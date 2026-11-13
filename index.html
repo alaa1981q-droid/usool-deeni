@@ -193,6 +193,24 @@ button{font-family:inherit;cursor:pointer}
 .zx{position:fixed;z-index:41;top:calc(12px + env(safe-area-inset-top));left:calc(12px + env(safe-area-inset-left));width:46px;height:46px;border-radius:50%;border:0;background:rgba(255,255,255,.92);font-size:24px;display:none}
 .zx.on{display:block}
 @media (prefers-reduced-motion: reduce){.rcta,.node.current .ic{animation:none}}
+
+.chip{display:inline-block;margin-top:4px;background:#fff4d6;color:#7a5200;border:1px solid #f2c94c;border-radius:20px;padding:0 10px;font-size:13px;font-weight:800;line-height:1.9}
+.titles{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:8px 0}
+.badgewin{margin:12px auto 4px;max-width:320px;background:linear-gradient(160deg,#fff8e0,#ffe6a3);border:3px solid var(--gold);border-radius:22px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.badgewin .medal{font-size:44px;line-height:1.1}
+.badgewin small{color:#8a5a00;font-weight:700}
+.badgewin b{font-size:26px;color:var(--deep)}
+.badgewin span{font-size:17px;color:#5a3c00;font-weight:700}
+.celebrate{position:fixed;inset:0;z-index:35;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(10,40,28,.55)}
+.celebrate.on{display:flex}
+.celebrate .in{background:#fffdf5;border:6px double var(--gold);border-radius:28px;padding:22px 18px;max-width:360px;width:100%;text-align:center;animation:popin .55s cubic-bezier(.2,1.6,.4,1)}
+@keyframes popin{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+.celebrate .medal{font-size:72px;line-height:1;animation:swing 1.2s ease-in-out infinite}
+@keyframes swing{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+.celebrate .gr{display:inline-block;background:var(--ok);color:#fff;border-radius:20px;padding:2px 16px;font-weight:800;font-size:18px;margin:8px 0 2px}
+.celebrate h2{margin:6px 0 0;font-size:30px;color:var(--deep)}
+.celebrate p{margin:4px 0 12px;font-size:19px;font-weight:700;color:#5a3c00}
+@media (prefers-reduced-motion: reduce){.celebrate .in,.celebrate .medal{animation:none}}
 </style>
 </head>
 <body>
@@ -259,6 +277,7 @@ button{font-family:inherit;cursor:pointer}
 <div class="rtoc" id="rtoc" dir="rtl"><div class="sc" id="rtocSc"></div><div class="dr"><h3>الفهرس <button id="rtocX" aria-label="إغلاق">×</button></h3><div class="ls" id="rtocLs"></div></div></div>
 <div class="zoomv" id="zoomv"><img id="zimg" alt=""></div><button class="zx" id="zx" aria-label="إغلاق التكبير">×</button>
 
+<div class="celebrate" id="celebrate" role="dialog" aria-live="assertive"><div class="in" id="celebIn"></div></div>
 <div class="modal" id="modal"><div class="in" id="modalIn"></div></div>
 
 <script>
@@ -311,7 +330,7 @@ const ART={
 /* ---------- content (from the book) ---------- */
 // verse: {a: text, s: source}  -> displayed with superscript number + footnote
 const STAGES=[
-{ id:0, title:'البداية', sub:'بيت ديني وسورتا الحمد والتوحيد', color:'var(--c0)', icon:'🌱',
+{ id:0, title:'البداية', sub:'بيت ديني وسورتا الحمد والتوحيد', color:'var(--c0)', icon:'🌱', badge:'طالب العلم', praise:'أصبحتَ طالبَ علم',
   lessons:[
    {h:'إلى صديقي الصغير', art:'tree', body:[
      'أهلًا بك يا صديقي! هل رأيت شجرةً كبيرة؟ لها <b>جذورٌ</b> تحت الأرض لا نراها، لكنها تُمسك الشجرة وتُغذّيها، وفوقها أغصانٌ وأوراقٌ وثمار.',
@@ -348,7 +367,7 @@ const STAGES=[
    {q:'ما الاسم الآخر لسورة التوحيد؟', o:['سورة الإخلاص','سورة الناس','سورة الفلق'], a:0, r:3}
   ]},
 
-{ id:1, title:'التوحيد', sub:'الله واحدٌ لا شريك له', color:'var(--c1)', icon:'١',
+{ id:1, title:'التوحيد', sub:'الله واحدٌ لا شريك له', color:'var(--c1)', icon:'١', badge:'الموحِّد', praise:'أصبحتَ موحِّدًا',
   lessons:[
    {h:'التوحيد', sm:'الله واحدٌ لا شريك له', art:'universe', body:[
      'حين تنظر إلى السماء والشمس والبحر والجبال، هل تسأل: <b>من صنع هذا الكون العجيب؟</b> هذا السؤال هو بداية الإيمان.',
@@ -381,7 +400,7 @@ const STAGES=[
    {q:'لماذا نقول إن مدبّر الكون واحد؟', o:['لأن الكون منظّمٌ دقيق','لأننا لا نحب الكثرة','لأن الشمس واحدة فقط'], a:0, r:3}
   ]},
 
-{ id:2, title:'العدل', sub:'الله لا يظلم أحدًا أبدًا', color:'var(--c2)', icon:'٢',
+{ id:2, title:'العدل', sub:'الله لا يظلم أحدًا أبدًا', color:'var(--c2)', icon:'٢', badge:'العادل', praise:'أصبحتَ عادلًا',
   lessons:[
    {h:'العدل', sm:'الله لا يظلم أحدًا أبدًا', art:'grade', body:[
      'تخيّل معلّمًا يعطي كل طالبٍ درجته بحسب جهده، لا يظلم مجتهدًا ولا يرفع كسولًا بغير حق.',
@@ -414,7 +433,7 @@ const STAGES=[
    {q:'ما الذي ينتظر الصابرين على الألم؟', o:['لا شيء','الضياع','التعويض والأجر عند الله'], a:2, r:3}
   ]},
 
-{ id:3, title:'النبوّة', sub:'الله أرسل إلينا من يعلّمنا', color:'var(--c3)', icon:'٣',
+{ id:3, title:'النبوّة', sub:'الله أرسل إلينا من يعلّمنا', color:'var(--c3)', icon:'٣', badge:'المؤمن بالنبوّة', praise:'أنت مؤمنٌ بالنبوّة',
   lessons:[
    {h:'النبوّة', sm:'الله أرسل إلينا من يعلّمنا', art:'letter', body:[
      'الله رحيمٌ بنا، فلم يتركنا ضائعين. اختار أفضل الناس أخلاقًا وصدقًا، وأوحى إليهم رسالته ليعلّمونا طريق الخير.',
@@ -447,7 +466,7 @@ const STAGES=[
    {q:'الوحي هو:', o:['لعبة','كلام الله وإبلاغه للنبي','حلمٌ عادي'], a:1, r:1}
   ]},
 
-{ id:4, title:'الإمامة', sub:'قادةٌ هداةٌ بعد النبي', color:'var(--c4)', icon:'٤',
+{ id:4, title:'الإمامة', sub:'قادةٌ هداةٌ بعد النبي', color:'var(--c4)', icon:'٤', badge:'الإمامي', praise:'أصبحتَ إماميًّا',
   lessons:[
    {h:'الإمامة', sm:'قادةٌ هداةٌ بعد النبي', art:'lantern', body:[
      'حين ينتقل المعلّم الكبير، هل نترك الصف بلا معلّم؟ كذلك الله لا يترك الناس بلا هادٍ بعد النبي.',
@@ -479,7 +498,7 @@ const STAGES=[
    {q:'الإمام المعصوم:', o:['يحفظه الله من الخطأ','يخطئ دائمًا','لا يعلّم الناس'], a:0, r:1}
   ]},
 
-{ id:5, title:'المعاد', sub:'بعد الموت حياةٌ أخرى', color:'var(--c5)', icon:'٥',
+{ id:5, title:'المعاد', sub:'بعد الموت حياةٌ أخرى', color:'var(--c5)', icon:'٥', badge:'المؤمن باليوم الآخر', praise:'إنّك آمنتَ باليوم الآخر',
   lessons:[
    {h:'المعاد', sm:'بعد الموت حياةٌ أخرى', art:'seed', body:[
      'البذرة تُدفن في التراب فتبدو وكأنها انتهت، ثم تنبت شجرةً كبيرة.',
@@ -511,7 +530,8 @@ const STAGES=[
    {q:'من تاب وأصلح:', o:['يقبل الله توبته','لا فرصة له','يُعاقَب مرتين'], a:0, r:3}
   ]}
 ];
-const PASS=4; // من ٥
+const PASS=3; // من ٥
+const GRADE=sc=>sc>=5?'جيد جدًا':sc==4?'شاطر':sc==3?'جيد':'';
 
 /* ---------- state ---------- */
 const KEY='usul5_progress_v1';
@@ -543,7 +563,7 @@ function renderHome(){
     h+=`<button class="node ${un?'':'locked'} ${cur?'current':''}" data-i="${i}">
       ${cur?'<span class="badge">ابدأ هنا</span>':''}
       <span class="ic" style="background:${s.color}">${un?s.icon:'🔒'}</span>
-      <span class="tx"><b>المرحلة ${ar(i+1)}: ${s.title}</b><small>${s.sub}</small></span>
+      <span class="tx"><b>المرحلة ${ar(i+1)}: ${s.title}</b><small>${s.sub}</small>${st?`<span class="chip">🏅 ${s.badge}</span>`:''}</span>
       <span class="st">${st?'⭐'.repeat(st):(un?'':'')}</span></button>`});
   const fin=allDone();
   h+=`<button class="node ${fin?'current':'locked'}" data-cert="1"><span class="ic" style="background:var(--gold)">${fin?'🏆':'🔒'}</span><span class="tx"><b>شهادة الإتمام</b><small>بعد إكمال كل المراحل</small></span></button>`;
@@ -625,16 +645,16 @@ $('#quizBack').onclick=()=>modal(`<h3 style="margin:4px 0">تريد الخروج
 
 function finishQuiz(){
   const st=STAGES[cur.s],n=qz.qs.length,sc=qz.score,pass=sc>=PASS;
-  const stars=sc==n?3:sc>=PASS?2:0;
+  const stars=sc>=5?3:sc==4?2:sc>=PASS?1:0, grade=GRADE(sc);
   let h=`<div class="result">`;
   if(pass){
     const prev=state.stars[st.id]||0;state.stars[st.id]=Math.max(prev,stars);save();
     const next=STAGES[cur.s+1];
-    h+=`<div class="big">🎉</div><h2 style="color:var(--ok)">نجحت يا بطل!</h2><div class="score">أجبتَ عن ${ar(sc)} من ${ar(n)} بشكلٍ صحيح</div><div class="stars">${'⭐'.repeat(stars)}</div>`;
+    h+=`<div class="big">🎉</div><h2 style="color:var(--ok)">${grade}! نجحت يا بطل</h2><div class="score">أجبتَ عن ${ar(sc)} من ${ar(n)} بشكلٍ صحيح</div><div class="stars">${'⭐'.repeat(stars)}</div><div class="badgewin"><div class="medal">🏅</div><small>لقبك الجديد</small><b>${st.badge}</b><span>${st.praise}</span></div>`;
     h+=next?`<p>فُتحت لك <b>المرحلة ${ar(cur.s+2)}: ${next.title}</b> 🔓</p>`:`<p>أكملتَ كل المراحل! شهادتك جاهزة 🏆</p>`;
     if(sc<n)h+=`<p class="tip">أجب عن الأسئلة كلّها صحيحة لتحصل على ٣ نجوم ⭐⭐⭐ — يمكنك إعادة الامتحان في أي وقت.</p>`;
     h+=`<div class="nav">${next?`<button class="btn gold" id="goNext">المرحلة التالية ←</button>`:`<button class="btn gold" id="goCert">شهادتي 🏆</button>`}</div><div class="nav"><button class="btn sec" id="goHome">خريطة المراحل</button></div>`;
-    setTimeout(confetti,150);
+    setTimeout(()=>celebrate(st,grade,stars),120);
   } else {
     const refs=[...new Set(qz.wrong.map(q=>q.r))].sort();
     h+=`<div class="big">🌱</div><h2 style="color:var(--bad)">محاولة جيدة!</h2><div class="score">أجبتَ عن ${ar(sc)} من ${ar(n)} — تحتاج ${ar(PASS)} على الأقل</div>
@@ -657,7 +677,7 @@ function openCert(){
     $('#certBody').innerHTML=`<div class="cert"><div class="art" style="background:none">${ART.cert()}</div><h2>مبارك!</h2><p>اكتب اسمك لنكتبه على شهادتك:</p><input class="inp" id="nm" maxlength="30" placeholder="اسمك هنا"><div class="nav"><button class="btn gold" id="saveNm">اكتب شهادتي</button></div></div>`;
     $('#saveNm').onclick=()=>{const v=$('#nm').value.trim();if(!v){$('#nm').focus();return}state.name=v;save();openCert()};
   } else {
-    $('#certBody').innerHTML=`<div class="cert"><div class="art" style="background:none;margin:0">${ART.cert()}</div><h2>شهادةُ إتمام</h2><p style="margin:0">بارك الله فيك يا بطلنا</p><p style="margin:4px 0 0">أكمل الطالب المجتهد</p><div class="nm">${state.name.replace(/[<>&]/g,'')}</div><p>رحلة <b>أصول ديني الخمسة</b><br>فهو يعرف: التوحيد والعدل والنبوّة والإمامة والمعاد</p><div class="stars" style="font-size:26px">⭐ ${ar(stars)} نجمة من ${ar(STAGES.length*3)}</div>
+    $('#certBody').innerHTML=`<div class="cert"><div class="art" style="background:none;margin:0">${ART.cert()}</div><h2>شهادةُ إتمام</h2><p style="margin:0">بارك الله فيك يا بطلنا</p><p style="margin:4px 0 0">أكمل الطالب المجتهد</p><div class="nm">${state.name.replace(/[<>&]/g,'')}</div><p>رحلة <b>أصول ديني الخمسة</b><br>فهو يعرف: التوحيد والعدل والنبوّة والإمامة والمعاد</p><div class="stars" style="font-size:26px">⭐ ${ar(stars)} نجمة من ${ar(STAGES.length*3)}</div><div class="titles">${STAGES.map(s=>`<span class="chip">🏅 ${s.badge}</span>`).join('')}</div>
     <div class="dua">اللّهمّ عرّفني نفسك، فإنّك إن لم تعرّفني نفسك لم أعرف نبيّك. اللّهمّ عرّفني نبيّك، فإنّك إن لم تعرّفني نبيّك لم أعرف حجّتك. اللّهمّ عرّفني حجّتك، فإنّك إن لم تعرّفني حجّتك ضللتُ عن ديني.</div>
     <p style="font-size:13px;color:var(--muted);margin-top:12px">تأليف الشيخ علاء المطوري</p></div>
     <p class="tip">📸 صوّر الشاشة واحتفظ بشهادتك!</p><div class="nav"><button class="btn sec" id="chName">تغيير الاسم</button><button class="btn" data-home2>الخريطة</button></div>`;
@@ -672,9 +692,21 @@ function openCert(){
 function modal(html,after){$('#modalIn').innerHTML=html;$('#modal').classList.add('on');$('#modalIn').querySelectorAll('[data-close]').forEach(b=>b.onclick=closeModal);after&&after()}
 function closeModal(){$('#modal').classList.remove('on')}
 $('#modal').onclick=e=>{if(e.target.id=='modal')closeModal()};
-$('#howBtn').onclick=()=>modal(`<div style="font-size:42px">🗺️</div><h3 style="margin:4px 0">كيف ألعب؟</h3><p style="text-align:right">١. ادخل المرحلة واقرأ الدروس واحدًا واحدًا (اسحب أو اضغط «التالي»).<br>٢. احفظ «الآية التي أحفظها».<br>٣. ادخل الامتحان: ${ar(5)} أسئلة، والنجاح بـ ${ar(PASS)} إجابات صحيحة.<br>٤. إذا نجحت تُفتح المرحلة التالية، وتحصل على نجوم ⭐.<br>٥. أكمل المراحل الست واحصل على شهادة الإتمام 🏆</p><button class="btn" data-close>هيّا نبدأ!</button>`);
+$('#howBtn').onclick=()=>modal(`<div style="font-size:42px">🗺️</div><h3 style="margin:4px 0">كيف ألعب؟</h3><p style="text-align:right">١. ادخل المرحلة واقرأ الدروس واحدًا واحدًا (اسحب أو اضغط «التالي»).<br>٢. احفظ «الآية التي أحفظها».<br>٣. ادخل الامتحان: ${ar(5)} أسئلة، والنجاح بـ ${ar(PASS)} إجابات صحيحة.<br>٤. إذا نجحت تُفتح المرحلة التالية، وتحصل على نجوم ⭐ ولقبٍ جديد 🏅.<br>٥. أكمل المراحل الست واحصل على شهادة الإتمام 🏆</p><button class="btn" data-close>هيّا نبدأ!</button>`);
 $('#resetBtn').onclick=()=>modal(`<h3 style="margin:4px 0">البدء من جديد؟</h3><p>ستُمسح كل النجوم وتُقفل المراحل مرةً أخرى.</p><div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn" id="mReset" style="background:var(--bad);box-shadow:0 5px 0 #a8332e">نعم، امسح</button></div>`,()=>{$('#mReset').onclick=()=>{state={stars:{},name:''};save();closeModal();renderHome()}});
 
+
+/* ---------- celebration: title + joyful melody ---------- */
+function fanfare(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const t0=actx.currentTime+.05;
+  const notes=[[523,0,.16],[659,.16,.16],[784,.32,.16],[1047,.48,.4],[784,.9,.14],[1047,1.04,.6],[1319,1.04,.6]];
+  notes.forEach(([f,at,d])=>{['triangle','sine'].forEach((w,k)=>{const o=actx.createOscillator(),g=actx.createGain();o.type=w;o.frequency.value=f*(k?2:1);
+    const v=k?.05:.16;g.gain.setValueAtTime(.0001,t0+at);g.gain.exponentialRampToValueAtTime(v,t0+at+.02);g.gain.exponentialRampToValueAtTime(.0001,t0+at+d+.25);
+    o.connect(g).connect(actx.destination);o.start(t0+at);o.stop(t0+at+d+.3)})})}catch(e){}}
+function celebrate(st,grade,stars){
+  $('#celebIn').innerHTML=`<div class="medal">🏅</div><div class="gr">${grade}</div><h2>${st.badge}</h2><p>${st.praise}</p><div class="stars" style="font-size:34px">${'⭐'.repeat(stars)}</div><button class="btn gold" id="celebOk">الحمد لله 🤲</button>`;
+  $('#celebrate').classList.add('on');fanfare();confetti();setTimeout(confetti,1300);
+  $('#celebOk').onclick=()=>$('#celebrate').classList.remove('on');
+}
 /* ---------- confetti ---------- */
 function confetti(){
   const c=$('#confetti'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
