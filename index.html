@@ -299,6 +299,17 @@ button{font-family:inherit;cursor:pointer}
 .opt.sel{border-color:#2f6fd0;background:#eaf2ff}
 .board .av{font-size:34px;display:block}
 @media (prefers-reduced-motion: reduce){.spin,.countdown-in{animation:none}}
+
+.gapq{display:inline-block;min-width:3em;border-bottom:3px dashed var(--sc,var(--green));color:var(--sc,var(--green));font-family:Tajawal,sans-serif;font-size:.7em;line-height:1.4;text-align:center}
+.slots{min-height:44px;margin:6px 0;padding:6px 30px 6px 10px;border:2px dashed var(--line);border-radius:14px;background:#fafdfb}
+.slots li{font-weight:700;padding:2px 0}
+.chipsq{display:flex;flex-wrap:wrap;gap:6px}
+.chipsq .opt{width:auto;margin:0;padding:8px 12px}
+.chipsq .opt:disabled{opacity:.3}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mgrid>div{display:flex;flex-direction:column;gap:0;min-width:0}
+.mgrid .opt{font-size:16px;padding:10px 8px;border-width:3px}
+.fixa{font-weight:500;color:var(--ink);font-size:15px;margin-top:4px}
 </style>
 </head>
 <body>
@@ -381,6 +392,7 @@ button{font-family:inherit;cursor:pointer}
 <div class="celebrate" id="celebrate" role="dialog" aria-live="assertive"><div class="in" id="celebIn"></div></div>
 <div class="modal" id="modal"><div class="in" id="modalIn"></div></div>
 
+<script src="questions.js"></script>
 <script>
 /* ---------- helpers ---------- */
 const AR='٠١٢٣٤٥٦٧٨٩';
@@ -718,25 +730,76 @@ $('#nextBtn').onclick=()=>{const P=pages(cur.s);if(cur.p<P.length-1){cur.p++;ren
 /* ---------- quiz ---------- */
 let qz=null;
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+/* ---------- question bank: book quizzes + QBANK, fresh-first picking ---------- */
+const ALLQ=[];
+STAGES.forEach((s,i)=>{s.quiz.forEach(q=>ALLQ.push({st:i,r:q.r,t:'mcq',q:q.q,o:q.o,a:q.a}));
+  (typeof QBANK!=='undefined'?QBANK:[]).filter(q=>q.st===i).forEach(q=>ALLQ.push(q))});
+ALLQ.forEach(q=>{q.id=q.st+':'+(q.q||q.v)});
+function toPlay(q){
+  if(q.t==='tf')return {...q,o:['صح ✓','خطأ ✗'],a:q.a?0:1,fixed:true};
+  if(q.t==='verse')return {...q,q:'أكمل الآية:',verse:q.v,src:q.s};
+  return {...q};
+}
+function withOpts(p){const o=p.o.map((t,k)=>({t,ok:k==p.a}));return {...p,opts:p.fixed?o:shuffle(o)}}
+function pickFresh(pool,n){state.seen=state.seen||{};const s=state.seen,t=Date.now();
+  const arr=shuffle(pool).sort((x,y)=>(s[x.id]||0)-(s[y.id]||0));const out=[];
+  for(let i=0;i<n&&arr.length;i++)out.push(arr[i%arr.length]);
+  out.forEach(q=>{s[q.id]=t});save();return out}
+const PLAYABLE=q=>q.t==='mcq'||q.t==='tf'||q.t==='verse';
+function qHead(p){return `<div class="qq">${p.q}</div>${p.verse?`<div class="ayah">${p.verse.replace('____','<span class="gapq">؟؟؟</span>')}</div><div class="tr">${p.src||''}</div>`:''}`}
+function prepQ(q){
+  if(q.t==='order')return {...q,shuf:shuffle(q.items)};
+  if(q.t==='match')return {...q,right:shuffle(q.pairs.map(p=>p[1]))};
+  return withOpts(toPlay(q));
+}
+const PAIRC=['#2f6fd0','#e57c1f','#7c4dc4','#13958c'];
+
 function startQuiz(){
   const st=STAGES[cur.s];
-  qz={qs:shuffle(st.quiz).map(q=>{const opts=shuffle(q.o.map((t,k)=>({t,ok:k==q.a})));return {...q,opts}}),i:0,score:0,wrong:[],sel:null,checked:false};
+  qz={qs:pickFresh(ALLQ.filter(q=>q.st===cur.s),5).map(prepQ),i:0,score:0,wrong:[],sel:null,checked:false};
   $('#qzTitle').textContent=`امتحان: ${st.title}`;renderQ();show('quiz');
 }
 function renderQ(){
-  const q=qz.qs[qz.i];qz.sel=null;qz.checked=false;
+  const q=qz.qs[qz.i];qz.sel=null;qz.checked=false;qz.seq=[];qz.pairs={};qz.pickL=null;
   $('#qzProg').style.width=(qz.i/qz.qs.length*100)+'%';
-  $('#qzBody').innerHTML=`<div class="qcard"><div class="qn">السؤال ${ar(qz.i+1)} من ${ar(qz.qs.length)}</div><div class="qq">${q.q}</div>${q.opts.map((o,k)=>`<button class="opt" data-k="${k}"><span class="l">${LET[k]}</span><span>${o.t}</span></button>`).join('')}<div class="fb" id="fb"></div></div>`;
+  let inner;
+  if(q.t==='order')inner=`<div class="qq">${q.q}</div><ol class="slots" id="slots"></ol><div class="chipsq">${q.shuf.map((t,k)=>`<button class="opt ch" data-k="${k}">${t}</button>`).join('')}</div><button class="link-btn" id="clr">↺ ابدأ الترتيب من جديد</button>`;
+  else if(q.t==='match')inner=`<div class="qq">${q.q}</div><p class="tip" style="margin:0 0 6px">اضغط على كلمة من اليمين، ثم على ما يناسبها من اليسار.</p><div class="mgrid"><div>${q.pairs.map((p,i)=>`<button class="opt ml" data-i="${i}">${p[0]}</button>`).join('')}</div><div>${q.right.map((t,j)=>`<button class="opt mr" data-j="${j}">${t}</button>`).join('')}</div></div>`;
+  else inner=qHead(q)+q.opts.map((o,k)=>`<button class="opt" data-k="${k}"><span class="l">${LET[k]}</span><span>${o.t}</span></button>`).join('');
+  $('#qzBody').innerHTML=`<div class="qcard"><div class="qn">السؤال ${ar(qz.i+1)} من ${ar(qz.qs.length)}</div>${inner}<div class="fb" id="fb"></div></div>`;
   $('#checkBtn').disabled=true;$('#checkBtn').textContent='تأكيد الإجابة';$('#checkBtn').className='btn';
-  $('#qzBody').querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(qz.checked)return;qz.sel=+b.dataset.k;$('#qzBody').querySelectorAll('.opt').forEach(x=>x.classList.toggle('sel',x==b));$('#checkBtn').disabled=false});
+  const B=$('#qzBody');
+  if(q.t==='order'){
+    const draw=()=>{$('#slots').innerHTML=qz.seq.map(k=>`<li>${q.shuf[k]}</li>`).join('');
+      B.querySelectorAll('.ch').forEach(b=>b.disabled=qz.checked||qz.seq.includes(+b.dataset.k));
+      $('#checkBtn').disabled=qz.seq.length<q.items.length};
+    B.querySelectorAll('.ch').forEach(b=>b.onclick=()=>{if(qz.checked)return;qz.seq.push(+b.dataset.k);tone(600+qz.seq.length*60,.06,'sine');draw()});
+    $('#clr').onclick=()=>{if(qz.checked)return;qz.seq=[];draw()};draw();
+  } else if(q.t==='match'){
+    const draw=()=>{B.querySelectorAll('.ml').forEach(b=>{const i=+b.dataset.i,j=qz.pairs[i];b.style.borderColor=j!=null?PAIRC[i]:(qz.pickL===i?'var(--sc,var(--green))':'');b.classList.toggle('sel',qz.pickL===i)});
+      B.querySelectorAll('.mr').forEach(b=>{const j=+b.dataset.j,i=Object.keys(qz.pairs).find(k=>qz.pairs[k]===j);b.style.borderColor=i!=null?PAIRC[i]:''});
+      $('#checkBtn').disabled=Object.keys(qz.pairs).length<q.pairs.length};
+    B.querySelectorAll('.ml').forEach(b=>b.onclick=()=>{if(qz.checked)return;qz.pickL=+b.dataset.i;draw()});
+    B.querySelectorAll('.mr').forEach(b=>b.onclick=()=>{if(qz.checked||qz.pickL==null)return;const j=+b.dataset.j;
+      Object.keys(qz.pairs).forEach(k=>{if(qz.pairs[k]===j)delete qz.pairs[k]});qz.pairs[qz.pickL]=j;qz.pickL=null;tone(700,.06,'sine');draw()});
+  } else {
+    B.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(qz.checked)return;qz.sel=+b.dataset.k;B.querySelectorAll('.opt').forEach(x=>x.classList.toggle('sel',x==b));$('#checkBtn').disabled=false});
+  }
 }
 $('#checkBtn').onclick=()=>{
   if(!qz.checked){
-    if(qz.sel==null)return;
-    const q=qz.qs[qz.i],ok=q.opts[qz.sel].ok,btns=$('#qzBody').querySelectorAll('.opt');
-    qz.checked=true;
-    if(ok){qz.score++;btns[qz.sel].classList.add('ok');$('#fb').className='fb ok';$('#fb').textContent=['أحسنت! إجابة صحيحة 🌟','ممتاز! بارك الله فيك 👏','رائع! هذا هو الجواب ✅'][Math.floor(Math.random()*3)]}
-    else{btns[qz.sel].classList.add('bad');qz.wrong.push(q);$('#fb').className='fb bad';$('#fb').textContent='ليست هذه الإجابة، لا تحزن 💪'}
+    const q=qz.qs[qz.i],B=$('#qzBody');let ok,fix='';
+    if(q.t==='order'){if(qz.seq.length<q.items.length)return;ok=qz.seq.every((k,i)=>q.shuf[k]===q.items[i]);
+      if(!ok)fix='الترتيب الصحيح: '+q.items.join(' ← ');}
+    else if(q.t==='match'){if(Object.keys(qz.pairs).length<q.pairs.length)return;
+      ok=q.pairs.every((p,i)=>q.right[qz.pairs[i]]===p[1]);
+      B.querySelectorAll('.ml').forEach(b=>{const i=+b.dataset.i;b.classList.add(q.right[qz.pairs[i]]===q.pairs[i][1]?'ok':'bad')});
+      if(!ok)fix='الصحيح: '+q.pairs.map(p=>p[0]+' ← '+p[1]).join('، ');}
+    else{if(qz.sel==null)return;const btns=B.querySelectorAll('.opt');ok=q.opts[qz.sel].ok;
+      btns[qz.sel].classList.add(ok?'ok':'bad');if(!ok)btns.forEach((b,i)=>{if(q.opts[i].ok)b.classList.add('ok')});}
+    qz.checked=true;B.querySelectorAll('button.opt').forEach(b=>b.disabled=true);
+    if(ok){qz.score++;$('#fb').className='fb ok';$('#fb').textContent=['أحسنت! إجابة صحيحة 🌟','ممتاز! بارك الله فيك 👏','رائع! هذا هو الجواب ✅'][Math.floor(Math.random()*3)]}
+    else{qz.wrong.push(q);$('#fb').className='fb bad';$('#fb').innerHTML='ليست هذه الإجابة، لا تحزن 💪'+(fix?`<div class="fixa">${fix}</div>`:'')}
     beep(ok);
     $('#checkBtn').textContent=qz.i<qz.qs.length-1?'السؤال التالي':'عرض النتيجة';
   } else {
@@ -801,12 +864,8 @@ $('#resetBtn').onclick=()=>modal(`<h3 style="margin:4px 0">البدء من جد�
 
 /* ---------- contest: solo vs time, or two players on one phone ---------- */
 const CT_TIME=15, CT_SOLO_N=10, CT_DUO_N=5;
-function ctPool(){
-  let pool=[];STAGES.forEach((s,i)=>{if(unlocked(i))s.quiz.forEach(q=>pool.push({...q,stage:i}))});
-  return pool;
-}
-function ctMake(n){const pool=shuffle(ctPool());const out=[];for(let i=0;i<n;i++)out.push(pool[i%pool.length]);
-  return out.map(q=>({...q,opts:shuffle(q.o.map((t,k)=>({t,ok:k==q.a})))}))}
+function ctPool(){return ALLQ.filter(q=>unlocked(q.st)&&PLAYABLE(q))}
+function ctMake(n){return pickFresh(ctPool(),n).map(q=>withOpts({...toPlay(q),stage:q.st}))}
 let ct=null,ctTimer=null;
 function ctStopTimer(){if(ctTimer){clearInterval(ctTimer);ctTimer=null}}
 function bestLine(){const b=state.best||0;$('#bestLine').textContent=b?`أعلى نتيجة لك: ${ar(b)} نقطة 🏅 — هل تكسرها؟`:'جاوب بسرعة واجمع النقاط، أو تحدَّ صديقك!'}
@@ -876,7 +935,7 @@ function ctAsk(){
      <button class="help" id="hTime" ${p.help.time?'':'disabled'}>⏳<small>+١٠ ثوانٍ</small></button>
      <button class="help" id="hSwap" ${p.help.swap?'':'disabled'}>🔄<small>سؤال آخر</small></button>
    </div>
-   <div class="qcard ${golden?'golden':''}" style="--sc:${golden?'#d4a017':STAGES[q.stage].color}"><div class="qn">${golden?'⭐ السؤال الذهبي — نقاطه مضاعفة! · ':'من مرحلة '+STAGES[q.stage].title+' · '}⏱️ <b id="tleft">${ar(left)}</b></div><div class="qq">${q.q}</div>
+   <div class="qcard ${golden?'golden':''}" style="--sc:${golden?'#d4a017':STAGES[q.stage].color}"><div class="qn">${golden?'⭐ السؤال الذهبي — نقاطه مضاعفة! · ':'من مرحلة '+STAGES[q.stage].title+' · '}⏱️ <b id="tleft">${ar(left)}</b></div>${qHead(q)}
    ${q.opts.map((o,k)=>`<button class="opt" data-k="${k}"><span class="l">${LET[k]}</span><span>${o.t}</span></button>`).join('')}<div class="fb" id="cfb"></div></div>`;
   if(golden){tone(784,.12,'sine',.12);tone(1175,.3,'sine',.12,.12)}
   const btns=[...$('#ctBody').querySelectorAll('.opt')];
@@ -908,8 +967,8 @@ function ctAsk(){
   $('#hTime').onclick=()=>{if(done||!p.help.time)return;p.help.time=0;$('#hTime').disabled=true;left=Math.min(left+10,CT_TIME+10);tone(523,.1,'sine');tone(784,.15,'sine',.16,.1);
     $('#tleft').textContent=ar(left);$('#tbox').classList.remove('hot');$('#tbar').style.transform=`scaleX(${Math.min(left/CT_TIME,1)})`};
   $('#hSwap').onclick=()=>{if(done||!p.help.swap)return;p.help.swap=0;ctStopTimer();tone(440,.1,'sine');tone(660,.12,'sine',.16,.1);
-    const used=new Set(ct.qs.map(x=>x.q));const pool=shuffle(ctPool()).filter(x=>!used.has(x.q));
-    const nq=pool[0]||ctPool()[Math.floor(Math.random()*ctPool().length)];ct.qs[ct.i]={...nq,opts:shuffle(nq.o.map((t,k)=>({t,ok:k==nq.a})))};ctAsk()};
+    const used=new Set(ct.qs.map(x=>x.id));const pool=shuffle(ctPool()).filter(x=>!used.has(x.id));
+    const nq=pool[0]||ctPool()[Math.floor(Math.random()*ctPool().length)];ct.qs[ct.i]=withOpts({...toPlay(nq),stage:nq.st});ctAsk()};
   ctTimer=setInterval(()=>{left--;const t=document.getElementById('tleft'),bar=document.getElementById('tbar');
     if(t)t.textContent=ar(Math.max(left,0));if(bar)bar.style.transform=`scaleX(${Math.min(Math.max(left,0)/CT_TIME,1)})`;
     if(left<=5&&left>0){tone(left<=2?1200:900,.06,'square',.08);$('#tbox').classList.add('hot')}

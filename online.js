@@ -24,7 +24,6 @@
   const esc = (v) => String(v == null ? '' : v).replace(/[<>&"]/g, '');
   const week = () => Math.floor((now() - Date.UTC(2024, 0, 5)) / (7 * 864e5)); // يبدأ كل جمعة
   const body = () => $('#onBody');
-  const allQ = () => { const a = []; STAGES.forEach((s, si) => s.quiz.forEach((q, qi) => a.push([si, qi]))); return a; };
   const maxStage = () => { let m = 0; STAGES.forEach((s, i) => { if (unlocked(i)) m = i; }); return m; };
 
   function loadScript(src) {
@@ -247,8 +246,7 @@
     if (r.state === 'wait' && room.isHost && ids.length === 2) {
       if (pin) db.ref('quick/' + pin).remove();
       const lim = Math.min(...ids.map(i => r.players[i].ms || 0));
-      const pool = shuffle(allQ().filter(([si]) => si <= lim));
-      const qs = []; for (let i = 0; i < N_Q; i++) qs.push(pool[i % pool.length]);
+      const qs = pickFresh(ALLQ.filter(q => q.st <= lim && PLAYABLE(q)), N_Q).map(q => { const p = toPlay(q); return { q: p.q, verse: p.verse || '', src: p.src || '', o: p.o, a: p.a, fixed: !!p.fixed, st: q.st }; });
       roomRef.update({ qs, start: now() + LEAD_MS, state: 'play' });
       return;
     }
@@ -301,7 +299,7 @@
   }
   function qOpts(idx) {
     room.opts = room.opts || {};
-    if (!room.opts[idx]) { const [si, qi] = room.data.qs[idx], q = STAGES[si].quiz[qi]; room.opts[idx] = { q, si, opts: shuffle(q.o.map((t, k) => ({ t, ok: k === q.a }))) }; }
+    if (!room.opts[idx]) { const q = room.data.qs[idx]; room.opts[idx] = { q, si: q.st, opts: withOpts(q).opts }; }
     return room.opts[idx];
   }
   function drawQ(r, idx) {
@@ -311,7 +309,7 @@
       <div class="turn"><span class="pts">سؤال ${ar(idx + 1)} من ${ar(N_Q)}</span><span class="pts">الخصم: <b id="oppState">🤔 يفكّر…</b></span></div>
       <div class="timer" id="tbox"><i id="tbar"></i></div>
       <div class="helps"><button class="help" id="hCut" ${room.cut && !mine ? '' : 'disabled'}>✂️<small>احذف جوابًا</small></button></div>
-      <div class="qcard ${golden ? 'golden' : ''}" style="--sc:${golden ? '#d4a017' : STAGES[si].color}"><div class="qn">${golden ? '⭐ السؤال الذهبي — نقاطه مضاعفة! · ' : ''}⏱️ <b id="tleft">${ar(15)}</b></div><div class="qq">${q.q}</div>
+      <div class="qcard ${golden ? 'golden' : ''}" style="--sc:${golden ? '#d4a017' : STAGES[si].color}"><div class="qn">${golden ? '⭐ السؤال الذهبي — نقاطه مضاعفة! · ' : ''}⏱️ <b id="tleft">${ar(15)}</b></div>${qHead(q)}
       ${opts.map((o, k) => `<button class="opt" data-k="${k}" ${mine ? 'disabled' : ''}><span class="l">${LET[k]}</span><span>${o.t}</span></button>`).join('')}<div class="fb" id="cfb">${mine ? 'انتظر الخصم…' : ''}</div></div>`;
     if (golden) { tone(784, .12, 'sine', .12); tone(1175, .3, 'sine', .12, .12); }
     const btns = [...body().querySelectorAll('.opt')];
