@@ -211,6 +211,37 @@ button{font-family:inherit;cursor:pointer}
 .celebrate h2{margin:6px 0 0;font-size:30px;color:var(--deep)}
 .celebrate p{margin:4px 0 12px;font-size:19px;font-weight:700;color:#5a3c00}
 @media (prefers-reduced-motion: reduce){.celebrate .in,.celebrate .medal{animation:none}}
+
+.contestcard{border-color:#e57c1f;box-shadow:0 5px 0 #f3c08f}
+.contestcard .cup{font-size:44px;width:62px;text-align:center;flex:none}
+.ctscore:empty{display:none}
+#ctBody .btn{flex:none}
+.ctscore{font-weight:800;color:#8a5a00;background:#fff4d6;border:2px solid var(--gold);border-radius:14px;padding:2px 10px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.modes{display:flex;flex-direction:column;gap:14px;margin-top:6px}
+.mode{display:flex;align-items:center;gap:14px;width:100%;text-align:right;color:inherit;background:#fff;border:3px solid var(--line);border-radius:22px;padding:14px}
+.mode .e{font-size:46px;flex:none;width:60px;text-align:center}
+.mode b{display:block;font-size:20px}
+.mode small{color:var(--muted);font-size:15px;line-height:1.6;display:block}
+.mode.solo{border-color:#2f6fd0}.mode.duo{border-color:#e57c1f}
+.rules{background:#fff8e3;border:2px solid #f2c94c;border-radius:16px;padding:10px 12px;font-size:16px;margin-top:4px}
+.timer{height:12px;background:#dcebe2;border-radius:10px;overflow:hidden;margin:4px 0 10px}
+.timer i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#e2504a,#f2b632,#1fa463);border-radius:10px;transform-origin:right;transition:transform .2s linear}
+.turn{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:800;margin-bottom:8px}
+.turn .who{padding:2px 12px;border-radius:14px;color:#fff}
+.streak{color:#e2504a;font-weight:800}
+.pts{font-size:15px;color:var(--muted)}
+.floatpts{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);font-size:44px;font-weight:800;color:var(--ok);pointer-events:none;z-index:36;animation:floatup 1s ease-out forwards}
+@keyframes floatup{from{opacity:1;transform:translate(-50%,-30%) scale(.8)}to{opacity:0;transform:translate(-50%,-140%) scale(1.3)}}
+.handoff{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px}
+.handoff .big{font-size:70px;line-height:1}
+.handoff h2{margin:0;font-size:28px}
+.board{display:flex;gap:10px;margin:10px 0}
+.board div{flex:1;background:#fff;border:3px solid var(--line);border-radius:18px;padding:10px;text-align:center}
+.board div.win{border-color:var(--gold);background:#fff8e0}
+.board b{display:block;font-size:30px;color:var(--deep);font-variant-numeric:tabular-nums}
+.rank{font-size:22px;font-weight:800;margin:6px 0}
+.inp2{margin:4px 0}
+@media (prefers-reduced-motion: reduce){.floatpts{animation:none;opacity:0}}
 </style>
 </head>
 <body>
@@ -230,6 +261,7 @@ button{font-family:inherit;cursor:pointer}
       <div class="stat"><b id="stStars">٠</b><span>نجمة ⭐</span></div>
     </div>
     <button class="bookcard" id="openBook"><img src="p/01.webp" alt=""><span><b>📖 الكتاب المصوّر</b><small>تصفّح صفحات الكتاب كما هي، بالصور والألوان</small></span><span class="go">‹</span></button>
+    <button class="bookcard contestcard" id="openContest"><span class="cup">🏆</span><span><b>مسابقة الأبطال</b><small id="bestLine">جاوب بسرعة واجمع النقاط، أو تحدَّ صديقك!</small></span><span class="go">‹</span></button>
     <div class="map" id="map"></div>
     <div class="footer-links">
       <button class="link-btn" id="howBtn">كيف ألعب؟</button>
@@ -254,6 +286,12 @@ button{font-family:inherit;cursor:pointer}
     <div class="prog"><i id="qzProg"></i></div>
     <div id="qzBody"></div>
     <div class="nav"><button class="btn" id="checkBtn" disabled>تأكيد الإجابة</button></div>
+  </section>
+
+  <!-- CONTEST -->
+  <section class="screen" id="contest">
+    <div class="bar"><button class="back" id="ctBack">›</button><div class="ttl" id="ctTitle">مسابقة الأبطال</div><div class="ctscore" id="ctScore"></div></div>
+    <div id="ctBody" style="flex:1;display:flex;flex-direction:column"></div>
   </section>
 
   <!-- RESULT -->
@@ -568,6 +606,7 @@ function renderHome(){
   const fin=allDone();
   h+=`<button class="node ${fin?'current':'locked'}" data-cert="1"><span class="ic" style="background:var(--gold)">${fin?'🏆':'🔒'}</span><span class="tx"><b>شهادة الإتمام</b><small>بعد إكمال كل المراحل</small></span></button>`;
   $('#map').innerHTML=h;
+  if(typeof bestLine==='function')bestLine();
   $('#map').querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;if(!unlocked(i)){modal(`<div style="font-size:46px">🔒</div><h3 style="margin:4px 0">المرحلة مقفلة</h3><p>انجح في امتحان المرحلة السابقة أولًا لتُفتح هذه المرحلة.</p><button class="btn" data-close>حسنًا</button>`);return}openStage(i)});
   $('#map').querySelector('[data-cert]').onclick=()=>{if(!fin){modal(`<div style="font-size:46px">🏆</div><h3 style="margin:4px 0">الشهادة تنتظرك!</h3><p>أكمل المراحل الست وانجح في امتحاناتها لتحصل على شهادة الإتمام.</p><button class="btn" data-close>حسنًا</button>`);return}openCert()};
 }
@@ -696,6 +735,106 @@ $('#howBtn').onclick=()=>modal(`<div style="font-size:42px">🗺️</div><h3 sty
 $('#resetBtn').onclick=()=>modal(`<h3 style="margin:4px 0">البدء من جديد؟</h3><p>ستُمسح كل النجوم وتُقفل المراحل مرةً أخرى.</p><div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn" id="mReset" style="background:var(--bad);box-shadow:0 5px 0 #a8332e">نعم، امسح</button></div>`,()=>{$('#mReset').onclick=()=>{state={stars:{},name:''};save();closeModal();renderHome()}});
 
 
+
+/* ---------- contest: solo vs time, or two players on one phone ---------- */
+const CT_TIME=15, CT_SOLO_N=10, CT_DUO_N=5;
+function ctPool(){
+  let pool=[];STAGES.forEach((s,i)=>{if(unlocked(i))s.quiz.forEach(q=>pool.push({...q,stage:i}))});
+  return pool;
+}
+function ctMake(n){const pool=shuffle(ctPool());const out=[];for(let i=0;i<n;i++)out.push(pool[i%pool.length]);
+  return out.map(q=>({...q,opts:shuffle(q.o.map((t,k)=>({t,ok:k==q.a})))}))}
+let ct=null,ctTimer=null;
+function ctStopTimer(){if(ctTimer){clearInterval(ctTimer);ctTimer=null}}
+function bestLine(){const b=state.best||0;$('#bestLine').textContent=b?`أعلى نتيجة لك: ${ar(b)} نقطة 🏅 — هل تكسرها؟`:'جاوب بسرعة واجمع النقاط، أو تحدَّ صديقك!'}
+function openContest(){
+  ctStopTimer();ct=null;document.documentElement.style.setProperty('--sc','#e57c1f');
+  $('#ctTitle').textContent='مسابقة الأبطال';$('#ctScore').textContent='';
+  $('#ctBody').innerHTML=`<div class="modes">
+    <button class="mode solo" id="mSolo"><span class="e">⏱️</span><span><b>أنا ضد الوقت</b><small>حتى ${ar(CT_SOLO_N)} أسئلة، لكل سؤال ${ar(CT_TIME)} ثانية. كلما أسرعت زادت نقاطك!</small></span></button>
+    <button class="mode duo" id="mDuo"><span class="e">🤝</span><span><b>تحدٍّ بين لاعبَين</b><small>العب مع أخيك أو صديقك على نفس التلفون، كلٌّ بدوره.</small></span></button>
+  </div>
+  <div class="rules"><b>💡 كيف تُحسب النقاط؟</b><br>الجواب الصحيح = ١٠ نقاط + نقطة لكل ثانية باقية.<br>ثلاثة أجوبة صحيحة متتالية = 🔥 سلسلة، ونقاطك تتضاعف!<br>الأسئلة من المراحل التي فتحتها فقط.</div>
+  ${state.best?`<p class="tip">🏅 أعلى نتيجة لك: <b>${ar(state.best)}</b> نقطة</p>`:''}`;
+  $('#mSolo').onclick=()=>ctStart([{name:state.name||'أنت',c:'#2f6fd0'}],CT_SOLO_N);
+  $('#mDuo').onclick=ctNames;
+  show('contest');
+}
+function ctNames(){
+  $('#ctBody').innerHTML=`<div class="card" style="flex:none;text-align:center"><h2>من سيتسابق؟</h2>
+   <input class="inp inp2" id="p1" maxlength="20" placeholder="اسم اللاعب الأول">
+   <input class="inp inp2" id="p2" maxlength="20" placeholder="اسم اللاعب الثاني">
+   <p class="tip">كل لاعب يجاوب ${ar(CT_DUO_N)} أسئلة بالتناوب، والتلفون ينتقل بينكما.</p>
+   <div class="nav"><button class="btn gold" id="goDuo">ابدأ التحدّي!</button></div></div>`;
+  $('#goDuo').onclick=()=>{const clean=v=>v.trim().replace(/[<>&]/g,'');
+    ctStart([{name:clean($('#p1').value)||'اللاعب الأول',c:'#2f6fd0'},{name:clean($('#p2').value)||'اللاعب الثاني',c:'#e57c1f'}],CT_DUO_N)};
+}
+function ctStart(players,per){
+  if(players.length==1)per=Math.min(per,ctPool().length);
+  const qs=ctMake(per*players.length);
+  ct={players:players.map(p=>({...p,score:0,streak:0,right:0})),qs,i:0,per};
+  ctNext();
+}
+function ctCur(){return ct.players[ct.i%ct.players.length]}
+function ctHead(){const p=ctCur();$('#ctScore').textContent=ct.players.length>1?ct.players.map(x=>ar(x.score)).join(' : '):'⭐ '+ar(p.score)}
+function ctNext(){
+  ctStopTimer();ct.answered=false;
+  if(ct.i>=ct.qs.length)return ctEnd();
+  ctHead();
+  if(ct.players.length>1){const p=ctCur();
+    $('#ctBody').innerHTML=`<div class="handoff"><div class="big">📱</div><h2>دور <span style="color:${p.c}">${p.name}</span></h2><p>السؤال ${ar(Math.floor(ct.i/2)+1)} من ${ar(ct.per)}</p><button class="btn gold" id="ready" style="flex:none;min-width:200px">أنا جاهز!</button></div>`;
+    $('#ready').onclick=ctAsk;
+  } else ctAsk();
+}
+function ctAsk(){
+  const q=ct.qs[ct.i],p=ctCur();let left=CT_TIME,done=false;
+  $('#ctBody').innerHTML=`<div class="turn"><span class="who" style="background:${p.c}">${p.name}</span><span class="pts">سؤال ${ar(ct.i+1)} من ${ar(ct.qs.length)}</span>${p.streak>=3?'<span class="streak">🔥 سلسلة!</span>':''}</div>
+   <div class="timer"><i id="tbar"></i></div>
+   <div class="qcard" style="--sc:${STAGES[q.stage].color}"><div class="qn">من مرحلة ${STAGES[q.stage].title} · ⏱️ <b id="tleft">${ar(left)}</b></div><div class="qq">${q.q}</div>
+   ${q.opts.map((o,k)=>`<button class="opt" data-k="${k}"><span class="l">${LET[k]}</span><span>${o.t}</span></button>`).join('')}<div class="fb" id="cfb"></div></div>`;
+  const btns=[...$('#ctBody').querySelectorAll('.opt')];
+  const finish=(k)=>{if(done)return;done=true;ct.answered=true;ctStopTimer();
+    const ok=k!=null&&q.opts[k].ok;btns.forEach((b,i)=>{b.disabled=true;if(q.opts[i].ok)b.classList.add('ok')});
+    if(k!=null&&!ok)btns[k].classList.add('bad');
+    let gain=0;
+    if(ok){p.streak++;p.right++;gain=10+left;if(p.streak>=3)gain*=2;p.score+=gain;
+      $('#cfb').className='fb ok';$('#cfb').textContent=p.streak>=3?`🔥 سلسلة ${ar(p.streak)}! +${ar(gain)}`:`أحسنت! +${ar(gain)}`;
+      const fl=document.createElement('div');fl.className='floatpts';fl.textContent='+'+ar(gain);document.body.appendChild(fl);setTimeout(()=>fl.remove(),1000);
+    } else {p.streak=0;$('#cfb').className='fb bad';$('#cfb').textContent=k==null?'⏰ انتهى الوقت!':'ليست هذه الإجابة 💪'}
+    beep(ok);ctHead();
+    const nx=document.createElement('button');nx.className='btn';nx.style.marginTop='12px';nx.textContent=ct.i<ct.qs.length-1?'التالي':'النتيجة 🏆';
+    nx.onclick=()=>{ct.i++;ctNext()};$('#ctBody').appendChild(nx);
+  };
+  btns.forEach((b,k)=>b.onclick=()=>finish(k));
+  ctTimer=setInterval(()=>{left--;const t=document.getElementById('tleft'),bar=document.getElementById('tbar');
+    if(t)t.textContent=ar(Math.max(left,0));if(bar)bar.style.transform=`scaleX(${Math.max(left,0)/CT_TIME})`;
+    if(left<=0)finish(null)},1000);
+}
+function ctEnd(){
+  ctStopTimer();const P=ct.players;let h='';
+  if(P.length==1){const p=P[0],max=ct.qs.length*25*2;
+    const rank=p.score>=250?['🥇','بطل ذهبي']:p.score>=150?['🥈','بطل فضّي']:p.score>=60?['🥉','بطل برونزي']:['🌱','مبتدئ مجتهد'];
+    const rec=p.score>(state.best||0);if(rec){state.best=p.score;save()}
+    h=`<div class="result"><div class="big">${rank[0]}</div><div class="rank">${rank[1]}</div><h2>${ar(p.score)} نقطة</h2>
+      <div class="score">أجبتَ عن ${ar(p.right)} من ${ar(ct.qs.length)} بشكلٍ صحيح</div>
+      ${rec?'<p style="color:var(--ok);font-weight:800;font-size:20px">🎉 رقم قياسي جديد!</p>':`<p class="tip">أعلى نتيجة لك: ${ar(state.best)} — حاول أن تكسرها!</p>`}
+      <div class="nav"><button class="btn gold" id="again">العب مرة أخرى</button></div><div class="nav"><button class="btn sec" id="ctHome">الرئيسية</button></div></div>`;
+    $('#ctBody').innerHTML=h;
+    if(rec||p.score>=150){fanfare();confetti()}
+  } else {const [a,b]=P,tie=a.score==b.score,w=a.score>b.score?a:b;
+    h=`<div class="result"><div class="big">${tie?'🤝':'🏆'}</div><h2>${tie?'تعادل! كلاكما بطل':'الفائز: <span style="color:'+w.c+'">'+w.name+'</span>'}</h2>
+      <div class="board">${P.map(p=>`<div class="${!tie&&p===w?'win':''}"><span style="color:${p.c};font-weight:800">${p.name}</span><b>${ar(p.score)}</b><small>${ar(p.right)} صحيحة</small></div>`).join('')}</div>
+      <p class="tip">${tie?'':'وأحسنتَ يا '+(w===a?b:a).name+'، المرة القادمة لك إن شاء الله! 💪'}</p>
+      <div class="nav"><button class="btn gold" id="again">جولة جديدة</button></div><div class="nav"><button class="btn sec" id="ctHome">الرئيسية</button></div></div>`;
+    $('#ctBody').innerHTML=h;fanfare();confetti();
+  }
+  const players=P.map(p=>({name:p.name,c:p.c}));
+  $('#again').onclick=()=>ctStart(players,ct.per);
+  $('#ctHome').onclick=()=>{renderHome();show('home')};
+}
+$('#openContest').onclick=openContest;
+$('#ctBack').onclick=()=>{ctStopTimer();if(ct&&ct.i<ct.qs.length){modal(`<h3 style="margin:4px 0">تريد الخروج من المسابقة؟</h3><p>ستضيع نقاط هذه الجولة.</p><div class="nav"><button class="btn sec" data-close id="mStay">أكمل</button><button class="btn" id="mLeave">خروج</button></div>`,()=>{
+  $('#mStay').onclick=()=>{closeModal();if(ct.answered){ct.i++;ctNext()}else ctAsk()};$('#mLeave').onclick=()=>{closeModal();ct=null;renderHome();show('home')}})}else{renderHome();show('home')}};
 /* ---------- celebration: title + joyful melody ---------- */
 function fanfare(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const t0=actx.currentTime+.05;
   const notes=[[523,0,.16],[659,.16,.16],[784,.32,.16],[1047,.48,.4],[784,.9,.14],[1047,1.04,.6],[1319,1.04,.6]];
