@@ -242,6 +242,29 @@ button{font-family:inherit;cursor:pointer}
 .rank{font-size:22px;font-weight:800;margin:6px 0}
 .inp2{margin:4px 0}
 @media (prefers-reduced-motion: reduce){.floatpts{animation:none;opacity:0}}
+
+.countdown{position:fixed;inset:0;z-index:37;display:flex;align-items:center;justify-content:center;background:rgba(10,40,28,.6)}
+.countdown span{font-size:130px;font-weight:800;color:#ffe08a;text-shadow:0 6px 0 #b9851a;animation:cd .8s ease-out}
+.countdown span.go{font-size:72px;color:#fff;text-shadow:0 6px 0 #0e5a3a}
+@keyframes cd{from{transform:scale(2.2);opacity:0}30%{opacity:1}to{transform:scale(1);opacity:1}}
+.hearts{font-size:22px;letter-spacing:2px}
+.hearts.lose{animation:hb .5s}
+@keyframes hb{30%{transform:scale(1.35)}}
+.timer.hot i{animation:hot .5s ease-in-out infinite alternate}
+@keyframes hot{to{filter:brightness(1.4) saturate(1.6)}}
+.timer.hot{box-shadow:0 0 0 3px rgba(226,80,74,.35)}
+.helps{display:flex;gap:8px;margin-bottom:10px}
+.help{flex:1;border:2px solid var(--line);background:#fff;border-radius:14px;padding:4px 2px;font-size:22px;line-height:1.2;display:flex;flex-direction:column;align-items:center;color:var(--ink)}
+.help small{font-size:12px;font-weight:700;color:var(--muted)}
+.help:disabled{opacity:.35;filter:grayscale(1)}
+.opt.gone{opacity:.25;text-decoration:line-through}
+.qcard.golden{background:linear-gradient(160deg,#fffaf0,#fff0c2);box-shadow:0 0 0 4px rgba(242,182,50,.35)}
+.ctbanner{position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:38;background:#e2504a;color:#fff;font-weight:800;font-size:26px;padding:10px 22px;border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.3);white-space:nowrap;animation:bn 1.4s ease forwards;pointer-events:none}
+.ctbanner.b2{background:#7c4dc4}.ctbanner.b3{background:linear-gradient(90deg,#d4a017,#f2b632);color:#4b3200}
+@keyframes bn{0%{transform:translateX(-50%) scale(.3);opacity:0}15%{transform:translateX(-50%) scale(1.1);opacity:1}25%{transform:translateX(-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-30px)}}
+.shake{animation:shk .45s}
+@keyframes shk{20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+@media (prefers-reduced-motion: reduce){.countdown span,.hearts.lose,.timer.hot i,.ctbanner,.shake{animation:none}}
 </style>
 </head>
 <body>
@@ -290,7 +313,7 @@ button{font-family:inherit;cursor:pointer}
 
   <!-- CONTEST -->
   <section class="screen" id="contest">
-    <div class="bar"><button class="back" id="ctBack">›</button><div class="ttl" id="ctTitle">مسابقة الأبطال</div><div class="ctscore" id="ctScore"></div></div>
+    <div class="bar"><button class="back" id="ctBack">›</button><div class="ttl" id="ctTitle">مسابقة الأبطال</div><div class="ctscore" id="ctScore"></div><button class="back" id="ctMute" aria-label="الصوت">🔊</button></div>
     <div id="ctBody" style="flex:1;display:flex;flex-direction:column"></div>
   </section>
 
@@ -581,7 +604,7 @@ const allDone=()=>STAGES.every(s=>state.stars[s.id]>0);
 
 /* ---------- sound ---------- */
 let actx=null;
-function beep(ok){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const notes=ok?[523,659,784]:[300,220];notes.forEach((f,i)=>{const o=actx.createOscillator(),g=actx.createGain();o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(.0001,actx.currentTime+i*.11);g.gain.exponentialRampToValueAtTime(.18,actx.currentTime+i*.11+.02);g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+i*.11+.22);o.connect(g).connect(actx.destination);o.start(actx.currentTime+i*.11);o.stop(actx.currentTime+i*.11+.25)})}catch(e){}}
+function beep(ok){if(state.mute)return;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const notes=ok?[523,659,784]:[300,220];notes.forEach((f,i)=>{const o=actx.createOscillator(),g=actx.createGain();o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(.0001,actx.currentTime+i*.11);g.gain.exponentialRampToValueAtTime(.18,actx.currentTime+i*.11+.02);g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+i*.11+.22);o.connect(g).connect(actx.destination);o.start(actx.currentTime+i*.11);o.stop(actx.currentTime+i*.11+.25)})}catch(e){}}
 
 /* ---------- navigation ---------- */
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id==id));window.scrollTo(0,0)}
@@ -754,7 +777,7 @@ function openContest(){
     <button class="mode solo" id="mSolo"><span class="e">⏱️</span><span><b>أنا ضد الوقت</b><small>حتى ${ar(CT_SOLO_N)} أسئلة، لكل سؤال ${ar(CT_TIME)} ثانية. كلما أسرعت زادت نقاطك!</small></span></button>
     <button class="mode duo" id="mDuo"><span class="e">🤝</span><span><b>تحدٍّ بين لاعبَين</b><small>العب مع أخيك أو صديقك على نفس التلفون، كلٌّ بدوره.</small></span></button>
   </div>
-  <div class="rules"><b>💡 كيف تُحسب النقاط؟</b><br>الجواب الصحيح = ١٠ نقاط + نقطة لكل ثانية باقية.<br>ثلاثة أجوبة صحيحة متتالية = 🔥 سلسلة، ونقاطك تتضاعف!<br>الأسئلة من المراحل التي فتحتها فقط.</div>
+  <div class="rules"><b>💡 كيف تُحسب النقاط؟</b><br>الجواب الصحيح = ١٠ نقاط + نقطة لكل ثانية باقية.<br>ثلاثة أجوبة صحيحة متتالية = 🔥 سلسلة، ونقاطك تتضاعف!<br>عندك ٣ قلوب ❤️❤️❤️ — كل خطأ يُذهب قلبًا!<br>وعندك ٣ مساعدات: ✂️ احذف جوابًا، ⏳ وقت إضافي، 🔄 سؤال آخر.<br>والسؤال الأخير ⭐ ذهبي ونقاطه مضاعفة!<br>الأسئلة من المراحل التي فتحتها فقط.</div>
   ${state.best?`<p class="tip">🏅 أعلى نتيجة لك: <b>${ar(state.best)}</b> نقطة</p>`:''}`;
   $('#mSolo').onclick=()=>ctStart([{name:state.name||'أنت',c:'#2f6fd0'}],CT_SOLO_N);
   $('#mDuo').onclick=ctNames;
@@ -769,45 +792,85 @@ function ctNames(){
   $('#goDuo').onclick=()=>{const clean=v=>v.trim().replace(/[<>&]/g,'');
     ctStart([{name:clean($('#p1').value)||'اللاعب الأول',c:'#2f6fd0'},{name:clean($('#p2').value)||'اللاعب الثاني',c:'#e57c1f'}],CT_DUO_N)};
 }
+function tone(f,d=.12,type='triangle',vol=.16,at=0){if(state.mute)return;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const t=actx.currentTime+at,o=actx.createOscillator(),g=actx.createGain();
+  o.type=type;o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.015);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+d+.05)}catch(e){}}
+function ctBanner(txt,cls){const d=document.createElement('div');d.className='ctbanner '+(cls||'');d.textContent=txt;document.body.appendChild(d);setTimeout(()=>d.remove(),1400)}
+function ctCountdown(then){
+  const ov=document.createElement('div');ov.className='countdown';document.body.appendChild(ov);
+  const seq=['٣','٢','١','انطلق!'];let i=0;
+  (function step(){if(i>=seq.length){ov.remove();then();return}
+    ov.innerHTML=`<span class="${i==3?'go':''}">${seq[i]}</span>`;tone(i==3?1047:523,i==3?.35:.15,'square',.12);i++;setTimeout(step,i==4?650:800)})();
+}
 function ctStart(players,per){
   if(players.length==1)per=Math.min(per,ctPool().length);
   const qs=ctMake(per*players.length);
-  ct={players:players.map(p=>({...p,score:0,streak:0,right:0})),qs,i:0,per};
+  ct={players:players.map(p=>({...p,score:0,streak:0,right:0,help:{cut:1,time:1,swap:1}})),qs,i:0,per,hearts:players.length==1?3:0,started:false};
   ctNext();
 }
 function ctCur(){return ct.players[ct.i%ct.players.length]}
 function ctHead(){const p=ctCur();$('#ctScore').textContent=ct.players.length>1?ct.players.map(x=>ar(x.score)).join(' : '):'⭐ '+ar(p.score)}
 function ctNext(){
   ctStopTimer();ct.answered=false;
-  if(ct.i>=ct.qs.length)return ctEnd();
+  if(ct.i>=ct.qs.length||(ct.players.length==1&&ct.hearts<=0))return ctEnd();
   ctHead();
+  const golden=ct.i>=ct.qs.length-ct.players.length;
   if(ct.players.length>1){const p=ctCur();
-    $('#ctBody').innerHTML=`<div class="handoff"><div class="big">📱</div><h2>دور <span style="color:${p.c}">${p.name}</span></h2><p>السؤال ${ar(Math.floor(ct.i/2)+1)} من ${ar(ct.per)}</p><button class="btn gold" id="ready" style="flex:none;min-width:200px">أنا جاهز!</button></div>`;
-    $('#ready').onclick=ctAsk;
-  } else ctAsk();
+    $('#ctBody').innerHTML=`<div class="handoff"><div class="big">📱</div><h2>دور <span style="color:${p.c}">${p.name}</span></h2><p>السؤال ${ar(Math.floor(ct.i/2)+1)} من ${ar(ct.per)}${golden?' — <b style="color:#b8860b">⭐ السؤال الذهبي!</b>':''}</p><button class="btn gold" id="ready" style="flex:none;min-width:200px">أنا جاهز!</button></div>`;
+    $('#ready').onclick=()=>ctCountdown(ctAsk);
+  } else if(!ct.started){ct.started=true;$('#ctBody').innerHTML='';ctCountdown(ctAsk)}
+  else ctAsk();
 }
 function ctAsk(){
-  const q=ct.qs[ct.i],p=ctCur();let left=CT_TIME,done=false;
-  $('#ctBody').innerHTML=`<div class="turn"><span class="who" style="background:${p.c}">${p.name}</span><span class="pts">سؤال ${ar(ct.i+1)} من ${ar(ct.qs.length)}</span>${p.streak>=3?'<span class="streak">🔥 سلسلة!</span>':''}</div>
-   <div class="timer"><i id="tbar"></i></div>
-   <div class="qcard" style="--sc:${STAGES[q.stage].color}"><div class="qn">من مرحلة ${STAGES[q.stage].title} · ⏱️ <b id="tleft">${ar(left)}</b></div><div class="qq">${q.q}</div>
+  const q=ct.qs[ct.i],p=ctCur(),solo=ct.players.length==1;let left=CT_TIME,done=false;
+  const golden=ct.i>=ct.qs.length-ct.players.length;
+  const mult=()=>p.streak>=5?3:p.streak>=3?2:1;
+  $('#ctBody').innerHTML=`<div class="turn"><span class="who" style="background:${p.c}">${p.name}</span>
+     ${solo?`<span class="hearts" id="hearts">${'❤️'.repeat(ct.hearts)}${'🤍'.repeat(3-ct.hearts)}</span>`:`<span class="pts">سؤال ${ar(ct.i+1)} من ${ar(ct.qs.length)}</span>`}
+     ${p.streak>=3?`<span class="streak">🔥 ×${ar(mult())}</span>`:''}</div>
+   ${solo?`<div class="pts" style="text-align:center;margin-bottom:2px">سؤال ${ar(ct.i+1)} من ${ar(ct.qs.length)}</div>`:''}
+   <div class="timer" id="tbox"><i id="tbar"></i></div>
+   <div class="helps">
+     <button class="help" id="hCut" ${p.help.cut?'':'disabled'}>✂️<small>احذف جوابًا</small></button>
+     <button class="help" id="hTime" ${p.help.time?'':'disabled'}>⏳<small>+١٠ ثوانٍ</small></button>
+     <button class="help" id="hSwap" ${p.help.swap?'':'disabled'}>🔄<small>سؤال آخر</small></button>
+   </div>
+   <div class="qcard ${golden?'golden':''}" style="--sc:${golden?'#d4a017':STAGES[q.stage].color}"><div class="qn">${golden?'⭐ السؤال الذهبي — نقاطه مضاعفة! · ':'من مرحلة '+STAGES[q.stage].title+' · '}⏱️ <b id="tleft">${ar(left)}</b></div><div class="qq">${q.q}</div>
    ${q.opts.map((o,k)=>`<button class="opt" data-k="${k}"><span class="l">${LET[k]}</span><span>${o.t}</span></button>`).join('')}<div class="fb" id="cfb"></div></div>`;
+  if(golden){tone(784,.12,'sine',.12);tone(1175,.3,'sine',.12,.12)}
   const btns=[...$('#ctBody').querySelectorAll('.opt')];
-  const finish=(k)=>{if(done)return;done=true;ct.answered=true;ctStopTimer();
+  const finish=(k)=>{if(done)return;done=true;ct.answered=true;ctStopTimer();$('#tbox').classList.remove('hot');
+    $('#ctBody').querySelectorAll('.help').forEach(h=>h.disabled=true);
     const ok=k!=null&&q.opts[k].ok;btns.forEach((b,i)=>{b.disabled=true;if(q.opts[i].ok)b.classList.add('ok')});
     if(k!=null&&!ok)btns[k].classList.add('bad');
     let gain=0;
-    if(ok){p.streak++;p.right++;gain=10+left;if(p.streak>=3)gain*=2;p.score+=gain;
-      $('#cfb').className='fb ok';$('#cfb').textContent=p.streak>=3?`🔥 سلسلة ${ar(p.streak)}! +${ar(gain)}`:`أحسنت! +${ar(gain)}`;
+    if(ok){p.streak++;p.right++;gain=(10+left)*mult()*(golden?2:1);p.score+=gain;
+      $('#cfb').className='fb ok';$('#cfb').textContent=(p.streak>=3?`🔥 سلسلة ${ar(p.streak)}! `:'أحسنت! ')+`+${ar(gain)}`;
       const fl=document.createElement('div');fl.className='floatpts';fl.textContent='+'+ar(gain);document.body.appendChild(fl);setTimeout(()=>fl.remove(),1000);
-    } else {p.streak=0;$('#cfb').className='fb bad';$('#cfb').textContent=k==null?'⏰ انتهى الوقت!':'ليست هذه الإجابة 💪'}
-    beep(ok);ctHead();
-    const nx=document.createElement('button');nx.className='btn';nx.style.marginTop='12px';nx.textContent=ct.i<ct.qs.length-1?'التالي':'النتيجة 🏆';
+      beep(true);
+      if(p.streak==3){ctBanner('🔥 رائع! النقاط ×٢');tone(880,.1,'square',.1,.3);tone(1320,.2,'square',.1,.42)}
+      else if(p.streak==5){ctBanner('⚡ لا يُوقَف! النقاط ×٣','b2');fanfare()}
+      else if(p.streak==8){ctBanner('👑 أسطورة!','b3');fanfare();confetti()}
+      if(golden){confetti()}
+    } else {p.streak=0;beep(false);try{navigator.vibrate&&navigator.vibrate(180)}catch(e){}$('#cfb').className='fb bad';$('#cfb').textContent=k==null?'⏰ انتهى الوقت!':'ليست هذه الإجابة 💪';
+      if(solo){ct.hearts--;const h=$('#hearts');if(h){h.textContent='❤️'.repeat(Math.max(ct.hearts,0))+'💔'+'🤍'.repeat(Math.max(2-ct.hearts,0));h.classList.add('lose')}
+        $('.app').classList.add('shake');setTimeout(()=>$('.app').classList.remove('shake'),450);
+        if(ct.hearts<=0)$('#cfb').textContent+=' — انتهت القلوب!'}}
+    ctHead();
+    const last=ct.i>=ct.qs.length-1||(solo&&ct.hearts<=0);
+    const nx=document.createElement('button');nx.className='btn';nx.style.marginTop='12px';nx.textContent=last?'النتيجة 🏆':'التالي';
     nx.onclick=()=>{ct.i++;ctNext()};$('#ctBody').appendChild(nx);
   };
   btns.forEach((b,k)=>b.onclick=()=>finish(k));
+  $('#hCut').onclick=()=>{if(done||!p.help.cut)return;p.help.cut=0;$('#hCut').disabled=true;tone(660,.12,'sine');
+    const wrong=btns.filter((b,i)=>!q.opts[i].ok&&!b.disabled);const w=wrong[Math.floor(Math.random()*wrong.length)];if(w){w.disabled=true;w.classList.add('gone')}};
+  $('#hTime').onclick=()=>{if(done||!p.help.time)return;p.help.time=0;$('#hTime').disabled=true;left=Math.min(left+10,CT_TIME+10);tone(523,.1,'sine');tone(784,.15,'sine',.16,.1);
+    $('#tleft').textContent=ar(left);$('#tbox').classList.remove('hot');$('#tbar').style.transform=`scaleX(${Math.min(left/CT_TIME,1)})`};
+  $('#hSwap').onclick=()=>{if(done||!p.help.swap)return;p.help.swap=0;ctStopTimer();tone(440,.1,'sine');tone(660,.12,'sine',.16,.1);
+    const used=new Set(ct.qs.map(x=>x.q));const pool=shuffle(ctPool()).filter(x=>!used.has(x.q));
+    const nq=pool[0]||ctPool()[Math.floor(Math.random()*ctPool().length)];ct.qs[ct.i]={...nq,opts:shuffle(nq.o.map((t,k)=>({t,ok:k==nq.a})))};ctAsk()};
   ctTimer=setInterval(()=>{left--;const t=document.getElementById('tleft'),bar=document.getElementById('tbar');
-    if(t)t.textContent=ar(Math.max(left,0));if(bar)bar.style.transform=`scaleX(${Math.max(left,0)/CT_TIME})`;
+    if(t)t.textContent=ar(Math.max(left,0));if(bar)bar.style.transform=`scaleX(${Math.min(Math.max(left,0)/CT_TIME,1)})`;
+    if(left<=5&&left>0){tone(left<=2?1200:900,.06,'square',.08);$('#tbox').classList.add('hot')}
     if(left<=0)finish(null)},1000);
 }
 function ctEnd(){
@@ -816,7 +879,7 @@ function ctEnd(){
     const rank=p.score>=250?['🥇','بطل ذهبي']:p.score>=150?['🥈','بطل فضّي']:p.score>=60?['🥉','بطل برونزي']:['🌱','مبتدئ مجتهد'];
     const rec=p.score>(state.best||0);if(rec){state.best=p.score;save()}
     h=`<div class="result"><div class="big">${rank[0]}</div><div class="rank">${rank[1]}</div><h2>${ar(p.score)} نقطة</h2>
-      <div class="score">أجبتَ عن ${ar(p.right)} من ${ar(ct.qs.length)} بشكلٍ صحيح</div>
+      <div class="score">أجبتَ عن ${ar(p.right)} من ${ar(ct.qs.length)} بشكلٍ صحيح${ct.hearts<=0?' — انتهت القلوب 💔':''}</div>
       ${rec?'<p style="color:var(--ok);font-weight:800;font-size:20px">🎉 رقم قياسي جديد!</p>':`<p class="tip">أعلى نتيجة لك: ${ar(state.best)} — حاول أن تكسرها!</p>`}
       <div class="nav"><button class="btn gold" id="again">العب مرة أخرى</button></div><div class="nav"><button class="btn sec" id="ctHome">الرئيسية</button></div></div>`;
     $('#ctBody').innerHTML=h;
@@ -833,10 +896,12 @@ function ctEnd(){
   $('#ctHome').onclick=()=>{renderHome();show('home')};
 }
 $('#openContest').onclick=openContest;
+const muteIcon=()=>{$('#ctMute').textContent=state.mute?'🔇':'🔊'};muteIcon();
+$('#ctMute').onclick=()=>{state.mute=!state.mute;save();muteIcon();if(!state.mute)tone(784,.12,'sine')};
 $('#ctBack').onclick=()=>{ctStopTimer();if(ct&&ct.i<ct.qs.length){modal(`<h3 style="margin:4px 0">تريد الخروج من المسابقة؟</h3><p>ستضيع نقاط هذه الجولة.</p><div class="nav"><button class="btn sec" data-close id="mStay">أكمل</button><button class="btn" id="mLeave">خروج</button></div>`,()=>{
   $('#mStay').onclick=()=>{closeModal();if(ct.answered){ct.i++;ctNext()}else ctAsk()};$('#mLeave').onclick=()=>{closeModal();ct=null;renderHome();show('home')}})}else{renderHome();show('home')}};
 /* ---------- celebration: title + joyful melody ---------- */
-function fanfare(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const t0=actx.currentTime+.05;
+function fanfare(){if(state.mute)return;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const t0=actx.currentTime+.05;
   const notes=[[523,0,.16],[659,.16,.16],[784,.32,.16],[1047,.48,.4],[784,.9,.14],[1047,1.04,.6],[1319,1.04,.6]];
   notes.forEach(([f,at,d])=>{['triangle','sine'].forEach((w,k)=>{const o=actx.createOscillator(),g=actx.createGain();o.type=w;o.frequency.value=f*(k?2:1);
     const v=k?.05:.16;g.gain.setValueAtTime(.0001,t0+at);g.gain.exponentialRampToValueAtTime(v,t0+at+.02);g.gain.exponentialRampToValueAtTime(.0001,t0+at+d+.25);
