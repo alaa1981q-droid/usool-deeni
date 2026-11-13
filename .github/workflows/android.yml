@@ -1,0 +1,33 @@
+name: Build Android APK
+on:
+  push:
+    branches: [main]
+    paths: ['index.html', 'p/**', 'android/**', '.github/workflows/android.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: '8.7' }
+      - name: Bundle the web app into the APK
+        run: |
+          mkdir -p android/app/src/main/assets/www
+          cp -r index.html manifest.webmanifest icon-192.png icon-512.png apple-touch-icon.png p android/app/src/main/assets/www/
+      - name: Build
+        working-directory: android
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+        run: gradle --no-daemon :app:assembleRelease
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/release/app-release.apk usool-deeni.apk
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest usool-deeni.apk --title "أصول ديني الخمسة - تطبيق أندرويد" --notes "حمّل ملف usool-deeni.apk وثبّته على جهاز أندرويد."
