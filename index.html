@@ -310,6 +310,7 @@ button{font-family:inherit;cursor:pointer}
 .mgrid>div{display:flex;flex-direction:column;gap:0;min-width:0}
 .mgrid .opt{font-size:16px;padding:10px 8px;border-width:3px}
 .fixa{font-weight:500;color:var(--ink);font-size:15px;margin-top:4px}
+.ver{text-align:center;color:var(--muted);font-size:13px;margin:10px 0 0}
 </style>
 </head>
 <body>
@@ -335,6 +336,7 @@ button{font-family:inherit;cursor:pointer}
       <button class="link-btn" id="howBtn">كيف ألعب؟</button>
       <button class="link-btn" id="resetBtn">ابدأ من جديد</button>
     </div>
+    <p class="ver" id="verLine"></p>
   </section>
 
   <!-- LESSON -->
@@ -1076,6 +1078,8 @@ document.addEventListener('keydown',e=>{if($('#zoomv').classList.contains('on'))
   if(!$('#reader').classList.contains('on'))return;
   if(e.key=='ArrowLeft')rGo(rCur+1);else if(e.key=='ArrowRight')rGo(rCur-1);else if(e.key=='Escape')closeReader()});
 
+const APP_VER='1.5';
+$('#verLine').textContent=`الإصدار ${ar(APP_VER).replace('.','٫')} · ${ar(ALLQ.length)} سؤالًا`;
 renderHome();
 if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
