@@ -215,7 +215,9 @@ button{font-family:inherit;cursor:pointer}
 .contestcard{border-color:#e57c1f;box-shadow:0 5px 0 #f3c08f}
 .contestcard .cup{font-size:44px;width:62px;text-align:center;flex:none}
 .ctscore:empty{display:none}
-#ctBody .btn{flex:none}
+#ctBody .btn,#onBody .btn{flex:none}
+#ctBody .nav .btn,#onBody .nav .btn{flex:1}
+.board small.nk{display:block;font-weight:800;color:var(--ink)}
 .ctscore{font-weight:800;color:#8a5a00;background:#fff4d6;border:2px solid var(--gold);border-radius:14px;padding:2px 10px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .modes{display:flex;flex-direction:column;gap:14px;margin-top:6px}
 .mode{display:flex;align-items:center;gap:14px;width:100%;text-align:right;color:inherit;background:#fff;border:3px solid var(--line);border-radius:22px;padding:14px}
@@ -265,6 +267,38 @@ button{font-family:inherit;cursor:pointer}
 .shake{animation:shk .45s}
 @keyframes shk{20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
 @media (prefers-reduced-motion: reduce){.countdown span,.hearts.lose,.timer.hot i,.ctbanner,.shake{animation:none}}
+
+.mode.online{border-color:#13958c;background:linear-gradient(160deg,#fff,#e8f8f6)}
+.spin{animation:spin 1.6s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.me-card,.code-card{display:flex;align-items:center;gap:12px;background:#fff;border:3px solid var(--line);border-radius:20px;padding:10px 14px;margin-bottom:10px}
+.me-card .av,.frow .av,.preview .av{font-size:40px;line-height:1;flex:none}
+.who-n{flex:1;min-width:0}.who-n b{display:block;font-size:19px}.who-n small{color:var(--muted);font-size:14px}
+.code-card{justify-content:space-between;border-color:var(--gold);background:#fff8e0}
+.code-card small{color:#8a5a00;font-weight:700}
+.code-card b{font-size:26px;letter-spacing:4px;font-family:monospace;color:var(--deep)}
+.mini{border:0;border-radius:12px;padding:6px 12px;font-weight:800;background:var(--green);color:#fff;font-size:15px;flex:none}
+.mini.go{background:#e57c1f}.mini:disabled{opacity:.35}
+.flist{display:flex;flex-direction:column;gap:8px}
+.frow{display:flex;align-items:center;gap:10px;background:#fff;border:2px solid var(--line);border-radius:16px;padding:8px 12px}
+.frow.mine{border-color:var(--gold);background:#fff8e0}
+.frow .rk{font-size:20px;font-weight:800;width:30px;text-align:center;flex:none}
+.frow .wn{font-weight:800;color:#8a5a00;flex:none}
+.preview{display:flex;align-items:center;justify-content:center;gap:10px;background:#f6fbf8;border-radius:16px;padding:10px;margin:8px 0;font-size:22px}
+.pick-h{font-weight:800;margin:10px 0 4px;color:var(--deep)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.pk{border:2px solid var(--line);background:#fff;border-radius:12px;font-size:26px;padding:2px 8px;line-height:1.4}
+.pk.w{font-size:16px;font-weight:700;padding:4px 10px;color:var(--ink)}
+.pk.on{border-color:var(--gold);background:#fff4d6;box-shadow:0 0 0 3px rgba(242,182,50,.3)}
+.pin{font-size:56px;font-weight:800;letter-spacing:12px;color:var(--deep);background:#fff8e0;border:3px dashed var(--gold);border-radius:20px;padding:4px 20px}
+.vs{display:flex;align-items:center;justify-content:space-around;gap:8px;margin-top:30px;text-align:center}
+.vs .av{font-size:64px;display:block;line-height:1.1}.vs b{font-size:16px}
+.vs-x{font-size:44px}
+.countdown-in{font-size:120px;font-weight:800;text-align:center;color:#e57c1f;animation:cd .8s ease-out}
+.live{display:flex;justify-content:space-between;font-weight:800;font-size:22px;background:#fff;border:3px solid var(--gold);border-radius:16px;padding:4px 14px;margin-bottom:8px;font-variant-numeric:tabular-nums}
+.opt.sel{border-color:#2f6fd0;background:#eaf2ff}
+.board .av{font-size:34px;display:block}
+@media (prefers-reduced-motion: reduce){.spin,.countdown-in{animation:none}}
 </style>
 </head>
 <body>
@@ -315,6 +349,12 @@ button{font-family:inherit;cursor:pointer}
   <section class="screen" id="contest">
     <div class="bar"><button class="back" id="ctBack">›</button><div class="ttl" id="ctTitle">مسابقة الأبطال</div><div class="ctscore" id="ctScore"></div><button class="back" id="ctMute" aria-label="الصوت">🔊</button></div>
     <div id="ctBody" style="flex:1;display:flex;flex-direction:column"></div>
+  </section>
+
+  <!-- ONLINE -->
+  <section class="screen" id="online">
+    <div class="bar"><button class="back" id="onBack">›</button><div class="ttl" id="onTitle">🌐 العب أونلاين</div></div>
+    <div id="onBody" style="flex:1;display:flex;flex-direction:column"></div>
   </section>
 
   <!-- RESULT -->
@@ -775,12 +815,14 @@ function openContest(){
   $('#ctTitle').textContent='مسابقة الأبطال';$('#ctScore').textContent='';
   $('#ctBody').innerHTML=`<div class="modes">
     <button class="mode solo" id="mSolo"><span class="e">⏱️</span><span><b>أنا ضد الوقت</b><small>حتى ${ar(CT_SOLO_N)} أسئلة، لكل سؤال ${ar(CT_TIME)} ثانية. كلما أسرعت زادت نقاطك!</small></span></button>
+    <button class="mode online" id="mOnline"><span class="e">🌐</span><span><b>تحدٍّ أونلاين</b><small>العب مع أصدقائك، كلٌّ من تلفونه، وادخل لوحة الأبطال!</small></span></button>
     <button class="mode duo" id="mDuo"><span class="e">🤝</span><span><b>تحدٍّ بين لاعبَين</b><small>العب مع أخيك أو صديقك على نفس التلفون، كلٌّ بدوره.</small></span></button>
   </div>
   <div class="rules"><b>💡 كيف تُحسب النقاط؟</b><br>الجواب الصحيح = ١٠ نقاط + نقطة لكل ثانية باقية.<br>ثلاثة أجوبة صحيحة متتالية = 🔥 سلسلة، ونقاطك تتضاعف!<br>عندك ٣ قلوب ❤️❤️❤️ — كل خطأ يُذهب قلبًا!<br>وعندك ٣ مساعدات: ✂️ احذف جوابًا، ⏳ وقت إضافي، 🔄 سؤال آخر.<br>والسؤال الأخير ⭐ ذهبي ونقاطه مضاعفة!<br>الأسئلة من المراحل التي فتحتها فقط.</div>
   ${state.best?`<p class="tip">🏅 أعلى نتيجة لك: <b>${ar(state.best)}</b> نقطة</p>`:''}`;
   $('#mSolo').onclick=()=>ctStart([{name:state.name||'أنت',c:'#2f6fd0'}],CT_SOLO_N);
   $('#mDuo').onclick=ctNames;
+  $('#mOnline').onclick=()=>{if(window.openOnline)openOnline()};
   show('contest');
 }
 function ctNames(){
@@ -896,6 +938,7 @@ function ctEnd(){
   $('#ctHome').onclick=()=>{renderHome();show('home')};
 }
 $('#openContest').onclick=openContest;
+$('#onBack').onclick=()=>{if(window.onlineBack)onlineBack();else{renderHome();show('home')}};
 const muteIcon=()=>{$('#ctMute').textContent=state.mute?'🔇':'🔊'};muteIcon();
 $('#ctMute').onclick=()=>{state.mute=!state.mute;save();muteIcon();if(!state.mute)tone(784,.12,'sine')};
 $('#ctBack').onclick=()=>{ctStopTimer();if(ct&&ct.i<ct.qs.length){modal(`<h3 style="margin:4px 0">تريد الخروج من المسابقة؟</h3><p>ستضيع نقاط هذه الجولة.</p><div class="nav"><button class="btn sec" data-close id="mStay">أكمل</button><button class="btn" id="mLeave">خروج</button></div>`,()=>{
@@ -977,5 +1020,6 @@ document.addEventListener('keydown',e=>{if($('#zoomv').classList.contains('on'))
 renderHome();
 if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
+<script src="online.js"></script>
 </body>
 </html>
