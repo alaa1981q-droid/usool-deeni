@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14794f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="أصول ديني">
+<title>أصول ديني الخمسة</title>
+<meta name="description" content="أصول ديني الخمسة: كتاب تفاعلي للأطفال، تأليف الشيخ علاء المطوري">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef7f1; --green:#14794f; --green2:#1f9a66; --deep:#0e5a3a; --gold:#f2b632; --ink:#1d2b24; --muted:#5d6f66;
+  --card:#ffffff; --line:#d6e9de; --ok:#1fa463; --bad:#e2504a;
+  --c0:#14794f; --c1:#3fbf6f; --c2:#2f6fd0; --c3:#e57c1f; --c4:#7c4dc4; --c5:#13958c;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{font-family:'Tajawal',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:18px;line-height:1.85;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  -webkit-user-select:none;user-select:none}
+button{font-family:inherit;cursor:pointer}
+.app{max-width:560px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+.screen{display:none;flex:1;flex-direction:column;padding:14px 14px 26px}
+.screen.on{display:flex;animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* header */
+.hero{background:linear-gradient(160deg,#1a8d5c,#0e5a3a);border-radius:26px;color:#fff;padding:18px 16px 16px;text-align:center;position:relative;overflow:hidden}
+.hero h1{margin:4px 0 0;font-size:30px;font-weight:800;color:#ffe08a}
+.hero p{margin:0;opacity:.9;font-size:15px}
+.hero .by{margin-top:6px;font-size:13px;opacity:.8}
+.hero svg{width:200px;height:auto}
+.stats{display:flex;gap:10px;margin:12px 0 4px}
+.stat{flex:1;background:#fff;border-radius:16px;padding:8px;text-align:center;border:1px solid var(--line)}
+.stat b{display:block;font-size:22px;color:var(--green)}
+.stat span{font-size:13px;color:var(--muted)}
+
+/* map */
+.map{position:relative;margin-top:10px;padding:6px 0}
+.node{display:flex;align-items:center;gap:12px;background:#fff;border-radius:20px;padding:10px 12px;margin:10px 0;border:2px solid var(--line);
+  width:88%;position:relative;transition:transform .15s;text-align:right;color:inherit}
+.node:nth-child(odd){margin-right:0;margin-left:auto}
+.node:nth-child(even){margin-left:0;margin-right:auto}
+.node:active{transform:scale(.97)}
+.node .ic{width:58px;height:58px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-weight:800;font-size:24px;box-shadow:0 4px 0 rgba(0,0,0,.15)}
+.node .tx{flex:1;min-width:0}
+.node .tx b{display:block;font-size:19px}
+.node .tx small{color:var(--muted);font-size:14px}
+.node .st{font-size:15px;letter-spacing:1px;color:var(--gold)}
+.node.locked{opacity:.55;filter:grayscale(.8)}
+.node.current{border-color:var(--gold);box-shadow:0 0 0 4px rgba(242,182,50,.25)}
+.node.current .ic{animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.badge{position:absolute;top:-9px;left:12px;background:var(--gold);color:#5a3c00;font-size:12px;font-weight:800;padding:0 9px;border-radius:20px}
+.footer-links{display:flex;justify-content:center;gap:10px;margin-top:14px}
+.link-btn{background:none;border:none;color:var(--muted);font-size:14px;text-decoration:underline}
+
+/* top bar */
+.bar{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.back{width:42px;height:42px;border-radius:14px;border:1px solid var(--line);background:#fff;font-size:22px;color:var(--ink);display:grid;place-items:center;flex:none}
+.bar .ttl{flex:1;font-weight:800;font-size:19px}
+.prog{height:10px;background:#dcebe2;border-radius:10px;overflow:hidden;margin-bottom:12px}
+.prog i{display:block;height:100%;width:0;background:var(--gold);border-radius:10px;transition:width .35s}
+
+/* card */
+.card{background:var(--card);border-radius:24px;border:3px solid var(--sc,var(--green));padding:16px 16px 14px;position:relative;flex:1}
+.card .num{position:absolute;top:-14px;right:16px;background:var(--sc,var(--green));color:#fff;font-weight:800;border-radius:20px;padding:0 12px;font-size:15px}
+.card h2{margin:6px 0 8px;font-size:23px;color:var(--sc,var(--green))}
+.card h2 small{display:block;font-size:15px;color:var(--muted);font-weight:500}
+.art{background:linear-gradient(180deg,#fff7df,#ffe9b8);border-radius:18px;margin:6px 0 12px;overflow:hidden}
+.art svg{display:block;width:100%;height:auto}
+.card p{margin:0 0 10px}
+.card p b,.card li b{color:var(--sc,var(--green))}
+.box{border-radius:16px;padding:10px 12px;margin:12px 0 4px;border:2px solid;font-size:16.5px}
+.box .h{font-weight:800;margin-bottom:2px}
+.box.remember{background:#fff8e3;border-color:#f2c94c}
+.box.know{background:#eef6ff;border-color:#8bb6ee}
+.box.think{background:#f5efff;border-color:#b79be6}
+.box.try{background:#ecfaf1;border-color:#86d3a5}
+.ayah{font-family:'Amiri Quran','Amiri',serif;font-size:25px;line-height:2.2;text-align:center;background:#f6fbf8;border-radius:16px;padding:10px 12px;margin:10px 0 2px;color:#0b3d27}
+.ayah sup{font-family:'Tajawal',sans-serif;font-size:12px;color:var(--green);font-weight:800;vertical-align:super}
+.tr{text-align:center;color:var(--muted);font-size:16px;margin:2px 0 10px}
+.vlist{list-style:none;padding:0;margin:6px 0}
+.vlist li{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px dashed var(--line)}
+.vlist li:last-child{border:0}
+.vlist .q{font-family:'Amiri Quran','Amiri',serif;font-size:23px;line-height:2;color:#0b3d27}
+.vlist .s{font-size:15.5px;color:var(--muted)}
+.fn{border-top:1px solid #cfdcd4;margin-top:14px;padding-top:6px;font-size:13px;color:var(--muted);line-height:1.7}
+.fn div{display:flex;gap:4px}
+.fn sup{color:var(--green);font-weight:800}
+.imams{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0;padding:0;list-style:none;font-size:15.5px}
+.imams li{background:#f4f0ff;border-radius:12px;padding:5px 8px}
+.imams li b{color:var(--c4)}
+.memo{background:linear-gradient(160deg,#fffaf0,#fff1c9);border:3px dashed var(--gold)}
+
+.nav{display:flex;gap:10px;margin-top:14px}
+.btn{flex:1;border:none;border-radius:18px;padding:13px 10px;font-size:18px;font-weight:800;background:var(--green);color:#fff;box-shadow:0 5px 0 var(--deep);transition:transform .1s}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--deep)}
+.btn.sec{background:#fff;color:var(--ink);border:2px solid var(--line);box-shadow:0 5px 0 #c9dbd0}
+.btn.gold{background:var(--gold);color:#4b3200;box-shadow:0 5px 0 #b9851a}
+.btn[disabled]{opacity:.45}
+
+/* quiz */
+.qcard{background:#fff;border-radius:24px;padding:16px;border:3px solid var(--sc,var(--green))}
+.qn{font-size:14px;color:var(--muted)}
+.qq{font-size:22px;font-weight:800;margin:4px 0 14px}
+.opt{display:flex;align-items:center;gap:10px;width:100%;text-align:right;background:#f7fbf9;border:2px solid var(--line);border-radius:16px;padding:12px;margin:8px 0;font-size:18px;color:var(--ink)}
+.opt .l{width:34px;height:34px;border-radius:50%;background:#e2efe7;display:grid;place-items:center;font-weight:800;flex:none}
+.opt.sel{border-color:var(--sc,var(--green));background:#eef8f2}
+.opt.ok{border-color:var(--ok);background:#e5f8ed}
+.opt.ok .l{background:var(--ok);color:#fff}
+.opt.bad{border-color:var(--bad);background:#fdecec}
+.opt.bad .l{background:var(--bad);color:#fff}
+.fb{min-height:30px;font-weight:700;text-align:center;margin-top:4px}
+.fb.ok{color:var(--ok)} .fb.bad{color:var(--bad)}
+
+/* result */
+.result{text-align:center;background:#fff;border-radius:26px;padding:22px 16px;border:3px solid var(--sc,var(--green))}
+.result .big{font-size:64px;line-height:1.2}
+.result h2{margin:6px 0;font-size:26px}
+.result .score{font-size:20px;color:var(--muted)}
+.stars{font-size:40px;letter-spacing:6px;margin:6px 0}
+.review{text-align:right;margin-top:12px;font-size:16px}
+.review div{background:#fff5f4;border:1px solid #f3c6c3;border-radius:12px;padding:8px 10px;margin:6px 0}
+
+/* certificate */
+.cert{background:#fffdf5;border:6px double var(--gold);border-radius:22px;padding:22px 16px;text-align:center;position:relative}
+.cert h2{color:var(--green);font-size:30px;margin:4px 0}
+.cert .nm{font-size:30px;font-weight:800;color:#8a5a00;border-bottom:2px dashed var(--gold);display:inline-block;padding:0 14px;margin:6px 0}
+.cert .dua{font-family:'Amiri Quran','Amiri',serif;font-size:19px;line-height:2;color:#0b3d27;margin-top:12px}
+.inp{width:100%;font-family:inherit;font-size:20px;padding:12px;border-radius:14px;border:2px solid var(--line);text-align:center;margin:8px 0;-webkit-user-select:text;user-select:text}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;padding:20px;z-index:20}
+.modal.on{display:flex}
+.modal .in{background:#fff;border-radius:22px;padding:18px;max-width:380px;width:100%;text-align:center}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:30}
+.tip{font-size:14px;color:var(--muted);text-align:center;margin-top:10px}
+
+/* book reader (merged) */
+.bookcard{display:flex;align-items:center;gap:12px;width:100%;margin-top:12px;background:#fff;border:2px solid var(--gold);border-radius:20px;padding:10px 12px;text-align:right;color:inherit;box-shadow:0 5px 0 #e9d49a}
+.bookcard:active{transform:translateY(3px);box-shadow:0 2px 0 #e9d49a}
+.bookcard img{width:62px;height:auto;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.18);flex:none}
+.bookcard b{display:block;font-size:19px;color:var(--deep)}
+.bookcard small{color:var(--muted);font-size:14px;line-height:1.5;display:block}
+.bookcard .go{margin-inline-start:auto;font-size:26px;color:var(--gold);flex:none}
+.bar .pg{width:auto;padding:0 10px;font-size:15px;font-weight:700;gap:4px;display:flex;align-items:center}
+.reader{position:fixed;inset:0;z-index:15;background:#e7efe9;display:none;flex-direction:column;
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.reader.on{display:flex}
+.rhead{display:flex;align-items:center;gap:8px;background:var(--deep);color:#fff;padding:10px max(12px,env(safe-area-inset-right)) 10px max(12px,env(safe-area-inset-left))}
+.rhead .t{flex:1;min-width:0;font-weight:800;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rbtn{width:42px;height:42px;border-radius:14px;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:20px;display:grid;place-items:center;flex:none}
+.rbook{flex:1;min-height:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.rbook::-webkit-scrollbar{display:none}
+.rpage{flex:0 0 100%;scroll-snap-align:center;scroll-snap-stop:always;display:grid;place-items:center;padding:10px;min-height:0;position:relative}
+.rpage img{max-width:100%;max-height:100%;width:auto;height:auto;aspect-ratio:1071/1511;object-fit:contain;border-radius:6px;box-shadow:0 6px 22px rgba(10,40,28,.2);background:#fff;display:block}
+.rcta{position:absolute;bottom:calc(16px + 6%);left:50%;transform:translateX(-50%);border:0;color:#fff;font-weight:800;font-size:17px;padding:11px 22px;border-radius:999px;box-shadow:0 8px 22px rgba(0,0,0,.3);white-space:nowrap;animation:rp 2.4s ease-in-out infinite}
+@keyframes rp{50%{transform:translateX(-50%) scale(1.05)}}
+.rfoot{display:flex;align-items:center;gap:10px;background:#fff;border-top:1px solid var(--line);padding:8px max(12px,env(safe-area-inset-right)) 8px max(12px,env(safe-area-inset-left))}
+.rfoot .rn{width:44px;height:44px;border-radius:50%;border:0;background:var(--bg);font-size:24px;color:var(--ink);flex:none;display:grid;place-items:center}
+.rfoot .rn[disabled]{opacity:.35}
+.rmid{flex:1;min-width:0}
+.rwhere{display:flex;justify-content:space-between;gap:8px;font-size:14px;color:var(--muted);line-height:1.4}
+.rwhere b{color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rmid input{width:100%;accent-color:var(--green);direction:rtl;margin:4px 0 0}
+.rtoc{position:fixed;inset:0;z-index:18;display:none}
+.rtoc.on{display:block}
+.rtoc .sc{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.rtoc .dr{position:absolute;top:0;bottom:0;right:0;width:min(86vw,360px);background:#fff;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+.rtoc h3{margin:0;padding:14px 16px 6px;display:flex;justify-content:space-between;align-items:center;font-size:20px}
+.rtoc h3 button{border:0;background:none;font-size:28px;color:var(--muted)}
+.rtoc .ls{overflow-y:auto;padding:0 8px 16px}
+.rtoc .ls button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;text-align:right;padding:8px 10px;border-radius:12px;font-size:16px;color:var(--ink);line-height:1.5}
+.rtoc .ls button.on{background:var(--bg);font-weight:800}
+.rtoc .ls .m{font-weight:800;margin-top:6px}
+.rtoc .ls .s{padding-inline-start:34px;font-size:15px;color:var(--muted)}
+.rtoc .ls .d{width:12px;height:12px;border-radius:50%;flex:none}
+.rtoc .ls .n{margin-inline-start:auto;color:var(--muted);font-size:13px}
+.zoomv{position:fixed;inset:0;z-index:40;background:#0b0f0d;overflow:auto;display:none}
+.zoomv.on{display:block}
+.zoomv img{width:200%;max-width:none;display:block;margin:0 auto}
+.zoomv.fit img{width:100%}
+.zx{position:fixed;z-index:41;top:calc(12px + env(safe-area-inset-top));left:calc(12px + env(safe-area-inset-left));width:46px;height:46px;border-radius:50%;border:0;background:rgba(255,255,255,.92);font-size:24px;display:none}
+.zx.on{display:block}
+@media (prefers-reduced-motion: reduce){.rcta,.node.current .ic{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<div class="app">
+
+  <!-- HOME / MAP -->
+  <section class="screen on" id="home">
+    <div class="hero">
+      <div id="heroArt"></div>
+      <h1>أصولُ دِيني الخمسة</h1>
+      <p>رحلة ملوّنة مع الصور والآيات والأسئلة</p>
+      <div class="by">تأليف الشيخ علاء المطوري</div>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="stDone">٠</b><span>مرحلة مكتملة</span></div>
+      <div class="stat"><b id="stStars">٠</b><span>نجمة ⭐</span></div>
+    </div>
+    <button class="bookcard" id="openBook"><img src="p/01.webp" alt=""><span><b>📖 الكتاب المصوّر</b><small>تصفّح صفحات الكتاب كما هي، بالصور والألوان</small></span><span class="go">‹</span></button>
+    <div class="map" id="map"></div>
+    <div class="footer-links">
+      <button class="link-btn" id="howBtn">كيف ألعب؟</button>
+      <button class="link-btn" id="resetBtn">ابدأ من جديد</button>
+    </div>
+  </section>
+
+  <!-- LESSON -->
+  <section class="screen" id="lesson">
+    <div class="bar"><button class="back" data-home>›</button><div class="ttl" id="lsTitle"></div><button class="back pg" id="lsBook" aria-label="صفحات هذه المرحلة في الكتاب">📖 الكتاب</button></div>
+    <div class="prog"><i id="lsProg"></i></div>
+    <div id="lsCard" style="flex:1;display:flex;flex-direction:column"></div>
+    <div class="nav">
+      <button class="btn sec" id="prevBtn">السابق</button>
+      <button class="btn" id="nextBtn">التالي</button>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="screen" id="quiz">
+    <div class="bar"><button class="back" id="quizBack">›</button><div class="ttl" id="qzTitle"></div></div>
+    <div class="prog"><i id="qzProg"></i></div>
+    <div id="qzBody"></div>
+    <div class="nav"><button class="btn" id="checkBtn" disabled>تأكيد الإجابة</button></div>
+  </section>
+
+  <!-- RESULT -->
+  <section class="screen" id="result"><div id="rsBody"></div></section>
+
+  <!-- CERTIFICATE -->
+  <section class="screen" id="certificate">
+    <div class="bar"><button class="back" data-home>›</button><div class="ttl">شهادة إتمام</div></div>
+    <div id="certBody"></div>
+  </section>
+</div>
+
+<div class="reader" id="reader" dir="rtl">
+  <div class="rhead"><button class="rbtn" id="rClose" aria-label="رجوع">›</button><div class="t">الكتاب المصوّر</div>
+    <button class="rbtn" id="rZoom" aria-label="تكبير الصفحة">🔍</button><button class="rbtn" id="rTocBtn" aria-label="الفهرس">☰</button></div>
+  <div class="rbook" id="rbook"></div>
+  <div class="rfoot"><button class="rn" id="rPrev" aria-label="الصفحة السابقة">›</button>
+    <div class="rmid"><div class="rwhere"><b id="rSec">الغلاف</b><span id="rCount"></span></div><input type="range" id="rSlider" min="1" max="38" value="1" aria-label="الانتقال إلى صفحة"></div>
+    <button class="rn" id="rNext" aria-label="الصفحة التالية">‹</button></div>
+</div>
+<div class="rtoc" id="rtoc" dir="rtl"><div class="sc" id="rtocSc"></div><div class="dr"><h3>الفهرس <button id="rtocX" aria-label="إغلاق">×</button></h3><div class="ls" id="rtocLs"></div></div></div>
+<div class="zoomv" id="zoomv"><img id="zimg" alt=""></div><button class="zx" id="zx" aria-label="إغلاق التكبير">×</button>
+
+<div class="modal" id="modal"><div class="in" id="modalIn"></div></div>
+
+<script>
+/* ---------- helpers ---------- */
+const AR='٠١٢٣٤٥٦٧٨٩';
+const ar=n=>String(n).replace(/\d/g,d=>AR[d]);
+const $=s=>document.querySelector(s);
+const LET=['أ','ب','ج','د'];
+
+/* ---------- illustrations (inline SVG) ---------- */
+const S=(inner,vb='0 0 320 170')=>`<svg viewBox="${vb}" xmlns="http://www.w3.org/2000/svg" font-family="Tajawal" >${inner}</svg>`;
+const sun=(x,y,r=18)=>{let g=`<circle cx="${x}" cy="${y}" r="${r}" fill="#f7b928"/>`;for(let i=0;i<12;i++){const a=i*Math.PI/6;g+=`<line x1="${x+Math.cos(a)*(r+5)}" y1="${y+Math.sin(a)*(r+5)}" x2="${x+Math.cos(a)*(r+12)}" y2="${y+Math.sin(a)*(r+12)}" stroke="#f7b928" stroke-width="3.5" stroke-linecap="round"/>`}return g};
+const PC=['#3fbf6f','#2f6fd0','#e57c1f','#7c4dc4','#13958c'];
+const PN=['التوحيد','العدل','النبوة','الإمامة','المعاد'];
+const house=(labels=true)=>{let g=`<polygon points="160,14 40,62 280,62" fill="#f2b632"/>${sun(160,44,11)}<rect x="40" y="62" width="240" height="10" rx="3" fill="#e0a21d"/>`;
+  for(let i=0;i<5;i++){const x=230-i*45;g+=`<rect x="${x}" y="74" width="34" height="62" rx="5" fill="${PC[i]}"/>`;if(labels)g+=`<text x="${x+17}" y="150" text-anchor="middle" font-size="12" font-weight="700" fill="#1d2b24">${PN[i]}</text>`}
+  g+=`<rect x="32" y="136" width="256" height="${labels?0:10}" rx="3" fill="#e0a21d"/>`;if(!labels)g+='';return S(g+(labels?'':''),labels?'0 0 320 160':'0 0 320 150')};
+const ART={
+ house:()=>house(true),
+ heroHouse:()=>S(`<circle cx="160" cy="80" r="70" fill="rgba(255,255,255,.08)"/><polygon points="160,20 50,62 270,62" fill="#f2b632"/>${sun(160,46,10)}<rect x="50" y="62" width="220" height="9" rx="3" fill="#e0a21d"/>${PC.map((c,i)=>`<rect x="${222-i*42}" y="73" width="32" height="56" rx="5" fill="${c}"/>`).join('')}<rect x="42" y="129" width="236" height="10" rx="3" fill="#e0a21d"/>`,'0 0 320 150'),
+ tree:()=>S(`<rect x="0" y="110" width="320" height="60" fill="#b9814f"/><rect x="150" y="62" width="20" height="52" fill="#8a5a2b"/><circle cx="160" cy="52" r="42" fill="#3fbf6f"/><circle cx="125" cy="66" r="26" fill="#35a862"/><circle cx="195" cy="66" r="26" fill="#35a862"/><circle cx="145" cy="40" r="6" fill="#e2504a"/><circle cx="180" cy="58" r="6" fill="#e2504a"/><circle cx="135" cy="72" r="6" fill="#e2504a"/>
+  <path d="M160 112 L130 150 M160 112 L190 152 M160 112 L160 160 M160 120 L110 135 M160 120 L215 138" stroke="#5c3a17" stroke-width="5" stroke-linecap="round" fill="none"/><text x="262" y="158" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">الجذور = الأصول</text><text x="52" y="24" text-anchor="middle" font-size="12" font-weight="700" fill="#14794f">الأغصان = الأعمال</text>`),
+ book:()=>S(`<path d="M160 40 Q110 20 50 34 L50 140 Q110 126 160 146 Z" fill="#fff" stroke="#14794f" stroke-width="4"/><path d="M160 40 Q210 20 270 34 L270 140 Q210 126 160 146 Z" fill="#fff" stroke="#14794f" stroke-width="4"/>${[0,1,2,3,4].map(i=>`<line x1="70" y1="${55+i*16}" x2="145" y2="${60+i*16}" stroke="#a7d3b9" stroke-width="4" stroke-linecap="round"/><line x1="175" y1="${60+i*16}" x2="250" y2="${55+i*16}" stroke="#a7d3b9" stroke-width="4" stroke-linecap="round"/>`).join('')}<circle cx="160" cy="22" r="9" fill="#f2b632"/>`),
+ one:()=>S(`${sun(160,70,30)}<text x="160" y="80" text-anchor="middle" font-size="30" font-weight="800" fill="#7a4b00">١</text><text x="160" y="150" text-anchor="middle" font-size="22" font-weight="800" fill="#14794f">اللهُ أحَد</text>`),
+ universe:()=>S(`${sun(255,40,20)}<polygon points="20,125 85,55 150,125" fill="#8aa39a"/><polygon points="100,125 160,70 220,125" fill="#6f8a80"/><rect x="0" y="122" width="320" height="48" fill="#5fa8e8"/><path d="M0 140 q20 -10 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0" stroke="#fff" stroke-width="3" fill="none"/><text x="110" y="34" text-anchor="middle" font-size="22" font-weight="800" fill="#14794f">من صنع هذا؟</text>`),
+ feet:()=>S(`<rect x="0" y="95" width="320" height="75" fill="#f0c97a"/>${sun(270,36,16)}${[[60,140],[100,122],[140,142],[180,120],[220,138]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="9" ry="14" fill="#b07a32"/><circle cx="${x-5}" cy="${y-17}" r="3" fill="#b07a32"/><circle cx="${x+1}" cy="${y-19}" r="3" fill="#b07a32"/><circle cx="${x+6}" cy="${y-16}" r="3" fill="#b07a32"/>`).join('')}<text x="125" y="66" text-anchor="middle" font-size="16" font-weight="800" fill="#8a5a00">آثار أقدام ← إذن مرّ أحدٌ من هنا</text>`),
+ clock:()=>S(`<circle cx="95" cy="85" r="55" fill="#fff" stroke="#2f6fd0" stroke-width="7"/>${[...Array(12)].map((_,i)=>{const a=i*Math.PI/6;return `<circle cx="${95+Math.cos(a)*44}" cy="${85+Math.sin(a)*44}" r="3" fill="#2f6fd0"/>`}).join('')}<line x1="95" y1="85" x2="95" y2="52" stroke="#1d2b24" stroke-width="5" stroke-linecap="round"/><line x1="95" y1="85" x2="120" y2="95" stroke="#1d2b24" stroke-width="4" stroke-linecap="round"/><circle cx="95" cy="85" r="5" fill="#e2504a"/>
+  <path d="M190 60 q30 -12 60 0 t50 0" stroke="#8bb6ee" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M180 90 q30 -12 60 0 t50 0" stroke="#8bb6ee" stroke-width="4" fill="none" stroke-linecap="round"/><ellipse cx="270" cy="120" rx="16" ry="8" fill="#3fbf6f" transform="rotate(-30 270 120)"/><ellipse cx="235" cy="135" rx="14" ry="7" fill="#35a862" transform="rotate(25 235 135)"/><text x="245" y="165" text-anchor="middle" font-size="12" font-weight="700" fill="#2f6fd0">لا نرى الهواء لكن نرى أثره</text>`),
+ orbit:()=>S(`${sun(160,85,24)}<ellipse cx="160" cy="85" rx="120" ry="55" fill="none" stroke="#7c4dc4" stroke-width="2" stroke-dasharray="6 6"/><ellipse cx="160" cy="85" rx="75" ry="34" fill="none" stroke="#2f6fd0" stroke-width="2" stroke-dasharray="6 6"/><circle cx="85" cy="85" r="9" fill="#2f6fd0"/><circle cx="275" cy="72" r="12" fill="#e57c1f"/><circle cx="200" cy="114" r="7" fill="#3fbf6f"/><text x="160" y="165" text-anchor="middle" font-size="14" font-weight="800" fill="#14794f">نظامٌ دقيق ← مدبّرٌ واحد</text>`),
+ grade:()=>S(`<rect x="60" y="25" width="200" height="120" rx="12" fill="#2d6a4f"/><rect x="60" y="145" width="200" height="8" fill="#8a5a2b"/><text x="160" y="70" text-anchor="middle" font-size="20" font-weight="800" fill="#fff">لكلٍّ درجته</text><text x="160" y="110" text-anchor="middle" font-size="26" font-weight="800" fill="#ffe08a">بحسب جهده ✓</text>`),
+ scale:()=>S(`<rect x="156" y="30" width="8" height="110" fill="#8a5a00"/><rect x="120" y="138" width="80" height="10" rx="4" fill="#8a5a00"/><rect x="60" y="40" width="200" height="7" rx="3" fill="#c48a1a"/><circle cx="160" cy="34" r="9" fill="#f2b632"/><line x1="75" y1="47" x2="60" y2="100" stroke="#8a5a00" stroke-width="2"/><line x1="75" y1="47" x2="90" y2="100" stroke="#8a5a00" stroke-width="2"/><line x1="245" y1="47" x2="230" y2="100" stroke="#8a5a00" stroke-width="2"/><line x1="245" y1="47" x2="260" y2="100" stroke="#8a5a00" stroke-width="2"/><path d="M50 100 h50 q-25 22 -50 0z" fill="#f2b632"/><path d="M220 100 h50 q-25 22 -50 0z" fill="#f2b632"/>`),
+ roads:()=>S(`<path d="M160 165 L160 110 Q160 80 90 40 L60 22" stroke="#3fbf6f" stroke-width="26" fill="none" stroke-linecap="round"/><path d="M160 110 Q160 80 230 40 L260 22" stroke="#e2504a" stroke-width="26" fill="none" stroke-linecap="round"/><text x="78" y="80" text-anchor="middle" font-size="36" font-weight="800" fill="#1fa463">✓</text><text x="242" y="80" text-anchor="middle" font-size="36" font-weight="800" fill="#e2504a">✗</text><text x="70" y="160" text-anchor="middle" font-size="15" font-weight="800" fill="#1fa463">طريق الخير</text><text x="250" y="160" text-anchor="middle" font-size="15" font-weight="800" fill="#e2504a">طريق الشر</text>`),
+ medicine:()=>S(`<rect x="70" y="50" width="70" height="95" rx="14" fill="#8bb6ee"/><rect x="80" y="30" width="50" height="24" rx="6" fill="#2f6fd0"/><rect x="80" y="80" width="50" height="34" rx="6" fill="#fff"/><path d="M98 97 h14 M105 90 v14" stroke="#e2504a" stroke-width="5" stroke-linecap="round"/><path d="M230 140 C170 100 180 55 215 60 C228 62 230 72 230 78 C230 72 232 62 245 60 C280 55 290 100 230 140Z" fill="#e2504a"/><text x="160" y="24" text-anchor="middle" font-size="15" font-weight="800" fill="#14794f">عقل + حرية = مسؤولية</text>`),
+ letter:()=>S(`<rect x="70" y="45" width="180" height="110" rx="10" fill="#fff" stroke="#e57c1f" stroke-width="5"/><path d="M70 50 L160 110 L250 50" stroke="#e57c1f" stroke-width="5" fill="none"/>${sun(160,30,13)}<text x="160" y="148" text-anchor="middle" font-size="15" font-weight="800" fill="#e57c1f">رسالة من الله إلينا</text>`),
+ traffic:()=>S(`<rect x="130" y="15" width="60" height="130" rx="14" fill="#33413a"/><circle cx="160" cy="42" r="15" fill="#e2504a"/><circle cx="160" cy="80" r="15" fill="#f2b632"/><circle cx="160" cy="118" r="15" fill="#3fbf6f"/><rect x="154" y="145" width="12" height="25" fill="#33413a"/><text x="40" y="90" font-size="40" font-weight="800" fill="#e57c1f">!</text><text x="230" y="90" font-size="36" font-weight="800" fill="#e57c1f">←</text>`),
+ prophets:()=>S(['آدم','نوح','إبراهيم','موسى','عيسى','محمد'].map((n,i)=>{const x=275-i*46,y=i%2?110:65,last=i==5;return `<circle cx="${x}" cy="${y}" r="${last?27:22}" fill="${last?'#14794f':'#e57c1f'}"/><text x="${x}" y="${y+5}" text-anchor="middle" font-size="${last?14:12}" font-weight="800" fill="#fff">${n}</text>`}).join('')+`<text x="160" y="160" text-anchor="middle" font-size="13" font-weight="700" fill="#8a5a00">عليهم السلام — ومحمدٌ صلى الله عليه وآله خاتمهم</text>`),
+ quran:()=>S(`<circle cx="160" cy="85" r="70" fill="#fff3c4"/><path d="M160 60 Q125 45 85 55 L85 130 Q125 120 160 135 Z" fill="#14794f"/><path d="M160 60 Q195 45 235 55 L235 130 Q195 120 160 135 Z" fill="#1f9a66"/><path d="M160 60 V135" stroke="#f2b632" stroke-width="4"/><circle cx="120" cy="92" r="12" fill="none" stroke="#f2b632" stroke-width="3"/><circle cx="200" cy="92" r="12" fill="none" stroke="#f2b632" stroke-width="3"/><text x="160" y="28" text-anchor="middle" font-size="15" font-weight="800" fill="#8a5a00">المعجزة الكبرى: القرآن الكريم</text>`),
+ lantern:()=>S(`<line x1="160" y1="0" x2="160" y2="30" stroke="#8a5a00" stroke-width="3"/><path d="M135 30 h50 l10 18 h-70z" fill="#7c4dc4"/><rect x="128" y="48" width="64" height="70" rx="10" fill="#ffe08a" stroke="#7c4dc4" stroke-width="5"/><circle cx="160" cy="83" r="14" fill="#f7b928"/><path d="M125 118 h70 l-10 16 h-50z" fill="#7c4dc4"/><circle cx="160" cy="83" r="48" fill="none" stroke="#f7b928" stroke-width="2" stroke-dasharray="4 8"/><text x="160" y="160" text-anchor="middle" font-size="14" font-weight="800" fill="#7c4dc4">هادٍ بعد النبي</text>`),
+ shield:()=>S(`<path d="M160 20 L230 45 V90 Q230 135 160 155 Q90 135 90 90 V45Z" fill="#7c4dc4"/><path d="M160 34 L218 54 V90 Q218 125 160 142 Q102 125 102 90 V54Z" fill="#b79be6"/><rect x="130" y="68" width="60" height="44" rx="6" fill="#fff"/><path d="M160 70 V110" stroke="#7c4dc4" stroke-width="3"/><text x="40" y="95" font-size="20" font-weight="800" fill="#7c4dc4">٢+٢=٤</text>`),
+ ghadir:()=>S(`<rect x="0" y="110" width="320" height="60" fill="#f0c97a"/><ellipse cx="160" cy="130" rx="70" ry="16" fill="#5fa8e8"/>${[[60,110],[260,110]].map(([x,y])=>`<rect x="${x-4}" y="${y-60}" width="8" height="60" fill="#8a5a2b"/><path d="M${x} ${y-60} q-30 -5 -38 15 M${x} ${y-60} q30 -5 38 15 M${x} ${y-60} q-20 -25 -30 -20 M${x} ${y-60} q20 -25 30 -20" stroke="#35a862" stroke-width="7" fill="none" stroke-linecap="round"/>`).join('')}${sun(160,40,15)}<text x="160" y="165" text-anchor="middle" font-size="15" font-weight="800" fill="#7a4b00">غدير خُمّ</text>`),
+ twelve:()=>S([...Array(12)].map((_,i)=>{const a=-Math.PI/2+i*Math.PI/6;const x=160+Math.cos(a)*62,y=85+Math.sin(a)*62;return `<circle cx="${x}" cy="${y}" r="14" fill="${i==11?'#f2b632':'#7c4dc4'}"/><text x="${x}" y="${y+5}" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">${ar(i+1)}</text>`}).join('')+`<circle cx="160" cy="85" r="30" fill="#fff"/><text x="160" y="90" text-anchor="middle" font-size="14" font-weight="800" fill="#7c4dc4">الأئمة</text>`),
+ cloudsun:()=>S(`${sun(160,70,30)}<path d="M80 120 q-30 0 -25 -25 q5 -22 30 -18 q10 -30 45 -20 q30 -25 60 5 q35 -5 35 25 q20 5 10 33z" fill="#fff" stroke="#c9dbd0" stroke-width="2"/><text x="160" y="160" text-anchor="middle" font-size="13" font-weight="700" fill="#8a5a00">الشمس خلف السحاب تنفع الناس</text>`),
+ seed:()=>S(`<rect x="0" y="120" width="320" height="50" fill="#9c6a3a"/><ellipse cx="260" cy="132" rx="10" ry="7" fill="#e57c1f"/><text x="260" y="162" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">بذرة</text><path d="M160 120 V85" stroke="#35a862" stroke-width="5"/><ellipse cx="148" cy="88" rx="14" ry="7" fill="#3fbf6f" transform="rotate(-25 148 88)"/><ellipse cx="172" cy="84" rx="14" ry="7" fill="#3fbf6f" transform="rotate(25 172 84)"/><text x="160" y="162" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">نبتة</text><rect x="54" y="60" width="12" height="60" fill="#8a5a2b"/><circle cx="60" cy="50" r="34" fill="#35a862"/><text x="60" y="162" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">شجرة</text><text x="215" y="80" font-size="22" fill="#e57c1f">←</text><text x="100" y="80" font-size="22" fill="#e57c1f">←</text>`),
+ journey:()=>{const st=[['الدنيا','#3fbf6f'],['الموت','#8a8f8c'],['البرزخ','#7c4dc4'],['القيامة','#e57c1f']];let g='';st.forEach(([n,c],i)=>{const x=280-i*68;g+=`<circle cx="${x}" cy="70" r="26" fill="${c}"/><text x="${x}" y="75" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">${n}</text>`;if(i<3)g+=`<text x="${x-38}" y="76" font-size="18" fill="#8a5a00">←</text>`});g+=`<path d="M76 92 L50 125 M76 92 L104 125" stroke="#8a5a00" stroke-width="3"/><rect x="18" y="125" width="64" height="30" rx="10" fill="#1fa463"/><text x="50" y="146" text-anchor="middle" font-size="14" font-weight="800" fill="#fff">الجنة</text><rect x="90" y="125" width="60" height="30" rx="10" fill="#e2504a"/><text x="120" y="146" text-anchor="middle" font-size="14" font-weight="800" fill="#fff">النار</text>`;return S(g)},
+ weigh:()=>S(`<rect x="156" y="30" width="8" height="110" fill="#13958c"/><rect x="120" y="138" width="80" height="10" rx="4" fill="#13958c"/><g transform="rotate(-8 160 43)"><rect x="60" y="40" width="200" height="7" rx="3" fill="#0f7a72"/><line x1="75" y1="47" x2="60" y2="100" stroke="#13958c" stroke-width="2"/><line x1="75" y1="47" x2="90" y2="100" stroke="#13958c" stroke-width="2"/><path d="M50 100 h50 q-25 22 -50 0z" fill="#3fbf6f"/><text x="75" y="95" text-anchor="middle" font-size="20">💚</text><line x1="245" y1="47" x2="230" y2="100" stroke="#13958c" stroke-width="2"/><line x1="245" y1="47" x2="260" y2="100" stroke="#13958c" stroke-width="2"/><path d="M220 100 h50 q-25 22 -50 0z" fill="#9fd9d4"/></g><text x="160" y="165" text-anchor="middle" font-size="13" font-weight="800" fill="#0f7a72">كل عمل خير يُوزن يوم القيامة</text>`),
+ garden:()=>S(`<rect x="0" y="0" width="320" height="170" fill="#dff3ff"/><rect x="0" y="105" width="320" height="65" fill="#7ccf8f"/><path d="M0 140 q80 -20 160 0 t160 0 v14 q-80 -20 -160 0 t-160 0z" fill="#5fa8e8"/>${[50,120,250].map(x=>`<rect x="${x-3}" y="70" width="6" height="40" fill="#8a5a2b"/><circle cx="${x}" cy="62" r="20" fill="#35a862"/><circle cx="${x-6}" cy="58" r="4" fill="#e2504a"/><circle cx="${x+7}" cy="66" r="4" fill="#e2504a"/>`).join('')}<rect x="180" y="55" width="40" height="50" rx="4" fill="#f2b632"/><path d="M176 58 l24 -22 l24 22z" fill="#e0a21d"/><rect x="194" y="80" width="12" height="25" rx="6" fill="#8a5a00"/>${sun(285,32,12)}`),
+ cert:()=>S(`<circle cx="160" cy="70" r="46" fill="#f2b632"/><circle cx="160" cy="70" r="36" fill="#ffe08a"/><text x="160" y="84" text-anchor="middle" font-size="38">🏆</text><path d="M130 110 L118 160 L140 148 L152 165 L160 115Z" fill="#e2504a"/><path d="M190 110 L202 160 L180 148 L168 165 L160 115Z" fill="#c43d38"/>`)
+};
+
+/* ---------- content (from the book) ---------- */
+// verse: {a: text, s: source}  -> displayed with superscript number + footnote
+const STAGES=[
+{ id:0, title:'البداية', sub:'بيت ديني وسورتا الحمد والتوحيد', color:'var(--c0)', icon:'🌱',
+  lessons:[
+   {h:'إلى صديقي الصغير', art:'tree', body:[
+     'أهلًا بك يا صديقي! هل رأيت شجرةً كبيرة؟ لها <b>جذورٌ</b> تحت الأرض لا نراها، لكنها تُمسك الشجرة وتُغذّيها، وفوقها أغصانٌ وأوراقٌ وثمار.',
+     'ديننا مثل هذه الشجرة: <b>جذورها هي أصول الدين الخمسة</b>، وأغصانها هي الأعمال التي نفعلها كل يوم، مثل الصلاة والصوم.',
+     'في هذا التطبيق سنتعرّف على الأصول الخمسة بالصور والألوان، ونقرأ آياتٍ من القرآن الكريم عن كل أصل، ونحفظ آيةً جميلة، ثم نختبر أنفسنا بأسئلة ممتعة.'],
+    box:['try','جرّب','اقرأ كل صفحة بهدوء، وانظر إلى الصور وتأمّلها، ثم ادخل الامتحان. إذا نجحت تُفتح لك المرحلة التالية!']},
+   {h:'بيتُ ديني', art:'house', body:[
+     'تخيّل أن ديننا <b>بيتٌ جميل</b>. هذا البيت يقوم على خمسة أعمدة قوية، وكل عمود له لون: ١ التوحيد، ٢ العدل، ٣ النبوّة، ٤ الإمامة، ٥ المعاد.',
+     'لو سقط عمودٌ واحد لاختلّ البيت. لذلك نتعلّم هذه الأصول بفهمٍ وحب، ولا نكتفي بترديدها.'],
+    box:['remember','تذكّر','التوحيد: الله واحد. العدل: الله لا يظلم. النبوّة: الله أرسل لنا الأنبياء. الإمامة: الله جعل بعد النبي أئمةً هداة. المعاد: بعد الموت حياةٌ أخرى.']},
+   {h:'سورة الحمد', sm:'السورة التي نقرؤها في كل صلاة', art:'book', surah:[
+     ['بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ','أبدأ كل عملٍ باسم الله الرحمن الرحيم.'],
+     ['الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ','الشكر لله الذي ربّانا وربّى كل الكون.'],
+     ['الرَّحْمَٰنِ الرَّحِيمِ','رحمته واسعة تشمل كل شيء.'],
+     ['مَالِكِ يَوْمِ الدِّينِ','هو صاحب يوم الحساب، يوم القيامة.'],
+     ['إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ','لك وحدك نعبد، ومنك وحدك نطلب العون.'],
+     ['اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ','دُلّنا يا ربّ على الطريق المستقيم الصحيح.'],
+     ['صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ','طريق الذين أنعمتَ عليهم: الأنبياء والصالحين، لا طريق من غضبتَ عليهم ولا التائهين الضائعين.']],
+    box:['know','هل تعلم؟','في سورة الحمد أصولٌ كثيرة: التوحيد في «إياك نعبد»، والعدل والمعاد في «مالك يوم الدين»، والنبوّة والإمامة في «صراط الذين أنعمت عليهم».'],
+    box2:['try','جرّب','احفظ آيةً واحدةً كل يوم حتى تحفظ السورة كلّها، ثم اقرأها في صلاتك.']},
+   {h:'سورة التوحيد', sm:'اسمها أيضًا سورة الإخلاص', art:'one', surah:[
+     ['قُلْ هُوَ اللَّهُ أَحَدٌ','قل يا محمد: الله واحدٌ لا شريك له.'],
+     ['اللَّهُ الصَّمَدُ','الله هو الذي تحتاجه كل المخلوقات، وهو لا يحتاج إلى أحد.'],
+     ['لَمْ يَلِدْ وَلَمْ يُولَدْ','ليس له ولدٌ ولا والد، فهو ليس مثلنا.'],
+     ['وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ','ولا يشبهه أحدٌ أبدًا.']],
+    box:['remember','تذكّر','هذه السورة قصيرة وعظيمة، وهي هويّة الله التي تعرّفنا بربّنا. من قرأها بفهمٍ وانتباه نال أجرًا كبيرًا.']}
+  ],
+  memo:null,
+  quiz:[
+   {q:'كم عدد أصول الدين؟', o:['خمسة','ثلاثة','سبعة'], a:0, r:1},
+   {q:'أصول الدين في شجرة الدين هي:', o:['الجذور','الأوراق','الثمار'], a:0, r:0},
+   {q:'ما السورة التي نقرؤها في كل صلاة؟', o:['سورة الحمد','سورة الكهف','سورة يس'], a:0, r:2},
+   {q:'معنى «اللَّهُ الصَّمَدُ»:', o:['الذي تحتاجه كل المخلوقات وهو لا يحتاج إلى أحد','الذي له ولد','الذي يشبه الناس'], a:0, r:3},
+   {q:'ما الاسم الآخر لسورة التوحيد؟', o:['سورة الإخلاص','سورة الناس','سورة الفلق'], a:0, r:3}
+  ]},
+
+{ id:1, title:'التوحيد', sub:'الله واحدٌ لا شريك له', color:'var(--c1)', icon:'١',
+  lessons:[
+   {h:'التوحيد', sm:'الله واحدٌ لا شريك له', art:'universe', body:[
+     'حين تنظر إلى السماء والشمس والبحر والجبال، هل تسأل: <b>من صنع هذا الكون العجيب؟</b> هذا السؤال هو بداية الإيمان.',
+     'جوابه: <b>الله</b>، خالق كل شيء، وهو واحدٌ لا شريك له.'],
+    box:['think','فكّر معي','لو رأيتَ بيتًا جميلًا في الصحراء، هل تقول إنه نبت وحده؟ فكيف بالكون كله؟']},
+   {h:'كيف نعرف أن الله موجود؟', art:'feet', body:[
+     'أنت تمشي في الصحراء فترى آثار أقدامٍ على الرمل. هل تحتاج إلى أن ترى صاحب القدمين لتعرف أن أحدًا مرّ من هنا؟ لا! <b>الأثر يدلّ على صاحبه</b>.',
+     'وكذلك الكون كله أثرٌ يدلّ على <b>خالقه</b>. نرى النظام والجمال في كل مكان، فنعرف أن وراءه خالقًا عظيمًا حكيمًا.'],
+    box:['know','هل تعلم؟','نحن لا نرى الهواء، لكننا نعرف أنه موجود حين نرى الأوراق تتحرّك والريح تهبّ. كذلك الله: لا نراه، لكننا نرى آثار قدرته.']},
+   {h:'أدلّةٌ بسيطة', art:'clock', body:[
+     'هل تعتقد أن هذه الساعة صنعت نفسها من غير صانع؟ <b>مستحيل!</b>',
+     'والساعة أبسط بكثير من جسمك الذي فيه قلبٌ ينبض، وعيونٌ ترى، وعقلٌ يفكّر.'],
+    box:['think','فكّر معي','من الذي جعل قلبك ينبض وأنت نائم؟ ومن الذي جعل الشمس تشرق كل يوم في وقتها؟']},
+   {h:'الله واحد', art:'orbit', body:[
+     'لو كان في المدرسة خمسة مديرين، كلٌّ يأمر بشيءٍ مختلف، فماذا يحدث؟ تضطرب المدرسة! والكون <b>منظّمٌ دقيق</b>، فهذا دليلٌ على أن مدبّره واحد.',
+     'والله <b>ليس جسمًا</b> فنراه بعيوننا، ولا يشبه المخلوقات، ولا يحتاج إلى أحد. نحن نعبده وحده ونطلب العون منه وحده، ونقول دائمًا: <b>لا إله إلا الله</b>.'],
+    box:['remember','تذكّر','التوحيد يعني: الله واحدٌ في ذاته، واحدٌ في خلقه، واحدٌ في عبادته. فلا نعبد أحدًا غيره.']},
+   {h:'آياتٌ عن التوحيد', sm:'من القرآن الكريم', verses:[
+     {a:'لَيْسَ كَمِثْلِهِ شَيْءٌ ۖ وَهُوَ السَّمِيعُ الْبَصِيرُ', s:'سورة الشورى، الآية ١١', t:'ليس شيءٌ يشبه الله تعالى، وهو يسمع كل شيء ويرى كل شيء.'},
+     {a:'وَإِلَٰهُكُمْ إِلَٰهٌ وَاحِدٌ ۖ لَا إِلَٰهَ إِلَّا هُوَ الرَّحْمَٰنُ الرَّحِيمُ', s:'سورة البقرة، الآية ١٦٣', t:'إلهكم إلهٌ واحد، لا معبود بحقٍّ إلا الله الرحمن الرحيم.'},
+     {a:'لَا تُدْرِكُهُ الْأَبْصَارُ وَهُوَ يُدْرِكُ الْأَبْصَارَ', s:'سورة الأنعام، الآية ١٠٣', t:'العيون لا تراه، وهو يعلم كل ما نراه ونخفيه.'},
+     {a:'لَوْ كَانَ فِيهِمَا آلِهَةٌ إِلَّا اللَّهُ لَفَسَدَتَا', s:'سورة الأنبياء، الآية ٢٢', t:'لو كان في الكون آلهةٌ كثيرة لاضطرب النظام وفسد.'}]}
+  ],
+  memo:{a:'لَيْسَ كَمِثْلِهِ شَيْءٌ ۖ وَهُوَ السَّمِيعُ الْبَصِيرُ', s:'سورة الشورى، الآية ١١', t:'ليس شيءٌ يشبه الله تعالى، وهو يسمع كل شيء ويرى كل شيء.'},
+  quiz:[
+   {q:'كم إلهًا للكون؟', o:['إلهان','إلهٌ واحد','ثلاثة آلهة'], a:1, r:3},
+   {q:'آثار الأقدام في الرمل تدلّ على:', o:['أن الرمل مشى وحده','أن أحدًا مرّ من هنا','لا شيء'], a:1, r:1},
+   {q:'هل نرى الله بعيوننا؟', o:['نعم في النهار','نعم في الليل','لا، لأنه ليس جسمًا'], a:2, r:3},
+   {q:'كلمة التوحيد هي:', o:['لا إله إلا الله','سبحان الله فقط','الحمد لله فقط'], a:0, r:3},
+   {q:'لماذا نقول إن مدبّر الكون واحد؟', o:['لأن الكون منظّمٌ دقيق','لأننا لا نحب الكثرة','لأن الشمس واحدة فقط'], a:0, r:3}
+  ]},
+
+{ id:2, title:'العدل', sub:'الله لا يظلم أحدًا أبدًا', color:'var(--c2)', icon:'٢',
+  lessons:[
+   {h:'العدل', sm:'الله لا يظلم أحدًا أبدًا', art:'grade', body:[
+     'تخيّل معلّمًا يعطي كل طالبٍ درجته بحسب جهده، لا يظلم مجتهدًا ولا يرفع كسولًا بغير حق.',
+     '<b>الله أعدل من كل عادل</b>: يعطي كل واحدٍ ما يستحق.'],
+    box:['think','فكّر معي','كيف تشعر حين يعاملك أحدٌ بعدل؟ وكيف تشعر حين يظلمك؟']},
+   {h:'الله عادلٌ لا يظلم', art:'scale', body:[
+     'الله لا يعاقب أحدًا على ذنبٍ لم يفعله، ولا يُضيّع عمل الخير مهما كان صغيرًا. كل ما نفعله مكتوبٌ ومحسوب، ونرى جزاءه بعدلٍ كامل.',
+     'و<b>الميزان رمزُ العدل</b>: كفّتان متساويتان، لا تميل إلى جهةٍ بلا سبب.'],
+    box:['remember','تذكّر','الله ليس ظالمًا لعباده أبدًا، فهو غنيٌّ عن الظلم وعالمٌ بكل شيء، ورحمته واسعة.']},
+   {h:'أنا أختار!', art:'roads', body:[
+     'أعطانا الله <b>عقلًا</b> نفكّر به و<b>حريةً</b> نختار بها: أصدق أم أكذب؟ أساعد أم أؤذي؟ لسنا مثل الروبوتات التي تفعل ما بُرمجت عليه.',
+     'ولهذا نُحاسَب على أعمالنا: <b>لأننا نحن الذين اخترناها</b>. فمن اختار الخير وجد خيرًا، ومن اختار الشرّ فعليه نتيجته.'],
+    box:['try','جرّب','اذكر موقفًا اخترتَ فيه الصدق أو الأمانة. كم كان شعورك جميلًا!']},
+   {h:'لماذا يوجد ألمٌ أحيانًا؟', art:'medicine', body:[
+     'أحيانًا نمرض أو نحزن أو نتألّم، فنسأل: هل هذا ظلم؟ لا يا صديقي. للحياة حكمةٌ نعرف بعضها ولا نعرف بعضها.',
+     'مثل الطبيب الذي يعطيك دواءً مرًّا لتشفى. والله <b>يعوّض الصابرين</b> خيرًا كثيرًا، فكل ألمٍ نصبر عليه لا يضيع عنده.'],
+    box:['know','هل تعلم؟','الدنيا دار امتحان، والامتحان يحتاج إلى صبرٍ وثقة. والنتيجة الحقيقية تظهر يوم القيامة بعدلٍ كامل.']},
+   {h:'آياتٌ عن العدل', sm:'من القرآن الكريم', verses:[
+     {a:'وَمَا رَبُّكَ بِظَلَّامٍ لِلْعَبِيدِ', s:'سورة فصّلت، الآية ٤٦', t:'الله ليس ظالمًا لعباده أبدًا.'},
+     {a:'إِنَّ اللَّهَ لَا يَظْلِمُ مِثْقَالَ ذَرَّةٍ', s:'سورة النساء، الآية ٤٠', t:'لا ينقص الله من أجرك ولو مثقال ذرّةٍ صغيرة.'},
+     {a:'وَلَا يَظْلِمُ رَبُّكَ أَحَدًا', s:'سورة الكهف، الآية ٤٩', t:'لا يظلم ربّك أحدًا أبدًا.'},
+     {a:'إِنَّا هَدَيْنَاهُ السَّبِيلَ إِمَّا شَاكِرًا وَإِمَّا كَفُورًا', s:'سورة الإنسان، الآية ٣', t:'أعطانا الله العقل وبيّن الطريق، فنختار أن نشكر أو أن نكفر.'}]}
+  ],
+  memo:{a:'وَمَا رَبُّكَ بِظَلَّامٍ لِلْعَبِيدِ', s:'سورة فصّلت، الآية ٤٦', t:'الله ليس ظالمًا لعباده أبدًا.'},
+  quiz:[
+   {q:'هل يعاقب الله إنسانًا على ذنبٍ لم يفعله؟', o:['نعم أحيانًا','لا أبدًا','إذا أراد'], a:1, r:1},
+   {q:'لماذا نُحاسَب على أعمالنا؟', o:['لأن الله يجبرنا عليها','بالصدفة','لأننا نختارها بعقلنا وحريتنا'], a:2, r:2},
+   {q:'أيّ شيءٍ يرمز إلى العدل؟', o:['الميزان','المطرقة','الساعة'], a:0, r:1},
+   {q:'العقل والحرية نعمتان من:', o:['المدرسة وحدها','الله تعالى','الأصدقاء'], a:1, r:2},
+   {q:'ما الذي ينتظر الصابرين على الألم؟', o:['لا شيء','الضياع','التعويض والأجر عند الله'], a:2, r:3}
+  ]},
+
+{ id:3, title:'النبوّة', sub:'الله أرسل إلينا من يعلّمنا', color:'var(--c3)', icon:'٣',
+  lessons:[
+   {h:'النبوّة', sm:'الله أرسل إلينا من يعلّمنا', art:'letter', body:[
+     'الله رحيمٌ بنا، فلم يتركنا ضائعين. اختار أفضل الناس أخلاقًا وصدقًا، وأوحى إليهم رسالته ليعلّمونا طريق الخير.',
+     'هؤلاء هم <b>الأنبياء</b>.'],
+    box:['think','فكّر معي','لو ذهبتَ إلى مدينةٍ لا تعرفها، هل تحتاج إلى دليلٍ يرشدك؟']},
+   {h:'لماذا أرسل الله الأنبياء؟', art:'traffic', body:[
+     'إشارة المرور تحمي الناس من الحوادث. وكذلك الأنبياء: <b>يعلّموننا الصواب من الخطأ</b>، وكيف نعيش بسعادة ونعبد الله كما يحب.',
+     'عقولنا قويّة لكنها لا تعرف كل شيء، فاحتجنا إلى معلّمٍ من الله يخبرنا بما لا نصل إليه وحدنا.'],
+    box:['remember','تذكّر','النبيّ يتلقّى <b>الوحي</b> من الله، أي رسالةً وكلامًا يبلّغه للناس.']},
+   {h:'من هم الأنبياء؟', art:'prophets', body:[
+     'أرسل الله أنبياء كثيرين، منهم: آدم ونوح وإبراهيم وموسى وعيسى، عليهم السلام. وآخرهم نبيّنا <b>محمدٌ صلى الله عليه وآله</b> الذي أرسله الله رحمةً للعالمين.',
+     'وكلّهم دعوا إلى شيءٍ واحد: توحيد الله، وحسن الأخلاق، والعدل بين الناس.'],
+    box:['know','هل تعلم؟','لا نبيّ بعد نبينا محمد صلى الله عليه وآله، ولهذا نسمّيه <b>خاتم النبيين</b>.']},
+   {h:'صفات الأنبياء ومعجزتهم', art:'quran', body:[
+     'الأنبياء <b>صادقون أمناء</b>، لا يكذبون أبدًا، و<b>معصومون</b> أي يحفظهم الله من الخطأ في تبليغ الدين.',
+     'ومعهم <b>معجزة</b>: أمرٌ عجيب يعجز الناس عن مثله ليعرفوا أنهم صادقون. ومعجزة نبيّنا الكبرى: <b>القرآن الكريم</b>، كتابٌ باقٍ إلى يوم القيامة.'],
+    box:['try','جرّب','اقرأ آيةً من القرآن بصوتٍ جميل، وتذكّر أنه كلام الله الذي جاء به النبي.']},
+   {h:'آياتٌ عن النبوّة', sm:'من القرآن الكريم', verses:[
+     {a:'وَمَا أَرْسَلْنَاكَ إِلَّا رَحْمَةً لِلْعَالَمِينَ', s:'سورة الأنبياء، الآية ١٠٧', t:'أرسل الله النبي محمدًا رحمةً لجميع الناس.'},
+     {a:'مَا كَانَ مُحَمَّدٌ أَبَا أَحَدٍ مِنْ رِجَالِكُمْ وَلَٰكِنْ رَسُولَ اللَّهِ وَخَاتَمَ النَّبِيِّينَ', s:'سورة الأحزاب، الآية ٤٠', t:'محمدٌ رسول الله وآخر الأنبياء.'},
+     {a:'وَإِنَّكَ لَعَلَىٰ خُلُقٍ عَظِيمٍ', s:'سورة القلم، الآية ٤', t:'خُلُق النبي عظيم: صدقٌ ورحمةٌ وتواضع.'},
+     {a:'وَجَعَلْنَا مِنْهُمْ أَئِمَّةً يَهْدُونَ بِأَمْرِنَا لَمَّا صَبَرُوا ۖ وَكَانُوا بِآيَاتِنَا يُوقِنُونَ', s:'سورة السجدة، الآية ٢٤', t:'الله يجعل من الأنبياء وأوصيائهم هداةً يصبرون ويوقنون.'}]}
+  ],
+  memo:{a:'وَمَا أَرْسَلْنَاكَ إِلَّا رَحْمَةً لِلْعَالَمِينَ', s:'سورة الأنبياء، الآية ١٠٧', t:'أرسل الله النبي محمدًا رحمةً لجميع الناس.'},
+  quiz:[
+   {q:'من هو آخر الأنبياء؟', o:['عيسى عليه السلام','محمد صلى الله عليه وآله','موسى عليه السلام'], a:1, r:2},
+   {q:'ما معجزة نبيّنا الكبرى؟', o:['القرآن الكريم','العصا','الناقة'], a:0, r:3},
+   {q:'الأنبياء دائمًا:', o:['يكذبون أحيانًا','صادقون أمناء','لا يعلّمون أحدًا'], a:1, r:3},
+   {q:'لماذا أرسل الله الأنبياء؟', o:['ليعلّمونا طريق الخير','ليتسلّوا','لا سبب'], a:0, r:1},
+   {q:'الوحي هو:', o:['لعبة','كلام الله وإبلاغه للنبي','حلمٌ عادي'], a:1, r:1}
+  ]},
+
+{ id:4, title:'الإمامة', sub:'قادةٌ هداةٌ بعد النبي', color:'var(--c4)', icon:'٤',
+  lessons:[
+   {h:'الإمامة', sm:'قادةٌ هداةٌ بعد النبي', art:'lantern', body:[
+     'حين ينتقل المعلّم الكبير، هل نترك الصف بلا معلّم؟ كذلك الله لا يترك الناس بلا هادٍ بعد النبي.',
+     'جعل لنا <b>أئمةً معصومين</b>، يكملون طريق النبي ويدلّوننا على الحق.'],
+    box:['think','فكّر معي','من الذي يكمل عمل المعلّم حين يسافر؟ المعلّم البديل الذي اختاره بنفسه.']},
+   {h:'لماذا نحتاج إلى الإمام؟', art:'shield', body:[
+     'الإمام <b>يشرح لنا الدين ويحفظه من التغيير</b>، ويكون قدوةً حسنة في الأخلاق والعلم والعبادة.',
+     'والإمام <b>معصومٌ وعالم</b>: يحفظه الله من الخطأ، وعلمه واسع، ليكون مرجعًا موثوقًا للناس.'],
+    box:['remember','تذكّر','الإمامة استمرارٌ لرسالة النبوّة في هداية الناس.']},
+   {h:'يوم الغدير', art:'ghadir', body:[
+     'في طريق العودة من حجّة الوداع، توقّف النبي صلى الله عليه وآله في مكانٍ اسمه <b>غدير خُمّ</b>، وجمع المسلمين، وأعلن أن <b>الإمام علي بن أبي طالب</b> عليه السلام هو القائد بعده.',
+     'فصارت هذه المناسبة عيدًا عظيمًا عند محبّي أهل البيت عليهم السلام.'],
+    box:['know','هل تعلم؟','الإمام علي عليه السلام أول الأئمة، وهو ابن عمّ النبي وزوج السيدة فاطمة الزهراء عليها السلام.']},
+   {h:'الأئمة الاثنا عشر', art:'twelve', imams:['علي بن أبي طالب','الحسن بن علي','الحسين بن علي','علي بن الحسين (السجاد)','محمد بن علي (الباقر)','جعفر بن محمد (الصادق)','موسى بن جعفر (الكاظم)','علي بن موسى (الرضا)','محمد بن علي (الجواد)','علي بن محمد (الهادي)','الحسن بن علي (العسكري)','محمد بن الحسن (المهدي)'],
+    body:['عليهم السلام جميعًا.'],
+    box:['remember','تذكّر','الإمام الثاني عشر هو <b>الإمام المهدي</b> عجّل الله فرجه، حيٌّ غائب، يشبه الشمس خلف السحاب: ينفع الناس وإن لم يروه.']},
+   {h:'آياتٌ عن الإمامة', sm:'من القرآن الكريم', verses:[
+     {a:'إِنَّمَا أَنْتَ مُنْذِرٌ ۖ وَلِكُلِّ قَوْمٍ هَادٍ', s:'سورة الرعد، الآية ٧', t:'لكل قومٍ هادٍ يدلّهم على الحق.'},
+     {a:'وَجَعَلْنَا مِنْهُمْ أَئِمَّةً يَهْدُونَ بِأَمْرِنَا لَمَّا صَبَرُوا ۖ وَكَانُوا بِآيَاتِنَا يُوقِنُونَ', s:'سورة السجدة، الآية ٢٤', t:'جعل الله منهم أئمةً يهدون الناس بأمره لمّا صبروا وأيقنوا.'},
+     {a:'إِنَّمَا وَلِيُّكُمُ اللَّهُ وَرَسُولُهُ وَالَّذِينَ آمَنُوا الَّذِينَ يُقِيمُونَ الصَّلَاةَ وَيُؤْتُونَ الزَّكَاةَ وَهُمْ رَاكِعُونَ', s:'سورة المائدة، الآية ٥٥', t:'ولاية الله ورسوله والذين آمنوا، وفسّرها الشيعة بالإمام علي عليه السلام حين تصدّق بخاتمه وهو راكع.'},
+     {a:'إِنَّمَا يُرِيدُ اللَّهُ لِيُذْهِبَ عَنْكُمُ الرِّجْسَ أَهْلَ الْبَيْتِ وَيُطَهِّرَكُمْ تَطْهِيرًا', s:'سورة الأحزاب، الآية ٣٣', t:'أراد الله أن يُبعد الذنب عن أهل البيت ويطهّرهم تطهيرًا.'}]}
+  ],
+  memo:{a:'إِنَّمَا أَنْتَ مُنْذِرٌ ۖ وَلِكُلِّ قَوْمٍ هَادٍ', s:'سورة الرعد، الآية ٧', t:'لكل قومٍ هادٍ يدلّهم على الحق.'},
+  quiz:[
+   {q:'كم عدد الأئمة؟', o:['اثنا عشر','سبعة','عشرة'], a:0, r:3},
+   {q:'من أول الأئمة؟', o:['الإمام الحسين','الإمام علي عليه السلام','الإمام الرضا'], a:1, r:2},
+   {q:'ما اسم المكان الذي أعلن فيه النبي إمامة علي؟', o:['غدير خُمّ','بدر','أُحُد'], a:0, r:2},
+   {q:'من الإمام الثاني عشر؟', o:['الإمام الصادق','الإمام الهادي','الإمام المهدي'], a:2, r:3},
+   {q:'الإمام المعصوم:', o:['يحفظه الله من الخطأ','يخطئ دائمًا','لا يعلّم الناس'], a:0, r:1}
+  ]},
+
+{ id:5, title:'المعاد', sub:'بعد الموت حياةٌ أخرى', color:'var(--c5)', icon:'٥',
+  lessons:[
+   {h:'المعاد', sm:'بعد الموت حياةٌ أخرى', art:'seed', body:[
+     'البذرة تُدفن في التراب فتبدو وكأنها انتهت، ثم تنبت شجرةً كبيرة.',
+     'وكذلك الموت: <b>ليس نهاية</b>، بل انتقالٌ إلى حياةٍ أخرى باقية، نجد فيها نتيجة أعمالنا.'],
+    box:['think','فكّر معي','لماذا تضع البذرة في الأرض وأنت تعلم أنها ستنبت؟ لأنك تثق بالنتيجة. فثِق بوعد الله.']},
+   {h:'رحلة الحياة', art:'journey', body:[
+     'رحلتنا: <b>الدنيا</b> دار العمل والامتحان، ثم <b>الموت</b> وهو باب الانتقال، ثم <b>البرزخ</b> وهو مكان انتظار حتى يوم القيامة، ثم <b>القيامة</b> حيث الحساب، ثم الجنة أو النار.'],
+    box:['remember','تذكّر','الدنيا مزرعة الآخرة: ما نزرعه اليوم من أعمال نحصده غدًا.']},
+   {h:'يوم القيامة والحساب', art:'weigh', body:[
+     'في يوم القيامة تُوزن الأعمال بميزان العدل. لا يضيع عمل خيرٍ صغير، ولا يُظلم أحد.',
+     'ونفرح كثيرًا إن كانت أعمالنا صالحة.'],
+    box:['try','جرّب','اكتب ثلاثة أعمال خيرٍ ستفعلها غدًا، مثل مساعدة أمّك أو الصدق أو ردّ السلام.']},
+   {h:'الجنّة والنار', art:'garden', body:[
+     '<b>الجنة</b> دار السعادة والأمان لمن آمن وعمل صالحًا: حدائق وأنهار وقصور.',
+     'و<b>النار</b> دار العذاب لمن ظلم وأصرّ على الشر ولم يتب. لكن رحمة الله واسعة: من تاب وأصلح قبل الله توبته.'],
+    box:['remember','تذكّر','أبواب التوبة مفتوحة دائمًا، فلا نيأس من رحمة الله.']},
+   {h:'آياتٌ عن المعاد', sm:'من القرآن الكريم', verses:[
+     {a:'كُلُّ نَفْسٍ ذَائِقَةُ الْمَوْتِ', s:'سورة آل عمران، الآية ١٨٥', t:'كل إنسانٍ سيموت، ثم نلقى جزاء أعمالنا.'},
+     {a:'وَأَنَّ السَّاعَةَ آتِيَةٌ لَا رَيْبَ فِيهَا وَأَنَّ اللَّهَ يَبْعَثُ مَنْ فِي الْقُبُورِ', s:'سورة الحج، الآية ٧', t:'القيامة آتية بلا شك، والله يُحيي من في القبور.'},
+     {a:'قُلْ يُحْيِيهَا الَّذِي أَنْشَأَهَا أَوَّلَ مَرَّةٍ', s:'سورة يس، الآية ٧٩', t:'الذي خلقنا أول مرّة يقدر أن يعيدنا.'},
+     {a:'فَمَنْ يَعْمَلْ مِثْقَالَ ذَرَّةٍ خَيْرًا يَرَهُ ۝ وَمَنْ يَعْمَلْ مِثْقَالَ ذَرَّةٍ شَرًّا يَرَهُ', s:'سورة الزلزلة، الآيتان ٧–٨', t:'كل عملٍ صالح أو سيّئ سنراه يوم القيامة.'}]}
+  ],
+  memo:{a:'فَمَنْ يَعْمَلْ مِثْقَالَ ذَرَّةٍ خَيْرًا يَرَهُ ۝ وَمَنْ يَعْمَلْ مِثْقَالَ ذَرَّةٍ شَرًّا يَرَهُ', s:'سورة الزلزلة، الآيتان ٧–٨', t:'كل عملٍ صالح أو سيّئ سنراه يوم القيامة.'},
+  quiz:[
+   {q:'الموت هو:', o:['نهاية كل شيء','انتقالٌ إلى حياةٍ أخرى','ضياع'], a:1, r:0},
+   {q:'مكان الانتظار بعد الموت يسمّى:', o:['البرزخ','المدرسة','الجنة'], a:0, r:1},
+   {q:'الدنيا بالنسبة للآخرة مثل:', o:['اللعب','المزرعة','السوق'], a:1, r:1},
+   {q:'أعمالنا الصالحة يوم القيامة:', o:['تُنسى','لا قيمة لها','نجدها ونفرح بها'], a:2, r:2},
+   {q:'من تاب وأصلح:', o:['يقبل الله توبته','لا فرصة له','يُعاقَب مرتين'], a:0, r:3}
+  ]}
+];
+const PASS=4; // من ٥
+
+/* ---------- state ---------- */
+const KEY='usul5_progress_v1';
+let state={stars:{},name:''};
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.stars)state=s}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}};
+const unlocked=i=>i==0||state.stars[i-1]>0;
+const allDone=()=>STAGES.every(s=>state.stars[s.id]>0);
+
+/* ---------- sound ---------- */
+let actx=null;
+function beep(ok){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const notes=ok?[523,659,784]:[300,220];notes.forEach((f,i)=>{const o=actx.createOscillator(),g=actx.createGain();o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(.0001,actx.currentTime+i*.11);g.gain.exponentialRampToValueAtTime(.18,actx.currentTime+i*.11+.02);g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+i*.11+.22);o.connect(g).connect(actx.destination);o.start(actx.currentTime+i*.11);o.stop(actx.currentTime+i*.11+.25)})}catch(e){}}
+
+/* ---------- navigation ---------- */
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id==id));window.scrollTo(0,0)}
+document.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>{renderHome();show('home')});
+
+/* ---------- home ---------- */
+function renderHome(){
+  $('#heroArt').innerHTML=ART.heroHouse();
+  const done=STAGES.filter(s=>state.stars[s.id]>0).length;
+  const stars=Object.values(state.stars).reduce((a,b)=>a+b,0);
+  $('#stDone').textContent=ar(done)+' / '+ar(STAGES.length);
+  $('#stStars').textContent=ar(stars);
+  let firstOpen=STAGES.findIndex(s=>!(state.stars[s.id]>0));
+  let h='';
+  STAGES.forEach((s,i)=>{
+    const un=unlocked(i),st=state.stars[s.id]||0,cur=i==firstOpen;
+    h+=`<button class="node ${un?'':'locked'} ${cur?'current':''}" data-i="${i}">
+      ${cur?'<span class="badge">ابدأ هنا</span>':''}
+      <span class="ic" style="background:${s.color}">${un?s.icon:'🔒'}</span>
+      <span class="tx"><b>المرحلة ${ar(i+1)}: ${s.title}</b><small>${s.sub}</small></span>
+      <span class="st">${st?'⭐'.repeat(st):(un?'':'')}</span></button>`});
+  const fin=allDone();
+  h+=`<button class="node ${fin?'current':'locked'}" data-cert="1"><span class="ic" style="background:var(--gold)">${fin?'🏆':'🔒'}</span><span class="tx"><b>شهادة الإتمام</b><small>بعد إكمال كل المراحل</small></span></button>`;
+  $('#map').innerHTML=h;
+  $('#map').querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;if(!unlocked(i)){modal(`<div style="font-size:46px">🔒</div><h3 style="margin:4px 0">المرحلة مقفلة</h3><p>انجح في امتحان المرحلة السابقة أولًا لتُفتح هذه المرحلة.</p><button class="btn" data-close>حسنًا</button>`);return}openStage(i)});
+  $('#map').querySelector('[data-cert]').onclick=()=>{if(!fin){modal(`<div style="font-size:46px">🏆</div><h3 style="margin:4px 0">الشهادة تنتظرك!</h3><p>أكمل المراحل الست وانجح في امتحاناتها لتحصل على شهادة الإتمام.</p><button class="btn" data-close>حسنًا</button>`);return}openCert()};
+}
+
+/* ---------- lesson ---------- */
+let cur={s:0,p:0};
+function verseBlock(list){
+  let fn='';let body='';
+  list.forEach((v,i)=>{const n=ar(i+1);body+=`<div class="ayah">﴿ ${v.a} ﴾<sup>${n}</sup></div>${v.t?`<div class="tr">${v.t}</div>`:''}`;fn+=`<div><sup>${n}</sup> ${v.s}</div>`});
+  return body+`<div class="fn">${fn}</div>`;
+}
+function boxHTML(b){return b?`<div class="box ${b[0]}"><div class="h">${({remember:'💡 ',know:'⭐ ',think:'🤔 ',try:'✏️ '})[b[0]]}${b[1]}</div>${b[2]}</div>`:''}
+function pages(s){const st=STAGES[s];const p=st.lessons.map((l,i)=>({l,i}));if(st.memo)p.push({memo:st.memo});p.push({exam:true});return p}
+function openStage(i){cur={s:i,p:0};renderPage();show('lesson')}
+function renderPage(){
+  const st=STAGES[cur.s],P=pages(cur.s),pg=P[cur.p];
+  document.documentElement.style.setProperty('--sc',st.color);
+  $('#lsTitle').textContent=`المرحلة ${ar(cur.s+1)}: ${st.title}`;
+  $('#lsProg').style.width=((cur.p+1)/P.length*100)+'%';
+  let h='';
+  if(pg.l){const l=pg.l;
+    h=`<div class="card"><span class="num">${ar(pg.i+1)} / ${ar(st.lessons.length)}</span><h2>${l.h}${l.sm?`<small>${l.sm}</small>`:''}</h2>`;
+    if(l.art)h+=`<div class="art">${ART[l.art]()}</div>`;
+    if(l.surah){h+=`<ul class="vlist">${l.surah.map((v,k)=>`<li><div><div class="q">${v[0]} ﴿${ar(k+1)}﴾</div><div class="s">${v[1]}</div></div></li>`).join('')}</ul>`}
+    if(l.imams){h+=`<ul class="imams">${l.imams.map((n,k)=>`<li><b>${ar(k+1)}</b> ${n}</li>`).join('')}</ul>`}
+    if(l.body)h+=l.body.map(t=>`<p>${t}</p>`).join('');
+    if(l.verses)h+=verseBlock(l.verses);
+    h+=boxHTML(l.box)+boxHTML(l.box2)+`</div>`;
+  } else if(pg.memo){
+    h=`<div class="card memo"><h2 style="text-align:center">⭐ آيةٌ أحفظها ⭐</h2><p style="text-align:center;color:var(--muted)">اقرأها ثلاث مرات بصوتٍ جميل حتى تحفظها</p>${verseBlock([pg.memo])}</div>`;
+  } else {
+    h=`<div class="card" style="text-align:center"><div style="font-size:60px;margin-top:10px">📝</div><h2>امتحان المرحلة</h2><p>أحسنت! أكملتَ دروس <b>${st.title}</b>.</p><p>الامتحان فيه <b>${ar(st.quiz.length)} أسئلة</b>. إذا أجبتَ عن <b>${ar(PASS)}</b> منها أو أكثر بشكلٍ صحيح تنجح وتُفتح لك المرحلة التالية.</p><div class="box remember" style="text-align:right"><div class="h">💡 تذكّر</div>إن أخطأتَ فلا تحزن! ارجع إلى الدرس واقرأه مرةً أخرى، وستجد الجواب بسهولة.</div></div>`;
+  }
+  $('#lsCard').innerHTML=h;
+  $('#prevBtn').disabled=cur.p==0;
+  const last=cur.p==P.length-1;
+  $('#nextBtn').textContent=last?'ابدأ الامتحان ✍️':'التالي';
+  $('#nextBtn').className='btn'+(last?' gold':'');
+  window.scrollTo(0,0);
+}
+$('#prevBtn').onclick=()=>{if(cur.p>0){cur.p--;renderPage()}};
+$('#nextBtn').onclick=()=>{const P=pages(cur.s);if(cur.p<P.length-1){cur.p++;renderPage()}else startQuiz()};
+// swipe
+(()=>{let x0=null;const el=$('#lsCard');el.addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true});el.addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)<70)return;if(dx>0)$('#nextBtn').click();else $('#prevBtn').click()},{passive:true})})();
+
+/* ---------- quiz ---------- */
+let qz=null;
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function startQuiz(){
+  const st=STAGES[cur.s];
+  qz={qs:shuffle(st.quiz).map(q=>{const opts=shuffle(q.o.map((t,k)=>({t,ok:k==q.a})));return {...q,opts}}),i:0,score:0,wrong:[],sel:null,checked:false};
+  $('#qzTitle').textContent=`امتحان: ${st.title}`;renderQ();show('quiz');
+}
+function renderQ(){
+  const q=qz.qs[qz.i];qz.sel=null;qz.checked=false;
+  $('#qzProg').style.width=(qz.i/qz.qs.length*100)+'%';
+  $('#qzBody').innerHTML=`<div class="qcard"><div class="qn">السؤال ${ar(qz.i+1)} من ${ar(qz.qs.length)}</div><div class="qq">${q.q}</div>${q.opts.map((o,k)=>`<button class="opt" data-k="${k}"><span class="l">${LET[k]}</span><span>${o.t}</span></button>`).join('')}<div class="fb" id="fb"></div></div>`;
+  $('#checkBtn').disabled=true;$('#checkBtn').textContent='تأكيد الإجابة';$('#checkBtn').className='btn';
+  $('#qzBody').querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(qz.checked)return;qz.sel=+b.dataset.k;$('#qzBody').querySelectorAll('.opt').forEach(x=>x.classList.toggle('sel',x==b));$('#checkBtn').disabled=false});
+}
+$('#checkBtn').onclick=()=>{
+  if(!qz.checked){
+    if(qz.sel==null)return;
+    const q=qz.qs[qz.i],ok=q.opts[qz.sel].ok,btns=$('#qzBody').querySelectorAll('.opt');
+    qz.checked=true;
+    if(ok){qz.score++;btns[qz.sel].classList.add('ok');$('#fb').className='fb ok';$('#fb').textContent=['أحسنت! إجابة صحيحة 🌟','ممتاز! بارك الله فيك 👏','رائع! هذا هو الجواب ✅'][Math.floor(Math.random()*3)]}
+    else{btns[qz.sel].classList.add('bad');qz.wrong.push(q);$('#fb').className='fb bad';$('#fb').textContent='ليست هذه الإجابة، لا تحزن 💪'}
+    beep(ok);
+    $('#checkBtn').textContent=qz.i<qz.qs.length-1?'السؤال التالي':'عرض النتيجة';
+  } else {
+    if(qz.i<qz.qs.length-1){qz.i++;renderQ()}else finishQuiz();
+  }
+};
+$('#quizBack').onclick=()=>modal(`<h3 style="margin:4px 0">تريد الخروج من الامتحان؟</h3><p>ستضيع إجاباتك في هذه المحاولة.</p><div class="nav"><button class="btn sec" data-close>أكمل الامتحان</button><button class="btn" id="mExit">خروج</button></div>`,()=>{$('#mExit').onclick=()=>{closeModal();renderPage();show('lesson')}});
+
+function finishQuiz(){
+  const st=STAGES[cur.s],n=qz.qs.length,sc=qz.score,pass=sc>=PASS;
+  const stars=sc==n?3:sc>=PASS?2:0;
+  let h=`<div class="result">`;
+  if(pass){
+    const prev=state.stars[st.id]||0;state.stars[st.id]=Math.max(prev,stars);save();
+    const next=STAGES[cur.s+1];
+    h+=`<div class="big">🎉</div><h2 style="color:var(--ok)">نجحت يا بطل!</h2><div class="score">أجبتَ عن ${ar(sc)} من ${ar(n)} بشكلٍ صحيح</div><div class="stars">${'⭐'.repeat(stars)}</div>`;
+    h+=next?`<p>فُتحت لك <b>المرحلة ${ar(cur.s+2)}: ${next.title}</b> 🔓</p>`:`<p>أكملتَ كل المراحل! شهادتك جاهزة 🏆</p>`;
+    if(sc<n)h+=`<p class="tip">أجب عن الأسئلة كلّها صحيحة لتحصل على ٣ نجوم ⭐⭐⭐ — يمكنك إعادة الامتحان في أي وقت.</p>`;
+    h+=`<div class="nav">${next?`<button class="btn gold" id="goNext">المرحلة التالية ←</button>`:`<button class="btn gold" id="goCert">شهادتي 🏆</button>`}</div><div class="nav"><button class="btn sec" id="goHome">خريطة المراحل</button></div>`;
+    setTimeout(confetti,150);
+  } else {
+    const refs=[...new Set(qz.wrong.map(q=>q.r))].sort();
+    h+=`<div class="big">🌱</div><h2 style="color:var(--bad)">محاولة جيدة!</h2><div class="score">أجبتَ عن ${ar(sc)} من ${ar(n)} — تحتاج ${ar(PASS)} على الأقل</div>
+    <div class="review"><b>ارجع واقرأ هذه الدروس مرةً أخرى:</b>${refs.map(r=>`<div>📖 الدرس ${ar(r+1)}: ${st.lessons[r].h}</div>`).join('')}</div>
+    <div class="nav"><button class="btn" id="goReview">أراجع الدروس</button></div><div class="nav"><button class="btn sec" id="goRetry">أعيد الامتحان</button></div>`;
+  }
+  h+=`</div>`;
+  $('#rsBody').innerHTML=h;show('result');
+  const b=(id,f)=>{const e=document.getElementById(id);if(e)e.onclick=f};
+  b('goNext',()=>openStage(cur.s+1));b('goHome',()=>{renderHome();show('home')});b('goCert',openCert);
+  b('goReview',()=>{const r=Math.min(...qz.wrong.map(q=>q.r));cur.p=r;renderPage();show('lesson')});
+  b('goRetry',startQuiz);
+}
+
+/* ---------- certificate ---------- */
+function openCert(){
+  document.documentElement.style.setProperty('--sc','var(--gold)');
+  const stars=Object.values(state.stars).reduce((a,b)=>a+b,0);
+  if(!state.name){
+    $('#certBody').innerHTML=`<div class="cert"><div class="art" style="background:none">${ART.cert()}</div><h2>مبارك!</h2><p>اكتب اسمك لنكتبه على شهادتك:</p><input class="inp" id="nm" maxlength="30" placeholder="اسمك هنا"><div class="nav"><button class="btn gold" id="saveNm">اكتب شهادتي</button></div></div>`;
+    $('#saveNm').onclick=()=>{const v=$('#nm').value.trim();if(!v){$('#nm').focus();return}state.name=v;save();openCert()};
+  } else {
+    $('#certBody').innerHTML=`<div class="cert"><div class="art" style="background:none;margin:0">${ART.cert()}</div><h2>شهادةُ إتمام</h2><p style="margin:0">بارك الله فيك يا بطلنا</p><p style="margin:4px 0 0">أكمل الطالب المجتهد</p><div class="nm">${state.name.replace(/[<>&]/g,'')}</div><p>رحلة <b>أصول ديني الخمسة</b><br>فهو يعرف: التوحيد والعدل والنبوّة والإمامة والمعاد</p><div class="stars" style="font-size:26px">⭐ ${ar(stars)} نجمة من ${ar(STAGES.length*3)}</div>
+    <div class="dua">اللّهمّ عرّفني نفسك، فإنّك إن لم تعرّفني نفسك لم أعرف نبيّك. اللّهمّ عرّفني نبيّك، فإنّك إن لم تعرّفني نبيّك لم أعرف حجّتك. اللّهمّ عرّفني حجّتك، فإنّك إن لم تعرّفني حجّتك ضللتُ عن ديني.</div>
+    <p style="font-size:13px;color:var(--muted);margin-top:12px">تأليف الشيخ علاء المطوري</p></div>
+    <p class="tip">📸 صوّر الشاشة واحتفظ بشهادتك!</p><div class="nav"><button class="btn sec" id="chName">تغيير الاسم</button><button class="btn" data-home2>الخريطة</button></div>`;
+    $('#chName').onclick=()=>{state.name='';save();openCert()};
+    document.querySelector('[data-home2]').onclick=()=>{renderHome();show('home')};
+    setTimeout(confetti,200);
+  }
+  show('certificate');
+}
+
+/* ---------- modal ---------- */
+function modal(html,after){$('#modalIn').innerHTML=html;$('#modal').classList.add('on');$('#modalIn').querySelectorAll('[data-close]').forEach(b=>b.onclick=closeModal);after&&after()}
+function closeModal(){$('#modal').classList.remove('on')}
+$('#modal').onclick=e=>{if(e.target.id=='modal')closeModal()};
+$('#howBtn').onclick=()=>modal(`<div style="font-size:42px">🗺️</div><h3 style="margin:4px 0">كيف ألعب؟</h3><p style="text-align:right">١. ادخل المرحلة واقرأ الدروس واحدًا واحدًا (اسحب أو اضغط «التالي»).<br>٢. احفظ «الآية التي أحفظها».<br>٣. ادخل الامتحان: ${ar(5)} أسئلة، والنجاح بـ ${ar(PASS)} إجابات صحيحة.<br>٤. إذا نجحت تُفتح المرحلة التالية، وتحصل على نجوم ⭐.<br>٥. أكمل المراحل الست واحصل على شهادة الإتمام 🏆</p><button class="btn" data-close>هيّا نبدأ!</button>`);
+$('#resetBtn').onclick=()=>modal(`<h3 style="margin:4px 0">البدء من جديد؟</h3><p>ستُمسح كل النجوم وتُقفل المراحل مرةً أخرى.</p><div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn" id="mReset" style="background:var(--bad);box-shadow:0 5px 0 #a8332e">نعم، امسح</button></div>`,()=>{$('#mReset').onclick=()=>{state={stars:{},name:''};save();closeModal();renderHome()}});
+
+/* ---------- confetti ---------- */
+function confetti(){
+  const c=$('#confetti'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
+  const cols=['#f2b632','#3fbf6f','#2f6fd0','#e57c1f','#7c4dc4','#13958c','#e2504a'];
+  const P=[...Array(120)].map(()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height*.5,vx:(Math.random()-.5)*3,vy:2+Math.random()*3,s:5+Math.random()*6,r:Math.random()*6,c:cols[Math.floor(Math.random()*cols.length)]}));
+  let t=0;(function f(){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.r+=.1;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);x.restore()});if(++t<200)requestAnimationFrame(f);else x.clearRect(0,0,c.width,c.height)})();
+}
+
+/* ---------- picture book reader (merged) ---------- */
+const BOOK_N=38;
+const STAGE_PAGE=[2,7,13,19,25,31];
+const QUIZ_PAGE={12:1,18:2,24:3,30:4,36:5};
+const BTOC=[[1,'الغلاف',0],[2,'إلى صديقي الصغير',0],[3,'بيت ديني',0],[4,'سورة الحمد',0],[6,'سورة التوحيد',0],
+ [7,'الأصل الأول: التوحيد',1,'--c1'],[8,'كيف نعرف أن الله موجود؟',2],[9,'أدلّة بسيطة',2],[10,'الله واحد',2],[11,'آيات عن التوحيد',2],[12,'اختبر نفسك: التوحيد',2],
+ [13,'الأصل الثاني: العدل',1,'--c2'],[14,'الله عادلٌ لا يظلم',2],[15,'أنا أختار',2],[16,'لماذا نمرض أحيانًا؟',2],[17,'آيات عن العدل',2],[18,'اختبر نفسك: العدل',2],
+ [19,'الأصل الثالث: النبوّة',1,'--c3'],[20,'لماذا أرسل الله الأنبياء؟',2],[21,'من هم الأنبياء؟',2],[22,'صفات الأنبياء ومعجزاتهم',2],[23,'آيات عن النبوّة',2],[24,'اختبر نفسك: النبوّة',2],
+ [25,'الأصل الرابع: الإمامة',1,'--c4'],[26,'لماذا نحتاج إلى الإمام؟',2],[27,'يوم الغدير',2],[28,'الأئمة الاثنا عشر',2],[29,'آيات عن الإمامة',2],[30,'اختبر نفسك: الإمامة',2],
+ [31,'الأصل الخامس: المعاد',1,'--c5'],[32,'رحلة الحياة',2],[33,'يوم القيامة والحساب',2],[34,'الجنة والنار',2],[35,'آيات عن المعاد',2],[36,'اختبر نفسك: المعاد',2],
+ [37,'صفحة الإجابات',0],[38,'شهادة إتمام',0]];
+const bSec=p=>{let t=BTOC[0];for(const e of BTOC)if(e[0]<=p)t=e;return t};
+const rbook=$('#rbook'),rPages=[];
+for(let i=1;i<=BOOK_N;i++){
+  const d=document.createElement('section');d.className='rpage';d.dataset.p=i;
+  const im=document.createElement('img');im.src='p/'+String(i).padStart(2,'0')+'.webp';im.alt='صفحة '+ar(i);im.loading=i<=2?'eager':'lazy';im.decoding='async';
+  im.addEventListener('dblclick',openZoom);d.appendChild(im);
+  if(QUIZ_PAGE[i]!=null){const si=QUIZ_PAGE[i],b=document.createElement('button');b.className='rcta';b.style.background=STAGES[si].color;
+    b.textContent='✍️ ادخل امتحان '+STAGES[si].title;b.onclick=()=>{closeReader();cur={s:si,p:pages(si).length-1};renderPage();startQuiz()};d.appendChild(b)}
+  rbook.appendChild(d);rPages.push(d);
+}
+const rtocLs=$('#rtocLs');
+BTOC.forEach(([p,t,l,c])=>{const b=document.createElement('button');b.className=l==2?'s':'m';b.dataset.p=p;
+  if(l!=2){const d=document.createElement('span');d.className='d';d.style.background=c?'var('+c+')':'var(--line)';b.appendChild(d)}
+  b.appendChild(document.createTextNode(t));const n=document.createElement('span');n.className='n';n.textContent=ar(p);b.appendChild(n);
+  b.onclick=()=>{$('#rtoc').classList.remove('on');rGo(p,false)};rtocLs.appendChild(b)});
+let rCur=1;
+function rUpdate(p){rCur=p;$('#rCount').textContent=ar(p)+' / '+ar(BOOK_N);$('#rSec').textContent=bSec(p)[1];$('#rSlider').value=p;
+  $('#rPrev').disabled=p==1;$('#rNext').disabled=p==BOOK_N;
+  rtocLs.querySelectorAll('button').forEach(b=>b.classList.toggle('on',+b.dataset.p==bSec(p)[0]));
+  try{localStorage.setItem('usul5_book_page',p)}catch(e){}}
+function rGo(p,smooth=true){p=Math.max(1,Math.min(BOOK_N,p));
+  const red=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  rPages[p-1].scrollIntoView({inline:'center',block:'nearest',behavior:smooth&&!red?'smooth':'auto'});rUpdate(p)}
+const rio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting&&e.intersectionRatio>.6)rUpdate(+e.target.dataset.p)}),{root:rbook,threshold:[.6]});
+rPages.forEach(x=>rio.observe(x));
+function openReader(p){$('#reader').classList.add('on');document.body.style.overflow='hidden';
+  if(p==null){p=1;try{p=parseInt(localStorage.getItem('usul5_book_page'),10)||1}catch(e){}}
+  requestAnimationFrame(()=>rGo(p,false))}
+function closeReader(){$('#reader').classList.remove('on');$('#rtoc').classList.remove('on');document.body.style.overflow=''}
+function openZoom(){const z=$('#zoomv');z.classList.remove('fit');$('#zimg').src=rPages[rCur-1].querySelector('img').src;z.classList.add('on');$('#zx').classList.add('on');
+  z.scrollTop=0;z.scrollLeft=(z.scrollWidth-z.clientWidth)/2}
+function closeZoom(){$('#zoomv').classList.remove('on');$('#zx').classList.remove('on')}
+$('#zimg').addEventListener('dblclick',()=>$('#zoomv').classList.toggle('fit'));
+$('#openBook').onclick=()=>openReader();
+$('#lsBook').onclick=()=>openReader(STAGE_PAGE[cur.s]);
+$('#rClose').onclick=closeReader;$('#rZoom').onclick=openZoom;$('#zx').onclick=closeZoom;
+$('#rTocBtn').onclick=()=>{$('#rtoc').classList.add('on');const o=rtocLs.querySelector('.on');o&&o.scrollIntoView({block:'center'})};
+$('#rtocX').onclick=$('#rtocSc').onclick=()=>$('#rtoc').classList.remove('on');
+$('#rPrev').onclick=()=>rGo(rCur-1);$('#rNext').onclick=()=>rGo(rCur+1);
+$('#rSlider').oninput=()=>rGo(+$('#rSlider').value,false);
+document.addEventListener('keydown',e=>{if($('#zoomv').classList.contains('on')){if(e.key=='Escape')closeZoom();return}
+  if(!$('#reader').classList.contains('on'))return;
+  if(e.key=='ArrowLeft')rGo(rCur+1);else if(e.key=='ArrowRight')rGo(rCur-1);else if(e.key=='Escape')closeReader()});
+
+renderHome();
+if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+</script>
+</body>
+</html>
