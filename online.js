@@ -29,26 +29,32 @@
   function loadScript(src) {
     return new Promise((ok, bad) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = bad; document.head.appendChild(s); });
   }
+  const withTimeout = (p, ms, step) => Promise.race([p, new Promise((_, bad) => setTimeout(() => bad(new Error('timeout:' + step)), ms))]);
+  let lastErr = '';
   function init() {
     if (ready) return ready;
     ready = (async () => {
       if (!navigator.onLine) throw new Error('offline');
-      if (!window.firebase) {
-        await loadScript('vendor/firebase-app-compat.js');
-        await loadScript('vendor/firebase-auth-compat.js');
-        await loadScript('vendor/firebase-database-compat.js');
+      if (!window.firebase || !firebase.database) {
+        await withTimeout(loadScript('vendor/firebase-app-compat.js'), 20000, 'scripts');
+        await withTimeout(loadScript('vendor/firebase-auth-compat.js'), 20000, 'scripts');
+        await withTimeout(loadScript('vendor/firebase-database-compat.js'), 20000, 'scripts');
       }
       fb = firebase.apps.length ? firebase.app() : firebase.initializeApp(FB_CONFIG);
-      const cred = fb.auth().currentUser || (await new Promise(r => { const u = fb.auth().onAuthStateChanged(x => { u(); r(x); }); }));
-      me = cred ? cred.uid : (await fb.auth().signInAnonymously()).user.uid;
+      const cred = await withTimeout((async () => {
+        const u0 = fb.auth().currentUser || (await new Promise(r => { const u = fb.auth().onAuthStateChanged(x => { u(); r(x); }); }));
+        return u0 || (await fb.auth().signInAnonymously()).user;
+      })(), 20000, 'auth');
+      me = cred.uid;
       db = fb.database();
+      db.goOnline();
       db.ref('.info/serverTimeOffset').on('value', s => { off = s.val() || 0; });
-      const p = await db.ref('profiles/' + me).get();
+      const p = await withTimeout(db.ref('profiles/' + me).once('value'), 20000, 'db');
       profile = p.val();
       if (profile) startPresence();
       return true;
     })();
-    ready.catch(() => { ready = null; });
+    ready.catch(e => { lastErr = (e && (e.code || e.message)) || String(e); ready = null; try { if (db) db.goOffline(); } catch (x) {} });
     return ready;
   }
   function startPresence() {
@@ -67,7 +73,7 @@
     document.documentElement.style.setProperty('--sc', '#2f6fd0');
     body().innerHTML = `<div class="handoff"><div class="big spin">🌐</div><p>جارٍ الاتصال…</p></div>`;
     try { await init(); } catch (e) {
-      body().innerHTML = `<div class="handoff"><div class="big">📡</div><h2>لا يوجد اتصال</h2><p>اللعب أونلاين يحتاج إلى الإنترنت. تأكّد من الاتصال ثم حاول مرة أخرى.</p><button class="btn gold" id="onRetry" style="flex:none;min-width:200px">حاول مرة أخرى</button></div>`;
+      body().innerHTML = `<div class="handoff"><div class="big">📡</div><h2>لا يوجد اتصال</h2><p>تعذّر الاتصال بخادم اللعب. تأكّد من الإنترنت ثم حاول مرة أخرى.</p><button class="btn gold" id="onRetry" style="flex:none;min-width:200px">حاول مرة أخرى</button><p class="tip" dir="ltr" style="opacity:.7">${esc(lastErr)}</p></div>`;
       $('#onRetry').onclick = openOnline; return;
     }
     if (!profile) return setupProfile();
