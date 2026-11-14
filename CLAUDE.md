@@ -1,0 +1,21 @@
+# أصول ديني الخمسة — تطبيق الأطفال
+
+Children's app for the book «أصول ديني الخمسة» by الشيخ علاء المطوري (Iraq). Talk to the owner in Iraqi Arabic, simply and step by step (he is not a programmer; give exact taps/clicks, ask for screenshots when stuck). Never guess Quranic text: verses must stay exactly as in the book.
+
+## Where it lives
+- Live app (PWA, the link families use): https://alaa1981q-droid.github.io/usool-deeni/ — GitHub Pages from `main`, root.
+- Android APK: built by `.github/workflows/android.yml` on every push, published to Release `latest` → `releases/download/latest/usool-deeni.apk`. Families prefer the link (APK triggers Play Protect warnings).
+- A copy is also published as a claude.ai artifact: https://claude.ai/artifact/X5qPTuubxS7Ra7EKSgoshM (no online play there; publish `index.html` + `questions.js`).
+- The owner's library artifact (2WtgvcP2YdbxcaAaKZ3oxw) and green site (GkFzJJze2b2T3GckuzUFHW) link to the live app.
+
+## Files
+- `index.html` — whole app: lessons (`STAGES`), stage exams, titles/grades/celebration, solo/duo contest, picture-book reader (`p/01..38.webp` = book pages). Bump `APP_VER` on every change and tell the owner the new number (shown at the bottom of the home screen).
+- `questions.js` — `QBANK` question bank (types: mcq, tf, verse, order, match), written from the book only and approved by the owner. Exams/contest pick fresh-first via `pickFresh`.
+- `online.js` — online play on Firebase Realtime Database (project `usool-deeni`, europe-west1, anonymous auth): friend codes, live 1v1 rooms, quick 4-digit rooms, weekly leaderboard. No chat, no real names (nicknames built from fixed word lists).
+- `database.rules.json` — security rules; if changed, the owner must paste them in Firebase console → Realtime Database → Rules → Publish.
+- `sw.js` — offline cache; must never intercept Firebase/other-origin requests. Bump `CACHE` when caching logic changes.
+- `vendor/` — Firebase compat SDK 10.14.1. `android/` — WebView wrapper.
+
+## Working rules
+- Commit and push to `main` directly; Pages and the APK rebuild automatically.
+- Test in Playwright before pushing (a Firebase mock is needed; this sandbox cannot reach Firebase).
