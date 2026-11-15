@@ -736,6 +736,7 @@ const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(M
 const ALLQ=[];
 STAGES.forEach((s,i)=>{s.quiz.forEach(q=>ALLQ.push({st:i,r:q.r,t:'mcq',q:q.q,o:q.o,a:q.a}));
   (typeof QBANK!=='undefined'?QBANK:[]).filter(q=>q.st===i).forEach(q=>ALLQ.push(q))});
+(typeof QEXTRA!=='undefined'?QEXTRA:[]).forEach(q=>ALLQ.push({...q,st:0,r:0,g:1})); // general questions: contest only
 ALLQ.forEach(q=>{q.id=q.st+':'+(q.q||q.v)});
 function toPlay(q){
   if(q.t==='tf')return {...q,o:['صح ✓','خطأ ✗'],a:q.a?0:1,fixed:true};
@@ -758,7 +759,7 @@ const PAIRC=['#2f6fd0','#e57c1f','#7c4dc4','#13958c'];
 
 function startQuiz(){
   const st=STAGES[cur.s];
-  qz={qs:pickFresh(ALLQ.filter(q=>q.st===cur.s),5).map(prepQ),i:0,score:0,wrong:[],sel:null,checked:false};
+  qz={qs:pickFresh(ALLQ.filter(q=>q.st===cur.s&&!q.g),5).map(prepQ),i:0,score:0,wrong:[],sel:null,checked:false};
   $('#qzTitle').textContent=`امتحان: ${st.title}`;renderQ();show('quiz');
 }
 function renderQ(){
@@ -987,6 +988,7 @@ function ctEnd(){
       <div class="nav"><button class="btn gold" id="again">العب مرة أخرى</button></div><div class="nav"><button class="btn sec" id="ctHome">الرئيسية</button></div></div>`;
     $('#ctBody').innerHTML=h;
     if(rec||p.score>=150){fanfare();confetti()}
+    if(window.cupsAward){const f=p.right/ct.qs.length,n=f>=1?3:f>=.8?2:f>=.6?1:0;const box=document.createElement('div');$('#ctBody .result h2').after(box);cupsAward(n,'contest',box)}
   } else {const [a,b]=P,tie=a.score==b.score,w=a.score>b.score?a:b;
     h=`<div class="result"><div class="big">${tie?'🤝':'🏆'}</div><h2>${tie?'تعادل! كلاكما بطل':'الفائز: <span style="color:'+w.c+'">'+w.name+'</span>'}</h2>
       <div class="board">${P.map(p=>`<div class="${!tie&&p===w?'win':''}"><span style="color:${p.c};font-weight:800">${p.name}</span><b>${ar(p.score)}</b><small>${ar(p.right)} صحيحة</small></div>`).join('')}</div>
@@ -1078,12 +1080,13 @@ document.addEventListener('keydown',e=>{if($('#zoomv').classList.contains('on'))
   if(!$('#reader').classList.contains('on'))return;
   if(e.key=='ArrowLeft')rGo(rCur+1);else if(e.key=='ArrowRight')rGo(rCur-1);else if(e.key=='Escape')closeReader()});
 
-const APP_VER='1.8';
+const APP_VER='2.0';
 $('#verLine').textContent=`الإصدار ${ar(APP_VER).replace('.','٫')} · ${ar(ALLQ.length)} سؤالًا`;
 renderHome();
 if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
 <script src="online.js"></script>
 <script src="bayt.js"></script>
+<script src="nafsak.js"></script>
 </body>
 </html>
