@@ -1,6 +1,10 @@
 package io.github.alaa1981qdroid.usooldeeni;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.pm.PackageManager;
+import android.webkit.PermissionRequest;
+import android.webkit.WebChromeClient;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
@@ -17,7 +21,9 @@ import androidx.webkit.WebViewAssetLoader;
 /** Shows the bundled book app from the APK's assets, fully offline. */
 public class MainActivity extends Activity {
     private static final String START = "https://appassets.androidplatform.net/assets/www/index.html";
+    private static final int MIC_REQ = 7;
     private WebView web;
+    private PermissionRequest pendingMic;
 
     @Override
     protected void onCreate(Bundle state) {
@@ -48,8 +54,34 @@ public class MainActivity extends Activity {
                 return true;
             }
         });
+        // المايك: للقراءة بالصوت والصلاة على النبي. نطلب إذن الصوت فقط، ونرفض أي شيء آخر (الكاميرا مثلًا).
+        web.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onPermissionRequest(final PermissionRequest req) {
+                runOnUiThread(() -> {
+                    boolean audio = false;
+                    for (String r : req.getResources()) if (PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(r)) audio = true;
+                    if (!audio) { req.deny(); return; }
+                    if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                        pendingMic = req;
+                        requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, MIC_REQ);
+                    } else {
+                        req.grant(new String[]{PermissionRequest.RESOURCE_AUDIO_CAPTURE});
+                    }
+                });
+            }
+        });
         setContentView(web);
         if (state != null) web.restoreState(state); else web.loadUrl(START);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int code, String[] perms, int[] res) {
+        super.onRequestPermissionsResult(code, perms, res);
+        if (code != MIC_REQ || pendingMic == null) return;
+        if (res.length > 0 && res[0] == PackageManager.PERMISSION_GRANTED) pendingMic.grant(new String[]{PermissionRequest.RESOURCE_AUDIO_CAPTURE});
+        else pendingMic.deny();
+        pendingMic = null;
     }
 
     @Override
