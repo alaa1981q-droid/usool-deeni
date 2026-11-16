@@ -113,6 +113,7 @@ function surah(i){inSurah=true;stop();hide=false;const s=SUR[i],B=$('#hzBody');
       const n=Object.keys(hs.done).length;
       modal(`<div style="font-size:56px">🏅</div><h3 style="margin:4px 0">ما شاء الله! ${boy()?'حفظتَ':'حفظتِ'} سورة ${s.name}</h3><p>${n==SUR.length?(boy()?'حفظتَ كل السور! أنت حافظٌ صغير حقًّا 🌟':'حفظتِ كل السور! أنتِ حافظةٌ صغيرة حقًّا 🌟'):`هذه السورة رقم ${ar(n)} ${boy()?'تحفظها':'تحفظينها'}. ${boy()?'اقرأها':'اقرئيها'} في صلاتك 🤍`}</p><div id="hzCups"></div><div class="nav"><button class="btn gold" data-close>رائع!</button></div>`);
       if(window.cupsAward)cupsAward(2,'hifz',$('#hzCups'));
+      if(window.Deco){Deco.addJ(30);$('#hzCups').insertAdjacentHTML('beforeend',`<div class="cupbox win" style="border-color:#9fd3f0;background:linear-gradient(160deg,#eaf6ff,#fff);color:#1d4e9e"><b>💎 +٣٠ 🌴</b>هدية الحافظ: جواهر لتزيين بيتك، ونخلة في حديقتك! 🏡</div>`)}
       surah(i)}};
   const nx=$('#hzNext');if(nx)nx.onclick=()=>surah(i+1);
   const mc=$('#hzMic');if(mc)mc.onclick=()=>{stop();recite(i)};
@@ -144,7 +145,8 @@ function reciteEnd(i,res,hideOn){const s=SUR[i],good=res.filter(x=>x>=.8).length
     <p>${all?(hideOn?'قرأتها من حفظك! 🤍':'جرّب الآن من حفظك والآيات مخفيّة 🙈'):'كل يوم تقرأ أكثر تحفظ أكثر. أعد الآيات الصفراء 💪'}</p><div id="hzRcCups"></div>
     <div class="nav"><button class="btn gold" id="hzAgain">🎤 مرة أخرى</button></div><div class="nav"><button class="btn sec" id="hzBackS">رجوع إلى السورة</button></div></div>`;
   if(all){if(typeof fanfare=='function')fanfare();if(typeof confetti=='function')confetti();
-    if(hideOn&&!hs.done[s.n]){hs.done[s.n]=1;hsave();line();$('#hzRcCups').insertAdjacentHTML('beforeend',`<div class="cupbox win"><b>⭐</b>سُجّلت سورة ${s.name} في محفوظاتك!</div>`)}
+    if(hideOn&&!hs.done[s.n]){hs.done[s.n]=1;hsave();line();$('#hzRcCups').insertAdjacentHTML('beforeend',`<div class="cupbox win"><b>⭐</b>سُجّلت سورة ${s.name} في محفوظاتك!</div>`);
+      if(window.Deco){Deco.addJ(30);$('#hzRcCups').insertAdjacentHTML('beforeend',`<div class="cupbox win" style="border-color:#9fd3f0;background:linear-gradient(160deg,#eaf6ff,#fff);color:#1d4e9e"><b>💎 +٣٠ 🌴</b>هدية الحافظ: جواهر لتزيين بيتك، ونخلة في حديقتك! 🏡</div>`)}}
     if(window.cupsAward)cupsAward(1,'tilawa',$('#hzRcCups'))}
   $('#hzAgain').onclick=()=>recite(i);$('#hzBackS').onclick=()=>surah(i);
   window.Alqab&&Alqab.soon()}

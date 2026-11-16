@@ -35,7 +35,7 @@ const MEDALS=[
  {id:'garden',e:'🌱',n:'حديقة الأعمال',      k:'deeds', at:[10,50,150,400],u:'عمل صالح زيّن بيتك',   go:'bayt'}];
 // مستوى كل نوع من الأعمال في الملف
 const DLV=[1,5,15,40,100];
-const DGO={sal:'sal',tas:'tas',pray:'pray',ayah:'hifz',fiqh:'salah',hifz:'hifz',akhlaq:'nafsak',wird:'wird',dars:'map',win:'online'};
+const DGO={ctst:'contest',sal:'sal',tas:'tas',pray:'pray',ayah:'hifz',fiqh:'salah',hifz:'hifz',akhlaq:'nafsak',wird:'wird',dars:'map',win:'online'};
 function deedsHTML(){const gc=A().gc||{},G=Aamal.GROW;
   return Object.entries(G).map(([k,g])=>{const n=gc[k]|0,lv=DLV.filter(x=>n>=x).length,nx=DLV[lv],pv=lv?DLV[lv-1]:0,f=nx?(n-pv)/(nx-pv):1;
     return `<button class="dl ${n?'':'z'}" data-dg="${k}"><span class="e">${g[0]}</span><span class="tx"><b>${g[4]}</b><small>${ar(n)} · ${lv?'⭐'.repeat(lv):'لم يبدأ بعد'}</small><div class="bar2"><i style="width:${Math.round(f*100)}%"></i></div></span></button>`}).join('')}
@@ -60,7 +60,7 @@ const lvName=L=>{let r=LEVELS[0];LEVELS.forEach(l=>{if(L>=l[0])r=l});return r};
 function snap(){const c=C(),x=xpOf(c),L=lvOf(x),tiers={};MEDALS.forEach(m=>tiers[m.id]=tierOf(m,c));
   return {c,x,L,tiers,titles:TITLES.filter(t=>t.c(c)).map(t=>t.id)}}
 // الجوائز في البيت بحسب الأعمال
-const DEED_ITEMS=[['d_rose',c=>c.sal>=10],['d_birds',c=>c.tas>=10],['d_lamps',c=>c.pray>=5],['d_star',c=>c.tilawa>=10],['d_palms',c=>c.sal>=100],['d_fruit',c=>c.pray>=35],['d_noor',c=>c.sal>=500],
+const DEED_ITEMS=[['d_h1',c=>c.hifz>=1],['d_h3',c=>c.hifz>=3],['d_h6',c=>c.hifz>=6],['d_h12',c=>c.hifz>=12],['d_rose',c=>c.sal>=10],['d_birds',c=>c.tas>=10],['d_lamps',c=>c.pray>=5],['d_star',c=>c.tilawa>=10],['d_palms',c=>c.sal>=100],['d_fruit',c=>c.pray>=35],['d_noor',c=>c.sal>=500],
   ['d_spring',()=>Object.values(A().fiqh||{}).some(f=>f.wt>=.75)],['d_mosque',()=>Object.values(A().fiqh||{}).some(f=>f.st>=.75)]];
 const shownTitle=s=>{const t=TITLES.find(t=>t.id==A().title&&s.titles.includes(t.id))||TITLES.filter(t=>s.titles.includes(t.id)).pop();return t||null};
 const myName=()=>(O()&&O().profile&&O().profile.nick)||state.name||B('بطلنا','بطلتنا');
@@ -82,6 +82,11 @@ css.textContent=`
 .hfbtn .e{font-size:40px;width:58px;text-align:center;flex:none}.hfbtn .nm{flex:1;min-width:0}.hfbtn b{display:block;font-size:19px;color:#1d4e9e}.hfbtn small{display:block;font-size:14px;color:var(--muted);line-height:1.5}
 .hfbtn .go{font-size:26px;color:#2f6fd0;flex:none}
 #homeHeroes{margin-top:16px}
+.pttoast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:45;width:min(92vw,360px);background:linear-gradient(135deg,#fff8e0,#fff);border:3px solid var(--gold);border-radius:20px;padding:8px 14px;box-shadow:0 8px 24px rgba(0,0,0,.25);text-align:center;animation:ptin .45s cubic-bezier(.2,1.5,.4,1);cursor:pointer}
+.pttoast b{display:block;font-size:22px;color:#c98a12}.pttoast span{display:block;font-size:13px;color:#5a3c00;font-weight:700}
+.pttoast .xpbar{height:10px;margin-top:4px}.pttoast .xpbar i{animation:ptbar 1s ease-out}
+.pttoast.out{opacity:0;transform:translate(-50%,30px);transition:.45s}
+@keyframes ptin{from{transform:translate(-50%,60px);opacity:0}}@keyframes ptbar{from{width:0}}
 .hbox{background:#fff;border:2px solid var(--line);border-radius:20px;padding:8px 10px;margin-top:10px}
 .hbox h4{margin:0 0 6px;font-size:16px;display:flex;align-items:center;gap:6px}.hbox h4 span{flex:1}
 .hbox h4 button{border:0;border-radius:12px;padding:2px 10px;font-weight:800;font-size:13px;background:var(--green);color:#fff}
@@ -217,8 +222,23 @@ let soonT=0,pending=false;
 function busy(){const on=document.querySelector('.screen.on');const id=on&&on.id;
   if($('#modal').classList.contains('on')||$('#celebrate').classList.contains('on')||document.querySelector('.countdown'))return true;
   if(['quiz','contest','online'].includes(id))return true;if(id=='bayt'&&window.Bayt&&Bayt.G)return true;if(id=='baytrace')return true;return false}
+// النقاط تظهر حتى في شاشة النتيجة، لكن لا تقاطع لعبةً أو امتحانًا جاريًا
+function toastBusy(){const on=document.querySelector('.screen.on'),id=on&&on.id;
+  if($('#modal').classList.contains('on')||$('#celebrate').classList.contains('on')||document.querySelector('.countdown'))return true;
+  if(id=='quiz')return true;if(id=='bayt'&&window.Bayt&&Bayt.G&&Bayt.G.run)return true;if(id=='baytrace'&&!on.querySelector('.result,.bover'))return true;
+  if(['contest','online'].includes(id)&&!on.querySelector('.result'))return true;return false}
+function pointsToast(d,s){const old=document.getElementById('ptToast');if(old)old.remove();
+  const f=(s.x-need(s.L))/(need(s.L+1)-need(s.L)),ln=lvName(s.L),t=document.createElement('div');t.id='ptToast';t.className='pttoast';
+  t.innerHTML=`<b>✨ +${ar(d)} نقطة</b><span>${ln[1]} المستوى ${ar(s.L)} · باقي ${ar(need(s.L+1)-s.x)} للمستوى ${ar(s.L+1)}</span><div class="xpbar"><i style="width:${Math.round(f*100)}%"></i></div>`;
+  t.onclick=()=>{t.remove();openProfile()};document.body.appendChild(t);
+  try{[880,1175,1568].forEach((q,i)=>tone(q,.1,'sine',.09,i*.07))}catch(e){}
+  setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),500)},3200)}
 function check(){const s=snap(),a=A();
   if(!a.seen){a.seen={L:s.L,tiers:s.tiers,titles:s.titles};Aamal.save()}
+  // ✨ النقاط: بعد كل عمل تظهر النقاط التي ربحها الطفل وشريط مستواه
+  if(a.lastX==null){a.lastX=s.x;Aamal.save()}
+  if(s.x>a.lastX){if(toastBusy()){pending=true;clearTimeout(soonT);soonT=setTimeout(check,3000)}else{pointsToast(s.x-a.lastX,s);a.lastX=s.x;Aamal.save()}}
+  else if(s.x<a.lastX){a.lastX=s.x;Aamal.save()}
   // جوائز البيت
   const gifts=[];if(window.Deco&&Deco.grant)DEED_ITEMS.forEach(([id,ok])=>{if(ok(s.c)&&Deco.grant(id))gifts.push(Deco.item(id))});
   const seen=a.seen,rows=[];
@@ -285,7 +305,7 @@ function doBtns(){const a=Aamal,tp=window.Salah?Salah.todayPray().filter(Boolean
 function bindDo(el,ret){el.querySelectorAll('[data-do]').forEach(b=>b.onclick=()=>{tone(880,.05,'sine',.08);goTo(b.dataset.do,ret)})}
 function goTo(g,ret){const click=s=>{const e=$(s);e&&e.click()};
   ({sal:()=>count('sal',ret),tas:()=>count('tas',ret),pray:()=>window.Salah&&Salah.openPray(),salah:()=>window.Salah&&Salah.open(),
-    hifz:()=>click('#openHifz'),nafsak:()=>click('#openNafsak'),bayt:()=>click('#openBayt'),wird:()=>click('#openWird'),
+    hifz:()=>click('#openHifz'),contest:()=>click('#openContest'),nafsak:()=>click('#openNafsak'),bayt:()=>click('#openBayt'),wird:()=>click('#openWird'),
     online:()=>{window.onlineReturn=openProfile;openOnline()},map:goHome})[g]()}
 
 /* ---------- عدّاد الصلاة على النبي والتسبيح بالصوت ---------- */
@@ -321,8 +341,12 @@ window.Alqab={soon,check,openProfile,snap,deedFor(id){const m={d_rose:'sal',d_pa
 const _ca=window.cupsAward;if(_ca)window.cupsAward=function(n,src,el){if(src=='nafsak'&&n>=2){Aamal.add('akhlaq',1);Aamal.grow('akhlaq')}const r=_ca.apply(this,arguments);soon();return r};
 const _rh=window.renderHome;window.renderHome=function(){_rh.apply(this,arguments);drawHome();soon()};
 const _wf=window.wirdFinish;if(_wf)window.wirdFinish=function(){const daily=typeof qz!='undefined'&&qz&&qz.mode=='daily';const r=_wf.apply(this,arguments);if(daily)Aamal.grow('wird');soon();return r};
+// كل تحدٍّ يلعبه الطفل (مسابقة الأبطال، أونلاين، سباق البيت، بناء طابق) = بالون في البيت ونقاط
+if(window.Deco){const _dc=Deco.challenge,_fj=Deco.floorJewels;
+  Deco.challenge=function(n,src){const r=_dc.apply(this,arguments);if(['contest','online','brace'].includes(src))Aamal.grow('ctst');soon();return r};
+  Deco.floorJewels=function(){const r=_fj.apply(this,arguments);Aamal.grow('ctst');soon();return r}}
 // نجاح في امتحان مرحلة من الكتاب = دوّار شمس في البيت
 const _ce=window.celebrate;if(typeof _ce=='function')window.celebrate=function(){const r=_ce.apply(this,arguments);Aamal.grow('dars');return r};
-setInterval(()=>{if(pending&&!busy())check()},4000);
+setInterval(()=>{if(pending&&!toastBusy())check()},4000);
 drawHome();setTimeout(check,1500);
 })();

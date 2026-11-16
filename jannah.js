@@ -77,6 +77,10 @@ const ITEMS=[
  {id:'d_mosque',cat:'deeds',name:'مسجد صغير',e:'🕌',deed:'انجح في اختبار الصلاة',layer:'back',at:[[320,254,40]]},
  {id:'d_palms', cat:'deeds',name:'نخيل الجنة',e:'🌴',deed:'صلِّ على محمد وآل محمد ١٠٠ مرة',layer:'back',at:[[8,288,34],[352,290,30]]},
  {id:'d_fruit', cat:'deeds',name:'بستان المصلّي',e:'🍊',deed:'سجّل ٣٥ صلاة صلّيتها',layer:'front',at:[[38,270,16],[326,264,15],[52,258,14]]},
+ {id:'d_h1',    cat:'deeds',name:'حمامات الحافظ',e:'🕊️',deed:'احفظ سورة واحدة',layer:'back',at:[[200,70,18],[226,58,15],[178,84,14]],anim:'fly'},
+ {id:'d_h3',    cat:'deeds',name:'قوس قزح الحافظ',e:'🌈',deed:'احفظ ٣ سور',layer:'back',at:[[90,118,54]]},
+ {id:'d_h6',    cat:'deeds',name:'برج الحافظ الذهبي',e:'🏯',deed:'احفظ ٦ سور',layer:'back',at:[[34,250,38]]},
+ {id:'d_h12',   cat:'deeds',name:'تاج حافظ القرآن',e:'👑',deed:'احفظ السور الاثنتي عشرة كلّها',layer:'back',at:[[260,46,30]],anim:'bob'},
  {id:'d_noor',  cat:'deeds',name:'نورٌ على بيتك',e:'✨',deed:'صلِّ على محمد وآل محمد ٥٠٠ مرة',layer:'back',at:[[110,130,18],[250,120,16],[180,58,22],[60,92,14]],anim:'twinkle'},
  // هدايا الأصدقاء فقط
  {id:'g_balloon',cat:'gift',name:'بالونات',      e:'🎈',gift:1,layer:'front',at:[[72,206,20],[60,218,18],[84,222,17]],anim:'bob'},
@@ -121,14 +125,14 @@ function itemSVG(it,full,withRoof){
   if(it.extra=='stars')s+=[[70,24],[96,52],[20,76],[130,22]].map(([x,y],k)=>`<text x="${x}" y="${y}" font-size="10" text-anchor="middle" class="dk-tw" style="animation-delay:${k*.3}s">⭐</text>`).join('');
   return s+it.at.map(([x,y,z],k)=>`<text x="${x}" y="${y}" font-size="${z}" text-anchor="middle"${cls} style="animation-delay:${k*.4}s">${it.e}</text>`).join('')}
 /* 🌱 حديقة الأعمال: حرف لكل عمل صالح (sawt.js Aamal.grow)، يُرسم في أماكن ثابتة حول البيت وفي السماء */
-const GL={a:'🌹',b:'🐦',c:'🌷',d:'⭐',e:'🌳',f:'🌴',g:'🦋',h:'🍎',i:'🌻',j:'🏵️'},SKY='bdg';
-const cleanG=g=>String(g||'').replace(/[^a-j]/g,'').slice(-80);
+const GL={a:'🌹',b:'🐦',c:'🌷',d:'⭐',e:'🌳',f:'🌴',g:'🦋',h:'🍎',i:'🌻',j:'🏵️',k:'🎈'},SKY='bdgk';
+const cleanG=g=>String(g||'').replace(/[^a-k]/g,'').slice(-80);
 const SLOTS=(()=>{let s=7;const r=()=>{s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
   const gr=[],sk=[];while(gr.length<60){let x,y;if(r()<.68){y=297+r()*14;x=6+r()*348;if(x>124&&x<202)continue}else{y=262+r()*28;x=r()<.5?4+r()*62:298+r()*56}gr.push([x,y])}
   while(sk.length<30){const x=14+r()*332,y=40+r()*150;if(x>270&&y<80)continue;sk.push([x,y])}return {gr,sk}})();
 function gardenSVG(g,layer){g=cleanG(g);let gi=0,si=0;const out=[];
   for(const c of g){const sky=SKY.includes(c),p=sky?SLOTS.sk[si++%30]:SLOTS.gr[gi++%60];if((layer=='back')!=sky)continue;
-    const big=c=='e'||c=='f',z=big?(p[1]<292?24:19):sky?12:13,an=c=='b'?'fly':c=='g'?'flut':c=='d'?'twinkle':'';
+    const big=c=='e'||c=='f',z=big?(p[1]<292?24:19):sky?(c=='k'?15:12):13,an=c=='b'?'fly':c=='g'?'flut':c=='d'?'twinkle':c=='k'?'bob':'';
     out.push([p[1],`<text x="${p[0].toFixed(1)}" y="${p[1].toFixed(1)}" font-size="${z}" text-anchor="middle"${an?` class="dk-${an}" style="animation-delay:${(out.length%7)*.3}s"`:''}>${GL[c]}</text>`])}
   return out.sort((a,b)=>a[0]-b[0]).map(x=>x[1]).join('')}
 function lookItems(L){return String(L.i||'').split(',').filter(id=>IT[id])}

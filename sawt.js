@@ -24,7 +24,7 @@ window.Aamal={get d(){return as},save:asave,add(k,n){as[k]=(as[k]||0)+n;asave();
 // [الرمز، الاسم، حرف الحفظ، الحد اليومي، اسم العمل]
 const GROW={sal:['🌹','وردة','a',3,'الصلاة على النبي وآله'],tas:['🐦','عصفور','b',3,'التسبيح'],pray:['🌷','زهرة','c',5,'صلاة صلّيتها'],
   ayah:['⭐','نجمة','d',4,'آيات قرأتها بصوتك'],fiqh:['🌳','شجرة','e',3,'تعلّم الوضوء والصلاة'],hifz:['🌴','نخلة','f',2,'سورة حفظتها'],
-  akhlaq:['🦋','فراشة','g',2,'خُلقٌ جميل'],wird:['🍎','تفاحة','h',1,'الورد اليومي'],dars:['🌻','دوّار شمس','i',3,'درس نجحت فيه'],win:['🏵️','وردة الأبطال','j',3,'فوز في تحدٍّ']};
+  akhlaq:['🦋','فراشة','g',2,'خُلقٌ جميل'],wird:['🍎','تفاحة','h',1,'الورد اليومي'],dars:['🌻','دوّار شمس','i',3,'درس نجحت فيه'],win:['🏵️','وردة الأبطال','j',3,'فوز في تحدٍّ'],ctst:['🎈','بالون','k',4,'تحدٍّ لعبته']};
 function grownBanner(g,m){const d=document.createElement('div');d.className='ctbanner b3';d.style.cssText='font-size:18px;top:14%;white-space:normal;max-width:90vw;text-align:center';
   d.textContent=`🏡 أُضيف إلى بيتك في الجنة: ${g[0]} ${g[1]}${m>1?' ×'+ar(m):''}`;document.body.appendChild(d);setTimeout(()=>d.remove(),1500);
   try{[1047,1319].forEach((f,i)=>tone(f,.12,'sine',.1,i*.08))}catch(e){}}
