@@ -89,36 +89,46 @@ async function openAdmin(){show('idara');body().innerHTML=`<div class="handoff">
     $('#idCp').onclick=()=>{try{navigator.clipboard.writeText(API.me).then(()=>API.toast('نُسخ ✓'))}catch(e){API.toast(API.me)}};return}
   panel()}
 const JOPT=[0,10,25,50,100,200].map(n=>`<option value="${n}">${n?`💎 ${ar(n)} جوهرة`:'بلا جواهر'}</option>`).join('');
-async function panel(prefill){const API=O();
-  body().innerHTML=`<div class="idbox"><h3>📢 رسالة لكل الأطفال</h3>
+let all=null,heroes=null,tab='heroes',q='';
+const key=r=>Math.max(r.xp|0,(r.wins|0)*10);
+async function loadKids(API){
+  if(!heroes){try{const s=(await API.db.ref('leader/'+API.week()).get()).val()||{};heroes=Object.entries(s).map(([id,v])=>({id,...v})).sort((a,b)=>key(b)-key(a)).slice(0,15)}catch(e){heroes=[]}}
+  if(!all){try{const s=(await API.db.ref('profiles').get()).val()||{};all=Object.entries(s).map(([id,v])=>({id,nick:v.nick||'؟',av:v.av||'❔',lv:v.lv|0,tt:v.tt||'',wins:v.wins|0,code:v.code||''}))}catch(e){all=[]}}}
+function kidRow(r,i){const p=all&&all.find(x=>x.id==r.id)||{};const lv=r.lv||p.lv,tt=r.tt||p.tt;
+  return `<div class="idrow"><span>${i!=null?(['🥇','🥈','🥉'][i]||ar(i+1)):''}</span><span class="av">${esc(r.av||p.av)}</span><b>${esc(r.nick||p.nick)}<small style="display:block;color:#8a5a00;font-weight:500">${lv?`⭐ المستوى ${ar(lv)} `:''}${esc(tt||'')}${r.xp?` · ✨${ar(r.xp)}`:''}${(r.wins||p.wins)?` · 🏆${ar(r.wins||p.wins)}`:''}</small></b><button class="mini go" data-g="${esc(r.id)}">🎁 جائزة</button></div>`}
+function drawKids(){const el=$('#idKids');if(!el)return;let rows=[],num=false;
+  if(tab=='heroes'){rows=heroes||[];num=true}
+  else if(tab=='top'){rows=(all||[]).slice().sort((a,b)=>(b.lv-a.lv)||(b.wins-a.wins)).slice(0,20);num=true}
+  else{const t=q.trim().replace(/[أإآ]/g,'ا');rows=(all||[]).filter(r=>!t||String(r.nick).replace(/[أإآ]/g,'ا').includes(t)||String(r.code).toUpperCase()==t.toUpperCase()).slice(0,40)}
+  el.innerHTML=rows.length?rows.map((r,i)=>kidRow(r,num?i:null)).join(''):`<p class="tip">${tab=='all'?(q?'لا يوجد طفل بهذا الاسم':`عدد الأطفال: ${ar((all||[]).length)} — اكتب اسمًا للبحث`):'لا أحد بعد'}</p>`;
+  el.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{const id=b.dataset.g,r=rows.find(x=>x.id==id)||{},p=(all||[]).find(x=>x.id==id)||{};giftTo(id,r.nick||p.nick,r.av||p.av)})}
+function giftTo(uid,nick,av){const API=O();
+  modal(`<div style="font-size:50px;line-height:1.2">${esc(av||'🎁')}</div><h3 style="margin:2px 0">جائزة إلى ${esc(nick||'')}</h3>
+    <textarea class="inp" id="gMsg" maxlength="400" placeholder="رسالة له، مثل: أحسنت يا بطل! 🌟" style="min-height:70px;text-align:right;font-size:16px"></textarea>
+    <select class="inp" id="gJ">${JOPT.replace('value="50"','value="50" selected')}</select>
+    <div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn gold" id="gSend">🎁 أرسل</button></div>`,()=>{
+    $('#gSend').onclick=async()=>{const msg=$('#gMsg').value.trim(),j=+$('#gJ').value;$('#gSend').disabled=true;
+      try{await API.db.ref('prizes/'+uid).push({msg,j,ts:firebase.database.ServerValue.TIMESTAMP});closeModal();API.toast(`أُرسلت الجائزة إلى ${nick||''} ✓`)}catch(e){$('#gSend').disabled=false;API.toast('تعذّر الإرسال')}}})}
+async function panel(){const API=O();heroes=null;all=null;
+  body().innerHTML=`<div class="idbox"><h3>🎁 أعطِ جائزة لطفل</h3>
+      <div class="jrooms" style="margin-bottom:6px"><button data-tab="heroes">🏅 أبطال الأسبوع</button><button data-tab="top">⭐ المميّزون</button><button data-tab="all">🔎 ابحث</button></div>
+      <input class="inp" id="kQ" placeholder="🔎 اكتب اسم الطفل أو رمزه" style="text-align:right;display:none">
+      <div id="idKids"><p class="tip">⏳ جارٍ التحميل…</p></div>
+      <p class="tip">بطل الأسبوع يأخذ تلقائيًا 💎١٠٠ (والثاني ٦٠ والثالث ٣٠) عند بداية الأسبوع الجديد.</p></div>
+    <div class="idbox"><h3>📢 رسالة لكل الأطفال</h3>
       <input class="inp" id="nTitle" maxlength="60" placeholder="العنوان، مثل: عيد مبارك 🌙" style="text-align:right">
       <textarea class="inp" id="nMsg" maxlength="600" placeholder="نص الرسالة"></textarea>
       <select class="inp" id="nJ">${JOPT}</select>
       <button class="btn gold" id="nSend" style="flex:none;width:100%">📢 أرسل للجميع</button></div>
-    <div class="idbox"><h3>🎁 جائزة لطفل واحد</h3>
-      <input class="inp" id="pCode" maxlength="6" dir="ltr" placeholder="رمز الطفل (٦ خانات)" style="text-transform:uppercase;letter-spacing:3px" value="${esc(prefill&&prefill.code||'')}">
-      ${prefill&&prefill.nick?`<p style="margin:0;font-size:14px">إلى: <b>${esc(prefill.av||'')} ${esc(prefill.nick)}</b></p>`:''}
-      <textarea class="inp" id="pMsg" maxlength="400" placeholder="رسالة له، مثل: أحسنت يا بطل!"></textarea>
-      <select class="inp" id="pJ">${JOPT.replace('value="50"','value="50" selected')}</select>
-      <button class="btn" id="pSend" style="flex:none;width:100%">🎁 أرسل الجائزة</button></div>
-    <div class="idbox"><h3>🏅 أبطال هذا الأسبوع</h3><div id="idHeroes"><p class="tip">⏳</p></div>
-      <p class="tip">بطل الأسبوع يأخذ تلقائيًا 💎١٠٠ (والثاني ٦٠ والثالث ٣٠) عند بداية الأسبوع الجديد.</p></div>
     <div class="idbox"><h3>📜 آخر الرسائل المرسلة</h3><div id="idNews"><p class="tip">⏳</p></div></div>`;
+  const tabs=()=>{body().querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab==tab));$('#kQ').style.display=tab=='all'?'':'none';drawKids()};
+  body().querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;tabs();if(tab=='all')$('#kQ').focus()});
+  $('#kQ').oninput=e=>{q=e.target.value;drawKids()};
   $('#nSend').onclick=()=>{const title=$('#nTitle').value.trim(),msg=$('#nMsg').value.trim(),j=+$('#nJ').value;
     if(!title&&!msg){API.toast('اكتب العنوان أو الرسالة');return}
     modal(`<h3 style="margin:4px 0">إرسال لكل الأطفال؟</h3><p><b>${esc(title)}</b><br>${esc(msg).slice(0,140)}${j?`<br>💎 ${ar(j)} لكل طفل`:''}</p><div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn gold" id="nYes">نعم، أرسل</button></div>`,()=>{
       $('#nYes').onclick=async()=>{closeModal();try{await API.db.ref('news').push({title,msg,j,ts:firebase.database.ServerValue.TIMESTAMP});API.toast('أُرسلت ✓');panel()}catch(e){API.toast('تعذّر الإرسال')}}})};
-  $('#pSend').onclick=async()=>{const code=$('#pCode').value.trim().toUpperCase().replace(/[^A-Z0-9]/g,''),msg=$('#pMsg').value.trim(),j=+$('#pJ').value;
-    let uid=prefill&&prefill.uid&&code==prefill.code?prefill.uid:null;
-    if(!uid){if(code.length!==6){API.toast('الرمز ٦ خانات');return}try{uid=(await API.db.ref('codes/'+code).get()).val()}catch(e){}}
-    if(!uid){API.toast('لا يوجد طفل بهذا الرمز');return}
-    try{await API.db.ref('prizes/'+uid).push({msg,j,ts:firebase.database.ServerValue.TIMESTAMP});API.toast('أُرسلت الجائزة ✓');panel()}catch(e){API.toast('تعذّر الإرسال')}};
-  // الأبطال
-  try{const s=(await API.db.ref('leader/'+API.week()).get()).val()||{},key=r=>Math.max(r.xp|0,(r.wins|0)*10);
-    const rows=Object.entries(s).map(([id,v])=>({id,...v})).sort((a,b)=>key(b)-key(a)).slice(0,10);
-    const codes={};await Promise.all(rows.map(async r=>{try{codes[r.id]=((await API.db.ref('profiles/'+r.id).get()).val()||{}).code||''}catch(e){}}));
-    $('#idHeroes').innerHTML=rows.length?rows.map((r,i)=>`<div class="idrow"><span>${['🥇','🥈','🥉'][i]||ar(i+1)}</span><span class="av">${esc(r.av)}</span><b>${esc(r.nick)}</b><small>✨${ar(r.xp|0)} 🏆${ar(r.wins|0)}</small><button class="mini" data-h="${esc(r.id)}">🎁</button></div>`).join(''):'<p class="tip">لا أبطال بعد هذا الأسبوع</p>';
-    $('#idHeroes').querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>{const r=rows.find(x=>x.id==b.dataset.h);panel({uid:r.id,code:codes[r.id],nick:r.nick,av:r.av});window.scrollTo(0,0)})}catch(e){$('#idHeroes').innerHTML='<p class="tip">تعذّر التحميل</p>'}
+  await loadKids(API);tabs();
   // الرسائل
   try{const s=(await API.db.ref('news').orderByChild('ts').limitToLast(10).get()).val()||{};const rows=Object.entries(s).sort((a,b)=>(b[1].ts||0)-(a[1].ts||0));
     $('#idNews').innerHTML=rows.length?rows.map(([id,v])=>`<div class="idrow"><b>📢 ${esc(v.title||v.msg||'').slice(0,40)}</b><small>${v.j?'💎'+ar(v.j):''} ${v.ts?new Date(v.ts).toLocaleDateString('ar-IQ'):''}</small><button class="mini" style="background:#e2504a" data-del="${esc(id)}">🗑️</button></div>`).join(''):'<p class="tip">لم تُرسل رسائل بعد</p>';

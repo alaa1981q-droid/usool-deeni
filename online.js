@@ -82,33 +82,25 @@
 
   function setupProfile() {
     setHead('اختر لقبك');
-    let av = (profile && profile.av) || AVATARS[0], w1 = W1[0], w2 = W2[0], own = (profile && profile.own) ? profile.nick : '';
-    const num = 10 + Math.floor(Math.random() * 90);
-    const nickNow = () => own ? own : `${w1} ${w2} ${ar(num)}`;
+    // الطفل يكتب اسمه المستعار بنفسه، واللقب (شاطر العقيدة، نجم الصلاة...) يأتي تلقائيًا من مستواه (alqab.js)
+    let av = (profile && profile.av) || AVATARS[0], own = (profile && profile.nick) || '';
     const draw = () => {
       body().innerHTML = `<div class="card" style="flex:none">
         <h2 style="text-align:center">مرحبًا يا بطل! 👋</h2>
-        <p style="text-align:center;color:var(--muted)">اختر صورتك ولقبك. لا نستخدم اسمك الحقيقي حفاظًا عليك.</p>
-        <div class="preview"><span class="av">${av}</span><b id="nickPrev">${esc(nickNow())}</b></div>
+        <p style="text-align:center;color:var(--muted)">اختر صورتك واكتب اسمك الذي يراه أصدقاؤك.<br>ولقبك يأتي وحده من شطارتك: بالعقيدة، بالصلاة، بالقرآن، بالتحديات… 🌟</p>
+        <div class="preview"><span class="av">${av}</span><b id="nickPrev">${esc(own || 'اسمك هنا')}</b></div>
         <div class="pick-h">صورتك</div><div class="chips">${AVATARS.map(a => `<button class="pk ${a === av ? 'on' : ''}" data-av="${a}">${a}</button>`).join('')}</div>
-        <div class="pick-h">الكلمة الأولى</div><div class="chips">${W1.map(w => `<button class="pk w ${w === w1 ? 'on' : ''}" data-w1="${w}">${w}</button>`).join('')}</div>
-        <div class="pick-h">الكلمة الثانية</div><div class="chips">${W2.map(w => `<button class="pk w ${w === w2 ? 'on' : ''}" data-w2="${w}">${w}</button>`).join('')}</div>
-        <div class="pick-h">✏️ أو اكتب لقبك بنفسك</div>
-        <input class="inp" id="ownNick" maxlength="16" placeholder="مثل: صقر الإيمان" value="${esc(own)}" autocomplete="off">
-        <div class="fb" id="nickMsg" style="font-size:14px">لا تكتب اسمك الحقيقي، حروف عربية فقط (٣ إلى ١٦ حرفًا)</div>
-        <div class="nav"><button class="btn gold" id="saveProf">هذا لقبي ✓</button></div></div>`;
+        <div class="pick-h">✏️ اسمك</div>
+        <input class="inp" id="ownNick" maxlength="16" placeholder="مثل: حيدر، زهراء، أبو علي الصغير" value="${esc(own)}" autocomplete="off">
+        <div class="fb" id="nickMsg" style="font-size:14px">اسمك الأول أو اسم تحبّه، بلا اسم العائلة 🤍 حروف عربية فقط (٣ إلى ١٦ حرفًا)</div>
+        <div class="nav"><button class="btn gold" id="saveProf">هذا اسمي ✓</button></div></div>`;
       body().querySelectorAll('[data-av]').forEach(b => b.onclick = () => { av = b.dataset.av; draw(); });
-      body().querySelectorAll('[data-w1]').forEach(b => b.onclick = () => { w1 = b.dataset.w1; own = ''; draw(); });
-      body().querySelectorAll('[data-w2]').forEach(b => b.onclick = () => { w2 = b.dataset.w2; own = ''; draw(); });
-      $('#ownNick').oninput = e => { own = e.target.value; $('#nickPrev').textContent = nickNow(); };
+      $('#ownNick').oninput = e => { own = e.target.value; $('#nickPrev').textContent = own.trim() || 'اسمك هنا'; };
       $('#saveProf').onclick = async () => {
         $('#saveProf').disabled = true;
         try {
-          let nick = `${w1} ${w2} ${ar(num)}`, isOwn = false;
-          if (own.trim()) {
-            const why = badNick(own); if (why) { $('#nickMsg').className = 'fb bad'; $('#nickMsg').textContent = why; $('#saveProf').disabled = false; return; }
-            nick = own.trim().replace(/\s+/g, ' '); isOwn = true;
-          }
+          const why = badNick(own); if (why) { $('#nickMsg').className = 'fb bad'; $('#nickMsg').textContent = why; $('#saveProf').disabled = false; $('#ownNick').focus(); return; }
+          const nick = own.trim().replace(/\s+/g, ' '), isOwn = true;
           const code = (profile && profile.code) || await claimCode();
           profile = Object.assign({ wins: 0, games: 0 }, profile || {}, { nick, av, code, own: isOwn });
           await db.ref('profiles/' + me).set(profile);
@@ -140,7 +132,7 @@
 
   function hub() {
     leaveRoom(); setHead('🌐 العب أونلاين');
-    body().innerHTML = `<div class="me-card"><span class="av">${profile.av}</span><span class="who-n"><b>${esc(profile.nick)}</b><small>🏆 ${ar(profile.wins || 0)} فوز · ${ar(profile.games || 0)} مباراة</small></span><button class="mini" id="editProf">✏️ لقبي</button></div>
+    body().innerHTML = `<div class="me-card"><span class="av">${profile.av}</span><span class="who-n"><b>${esc(profile.nick)}</b><small>${profile.tt ? esc(profile.tt) + ' · ' : ''}🏆 ${ar(profile.wins || 0)} فوز · ${ar(profile.games || 0)} مباراة</small></span><button class="mini" id="editProf">✏️ اسمي</button></div>
       <div class="modes">
         <button class="mode" id="oQuick"><span class="e">🔢</span><span><b>غرفة سريعة</b><small>لصديق بجانبك: رمز من ٤ أرقام.</small></span></button>
       </div>

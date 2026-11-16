@@ -62,7 +62,22 @@ function snap(){const c=C(),x=xpOf(c),L=lvOf(x),tiers={};MEDALS.forEach(m=>tiers
 // الجوائز في البيت بحسب الأعمال
 const DEED_ITEMS=[['d_h1',c=>c.hifz>=1],['d_h3',c=>c.hifz>=3],['d_h6',c=>c.hifz>=6],['d_h12',c=>c.hifz>=12],['d_rose',c=>c.sal>=10],['d_birds',c=>c.tas>=10],['d_lamps',c=>c.pray>=5],['d_star',c=>c.tilawa>=10],['d_palms',c=>c.sal>=100],['d_fruit',c=>c.pray>=35],['d_noor',c=>c.sal>=500],
   ['d_spring',()=>Object.values(A().fiqh||{}).some(f=>f.wt>=.75)],['d_mosque',()=>Object.values(A().fiqh||{}).some(f=>f.st>=.75)]];
-const shownTitle=s=>{const t=TITLES.find(t=>t.id==A().title&&s.titles.includes(t.id))||TITLES.filter(t=>s.titles.includes(t.id)).pop();return t||null};
+/* 💪 اللقب التلقائي: من المجال الذي يتفوّق فيه الطفل، أو لقب جامع إذا تفوّق في عدّة مجالات */
+const AREAS=[
+ {id:'aq',n:'العقيدة',e:'📚',m:['usul'],t:['شاطر العقيدة','عالم الأصول'],go:'map',how:'أكمل مراحل الكتاب بنجوم كثيرة'},
+ {id:'sl',n:'الصلاة',e:'🕌',m:['pray','fiqh'],t:['المصلّي الصغير','نجم الصلاة'],go:'salah',how:'تعلّم الوضوء والصلاة وسجّل صلواتك'},
+ {id:'qr',n:'القرآن',e:'📖',m:['hifz','tilawa'],t:['محبّ القرآن','حافظ القرآن'],go:'hifz',how:'احفظ السور وسمّعها بصوتك'},
+ {id:'ch',n:'التحديات',e:'⚔️',m:['champ'],t:['فارس التحديات','بطل التحديات'],go:'contest',how:'العب التحديات أونلاين وافز'},
+ {id:'ak',n:'الأخلاق',e:'🌷',m:['akhlaq'],t:['صاحب الخُلق','زينة الأخلاق'],go:'nafsak',how:'أجب إجابات ممتازة في «اختبر نفسك»'},
+ {id:'dk',n:'الذكر',e:'💚',m:['sal','tas'],t:['الذاكر الصغير','محبّ النبي وآله'],go:'sal',how:'صلِّ على النبي وآله وسبّح الله بصوتك'}];
+const areaTier=(a,s)=>Math.max(...a.m.map(id=>s.tiers[id]|0));
+function autoTitle(s){const r=AREAS.map(a=>({a,t:areaTier(a,s)})).filter(x=>x.t>0).sort((x,y)=>y.t-x.t);
+  if(!r.length)return null;const strong=r.filter(x=>x.t>=2);
+  if(strong.length>=5)return {id:'all',e:'👑',n:'بطل الجنة الشامل'};
+  if(strong.length>=3)return {id:'star',e:'🌟',n:'النجم الشامل'};
+  if(strong.length==2)return {id:'two_'+strong[0].a.id+strong[1].a.id,e:strong[0].a.e,n:`شاطر ب${strong[0].a.n} و${strong[1].a.n}`};
+  const top=r[0];return {id:top.a.id+(top.t>=3?2:1),e:top.a.e,n:top.a.t[top.t>=3?1:0]}}
+const shownTitle=s=>autoTitle(s);
 const myName=()=>(O()&&O().profile&&O().profile.nick)||state.name||B('بطلنا','بطلتنا');
 const myAv=()=>(O()&&O().profile&&O().profile.av)||(boy()?'👦':'👧');
 
@@ -205,17 +220,17 @@ const medal=i=>['🥇','🥈','🥉'][i]||ar(i+1);
 function heroesHTML(){if(!hcache)return `<p class="hnote">${state.online?'⏳':'العب وتعلّم واعمل الخير لتصير من أبطال الأسبوع! 🌟'}</p>`;
   if(!hcache.length)return `<p class="hnote">لا أبطال بعد هذا الأسبوع. ${B('كن','كوني')} الأول! 🌟</p>`;
   const me=O()&&O().me;
-  return `<div class="hher">${hcache.slice(0,10).map((r,i)=>`<div class="${r.id==me?'me':''}"><span class="rk">${medal(i)}</span><span class="av">${esc(r.av)}</span><b>${esc(r.nick)}</b><small>${r.xp?`✨ ${ar(r.xp)}`:''}${r.wins?` 🏆 ${ar(r.wins)}`:''}</small></div>`).join('')}</div>
+  return `<div class="hher">${hcache.slice(0,10).map((r,i)=>`<div class="${r.id==me?'me':''}"><span class="rk">${medal(i)}</span><span class="av">${esc(r.av)}</span><b>${esc(r.nick)}${r.lv||r.tt?`<small style="display:block;color:#8a5a00;font-size:11.5px">${r.lv?`⭐${ar(r.lv)} `:''}${esc(r.tt||'')}</small>`:''}</b><small>${r.xp?`✨ ${ar(r.xp)}`:''}${r.wins?` 🏆 ${ar(r.wins)}`:''}</small></div>`).join('')}</div>
    <p class="hnote">الترتيب بالأعمال الصالحة والتعلّم والانتصارات هذا الأسبوع · يبدأ من جديد كل جمعة</p>`}
 async function loadSocial(force){if(loading||!navigator.onLine||!O()||!state.online)return;if(!force&&Date.now()-lastLoad<60000&&fcache)return;
   loading=true;lastLoad=Date.now();
   try{await O().init();const API=O();if(!API.profile)return;publish();
     const ids=await API.friendIds();
     const rows=await Promise.all(ids.slice(0,30).map(async id=>{try{const [p,pr]=await Promise.all([API.db.ref('profiles/'+id).get(),API.db.ref('presence/'+id).get()]);
-      const v=p.val()||{};return {id,nick:v.nick||'؟',av:v.av||'❔',lv:v.lv|0,tt:v.tt?String(v.tt).slice(0,2):'',on:!!pr.val()}}catch(e){return null}}));
+      const v=p.val()||{};return {id,nick:v.nick||'؟',av:v.av||'❔',lv:v.lv|0,tt:v.tt?String(v.tt).slice(0,30):'',on:!!pr.val()}}catch(e){return null}}));
     fcache=rows.filter(Boolean).sort((a,b)=>(b.on-a.on)||(b.lv-a.lv));
     const s=(await API.db.ref('leader/'+API.week()).get()).val()||{};
-    hcache=Object.entries(s).map(([id,v])=>({id,nick:v.nick||'؟',av:v.av||'❔',xp:v.xp|0,wins:v.wins|0})).sort((a,b)=>(Math.max(b.xp,b.wins*10)-Math.max(a.xp,a.wins*10))).slice(0,10);
+    hcache=Object.entries(s).map(([id,v])=>({id,nick:v.nick||'؟',av:v.av||'❔',xp:v.xp|0,wins:v.wins|0,lv:v.lv|0,tt:typeof v.tt=='string'?v.tt.slice(0,30):''})).sort((a,b)=>(Math.max(b.xp,b.wins*10)-Math.max(a.xp,a.wins*10))).slice(0,10);
     try{localStorage.setItem('usul5_social_v1',JSON.stringify({f:fcache,h:hcache}))}catch(e){}
     if($('#home').classList.contains('on')){const a=$('#hFrSum');if(a)a.textContent=frSum();drawHeroes()}
     if(frOpen&&$('#alqab').classList.contains('on')&&$('#aqTitle').textContent=='👥 أصدقائي')drawFriends()}
@@ -239,7 +254,7 @@ function publish(){const API=O();if(!API||!API.profile||!API.db)return;const s=s
   const key=[s.L,t&&t.id,md,wx,API.profile.nick,API.profile.av].join('|');if(key==pubKey)return;pubKey=key;
   const tt=t?`${t.e} ${t.n}`:'';Object.assign(API.profile,{lv:s.L,tt,md});
   API.db.ref('profiles/'+API.me).update({lv:s.L,tt,md}).catch(()=>{});
-  if(wx>0)API.db.ref(`leader/${w}/${API.me}`).update({nick:API.profile.nick,av:API.profile.av,xp:wx}).catch(()=>{})}
+  if(wx>0)API.db.ref(`leader/${w}/${API.me}`).update({nick:API.profile.nick,av:API.profile.av,xp:wx,lv:s.L,tt}).catch(()=>{})}
 
 /* ---------- الاحتفال: ارتفعت درجتك / وسام جديد / لقب جديد / جائزة للبيت ---------- */
 let soonT=0,pending=false;
@@ -258,7 +273,7 @@ function pointsToast(d,s){const old=document.getElementById('ptToast');if(old)ol
   try{[880,1175,1568].forEach((q,i)=>tone(q,.1,'sine',.09,i*.07))}catch(e){}
   setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),500)},3200)}
 function check(){const s=snap(),a=A();
-  if(!a.seen){a.seen={L:s.L,tiers:s.tiers,titles:s.titles};Aamal.save()}
+  if(!a.seen){a.seen={L:s.L,tiers:s.tiers,titles:s.titles,tt:(autoTitle(s)||{}).id||''};Aamal.save()}
   // ✨ النقاط: بعد كل عمل تظهر النقاط التي ربحها الطفل وشريط مستواه
   if(a.lastX==null){a.lastX=s.x;Aamal.save()}
   if(s.x>a.lastX){if(toastBusy()){pending=true;clearTimeout(soonT);soonT=setTimeout(check,3000)}else{pointsToast(s.x-a.lastX,s);a.lastX=s.x;Aamal.save()}}
@@ -267,12 +282,13 @@ function check(){const s=snap(),a=A();
   const gifts=[];if(window.Deco&&Deco.grant)DEED_ITEMS.forEach(([id,ok])=>{if(ok(s.c)&&Deco.grant(id))gifts.push(Deco.item(id))});
   const seen=a.seen,rows=[];
   MEDALS.forEach(m=>{const t=s.tiers[m.id],o=(seen.tiers||{})[m.id]|0;if(t>o)rows.push(`<div class="row"><span>${TIERS[t-1].e}${m.e}</span>وسام «${m.n}» ${TIERS[t-1].n}</div>`)});
-  s.titles.filter(x=>!(seen.titles||[]).includes(x)).forEach(id=>{const t=TITLES.find(t=>t.id==id);rows.push(`<div class="row"><span>${t.e}</span>لقب جديد: ${t.n}</div>`)});
+  const at=autoTitle(s);if(at&&at.id!==(seen.tt||''))rows.unshift(`<div class="row" style="background:#e3f7ea"><span>${at.e}</span>لقبك الجديد: <b>${at.n}</b></div>`);
+  s.titles.filter(x=>!(seen.titles||[]).includes(x)).forEach(id=>{const t=TITLES.find(t=>t.id==id);rows.push(`<div class="row"><span>${t.e}</span>إنجاز جديد: ${t.n}</div>`)});
   gifts.forEach(g=>rows.push(`<div class="row"><span>${g.e}</span>جائزة لبيتك: ${g.name} 🏡</div>`));
   const up=s.L>seen.L;
-  if(!up&&!rows.length){a.seen={L:s.L,tiers:s.tiers,titles:s.titles};Aamal.save();publish();return}
+  if(!up&&!rows.length){a.seen={L:s.L,tiers:s.tiers,titles:s.titles,tt:(autoTitle(s)||{}).id||''};Aamal.save();publish();return}
   if(busy()){pending=true;clearTimeout(soonT);soonT=setTimeout(check,3000);return}
-  const seenL=seen.L;pending=false;a.seen={L:s.L,tiers:s.tiers,titles:s.titles};Aamal.save();publish();
+  const seenL=seen.L;pending=false;a.seen={L:s.L,tiers:s.tiers,titles:s.titles,tt:(autoTitle(s)||{}).id||''};Aamal.save();publish();
   const ln=lvName(s.L);
   try{fanfare();confetti()}catch(e){}
   modal(`<div class="lvup"><div class="big">${up?ln[1]:'🏅'}</div><h3 style="margin:2px 0;color:#14794f">${up?`ارتفعت درجتك! المستوى ${ar(s.L)}`:B('مبروك! ربحتَ جديدًا','مبروك! ربحتِ جديدًا')}</h3>
@@ -301,8 +317,11 @@ function openProfile(){stopVc();aqBack=null;show('alqab');$('#aqTitle').textCont
    <div class="dls">${deedsHTML()}</div>
    <div class="aqsec">🤲 أعمالٌ ترفع درجتك اليوم</div>
    <div class="aqdo">${doBtns()}</div>
-   <div class="aqsec">👑 ألقابي <small style="font-weight:500;color:var(--muted);font-size:13px">${B('اضغط','اضغطي')} على لقبك ليظهر تحت اسمك</small></div>
-   <div class="aqts">${TITLES.map(x=>{const own=s.titles.includes(x.id);return `<button data-t="${x.id}" class="${own?'':'lock'} ${t&&t.id==x.id?'on':''}">${own?x.e:'🔒'} ${x.n}</button>`}).join('')}</div>
+   <div class="aqsec">💪 نقاط قوّتي <small style="font-weight:500;color:var(--muted);font-size:13px">لقبك يأتي من المجال الذي ${B('تتفوّق','تتفوّقين')} فيه</small></div>
+   <div class="aqm">${AREAS.map(a=>{const tr=areaTier(a,s);return `<button class="t${tr}" data-ar="${a.id}">${tr?`<span class="t">${TIERS[tr-1].e}</span>`:''}<div class="e">${a.e}</div><b>${a.n}</b><small>${tr?`${TIERS[tr-1].n} · لقبه: ${a.t[tr>=3?1:0]}`:'لم يبدأ بعد'}</small></button>`}).join('')}</div>
+   <p class="hnote">${B('تفوّق','تفوّقي')} في مجالين لتصير «شاطر بـ…»، وفي ثلاثة لتصير 🌟 النجم الشامل، وفي خمسة لتصير 👑 بطل الجنة الشامل</p>
+   <div class="aqsec">🏆 إنجازاتي</div>
+   <div class="aqts">${TITLES.map(x=>{const own=s.titles.includes(x.id);return `<button data-t="${x.id}" class="${own?'on':'lock'}">${own?x.e:'🔒'} ${x.n}</button>`}).join('')}</div>
    <div class="aqsec">🏅 أوسمتي</div>
    <div class="aqm">${MEDALS.map(m=>{const tr=s.tiers[m.id],nx=m.at[tr],prev=tr?m.at[tr-1]:0,v=c[m.k],fr=nx?Math.min(1,(v-prev)/(nx-prev)):1,col=tr?TIERS[tr-1].c:'#b9cfc2';
      return `<button class="t${tr}" data-m="${m.id}">${tr?`<span class="t">${TIERS[tr-1].e}</span>`:''}<div class="e">${m.e}</div><b>${m.n}</b><small>${tr?TIERS[tr-1].n:'لم يبدأ بعد'} · ${ar(v)} ${m.u}</small><div class="bar2"><i style="width:${fr*100}%;background:${col}"></i></div><small>${nx?`التالي ${TIERS[tr].e} عند ${ar(nx)}`:'أعلى درجة! 🌟'}</small></button>`}).join('')}</div>
@@ -311,8 +330,10 @@ function openProfile(){stopVc();aqBack=null;show('alqab');$('#aqTitle').textCont
   $('#aqBody').querySelectorAll('[data-dg]').forEach(b=>b.onclick=()=>{tone(880,.05,'sine',.08);goTo(DGO[b.dataset.dg],openProfile)});
   const hh=$('#aqHouse');if(hh){hh.style.cursor='pointer';hh.onclick=()=>view3D()};
   $('#aqBody').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{const x=TITLES.find(t=>t.id==b.dataset.t);
-    if(!s.titles.includes(x.id)){modal(`<div style="font-size:50px">${x.e}</div><h3 style="margin:4px 0">${x.n}</h3><p>${B('كيف تربحه','كيف تربحينه')}؟<br><b>${x.how}</b></p><div class="nav"><button class="btn gold" data-close>حسنًا 💪</button></div>`);return}
-    A().title=x.id;Aamal.save();tone(784,.1,'sine');publish();openProfile()});
+    const own=s.titles.includes(x.id);modal(`<div style="font-size:50px">${x.e}</div><h3 style="margin:4px 0">${x.n}</h3><p>${own?B('ما شاء الله! ربحتَ هذا الإنجاز 🌟','ما شاء الله! ربحتِ هذا الإنجاز 🌟'):`${B('كيف تربحه','كيف تربحينه')}؟<br><b>${x.how}</b>`}</p><div class="nav"><button class="btn gold" data-close>حسنًا 💪</button></div>`)});
+  $('#aqBody').querySelectorAll('[data-ar]').forEach(b=>b.onclick=()=>{const a=AREAS.find(x=>x.id==b.dataset.ar),tr=areaTier(a,s);
+    modal(`<div style="font-size:54px">${a.e}</div><h3 style="margin:4px 0">${a.n}</h3><p>${tr?`درجتك: ${TIERS[tr-1].e} ${TIERS[tr-1].n}<br>لقبك فيه: <b>${a.t[tr>=3?1:0]}</b>`:'لم تبدأ بعد'}</p><p style="font-size:15px">${B('لتتفوّق','لتتفوّقي')} أكثر: <b>${a.how}</b>${tr<3?`<br>عند الدرجة 🥇 يصير لقبك: <b>${a.t[1]}</b>`:''}</p>
+      <div class="nav"><button class="btn gold" id="arGo">هيّا 💪</button><button class="btn sec" data-close>رجوع</button></div>`,()=>{$('#arGo').onclick=()=>{closeModal();goTo(a.go,openProfile)}})});
   $('#aqBody').querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{const m=MEDALS.find(m=>m.id==b.dataset.m),tr=s.tiers[m.id];
     modal(`<div style="font-size:54px">${tr?TIERS[tr-1].e:''}${m.e}</div><h3 style="margin:4px 0">${m.n}</h3><p>${ar(c[m.k])} ${m.u}</p>
       <p style="font-size:15px">${m.at.map((x,k)=>`${TIERS[k].e} ${TIERS[k].n}: ${ar(x)}${c[m.k]>=x?' ✅':''}`).join('<br>')}</p>
