@@ -126,6 +126,30 @@ css.textContent=`
 .b3d.idle>svg{animation:b3float 5s ease-in-out infinite}
 @keyframes b3float{0%,100%{transform:rotateY(-6deg) rotateX(3deg)}50%{transform:rotateY(6deg) rotateX(1deg) translateY(-3px)}}
 .b3hint{text-align:center;font-size:12.5px;color:var(--muted);margin-top:2px}
+.v3open{width:100%;margin-top:10px;flex:none;font-size:19px;background:linear-gradient(135deg,#7c4dc4,#2f6fd0);box-shadow:0 5px 0 #3b2470;animation:pulse 2.2s infinite}
+.v3ov{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;background:linear-gradient(#8fd4ff,#d8f1ff 55%,#bff0c8);padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);transition:background .8s;user-select:none}
+.v3ov.night{background:linear-gradient(#0b1640,#1d2f6b 55%,#25466b)}
+.v3top{display:flex;align-items:center;gap:10px;padding:10px 12px}.v3top b{flex:1;text-align:center;font-size:20px;color:#0e5a3a}.v3ov.night .v3top b{color:#ffe08a}
+.v3b{width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.85);font-size:20px;flex:none}
+.v3stage{flex:1;min-height:0;perspective:900px;display:flex;align-items:center;justify-content:center;touch-action:none;overflow:hidden}
+.v3world{position:relative;width:min(92vw,520px,calc((100vh - 240px) * 1.09));aspect-ratio:360/330;transform-style:preserve-3d;transition:transform .25s ease-out}
+.v3world.sway{animation:v3sway 7s ease-in-out infinite}
+@keyframes v3sway{0%,100%{transform:rotateY(-14deg) rotateX(4deg)}50%{transform:rotateY(14deg) rotateX(2deg) translateY(-6px)}}
+.v3house{position:absolute;inset:0;transform:translateZ(0);border-radius:26px;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.35),0 0 0 4px rgba(255,255,255,.6)}
+.v3house svg{display:block;width:100%;height:100%;transition:filter .8s}
+.v3ov.night .v3house svg{filter:brightness(.5) saturate(1.3) hue-rotate(-12deg)}
+.v3glow{position:absolute;left:18%;right:18%;top:38%;bottom:8%;border-radius:50%;background:radial-gradient(closest-side,rgba(255,214,90,.75),rgba(255,214,90,0));mix-blend-mode:screen;opacity:0;transition:opacity .8s;transform:translateZ(10px);pointer-events:none}
+.v3ov.night .v3glow{opacity:1;animation:v3glow 2.4s ease-in-out infinite}
+@keyframes v3glow{50%{opacity:.7}}
+.v3shadow{position:absolute;left:8%;right:8%;bottom:-26px;height:30px;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.35),transparent);transform:translateZ(-40px) rotateX(70deg)}
+.v3p{position:absolute;pointer-events:none}.v3p i{display:block;font-style:normal;animation:v3float 3.4s ease-in-out infinite;filter:drop-shadow(0 3px 4px rgba(0,0,0,.25))}
+@keyframes v3float{50%{transform:translateY(-14px) rotate(8deg)}}
+.v3stars{position:absolute;inset:-20% -10% 40%;transform:translateZ(-120px);opacity:0;transition:opacity .8s}.v3ov.night .v3stars{opacity:1}
+.v3stars i{position:absolute;width:4px;height:4px;border-radius:50%;background:#fff;box-shadow:0 0 6px #fff;animation:v3tw 1.6s ease-in-out infinite}
+@keyframes v3tw{50%{opacity:.3}}
+.v3hint{text-align:center;font-size:14px;color:#0e5a3a;margin:4px 12px;font-weight:700}.v3ov.night .v3hint{color:#ffe08a}
+.v3acts{display:flex;gap:10px;padding:6px 14px 14px}.v3acts .btn{flex:1}
+@media (prefers-reduced-motion: reduce){.v3world.sway,.v3p i,.v3open{animation:none}}
 #aqHouse svg{height:100%}
 .dls{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
 .dl{display:flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--line);border-radius:14px;padding:5px 8px;text-align:right;color:inherit}
@@ -181,7 +205,7 @@ const medal=i=>['🥇','🥈','🥉'][i]||ar(i+1);
 function heroesHTML(){if(!hcache)return `<p class="hnote">${state.online?'⏳':'العب وتعلّم واعمل الخير لتصير من أبطال الأسبوع! 🌟'}</p>`;
   if(!hcache.length)return `<p class="hnote">لا أبطال بعد هذا الأسبوع. ${B('كن','كوني')} الأول! 🌟</p>`;
   const me=O()&&O().me;
-  return `<div class="hher">${hcache.slice(0,5).map((r,i)=>`<div class="${r.id==me?'me':''}"><span class="rk">${medal(i)}</span><span class="av">${esc(r.av)}</span><b>${esc(r.nick)}</b><small>${r.xp?`✨ ${ar(r.xp)}`:''}${r.wins?` 🏆 ${ar(r.wins)}`:''}</small></div>`).join('')}</div>
+  return `<div class="hher">${hcache.slice(0,10).map((r,i)=>`<div class="${r.id==me?'me':''}"><span class="rk">${medal(i)}</span><span class="av">${esc(r.av)}</span><b>${esc(r.nick)}</b><small>${r.xp?`✨ ${ar(r.xp)}`:''}${r.wins?` 🏆 ${ar(r.wins)}`:''}</small></div>`).join('')}</div>
    <p class="hnote">الترتيب بالأعمال الصالحة والتعلّم والانتصارات هذا الأسبوع · يبدأ من جديد كل جمعة</p>`}
 async function loadSocial(force){if(loading||!navigator.onLine||!O()||!state.online)return;if(!force&&Date.now()-lastLoad<60000&&fcache)return;
   loading=true;lastLoad=Date.now();
@@ -285,7 +309,7 @@ function openProfile(){stopVc();aqBack=null;show('alqab');$('#aqTitle').textCont
    <p class="tip">كل عملٍ صالح، وكل درسٍ ${B('تتعلّمه','تتعلّمينه')}، وكل تحدٍّ ${B('تفوز','تفوزين')} به، يرفع درجتك ✨<br>والأعمال تزيّن بيتك في الجنة أيضًا 🏡</p>`;
   bindDo($('#aqBody'),openProfile);tilt($('#aqHouse'));
   $('#aqBody').querySelectorAll('[data-dg]').forEach(b=>b.onclick=()=>{tone(880,.05,'sine',.08);goTo(DGO[b.dataset.dg],openProfile)});
-  const hh=$('#aqHouse');if(hh){hh.style.cursor='pointer';hh.onclick=()=>goTo('bayt')};
+  const hh=$('#aqHouse');if(hh){hh.style.cursor='pointer';hh.onclick=()=>view3D()};
   $('#aqBody').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{const x=TITLES.find(t=>t.id==b.dataset.t);
     if(!s.titles.includes(x.id)){modal(`<div style="font-size:50px">${x.e}</div><h3 style="margin:4px 0">${x.n}</h3><p>${B('كيف تربحه','كيف تربحينه')}؟<br><b>${x.how}</b></p><div class="nav"><button class="btn gold" data-close>حسنًا 💪</button></div>`);return}
     A().title=x.id;Aamal.save();tone(784,.1,'sine');publish();openProfile()});
@@ -324,12 +348,38 @@ function count(k,ret){stopVc();show('alqab');aqBack=ret||null;const P=PHR[k];$('
   $('#aqDone').onclick=()=>$('#aqBack').click();window.scrollTo(0,0)}
 
 /* ---------- البيت: أعمال تبني بيتك + بيت ثلاثي الأبعاد ---------- */
+/* ---------- 🏡✨ عرض البيت ثلاثي الأبعاد: يدور مع الإصبع، فيه عمق ولمعات، ووضع ليلي تضيء فيه الشبابيك ---------- */
+function view3D(){if(!window.Bayt)return;const ov=document.createElement('div');ov.className='v3ov';
+  const P=['✨','🦋','🕊️','🌸','⭐','✨','🦋','🌼','✨','💫','🌸','✨'];
+  const parts=P.map((e,k)=>{const x=6+((k*37)%88),y=8+((k*53)%70),z=60+((k*41)%120),d=(k%5)*.6;
+    return `<span class="v3p" style="left:${x}%;top:${y}%;transform:translateZ(${z}px)"><i style="animation-delay:${d}s;font-size:${16+(k%3)*6}px">${e}</i></span>`}).join('');
+  const stars=Array.from({length:26},(_,k)=>`<i style="left:${(k*29)%100}%;top:${(k*17)%55}%;animation-delay:${(k%7)*.3}s"></i>`).join('');
+  ov.innerHTML=`<div class="v3top"><button class="v3b" id="v3x" aria-label="إغلاق">✖</button><b>🏡 بيتي في الجنة</b><button class="v3b" id="v3n" aria-label="ليل ونهار">🌙</button></div>
+   <div class="v3stage" id="v3s"><div class="v3world sway" id="v3w">
+     <div class="v3stars">${stars}</div>
+     <div class="v3house">${Bayt.houseSVG(Bayt.done,-1,0,true,false)}</div>
+     <div class="v3glow"></div><div class="v3shadow"></div>${parts}</div></div>
+   <p class="v3hint">👆 حرّك إصبعك لتدور حول بيتك · 🌙 للّيل · كل عملٍ صالح يزيّن بيتك أكثر 🌷</p>
+   <div class="v3acts"><button class="btn gold" id="v3shop">🎨 زيّن بيتك</button><button class="btn" id="v3in" style="background:linear-gradient(160deg,#ffb36b,#c96a2a);box-shadow:0 5px 0 #8a4a1a">🛋️ ادخل بيتك</button></div>`;
+  document.body.appendChild(ov);document.body.style.overflow='hidden';
+  const w=$('#v3w'),st=$('#v3s');let ry=0,rx=0,drag=null,idleT=0;
+  const apply=()=>{w.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`};
+  const idle=()=>{clearTimeout(idleT);idleT=setTimeout(()=>{ry=0;rx=0;w.style.transform='';w.classList.add('sway')},2600)};
+  st.onpointerdown=e=>{drag={x:e.clientX,y:e.clientY,ry,rx};w.classList.remove('sway');try{st.setPointerCapture(e.pointerId)}catch(x){}};
+  st.onpointermove=e=>{if(!drag)return;ry=Math.max(-50,Math.min(50,drag.ry+(e.clientX-drag.x)*.4));rx=Math.max(-14,Math.min(18,drag.rx-(e.clientY-drag.y)*.2));apply()};
+  st.onpointerup=st.onpointercancel=()=>{drag=null;idle()};
+  const close=()=>{clearTimeout(idleT);ov.remove();document.body.style.overflow=''};
+  $('#v3x').onclick=close;
+  $('#v3n').onclick=()=>{const n=ov.classList.toggle('night');$('#v3n').textContent=n?'☀️':'🌙';try{(n?[523,659,784]:[784,988,1175]).forEach((f,i)=>tone(f,.15,'sine',.1,i*.09))}catch(e){}};
+  const toMenu=()=>{close();if(!$('#bayt').classList.contains('on')){show('bayt');Bayt.menu()}};
+  $('#v3shop').onclick=()=>{toMenu();const b=$('#jShop');b&&b.click()};
+  $('#v3in').onclick=()=>{toMenu();const b=$('#jIn');b&&b.click()}}
 function tilt(el){if(!el||el.dataset.t3)return;el.dataset.t3=1;el.classList.add('b3d','idle');const svg=el.querySelector('svg');if(!svg)return;
   let t=0;const mv=e=>{const r=el.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
     el.classList.remove('idle');svg.style.transform=`rotateY(${x*24}deg) rotateX(${-y*14}deg) scale(1.04)`;clearTimeout(t);t=setTimeout(()=>{svg.style.transform='';el.classList.add('idle')},1500)};
   el.addEventListener('pointermove',mv);el.addEventListener('pointerdown',mv)}
 if(window.Deco&&Deco.menuHook){const orig=Deco.menuHook;Deco.menuHook=function(B0){orig.apply(this,arguments);
-  const hb=B0.querySelector('.bhouse');tilt(hb);if(hb)hb.insertAdjacentHTML('afterend','<div class="b3hint">👆 حرّك إصبعك على البيت لتراه من كل الجهات، واضغط لتدخله</div>');
+  const hb=B0.querySelector('.bhouse');tilt(hb);if(hb){hb.insertAdjacentHTML('afterend','<button class="btn v3open" id="v3Open">🏡✨ شاهد بيتك ثلاثي الأبعاد</button>');$('#v3Open').onclick=()=>{tone(880,.05,'sine',.08);view3D()}}
   const own=Deco.deeds().filter(i=>Deco.owns(i.id)).length,all=Deco.deeds().length;
   const box=document.createElement('div');box.className='dbuild';
   box.innerHTML=`<h4>🤲 ${B('ابنِ','ابني')} بيتك بالأعمال الصالحة · ${ar(own)}/${ar(all)} جائزة</h4><div class="aqdo">${doBtns()}</div>`;

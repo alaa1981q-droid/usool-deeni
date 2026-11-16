@@ -141,16 +141,12 @@
   function hub() {
     leaveRoom(); setHead('🌐 العب أونلاين');
     body().innerHTML = `<div class="me-card"><span class="av">${profile.av}</span><span class="who-n"><b>${esc(profile.nick)}</b><small>🏆 ${ar(profile.wins || 0)} فوز · ${ar(profile.games || 0)} مباراة</small></span><button class="mini" id="editProf">✏️ لقبي</button></div>
-      <div class="code-card"><small>رمزك — أعطه لصديقك ليضيفك</small><b dir="ltr">${profile.code}</b><button class="mini" id="cpCode">نسخ</button></div>
       <div class="modes">
-        <button class="mode" id="oFriends"><span class="e">👥</span><span><b>أصدقائي</b><small>تحدَّ صديقًا متصلًا الآن.</small></span></button>
-        <button class="mode" id="oAdd"><span class="e">➕</span><span><b>أضف صديقًا</b><small>اكتب رمز صديقك المكوّن من ٦ خانات.</small></span></button>
         <button class="mode" id="oQuick"><span class="e">🔢</span><span><b>غرفة سريعة</b><small>لصديق بجانبك: رمز من ٤ أرقام.</small></span></button>
-        <button class="mode" id="oBoard"><span class="e">🏅</span><span><b>لوحة الأبطال</b><small>ترتيب هذا الأسبوع، يبدأ من جديد كل جمعة.</small></span></button>
-      </div>`;
-    $('#cpCode').onclick = () => { try { navigator.clipboard.writeText(profile.code).then(() => toast('نُسخ الرمز ✓'), () => toast(profile.code)); } catch (e) { toast(profile.code); } };
+      </div>
+      <p class="tip">👥 لتحدّي صديقك أو إضافة صديق: من الواجهة ← «أصدقائي»<br>🏅 وأبطال هذا الأسبوع في أسفل الواجهة</p>`;
     $('#editProf').onclick = setupProfile;
-    $('#oFriends').onclick = friends; $('#oAdd').onclick = addFriend; $('#oQuick').onclick = quick; $('#oBoard').onclick = board;
+    $('#oQuick').onclick = quick;
   }
 
   async function friends() {
