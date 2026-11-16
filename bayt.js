@@ -30,7 +30,7 @@ const hasGift=g=>RANKS.some(r=>r.gift==g&&cs.n>=r.at);
 const cupWord=n=>n==1?'كأس':n==2?'كأسان':n<=10?'كؤوس':'كأسًا';
 function cupsAdd(n,src){const today=new Date().toDateString();if(cs.day!=today){cs.day=today;cs.daily={}}
   if(n>0&&src&&DAILY[src]){const c=cs.daily[src]||0;if(c>=DAILY[src])return {got:0,capped:true};cs.daily[src]=c+1}
-  const before=cs.n;cs.n+=Math.max(0,n);csave();updHome();return {got:Math.max(0,n),before,after:cs.n}}
+  const before=cs.n;cs.n+=Math.max(0,n);csave();updHome();if(n>0&&window.Deco)Deco.addJ(n*10);return {got:Math.max(0,n),before,after:cs.n}}
 function cupsHTML(r,n){if(r.capped)return `<div class="cupbox"><b>🏆</b>جمعتَ كؤوس اليوم من هنا. ارجع غدًا لكؤوس جديدة 🌙</div>`;
   if(!r.got)return `<div class="cupbox"><b>🏆</b>لم تربح كأسًا هذه المرة، حاول مرة أخرى 💪</div>`;
   const nx=nextRank(cs.n);
@@ -244,20 +244,27 @@ function roof(n,cls=''){const y=fy(n-1),L=FX-12,R=FX+FW+12,M=FX+FW/2,H=66;
   <circle cx="${M}" cy="${y-24}" r="11" fill="url(#hWin)" stroke="url(#hGold)" stroke-width="3"/>
   <line x1="${M}" y1="${y-H}" x2="${M+DX}" y2="${y-H+DY}" stroke="url(#hGold)" stroke-width="4" stroke-linecap="round"/>
   <path d="M${M} ${y-H-2} q-9 -4 -7 -14 a9 9 0 0 0 14 0 q2 10 -7 14z" fill="url(#hGold)"/><circle cx="${M}" cy="${y-H-22}" r="3" fill="#ffd54a"/></g>`}
-function houseSVG(full,part,frac,withRoof,anim){
+function houseSVG(full,part,frac,withRoof,anim,look){
+  const L=look||(window.Deco?Deco.myLook():{c:cs.n}),D=window.Deco,hasGift=g=>RANKS.some(r=>r.gift==g&&(L.c||0)>=r.at);
   let s=`<svg viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">${defs()}${scene()}`;
+  if(D)s+=D.svg(L,'back');
   if(hasGift('rainbow'))s+=`<g fill="none" stroke-width="7" opacity=".55">${['#e2504a','#f2b632','#ffe066','#3fbf6f','#2f8fd0','#7c4dc4'].map((c,k)=>`<path d="M-10 ${GY-10} A190 170 0 0 1 370 ${GY-10}" stroke="${c}" transform="translate(0 ${k*7}) scale(1 ${1-k*.03})"/>`).join('')}</g>`;
   const top=Math.max(full,part+1);
   if(top>0)s+=`<ellipse cx="${FX+FW/2+DX/2}" cy="${GY+3}" rx="${FW/2+DX}" ry="9" fill="#2f7a45" opacity=".35"/>`;
+  const paint=D?D.paintFilter(L):'';if(paint)s+=`<g filter="${paint}">`;
   for(let i=0;i<full;i++)s+=floorFull(i,anim&&i==full-1?'fl-new':'');
+  if(paint)s+='</g>';
   if(part>=0){s+=topSlab(part);s+=floorPart(part,frac)}
   if(withRoof&&full>0)s+=roof(full,anim?'fl-new':'');
   if(hasGift('lanterns')&&full>0){const dx=FX+FW/2;s+=[dx-34,dx+34].map(x=>`<g><line x1="${x}" y1="${GY-56}" x2="${x}" y2="${GY-48}" stroke="#8a5a00" stroke-width="1.5"/><circle cx="${x}" cy="${GY-40}" r="11" fill="#ffe066" opacity=".45"/><rect x="${x-5}" y="${GY-48}" width="10" height="14" rx="3" fill="url(#hGold)" stroke="#8a5a00"/><rect x="${x-3}" y="${GY-45}" width="6" height="8" rx="2" fill="#fff6b0"/></g>`).join('')}
   if(hasGift('crown')&&withRoof&&full>0){const y=fy(full-1)-66-40,M=FX+FW/2;s+=`<g><circle cx="${M}" cy="${y+6}" r="22" fill="#ffe066" opacity=".35"/><path d="M${M-16} ${y+14} L${M-18} ${y-2} L${M-8} ${y+6} L${M} ${y-8} L${M+8} ${y+6} L${M+18} ${y-2} L${M+16} ${y+14}Z" fill="url(#hGold)" stroke="#9a6a00" stroke-width="1.5"/><circle cx="${M}" cy="${y+8}" r="2.6" fill="#e2504a"/><circle cx="${M-9}" cy="${y+10}" r="2" fill="#2f8fd0"/><circle cx="${M+9}" cy="${y+10}" r="2" fill="#3fbf6f"/></g>`}
   if(hasGift('flowers'))s+=[[FX-14,GY+2],[FX+10,GY+4],[FX+FW-6,GY+4],[FX+FW+DX-10,GY-2],[FX+FW+24,GY+2]].map(([x,y])=>`<g><ellipse cx="${x}" cy="${y}" rx="13" ry="8" fill="#2e9c55"/>${[[-6,-3,'#e2504a'],[1,-6,'#ff8ac2'],[7,-2,'#f2b632'],[-1,1,'#fff']].map(([a,b,c])=>`<circle cx="${x+a}" cy="${y+b}" r="2.8" fill="${c}"/>`).join('')}</g>`).join('');
   if(hasGift('fountain')){const x=0,y=0;s+=`<g transform="translate(50 ${GY+14}) scale(1.5)"><ellipse cx="${x}" cy="${y}" rx="20" ry="6" fill="#bfc9cf" stroke="#8b979e"/><ellipse cx="${x}" cy="${y-1}" rx="16" ry="4" fill="#7cc8ff"/><rect x="${x-2.5}" y="${y-22}" width="5" height="21" fill="#bfc9cf"/><ellipse cx="${x}" cy="${y-22}" rx="9" ry="3" fill="#bfc9cf"/><path d="M${x} ${y-24} q-10 -12 -14 4 M${x} ${y-24} q10 -12 14 4 M${x} ${y-24} v-10" stroke="#7cc8ff" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>`}
+  if(D)s+=D.svg(L,'front',full,withRoof);
   if(full==0&&part<0)s+=floorPart(0,0)+`<text x="${FX+FW/2}" y="${fy(0)-14}" text-anchor="middle" font-size="16" font-weight="800" fill="#3d5a4a" font-family="Tajawal,sans-serif">هنا سيُبنى بيتك</text>`;
-  return s+'</svg>'}
+  // معرّفات فريدة لكل رسمة: إذا تكرّرت ووقعت الأولى في شاشة مخفية تختفي الألوان من الباقي
+  const k=++svgN;return (s+'</svg>').replace(/(id="|url\(#)(h[A-Z]\w*)/g,`$1$2_${k}`)}
+let svgN=0;
 
 /* ---------- screen ---------- */
 const sec=document.createElement('section');sec.className='screen';sec.id='bayt';
@@ -289,6 +296,7 @@ function menu(){G=null;clearTimeout(autoT);const B=$('#byBody');
     <span class="mk">${dn?'⭐'.repeat(bs.stars[i]||1):why?'':'▶️'}</span></button>`}).join('')}
   <p class="bcap" style="margin-top:12px">المس الكلمة <b>التالية</b> بالترتيب قبل أن ينتهي الوقت ⏱️<br>الصحيح المتتابع يضاعف نقاطك 🔥 والنجمة الذهبية ⭐ تعطيك وقتًا إضافيًا.<br>الخطأ أو ترك الكلمة الصحيحة تسقط يهدم من بيتك!<br>🏆 كل نجمة جديدة تربحها في طابق = كأس، والسباق الكامل للطوابق الثلاثة = كأسان.<br>واجمع كؤوسًا أكثر من «اختبر نفسك» و«مسابقة الأبطال».</p>`;
   $('#byRace').onclick=()=>{sTap();play(0,0,true)};
+  if(window.Deco)Deco.menuHook(B);
   B.querySelectorAll('[data-lv]').forEach(b=>b.onclick=()=>{const i=+b.dataset.lv,why=lockWhy(i);
     if(why){tone(200,.15,'square',.08);modal(`<div style="font-size:50px">🔒</div><h3 style="margin:4px 0">${LEVELS[i].floor} مقفول</h3><p>${why}</p>${cs.n<FLOOR_CUPS[i]?'<p style="font-size:15px;color:var(--muted)">اجمع الكؤوس من «اختبر نفسك» و«مسابقة الأبطال»، أو أعد بناء الطوابق بنجوم أكثر ⭐</p>':''}<div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`);return}
     sTap();play(i,0)})}
@@ -383,10 +391,11 @@ function finish(){const i=G.i,lv=G.lv,last=i==LEVELS.length-1;stop();
   const won=newStars+(last&&G.race?2:0),cr=cupsAdd(won);updCard();
   const h=$('#byHouse');h.innerHTML=houseSVG(i+1,-1,0,true,true);h.classList.remove('grow');void h.offsetWidth;h.classList.add('grow');
   const [t,p]=FLOORMSG[i],total=G.score,race=G.race;
+  const jw=window.Deco?Deco.floorJewels(G.score-G.start):'';
   const nextWhy=last?'':lockWhy(i+1);
   const res=`<div class="bres"><div><b>${'⭐'.repeat(stars)}</b>التقييم</div><div><b>+${ar(tBonus)}</b>بقية الوقت</div><div><b>+${ar(lBonus)}</b>القلوب</div><div><b>${ar(total)}</b>المجموع</div></div>`;
   const cupNote=cr.got?cupsHTML(cr):`<div class="cupbox"><b>🏆</b>${stars<3?'اربح نجومًا أكثر في هذا الطابق لتربح كأسًا ⭐':'أخذتَ كل كؤوس هذا الطابق. أكمل السباق كاملًا لتربح كأسين!'}</div>`;
-  modal(`<div class="bhouse" style="margin-bottom:6px">${houseSVG(i+1,-1,0,true,true)}</div><h3 style="margin:4px 0">${t}</h3><p style="margin:2px 0 4px">${p}</p>${res}${cupNote}
+  modal(`<div class="bhouse" style="margin-bottom:6px">${houseSVG(i+1,-1,0,true,true)}</div><h3 style="margin:4px 0">${t}</h3><p style="margin:2px 0 4px">${p}</p>${res}${cupNote}${jw}
     ${last?`<p style="margin:4px 0;font-weight:800;color:#14794f">${newBest?'🏆 رقم قياسي جديد!':`أفضل نتيجة: ${ar(bs.best)}`}</p>`:nextWhy?`<p style="margin:4px 0;font-weight:800;color:#b06a2c">🔒 الطابق التالي ${nextWhy}.<br><small style="font-weight:500;color:var(--muted)">اجمع الكؤوس من «اختبر نفسك» و«مسابقة الأبطال»، أو أعد البناء بنجوم أكثر.</small></p>`:`<div style="font-size:14px;color:var(--muted)">المرحلة التالية تبدأ تلقائيًا…</div><div class="bauto"><i></i></div>`}
     <div class="nav">${last?`<button class="btn gold" id="byRe">🏁 سباق جديد</button>`:nextWhy?`<button class="btn gold" id="byRe">🔁 أعد هذا الطابق</button>`:`<button class="btn gold" id="byNext">انطلق الآن ⬆️</button>`}<button class="btn sec" id="byMenu">بيتي</button></div>`,()=>{
     $('#byMenu').onclick=()=>{clearTimeout(autoT);closeModal();menu()};
@@ -399,4 +408,5 @@ function finish(){const i=G.i,lv=G.lv,last=i==LEVELS.length-1;stop();
 document.addEventListener('visibilitychange',()=>{if(!G)return;if(document.hidden&&G.run){G.run=false;cancelAnimationFrame(G.raf);G.paused=true}
   else if(!document.hidden&&G.paused){G.paused=false;G.run=true;G.last=performance.now();G.raf=requestAnimationFrame(loop)}});
 window.__bayt={get G(){return G},need:()=>G&&need()};
+window.Bayt={houseSVG,menu,get done(){return bs.done},get cups(){return cs.n},rankOf,RANKS,sTap,sStar,sLine,VW,VH,GY,FX,FW,DX,fy};
 })();

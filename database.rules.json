@@ -52,9 +52,45 @@
     "leader": {
       "$week": {
         ".read": "auth != null",
-        ".indexOn": ["wins"],
+        ".indexOn": [
+          "wins"
+        ],
         "$uid": {
           ".write": "auth != null && auth.uid === $uid"
+        }
+      }
+    },
+    "houses": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.child('f').isNumber() && newData.child('i').isString() && newData.child('i').val().length <= 400 && newData.child('n').isString() && newData.child('n').val().length <= 40"
+      }
+    },
+    "gifts": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$id": {
+          ".write": "auth != null && ((!data.exists() && newData.child('f').val() === auth.uid && root.child('friends/' + $uid + '/' + auth.uid).exists()) || (auth.uid === $uid && !newData.exists()))",
+          ".validate": "newData.child('g').isString() && newData.child('g').val().length <= 16 && newData.child('n').isString() && newData.child('n').val().length <= 40"
+        }
+      }
+    },
+    "hlikes": {
+      "$uid": {
+        ".read": "auth != null",
+        "$from": {
+          ".write": "auth != null && auth.uid === $from && root.child('friends/' + $uid + '/' + $from).exists()",
+          ".validate": "newData.child('n').isNumber() && newData.child('n').val() <= (data.exists() ? data.child('n').val() : 0) + 1"
+        }
+      }
+    },
+    "hvisit": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$from": {
+          ".write": "auth != null && auth.uid === $from && root.child('friends/' + $uid + '/' + $from).exists()",
+          ".validate": "newData.child('n').isString() && newData.child('n').val().length <= 40"
         }
       }
     }

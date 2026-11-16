@@ -362,6 +362,7 @@
       ${!win && !tie ? '<p class="tip">المرة القادمة لك إن شاء الله! 💪</p>' : ''}
       <div class="nav"><button class="btn gold" id="again">تحدٍّ جديد</button></div><div class="nav"><button class="btn sec" id="toHub">الرئيسية أونلاين</button></div></div>`;
     if (win || tie) { fanfare(); confetti(); }
+    if (window.Deco) { const jw = Deco.challenge(win && !tie ? 30 : tie ? 20 : 10, 'online'); if (jw) $('#onBody .result h2').insertAdjacentHTML('afterend', jw); }
     $('#again').onclick = () => (room && room.opp && !forfeit ? challenge(room.opp) : hub());
     $('#toHub').onclick = hub;
     if (room.isHost) roomRef.update({ state: 'done' });
@@ -405,10 +406,17 @@
   function toast(t) { const d = document.createElement('div'); d.className = 'ctbanner b2'; d.style.fontSize = '18px'; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 1400); }
 
   window.openOnline = openOnline;
+  // for «بيتك في الجنة»: friends' houses, gifts and likes
+  window.OnlineAPI = {
+    init: () => init(), get db() { return db; }, get me() { return me; }, get profile() { return profile; },
+    get lastErr() { return lastErr; }, now, esc, toast,
+    friendIds: async () => Object.keys((await db.ref('friends/' + me).get()).val() || {}),
+    openAdd: async () => { show('online'); try { await init(); } catch (e) { return openOnline(); } if (!profile) return setupProfile(); addFriend(); }
+  };
   window.onlineBack = () => { if (room && room.data && room.data.state === 'play' && !room.done) {
       modal(`<h3 style="margin:4px 0">تريد الانسحاب؟</h3><p>إذا خرجت يفوز خصمك.</p><div class="nav"><button class="btn sec" data-close>أكمل</button><button class="btn" id="mQuit">انسحاب</button></div>`,
         () => { $('#mQuit').onclick = () => { closeModal(); room.done = true; leaveRoom(); renderHome(); show('home'); }; });
-    } else { leaveRoom(); renderHome(); show('home'); } };
+    } else { leaveRoom(); if (window.onlineReturn) { const f = window.onlineReturn; window.onlineReturn = null; f(); return; } renderHome(); show('home'); } };
   // reconnect quietly for invites if the child played online before
   window.addEventListener('load', () => { try { if (state.online && navigator.onLine) init().catch(() => {}); } catch (e) {} });
   window.markOnline = () => { state.online = true; save(); };

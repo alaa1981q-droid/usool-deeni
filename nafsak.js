@@ -110,6 +110,6 @@ function end(){const f=Q.good/Q.qs.length,b=boy(),B=$('#nfBody');
     ${tips?`<div class="tips"><b>${b?'تذكّر':'تذكّري'}:</b><br>${tips}</div>`:''}<div id="nfCups"></div>
     <div class="nav"><button class="btn gold" id="nfAgain">مواقف جديدة 🔁</button></div><div class="nav"><button class="btn sec" id="nfBayt">🏡 إلى بيتي في الجنة</button></div></div>`;
   if(f>=.8){fanfare();confetti()}
-  const n=f>=1?3:f>=.8?2:f>=.6?1:0;if(window.cupsAward)cupsAward(n,'nafsak',$('#nfCups'));
+  const n=f>=1?3:f>=.8?2:f>=.6?1:0;if(window.cupsAward)cupsAward(n,'nafsak',$('#nfCups'));if(window.Deco){const jw=Deco.challenge(Math.max(3,Q.good*3),'nafsak');if(jw)$('#nfCups').insertAdjacentHTML('beforeend',jw)}
   $('#nfAgain').onclick=start;$('#nfBayt').onclick=()=>{$('#openBayt')&&$('#openBayt').click()}}
 })();
