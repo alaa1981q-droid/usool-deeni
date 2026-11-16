@@ -268,12 +268,12 @@ let svgN=0;
 
 /* ---------- screen ---------- */
 const sec=document.createElement('section');sec.className='screen';sec.id='bayt';
-sec.innerHTML=`<div class="bar"><button class="back" id="byBack">›</button><div class="ttl">ابنِ بيتك في الجنة</div></div><div id="byBody" style="flex:1;display:flex;flex-direction:column"></div>`;
+sec.innerHTML=`<div class="bar"><button class="back" id="byBack">›</button><div class="ttl">رحلة دينية مسلّية 🏡</div></div><div id="byBody" style="flex:1;display:flex;flex-direction:column"></div>`;
 document.querySelector('.app').appendChild(sec);
 const card=document.createElement('button');card.className='bookcard baytcard';card.id='openBayt';
-card.innerHTML=`<span class="cup">🏡</span><span><b>ابنِ بيتك في الجنة</b><small id="baytLine"></small></span><span class="go">‹</span>`;
+card.innerHTML=`<span class="cup">🏡</span><span><b>رحلة دينية مسلّية</b><small id="baytLine"></small></span><span class="go">‹</span>`;
 $('#openContest').after(card);
-const updCard=()=>{$('#baytLine').textContent=bs.done>=3?`بيتك ثلاثة طوابق! أفضل نتيجة: ${ar(bs.best)} نقطة 🏰`:bs.done?`بيتك الآن ${['','طابق واحد','طابقان'][bs.done]}، أكمل البناء!`:'سباق بناء: اجمع الكلمات بالترتيب قبل أن ينتهي الوقت'};
+const updCard=()=>{$('#baytLine').textContent=bs.done>=3?`بيتك ثلاثة طوابق! أفضل نتيجة: ${ar(bs.best)} نقطة 🏰`:bs.done?`بيتك الآن ${['','طابق واحد','طابقان'][bs.done]}، أكمل البناء!`:'ابنِ بيتك في الجنة وزيّنه، وسابق أصدقاءك 🏁'};
 updCard();updHome();
 card.onclick=()=>{sTap();menu();show('bayt')};
 $('#byBack').onclick=()=>{clearTimeout(autoT);if(G&&G.net){G.net.quit(G);return}if(G){stop();menu()}else{updCard();renderHome&&renderHome();show('home')}};
