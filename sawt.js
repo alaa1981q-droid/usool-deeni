@@ -175,8 +175,7 @@ function counter(el,{phrase,target=10,emoji='💚',onDone}){let n=0,vh=null,done
   el.innerHTML=`<div class="vx"><div class="tx" style="font-size:24px">${phrase}</div>
     <div class="vcount" id="vcN">${ar(0)}</div><div class="vbeads">${Array.from({length:target},(_,k)=>`<i data-b="${k}"></i>`).join('')}</div>
     <button class="vmic" aria-label="ابدأ"><span class="ring"></span>🎤</button>
-    <div class="vmsg">${B('اضغط المايك وقلها بصوتك، ثم اسكت لحظة بين كل مرة','اضغطي المايك وقوليها بصوتك، ثم اسكتي لحظة بين كل مرة')}</div>
-    <button class="link-btn" id="vcTap">لا يعمل المايك؟ ${B('اضغط هنا كلما قلتها','اضغطي هنا كلما قلتِها')} ✋</button></div>`;
+    <div class="vmsg">${B('اضغط المايك وقلها بصوتك، ثم اسكت لحظة بين كل مرة','اضغطي المايك وقوليها بصوتك، ثم اسكتي لحظة بين كل مرة')}</div></div>`;
   const mic=el.querySelector('.vmic'),ring=el.querySelector('.ring'),msg=el.querySelector('.vmsg');
   const bump=k=>{for(let i=0;i<k&&n<target;i++){n++;const b=el.querySelector(`[data-b="${n-1}"]`);if(b){b.classList.add('on');b.textContent=emoji}}
     el.querySelector('#vcN').textContent=ar(n);tone(523+n*60,.12,'triangle',.14);if(n%5==0)fly(emoji);
@@ -185,8 +184,7 @@ function counter(el,{phrase,target=10,emoji='💚',onDone}){let n=0,vh=null,done
     try{mic.classList.add('on');msg.className='vmsg mid';msg.textContent=B('أسمعك… قلها الآن 👂','أسمعكِ… قوليها الآن 👂');
       vh=await vad({minMs:600,onLevel:(l,loud)=>{ring.style.opacity=loud?.9:0;ring.style.transform=`scale(${1+l*.35})`},
         onUtter:d=>bump(Math.min(3,Math.max(1,Math.round(d/2600))))})}
-    catch(e){mic.classList.remove('on');vh=null;msg.className='vmsg bad';msg.textContent=micHelp(e)+'. '+B('أو اضغط «✋» كلما قلتها','أو اضغطي «✋» كلما قلتِها')}};
-  el.querySelector('#vcTap').onclick=()=>bump(1);
+    catch(e){mic.classList.remove('on');vh=null;msg.className='vmsg bad';msg.textContent=micHelp(e)}};
   return {stop(){if(vh){vh.stop();vh=null}}}}
 
 window.Voice={norm,compare,hear,vad,reciteBox,counter,canCorrect,stop:stopAll,fly,chime};

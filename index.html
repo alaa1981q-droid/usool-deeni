@@ -1083,7 +1083,7 @@ document.addEventListener('keydown',e=>{if($('#zoomv').classList.contains('on'))
   if(!$('#reader').classList.contains('on'))return;
   if(e.key=='ArrowLeft')rGo(rCur+1);else if(e.key=='ArrowRight')rGo(rCur-1);else if(e.key=='Escape')closeReader()});
 
-const APP_VER='3.5';
+const APP_VER='3.6';
 $('#verLine').textContent=`الإصدار ${ar(APP_VER).replace('.','٫')} · ${ar(ALLQ.length)} سؤالًا`;
 renderHome();
 if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
