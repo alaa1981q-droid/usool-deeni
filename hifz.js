@@ -48,7 +48,7 @@ function line(){const n=Object.keys(hs.done).length;$('#hzLine').textContent=n?`
 line();
 card.onclick=()=>{list();show('hifz')};
 let inSurah=false;
-$('#hzBack').onclick=()=>{stop();if(inSurah){list()}else{renderHome&&renderHome();show('home')}};
+$('#hzBack').onclick=()=>{stop();if(rv){rv.stop();rv=null}if(inSurah){list()}else{renderHome&&renderHome();show('home')}};
 
 /* ---------- player ---------- */
 const audio=new Audio();audio.preload='auto';
@@ -84,6 +84,7 @@ function surah(i){inSurah=true;stop();hide=false;const s=SUR[i],B=$('#hzBody');
   $('#hzTitle').textContent='سورة '+s.name;
   const bism=s.n!==1;
   B.innerHTML=`<div class="hztools"><button id="hzAll">▶️ السورة كاملة</button><button id="hzRep">🔁 كرّر ×${ar(3)}</button><button id="hzHide">🙈 اختبر حفظي</button></div>
+   ${window.Voice?`<button class="btn" id="hzMic" style="background:#13958c;box-shadow:0 5px 0 #0d6b65;margin-bottom:10px;flex:none;width:100%">🎤 سمّعني بصوتي — التطبيق يصحّح لي</button>`:''}
    <div class="hzhint" id="hzHint">👆 ${boy()?'اضغط':'اضغطي'} على أي آية لتسمعها</div>
    <div class="card" style="--sc:#2f6fd0;flex:none" id="hzWrap">
     ${bism?`<div class="hzbism">${BASMALA}</div>`:''}
@@ -106,7 +107,7 @@ function surah(i){inSurah=true;stop();hide=false;const s=SUR[i],B=$('#hzBody');
     if(hs.done[s.n]){list();return}
     modal(`<div style="font-size:46px">🌟</div><h3 style="margin:4px 0">${boy()?'هل حفظتَ':'هل حفظتِ'} سورة ${s.name}؟</h3><p>${boy()?'جرّب':'جرّبي'} «اختبر حفظي» أولًا، ${boy()?'واقرأها':'واقرئيها'} بلا نظر. هل ${boy()?'قرأتها':'قرأتِها'} كلّها صحيحة؟</p>
       <div class="nav"><button class="btn sec" data-close>ليس بعد</button><button class="btn gold" id="hzYes">نعم، حفظتُها!</button></div>`);
-    $('#hzYes').onclick=()=>{hs.done[s.n]=1;hsave();line();
+    $('#hzYes').onclick=()=>{hs.done[s.n]=1;hsave();line();if(window.Aamal)Aamal.grow('hifz');
       closeModal();
       if(typeof fanfare==='function')fanfare();if(typeof confetti==='function')confetti();
       const n=Object.keys(hs.done).length;
@@ -114,5 +115,37 @@ function surah(i){inSurah=true;stop();hide=false;const s=SUR[i],B=$('#hzBody');
       if(window.cupsAward)cupsAward(2,'hifz',$('#hzCups'));
       surah(i)}};
   const nx=$('#hzNext');if(nx)nx.onclick=()=>surah(i+1);
+  const mc=$('#hzMic');if(mc)mc.onclick=()=>{stop();recite(i)};
   window.scrollTo(0,0)}
+
+/* ---------- 🎤 سمّعني: الطفل يقرأ آيةً آية بصوته، والتطبيق يلوّن الكلمات ---------- */
+let rv=null;
+function recite(i,k=0,res=[],hideOn=true){const s=SUR[i],Bd=$('#hzBody');if(rv)rv.stop();inSurah=true;
+  $('#hzTitle').textContent='🎤 سمّعني: سورة '+s.name;
+  Bd.innerHTML=`<div class="vprog">${s.v.map((_,j)=>`<i class="${j<k?(res[j]>=.8?'ok':'mid'):j==k?'cur':''}"></i>`).join('')}</div>
+   <div class="hzhint">الآية ${ar(k+1)} من ${ar(s.v.length)} · ${hideOn?'🙈 '+(boy()?'اقرأها من حفظك':'اقرئيها من حفظك'):'👀 الآية ظاهرة'}</div>
+   <div id="hzRc"></div>
+   <div class="hztools" style="margin-top:10px"><button id="hzHear">🔊 أسمعني الآية</button><button id="hzShow">${hideOn?'👀 أظهر الآية':'🙈 أخفِ الآية'}</button></div>
+   <div class="nav"><button class="btn sec" id="hzSkip">${k+1<s.v.length?'الآية التالية ←':'النتيجة 🏁'}</button></div>
+   <div class="nav"><button class="btn sec" id="hzOut">رجوع إلى السورة</button></div>`;
+  let score=0;
+  rv=Voice.reciteBox($('#hzRc'),s.v[k],{quran:true,hide:hideOn,onResult:(sc,mode)=>{score=Math.max(score,sc);
+    if(sc>=.8){$('#hzSkip').className='btn gold';if(mode=='sr')setTimeout(()=>{if($('#hzSkip'))next()},1800)}}});
+  const next=()=>{if(rv)rv.stop();res[k]=score;if(k+1<s.v.length)recite(i,k+1,res,hideOn);else reciteEnd(i,res,hideOn)};
+  $('#hzSkip').onclick=next;
+  $('#hzHear').onclick=()=>playSeq([{f:file(s.n,k+1)}]);
+  $('#hzShow').onclick=()=>{stop();recite(i,k,res,!hideOn)};
+  $('#hzOut').onclick=()=>{if(rv)rv.stop();surah(i)};
+  window.scrollTo(0,0)}
+function reciteEnd(i,res,hideOn){const s=SUR[i],good=res.filter(x=>x>=.8).length,all=good==s.v.length,Bd=$('#hzBody');
+  if(window.Aamal){Aamal.add('tilawa',good);if(good)Aamal.grow('ayah',Math.min(2,good));if(all&&hideOn){Aamal.d.surOk[s.n]=1;Aamal.save();if(!hs.done[s.n])Aamal.grow('hifz')}}
+  Bd.innerHTML=`<div class="result"><div class="big">${all?'🌟':'📖'}</div><h2 style="color:${all?'var(--ok)':'#2f6fd0'}">${all?(boy()?'ما شاء الله! سمّعتَ السورة كلّها':'ما شاء الله! سمّعتِ السورة كلّها'):`قرأتَ ${ar(good)} من ${ar(s.v.length)} آيات صحيحة`}</h2>
+    <div class="vprog">${res.map(x=>`<i class="${x>=.8?'ok':'mid'}"></i>`).join('')}</div>
+    <p>${all?(hideOn?'قرأتها من حفظك! 🤍':'جرّب الآن من حفظك والآيات مخفيّة 🙈'):'كل يوم تقرأ أكثر تحفظ أكثر. أعد الآيات الصفراء 💪'}</p><div id="hzRcCups"></div>
+    <div class="nav"><button class="btn gold" id="hzAgain">🎤 مرة أخرى</button></div><div class="nav"><button class="btn sec" id="hzBackS">رجوع إلى السورة</button></div></div>`;
+  if(all){if(typeof fanfare=='function')fanfare();if(typeof confetti=='function')confetti();
+    if(hideOn&&!hs.done[s.n]){hs.done[s.n]=1;hsave();line();$('#hzRcCups').insertAdjacentHTML('beforeend',`<div class="cupbox win"><b>⭐</b>سُجّلت سورة ${s.name} في محفوظاتك!</div>`)}
+    if(window.cupsAward)cupsAward(1,'tilawa',$('#hzRcCups'))}
+  $('#hzAgain').onclick=()=>recite(i);$('#hzBackS').onclick=()=>surah(i);
+  window.Alqab&&Alqab.soon()}
 })();

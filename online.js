@@ -391,17 +391,20 @@
     const w = week(), winInc = win && !tie ? 1 : 0;
     profile.wins = (profile.wins || 0) + winInc; profile.games = (profile.games || 0) + 1;
     db.ref('profiles/' + me).update({ wins: profile.wins, games: profile.games });
-    db.ref(`leader/${w}/${me}`).transaction(v => { v = v || { wins: 0, pts: 0 }; return { nick: profile.nick, av: profile.av, wins: v.wins + winInc, pts: v.pts + a.sc }; });
+    db.ref(`leader/${w}/${me}`).transaction(v => { v = v || { wins: 0, pts: 0 }; return Object.assign({}, v, { nick: profile.nick, av: profile.av, wins: (v.wins || 0) + winInc, pts: (v.pts || 0) + a.sc }); });
+    if (winInc && window.Aamal) Aamal.grow('win');
+    if (window.Alqab) Alqab.soon();
   }
 
   async function board() {
     setHead('🏅 لوحة الأبطال');
     body().innerHTML = `<div class="handoff"><div class="big spin">🏅</div></div>`;
-    const s = await db.ref('leader/' + week()).orderByChild('wins').limitToLast(30).get();
+    const s = await db.ref('leader/' + week()).get();
     const rows = []; s.forEach(c => { rows.push({ id: c.key, ...c.val() }); });
-    rows.sort((x, y) => (y.wins - x.wins) || (y.pts - x.pts));
+    const key = r => Math.max(r.xp || 0, (r.wins || 0) * 10);
+    rows.sort((x, y) => (key(y) - key(x)) || ((y.wins || 0) - (x.wins || 0)) || ((y.pts || 0) - (x.pts || 0))); rows.splice(30);
     const medal = i => ['🥇', '🥈', '🥉'][i] || ar(i + 1);
-    body().innerHTML = rows.length ? `<p class="tip">ترتيب هذا الأسبوع حسب عدد الانتصارات · يبدأ من جديد كل جمعة</p><div class="flist">${rows.map((r, i) => `<div class="frow ${r.id === me ? 'mine' : ''}"><span class="rk">${medal(i)}</span><span class="av">${r.av}</span><span class="who-n"><b>${esc(r.nick)}</b><small>${ar(r.pts || 0)} نقطة</small></span><span class="wn">🏆 ${ar(r.wins || 0)}</span></div>`).join('')}</div>
+    body().innerHTML = rows.length ? `<p class="tip">أبطال هذا الأسبوع: بالأعمال الصالحة والتعلّم ✨ والانتصارات 🏆 · يبدأ من جديد كل جمعة</p><div class="flist">${rows.map((r, i) => `<div class="frow ${r.id === me ? 'mine' : ''}"><span class="rk">${medal(i)}</span><span class="av">${esc(r.av)}</span><span class="who-n"><b>${esc(r.nick)}</b><small>✨ ${ar(r.xp || 0)} · ${ar(r.pts || 0)} نقطة</small></span><span class="wn">🏆 ${ar(r.wins || 0)}</span></div>`).join('')}</div>
       <button class="btn sec" id="backHub" style="margin-top:12px">رجوع</button>`
       : `<div class="handoff"><div class="big">🏅</div><h2>اللوحة فارغة هذا الأسبوع</h2><p>كن أول بطل! العب تحدّيًا واربح.</p><button class="btn sec" id="backHub" style="flex:none;min-width:200px">رجوع</button></div>`;
     $('#backHub').onclick = hub;
@@ -433,6 +436,8 @@
     init: () => init(), get db() { return db; }, get me() { return me; }, get profile() { return profile; },
     get lastErr() { return lastErr; }, now, esc, toast, get busy() { return !!(room && room.data && room.data.state === 'play'); },
     friendIds: async () => Object.keys((await db.ref('friends/' + me).get()).val() || {}),
+    week, challenge: async (uid) => { show('online'); try { await init(); } catch (e) { return openOnline(); } if (!profile) return setupProfile(); challenge(uid); },
+    openBoard: async () => { show('online'); try { await init(); } catch (e) { return openOnline(); } if (!profile) return setupProfile(); board(); },
     openAdd: async () => { show('online'); try { await init(); } catch (e) { return openOnline(); } if (!profile) return setupProfile(); addFriend(); }
   };
   window.onlineBack = () => { if (room && room.data && room.data.state === 'play' && !room.done) {

@@ -1,0 +1,309 @@
+/* 🏅 ألقابي وأوسمتي — ملفّ الطفل: المستوى (الدرجة) والأوسمة والألقاب، وكل عملٍ صالح يرفعه.
+   + في واجهة البرنامج: بطاقتي، أصدقائي (وإضافة صديق)، أبطال هذا الأسبوع.
+   + أعمال تبني البيت: الصلاة على النبي والتسبيح بالصوت، وجوائز الأعمال في البيت، وبيت ثلاثي الأبعاد يتحرّك مع الإصبع.
+   الأرقام تُحسب من حفظ التطبيق نفسه (state, Aamal, hifz, Cups...) فلا تُفقد. يعتمد على sawt.js و jannah.js و online.js. */
+(function(){
+const boy=()=>!window.Cups||Cups.sex!='g';
+const B=(m,f)=>boy()?m:f;
+const A=()=>Aamal.d;
+const O=()=>window.OnlineAPI;
+const esc=v=>String(v==null?'':v).replace(/[<>&"]/g,'');
+const J=k=>{try{return JSON.parse(localStorage.getItem(k)||'null')||{}}catch(e){return {}}};
+
+/* ---------- العدّادات ---------- */
+function fiqhPts(){let best=0;Object.values(A().fiqh||{}).forEach(f=>{const p=['wl','sl','wo','so','sv'].filter(k=>f[k]).length+(f.wt>=.75?1:0)+(f.st>=.75?1:0);best=Math.max(best,p)});return best}
+function fiqhBoth(){return Object.values(A().fiqh||{}).some(f=>f.wt>=.75&&f.st>=.75)}
+function C(){const a=A(),hz=J('usul5_hifz_v1').done||{},w=state.wird||{};
+  if(O()&&O().profile)a.wins=O().profile.wins||0;
+  return {stars:Object.values(state.stars||{}).reduce((s,x)=>s+x,0),stages:STAGES.filter(s=>state.stars[s.id]>0).length,all:allDone(),
+    hifz:Object.keys(hz).length,tilawa:a.tilawa|0,pray:a.prayN|0,fiqh:fiqhPts(),fiqh2:fiqhBoth(),sal:a.sal|0,tas:a.tas|0,
+    wins:a.wins|0,akhlaq:a.akhlaq|0,deeds:a.gN|0,wird:w.best|0,cups:window.Cups?Cups.n:0,floors:window.Bayt?Bayt.done:0}}
+
+const TIERS=[{e:'🥉',n:'برونزي',xp:10,c:'#b06a2c'},{e:'🥈',n:'فضّي',xp:25,c:'#6f7f8f'},{e:'🥇',n:'ذهبي',xp:50,c:'#c98a12'},{e:'💎',n:'ماسي',xp:100,c:'#2f8fd0'}];
+const MEDALS=[
+ {id:'usul',  e:'📚',n:'عالم الأصول',        k:'stars', at:[3,9,15,18],   u:'نجمة في مراحل الكتاب',  go:'map'},
+ {id:'pray',  e:'🤲',n:'المصلّي',            k:'pray',  at:[5,35,150,500],u:'صلاة سجّلتها',          go:'pray'},
+ {id:'fiqh',  e:'🕌',n:'فقيه الوضوء والصلاة',k:'fiqh',  at:[2,4,6,7],     u:'خطوة في «وضوئي وصلاتي»',go:'salah'},
+ {id:'hifz',  e:'📖',n:'الحافظ الصغير',      k:'hifz',  at:[1,3,6,12],    u:'سورة حفظتها',           go:'hifz'},
+ {id:'tilawa',e:'🎤',n:'القارئ',             k:'tilawa',at:[10,40,120,300],u:'آية قرأتها بصوتك',      go:'hifz'},
+ {id:'sal',   e:'💚',n:'المصلّي على النبي',  k:'sal',   at:[10,100,500,1500],u:'صلاة على النبي وآله', go:'sal'},
+ {id:'tas',   e:'📿',n:'المسبّح',            k:'tas',   at:[10,100,330,1000],u:'تسبيحة',              go:'tas'},
+ {id:'champ', e:'⚔️',n:'بطل التحديات',       k:'wins',  at:[1,5,15,40],   u:'فوز في التحدّي أونلاين',go:'online'},
+ {id:'akhlaq',e:'🌷',n:'صاحب الأخلاق',       k:'akhlaq',at:[1,4,10,25],   u:'جولة ممتازة في «اختبر نفسك»',go:'nafsak'},
+ {id:'wird',  e:'🔥',n:'المواظب',            k:'wird',  at:[3,7,15,30],   u:'يومًا متتاليًا في الورد',go:'wird'},
+ {id:'banna', e:'🏡',n:'بنّاء الجنة',        k:'cups',  at:[3,15,40,80],  u:'كأس 🏆',                go:'bayt'},
+ {id:'garden',e:'🌱',n:'حديقة الأعمال',      k:'deeds', at:[10,50,150,400],u:'عمل صالح زيّن بيتك',   go:'bayt'}];
+// مستوى كل نوع من الأعمال في الملف
+const DLV=[1,5,15,40,100];
+const DGO={sal:'sal',tas:'tas',pray:'pray',ayah:'hifz',fiqh:'salah',hifz:'hifz',akhlaq:'nafsak',wird:'wird',dars:'map',win:'online'};
+function deedsHTML(){const gc=A().gc||{},G=Aamal.GROW;
+  return Object.entries(G).map(([k,g])=>{const n=gc[k]|0,lv=DLV.filter(x=>n>=x).length,nx=DLV[lv],pv=lv?DLV[lv-1]:0,f=nx?(n-pv)/(nx-pv):1;
+    return `<button class="dl ${n?'':'z'}" data-dg="${k}"><span class="e">${g[0]}</span><span class="tx"><b>${g[4]}</b><small>${ar(n)} · ${lv?'⭐'.repeat(lv):'لم يبدأ بعد'}</small><div class="bar2"><i style="width:${Math.round(f*100)}%"></i></div></span></button>`}).join('')}
+const TITLES=[
+ {id:'grad', e:'🎓',n:'خرّيج أصول الدين',     c:c=>c.all,        how:'أكمل مراحل الكتاب الست'},
+ {id:'champ',e:'⚔️',n:'بطل التحديات',         c:c=>c.wins>=3,    how:'افز في ٣ تحدّيات أونلاين'},
+ {id:'musal',e:'🕌',n:'المصلّي المواظب',      c:c=>c.pray>=35,   how:'سجّل ٣٥ صلاة صلّيتها'},
+ {id:'faqih',e:'💧',n:'يعرف وضوءه وصلاته',    c:c=>c.fiqh2,      how:'انجح في اختبارَي الوضوء والصلاة'},
+ {id:'hafiz',e:'📖',n:'حافظ القرآن الصغير',    c:c=>c.hifz>=5,    how:'احفظ ٥ سور'},
+ {id:'qari', e:'🎤',n:'القارئ الصغير',         c:c=>c.tilawa>=40, how:'سمّع ٤٠ آية بصوتك'},
+ {id:'muhib',e:'💚',n:'محبّ النبي وآله',       c:c=>c.sal>=100,   how:'صلِّ على النبي وآله ١٠٠ مرة'},
+ {id:'khuluq',e:'🌷',n:'صاحب الخُلق الجميل',   c:c=>c.akhlaq>=4,  how:'٤ جولات ممتازة في «اختبر نفسك»'},
+ {id:'muwa', e:'🔥',n:'المواظب على الورد',     c:c=>c.wird>=7,    how:'سلسلة ٧ أيام في الورد اليومي'},
+ {id:'jannah',e:'👑',n:'بطل الجنة',            c:c=>c.cups>=40,   how:'اجمع ٤٠ كأسًا'}];
+const LEVELS=[[1,'🌱','برعم الإيمان'],[3,'⭐','نجم صغير'],[5,'🌟','نجم ساطع'],[7,'🌙','قمر منير'],[10,'🏇','فارس الإيمان'],[13,'🦅','صقر الهدى'],[16,'👑','بطل الجنة']];
+const tierOf=(m,c)=>m.at.filter(x=>c[m.k]>=x).length; // 0..4
+function xpOf(c){let x=c.deeds*3+c.stars*5+c.stages*10+c.hifz*15+c.tilawa*2+c.pray*3+c.fiqh*10+Math.floor(c.sal/10)*4+Math.floor(c.tas/10)*3+c.wins*10+c.akhlaq*8+c.wird*4+c.cups*3;
+  MEDALS.forEach(m=>{for(let t=0;t<tierOf(m,c);t++)x+=TIERS[t].xp});TITLES.forEach(t=>{if(t.c(c))x+=30});return x}
+const need=L=>15*L*(L-1); // XP لبداية المستوى L
+const lvOf=x=>{let L=1;while(x>=need(L+1))L++;return L};
+const lvName=L=>{let r=LEVELS[0];LEVELS.forEach(l=>{if(L>=l[0])r=l});return r};
+function snap(){const c=C(),x=xpOf(c),L=lvOf(x),tiers={};MEDALS.forEach(m=>tiers[m.id]=tierOf(m,c));
+  return {c,x,L,tiers,titles:TITLES.filter(t=>t.c(c)).map(t=>t.id)}}
+// الجوائز في البيت بحسب الأعمال
+const DEED_ITEMS=[['d_rose',c=>c.sal>=10],['d_birds',c=>c.tas>=10],['d_lamps',c=>c.pray>=5],['d_star',c=>c.tilawa>=10],['d_palms',c=>c.sal>=100],['d_fruit',c=>c.pray>=35],['d_noor',c=>c.sal>=500],
+  ['d_spring',()=>Object.values(A().fiqh||{}).some(f=>f.wt>=.75)],['d_mosque',()=>Object.values(A().fiqh||{}).some(f=>f.st>=.75)]];
+const shownTitle=s=>{const t=TITLES.find(t=>t.id==A().title&&s.titles.includes(t.id))||TITLES.filter(t=>s.titles.includes(t.id)).pop();return t||null};
+const myName=()=>(O()&&O().profile&&O().profile.nick)||state.name||B('بطلنا','بطلتنا');
+const myAv=()=>(O()&&O().profile&&O().profile.av)||(boy()?'👦':'👧');
+
+/* ---------- الشكل ---------- */
+const css=document.createElement('style');
+css.textContent=`
+.hpro{display:flex;align-items:center;gap:10px;width:100%;margin-top:10px;background:linear-gradient(135deg,#fff8e0,#fff);border:3px solid var(--gold);border-radius:22px;padding:8px 12px;text-align:right;color:inherit;box-shadow:0 5px 0 #e9d49a}
+.hpro:active{transform:translateY(3px);box-shadow:0 2px 0 #e9d49a}
+.hpro .av{font-size:44px;line-height:1;flex:none;position:relative}
+.hpro .lv{position:absolute;bottom:-6px;left:-8px;background:#14794f;color:#fff;border-radius:12px;font-size:12px;font-weight:800;padding:0 6px;line-height:1.6;border:2px solid #fff}
+.hpro .nm{flex:1;min-width:0}.hpro .nm b{display:block;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hpro .nm small{display:block;font-size:13px;color:#8a5a00;font-weight:700}
+.xpbar{height:9px;background:#efe3c0;border-radius:8px;overflow:hidden;margin-top:3px}.xpbar i{display:block;height:100%;background:linear-gradient(90deg,#f2b632,#e57c1f);border-radius:8px;transition:width .6s}
+.hpro .md{font-size:18px;letter-spacing:1px;flex:none;max-width:80px;text-align:center;line-height:1.3}
+.hbox{background:#fff;border:2px solid var(--line);border-radius:20px;padding:8px 10px;margin-top:10px}
+.hbox h4{margin:0 0 6px;font-size:16px;display:flex;align-items:center;gap:6px}.hbox h4 span{flex:1}
+.hbox h4 button{border:0;border-radius:12px;padding:2px 10px;font-weight:800;font-size:13px;background:var(--green);color:#fff}
+.hbox h4 button.sec{background:#eef6f1;color:var(--deep)}
+.hfrs{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none}.hfrs::-webkit-scrollbar{display:none}
+.hfr{flex:none;width:74px;border:2px solid var(--line);background:#fafdfb;border-radius:16px;padding:4px 2px;text-align:center;color:inherit;position:relative}
+.hfr .av{font-size:30px;line-height:1.2;display:block}.hfr b{display:block;font-size:11.5px;line-height:1.3;height:30px;overflow:hidden}.hfr small{font-size:11px;color:#14794f;font-weight:800}
+.hfr .on{position:absolute;top:2px;right:4px;width:10px;height:10px;border-radius:50%;background:#1fa463;border:2px solid #fff}
+.hfr.add{border-style:dashed;color:var(--green)}.hfr.add .av{font-size:28px}
+.hher{display:flex;flex-direction:column;gap:5px}
+.hher div{display:flex;align-items:center;gap:8px;background:#fafdfb;border-radius:12px;padding:2px 8px;font-size:14px}
+.hher div.me{background:#fff8e0;outline:2px solid var(--gold)}
+.hher .rk{width:24px;text-align:center;font-weight:800}.hher .av{font-size:22px}.hher b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hher small{color:var(--muted);font-weight:700;white-space:nowrap}
+.hnote{font-size:13px;color:var(--muted);text-align:center;line-height:1.6;margin:2px 0}
+.aqhead{text-align:center;background:linear-gradient(160deg,#fff8e0,#fff);border:3px solid var(--gold);border-radius:26px;padding:12px}
+.aqhead .av{font-size:64px;line-height:1.1}.aqhead h2{margin:2px 0;font-size:22px}
+.aqlv{display:inline-block;background:#14794f;color:#fff;border-radius:16px;padding:0 12px;font-weight:800;font-size:16px}
+.aqtt{display:inline-block;margin-top:4px;background:#fff4d6;color:#7a5200;border:2px solid var(--gold);border-radius:14px;padding:0 10px;font-weight:800;font-size:14px}
+.aqsec{font-weight:800;color:var(--deep);margin:14px 0 6px;font-size:17px}
+.aqts{display:flex;flex-wrap:wrap;gap:6px}
+.aqts button{border:2px solid var(--line);background:#fff;border-radius:14px;padding:2px 10px;font-size:14px;font-weight:700;color:var(--ink)}
+.aqts button.on{border-color:var(--gold);background:#fff4d6;box-shadow:0 0 0 3px rgba(242,182,50,.3)}
+.aqts button.lock{opacity:.45;filter:grayscale(1)}
+.aqm{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.aqm button{background:#fff;border:2px solid var(--line);border-radius:16px;padding:8px;text-align:center;color:inherit;position:relative}
+.aqm .e{font-size:30px;line-height:1.2}.aqm .t{position:absolute;top:4px;left:6px;font-size:20px}
+.aqm b{display:block;font-size:14px}.aqm small{display:block;font-size:12px;color:var(--muted);line-height:1.5}
+.aqm .bar2{height:7px;background:#eef3ef;border-radius:7px;overflow:hidden;margin-top:3px}.aqm .bar2 i{display:block;height:100%;border-radius:7px}
+.aqm button.t0{opacity:.75}.aqm button.t0 .e{filter:grayscale(.7)}
+.aqdo{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.aqdo button{background:#fff;border:2px solid var(--line);border-radius:16px;padding:6px 2px;font-size:13px;font-weight:700;color:var(--ink);position:relative}
+.aqdo button span{display:block;font-size:28px;line-height:1.3}.aqdo button i{position:absolute;top:-6px;left:-4px;font-style:normal}
+.lvup .big{font-size:70px;line-height:1.1;animation:swing 1.2s ease-in-out infinite}
+.lvup .row{display:flex;align-items:center;gap:8px;background:#fff8e0;border-radius:14px;padding:4px 10px;margin:5px 0;text-align:right;font-weight:700;font-size:15px}
+.lvup .row span{font-size:26px}
+.b3d{perspective:800px}.b3d>svg{transition:transform .25s ease-out;transform-origin:50% 80%;will-change:transform}
+.b3d.idle>svg{animation:b3float 5s ease-in-out infinite}
+@keyframes b3float{0%,100%{transform:rotateY(-6deg) rotateX(3deg)}50%{transform:rotateY(6deg) rotateX(1deg) translateY(-3px)}}
+.b3hint{text-align:center;font-size:12.5px;color:var(--muted);margin-top:2px}
+#aqHouse svg{height:100%}
+.dls{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.dl{display:flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--line);border-radius:14px;padding:5px 8px;text-align:right;color:inherit}
+.dl .e{font-size:26px;flex:none}.dl .tx{flex:1;min-width:0}.dl b{display:block;font-size:12.5px;line-height:1.4}.dl small{font-size:11.5px;color:#8a5a00;font-weight:700}
+.dl .bar2{height:5px;background:#eef3ef;border-radius:5px;overflow:hidden;margin-top:2px}.dl .bar2 i{display:block;height:100%;background:#3fbf6f;border-radius:5px}
+.dl.z{opacity:.6}.dl.z .e{filter:grayscale(.6)}
+.dbuild{background:linear-gradient(160deg,#eafbf1,#fff);border:3px solid #3fbf6f;border-radius:20px;padding:8px 10px;margin-top:10px}
+.dbuild h4{margin:0 0 6px;font-size:16px;color:#14794f;text-align:center}
+@media (prefers-reduced-motion: reduce){.b3d.idle>svg,.lvup .big{animation:none}}
+`;
+document.head.appendChild(css);
+
+/* ---------- واجهة البرنامج: بطاقتي + أصدقائي + أبطال الأسبوع ---------- */
+const home=document.createElement('div');home.id='homeSocial';
+const stats=document.querySelector('#home .stats');(stats||$('#map')).after(home);
+let fcache=null,hcache=null,loading=false,lastLoad=0;
+try{const c=J('usul5_social_v1');fcache=c.f||null;hcache=c.h||null}catch(e){}
+function drawHome(){const s=snap(),ln=lvName(s.L),t=shownTitle(s),f=(s.x-need(s.L))/(need(s.L+1)-need(s.L));
+  const meds=MEDALS.filter(m=>s.tiers[m.id]).sort((a,b)=>s.tiers[b.id]-s.tiers[a.id]).slice(0,3).map(m=>TIERS[s.tiers[m.id]-1].e+m.e).join(' ');
+  const prof=O()&&O().profile;
+  home.innerHTML=`<button class="hpro" id="hProf"><span class="av">${esc(myAv())}<span class="lv">${ar(s.L)}</span></span>
+    <span class="nm"><b>${esc(myName())}</b><small>${ln[1]} ${ln[2]} · المستوى ${ar(s.L)}${t?` · ${t.e} ${t.n}`:''}</small><div class="xpbar"><i style="width:${Math.round(f*100)}%"></i></div></span>
+    <span class="md">${meds||'🏅'}</span></button>
+   <div class="hbox"><h4><span>👥 أصدقائي</span>${prof?`<button id="hAdd">➕ أضف صديقًا</button>`:''}</h4><div id="hFr">${friendsHTML()}</div></div>
+   <div class="hbox"><h4><span>🏅 أبطال هذا الأسبوع</span><button class="sec" id="hAll">الكل</button></h4><div id="hHe">${heroesHTML()}</div></div>`;
+  $('#hProf').onclick=()=>{tone(880,.05,'sine',.08);openProfile()};
+  const ad=$('#hAdd');if(ad)ad.onclick=()=>{window.onlineReturn=goHome;O().openAdd()};
+  $('#hAll').onclick=()=>{if(O()&&O().openBoard){window.onlineReturn=goHome;O().openBoard()}};
+  home.querySelectorAll('[data-fr]').forEach(b=>b.onclick=()=>friendCard(b.dataset.fr));
+  const go=$('#hGoOn');if(go)go.onclick=()=>{window.onlineReturn=goHome;openOnline()};
+  const ad2=$('#hAdd2');if(ad2)ad2.onclick=()=>{window.onlineReturn=goHome;O().openAdd()};
+  loadSocial()}
+const goHome=()=>{renderHome();show('home')};
+function friendsHTML(){const prof=O()&&O().profile;
+  if(!state.online&&!prof)return `<p class="hnote">${B('اصنع لقبك','اصنعي لقبك')} ${B('وأضف','وأضيفي')} أصدقاءك، ${B('وتحدَّهم','وتحدّيهم')} ${B('وزُر','وزوري')} بيوتهم في الجنة 🏡</p><div class="nav" style="margin-top:4px"><button class="btn gold" id="hGoOn" style="padding:8px">🌐 اصنع لقبي</button></div>`;
+  if(!fcache)return `<p class="hnote">${navigator.onLine?'<span class="spin">⏳</span> جارٍ تحميل أصدقائك…':'📡 لا يوجد إنترنت الآن'}</p>`;
+  return `<div class="hfrs">${fcache.map(r=>`<button class="hfr" data-fr="${esc(r.id)}">${r.on?'<i class="on"></i>':''}<span class="av">${esc(r.av)}</span><b>${esc(r.nick)}</b><small>${r.lv?`⭐ ${ar(r.lv)}`:''}${r.tt?' '+esc(r.tt):''}</small></button>`).join('')}
+    <button class="hfr add" id="hAdd2"><span class="av">➕</span><b>أضف صديقًا</b></button></div>${fcache.length?'':`<p class="hnote">لا أصدقاء بعد. ${B('أعطِ','أعطي')} صديقك رمزك: <b dir="ltr">${esc((O()&&O().profile&&O().profile.code)||'')}</b></p>`}`}
+const medal=i=>['🥇','🥈','🥉'][i]||ar(i+1);
+function heroesHTML(){if(!hcache)return `<p class="hnote">${state.online?'⏳':'العب وتعلّم واعمل الخير لتصير من أبطال الأسبوع! 🌟'}</p>`;
+  if(!hcache.length)return `<p class="hnote">لا أبطال بعد هذا الأسبوع. ${B('كن','كوني')} الأول! 🌟</p>`;
+  const me=O()&&O().me;
+  return `<div class="hher">${hcache.slice(0,5).map((r,i)=>`<div class="${r.id==me?'me':''}"><span class="rk">${medal(i)}</span><span class="av">${esc(r.av)}</span><b>${esc(r.nick)}</b><small>${r.xp?`✨ ${ar(r.xp)}`:''}${r.wins?` 🏆 ${ar(r.wins)}`:''}</small></div>`).join('')}</div>
+   <p class="hnote">الترتيب بالأعمال الصالحة والتعلّم والانتصارات هذا الأسبوع · يبدأ من جديد كل جمعة</p>`}
+async function loadSocial(force){if(loading||!navigator.onLine||!O()||!state.online)return;if(!force&&Date.now()-lastLoad<60000&&fcache)return;
+  loading=true;lastLoad=Date.now();
+  try{await O().init();const API=O();if(!API.profile)return;publish();
+    const ids=await API.friendIds();
+    const rows=await Promise.all(ids.slice(0,30).map(async id=>{try{const [p,pr]=await Promise.all([API.db.ref('profiles/'+id).get(),API.db.ref('presence/'+id).get()]);
+      const v=p.val()||{};return {id,nick:v.nick||'؟',av:v.av||'❔',lv:v.lv|0,tt:v.tt?String(v.tt).slice(0,2):'',on:!!pr.val()}}catch(e){return null}}));
+    fcache=rows.filter(Boolean).sort((a,b)=>(b.on-a.on)||(b.lv-a.lv));
+    const s=(await API.db.ref('leader/'+API.week()).get()).val()||{};
+    hcache=Object.entries(s).map(([id,v])=>({id,nick:v.nick||'؟',av:v.av||'❔',xp:v.xp|0,wins:v.wins|0})).sort((a,b)=>(Math.max(b.xp,b.wins*10)-Math.max(a.xp,a.wins*10))).slice(0,10);
+    try{localStorage.setItem('usul5_social_v1',JSON.stringify({f:fcache,h:hcache}))}catch(e){}
+    if($('#home').classList.contains('on')){const a=$('#hFr'),b=$('#hHe');if(a){a.innerHTML=friendsHTML();a.querySelectorAll('[data-fr]').forEach(x=>x.onclick=()=>friendCard(x.dataset.fr));const ad2=$('#hAdd2');if(ad2)ad2.onclick=()=>{window.onlineReturn=goHome;O().openAdd()}}if(b)b.innerHTML=heroesHTML()}}
+  catch(e){}finally{loading=false}}
+async function friendCard(id){const r=(fcache||[]).find(x=>x.id==id);if(!r)return;const API=O();
+  let p={};try{p=(await API.db.ref('profiles/'+id).get()).val()||{}}catch(e){}
+  const md=String(p.md||'').split(',').filter(Boolean).map(x=>{const [k,t]=x.split(':');const m=MEDALS.find(m=>m.id==k);return m&&t>0?`<span title="${m.n}">${TIERS[t-1].e}${m.e}</span>`:''}).join(' ');
+  modal(`<div style="font-size:60px;line-height:1.2">${esc(p.av||r.av)}</div><h3 style="margin:2px 0">${esc(p.nick||r.nick)}</h3>
+    <p style="margin:2px 0">${p.lv?`<span class="aqlv">⭐ المستوى ${ar(p.lv)}</span>`:''} ${p.tt?`<span class="aqtt">${esc(p.tt)}</span>`:''}</p>
+    ${md?`<p style="font-size:22px;margin:6px 0">${md}</p>`:''}<p style="margin:2px 0;color:var(--muted);font-size:14px">${r.on?'🟢 متصل الآن':'⚪ غير متصل'} · 🏆 ${ar(p.wins||0)} فوز</p>
+    <div class="nav"><button class="btn gold" id="fcCh" ${r.on?'':'disabled'}>⚔️ تحدَّه</button><button class="btn" id="fcHouse" style="background:#2f6fd0;box-shadow:0 5px 0 #1d4e9e">🏡 بيته</button></div><div class="nav"><button class="btn sec" data-close>رجوع</button></div>`,()=>{
+    $('#fcCh').onclick=()=>{closeModal();API.challenge(id)};
+    $('#fcHouse').onclick=()=>{closeModal();$('#openBayt')&&$('#openBayt').click();setTimeout(()=>{const b=$('#jFr');b&&b.click()},150)}})}
+
+/* ---------- نشر المستوى والأوسمة للأصدقاء + نقاط الأسبوع ---------- */
+let pubKey='';
+function publish(){const API=O();if(!API||!API.profile||!API.db)return;const s=snap(),t=shownTitle(s);
+  const md=MEDALS.filter(m=>s.tiers[m.id]).map(m=>m.id+':'+s.tiers[m.id]).join(',');
+  const a=A(),w=API.week();if(!a.wk||a.wk.w!==w){a.wk={w,base:s.x};Aamal.save()}
+  const wx=Math.max(0,s.x-a.wk.base);
+  const key=[s.L,t&&t.id,md,wx,API.profile.nick,API.profile.av].join('|');if(key==pubKey)return;pubKey=key;
+  const tt=t?`${t.e} ${t.n}`:'';Object.assign(API.profile,{lv:s.L,tt,md});
+  API.db.ref('profiles/'+API.me).update({lv:s.L,tt,md}).catch(()=>{});
+  if(wx>0)API.db.ref(`leader/${w}/${API.me}`).update({nick:API.profile.nick,av:API.profile.av,xp:wx}).catch(()=>{})}
+
+/* ---------- الاحتفال: ارتفعت درجتك / وسام جديد / لقب جديد / جائزة للبيت ---------- */
+let soonT=0,pending=false;
+function busy(){const on=document.querySelector('.screen.on');const id=on&&on.id;
+  if($('#modal').classList.contains('on')||$('#celebrate').classList.contains('on')||document.querySelector('.countdown'))return true;
+  if(['quiz','contest','online'].includes(id))return true;if(id=='bayt'&&window.Bayt&&Bayt.G)return true;if(id=='baytrace')return true;return false}
+function check(){const s=snap(),a=A();
+  if(!a.seen){a.seen={L:s.L,tiers:s.tiers,titles:s.titles};Aamal.save()}
+  // جوائز البيت
+  const gifts=[];if(window.Deco&&Deco.grant)DEED_ITEMS.forEach(([id,ok])=>{if(ok(s.c)&&Deco.grant(id))gifts.push(Deco.item(id))});
+  const seen=a.seen,rows=[];
+  MEDALS.forEach(m=>{const t=s.tiers[m.id],o=(seen.tiers||{})[m.id]|0;if(t>o)rows.push(`<div class="row"><span>${TIERS[t-1].e}${m.e}</span>وسام «${m.n}» ${TIERS[t-1].n}</div>`)});
+  s.titles.filter(x=>!(seen.titles||[]).includes(x)).forEach(id=>{const t=TITLES.find(t=>t.id==id);rows.push(`<div class="row"><span>${t.e}</span>لقب جديد: ${t.n}</div>`)});
+  gifts.forEach(g=>rows.push(`<div class="row"><span>${g.e}</span>جائزة لبيتك: ${g.name} 🏡</div>`));
+  const up=s.L>seen.L;
+  if(!up&&!rows.length){a.seen={L:s.L,tiers:s.tiers,titles:s.titles};Aamal.save();publish();return}
+  if(busy()){pending=true;clearTimeout(soonT);soonT=setTimeout(check,3000);return}
+  const seenL=seen.L;pending=false;a.seen={L:s.L,tiers:s.tiers,titles:s.titles};Aamal.save();publish();
+  const ln=lvName(s.L);
+  try{fanfare();confetti()}catch(e){}
+  modal(`<div class="lvup"><div class="big">${up?ln[1]:'🏅'}</div><h3 style="margin:2px 0;color:#14794f">${up?`ارتفعت درجتك! المستوى ${ar(s.L)}`:B('مبروك! ربحتَ جديدًا','مبروك! ربحتِ جديدًا')}</h3>
+    ${up&&lvName(seenL)!==ln?`<p style="margin:0 0 6px;font-weight:800;color:#8a5a00">${B('صرتَ','صرتِ')} ${ln[2]} ${ln[1]}</p>`:up&&LEVELS.find(l=>l[0]>s.L)?`<p style="margin:0 0 6px;color:#8a5a00">${B('استمرّ','استمرّي')} حتى المستوى ${ar(LEVELS.find(l=>l[0]>s.L)[0])} ${B('لتصير','لتصيري')} ${LEVELS.find(l=>l[0]>s.L)[2]} ${LEVELS.find(l=>l[0]>s.L)[1]}</p>`:''}${rows.join('')}
+    <div class="nav"><button class="btn gold" id="lvMy">🏅 ملفّي</button><button class="btn sec" data-close>الحمد لله 🤲</button></div></div>`,()=>{$('#lvMy').onclick=()=>{closeModal();openProfile()}});
+  if($('#home').classList.contains('on'))drawHome()}
+const soon=()=>{clearTimeout(soonT);soonT=setTimeout(check,1200)};
+
+/* ---------- شاشة ملفّي ---------- */
+const sec=document.createElement('section');sec.className='screen';sec.id='alqab';
+sec.innerHTML=`<div class="bar"><button class="back" id="aqBack">›</button><div class="ttl" id="aqTitle">🏅 ملفّي</div></div><div id="aqBody" style="flex:1;display:flex;flex-direction:column"></div>`;
+document.querySelector('.app').appendChild(sec);
+let aqBack=null,vc=null;
+const stopVc=()=>{if(vc){vc.stop();vc=null}};
+$('#aqBack').onclick=()=>{stopVc();if(aqBack){const f=aqBack;aqBack=null;f()}else goHome()};
+function openProfile(){stopVc();aqBack=null;show('alqab');$('#aqTitle').textContent='🏅 ملفّي';const s=snap(),c=s.c,ln=lvName(s.L),t=shownTitle(s),f=(s.x-need(s.L))/(need(s.L+1)-need(s.L));
+  const prof=O()&&O().profile;
+  $('#aqBody').innerHTML=`<div class="aqhead"><div class="av">${esc(myAv())}</div><h2>${esc(myName())}</h2>
+    <span class="aqlv">${ln[1]} المستوى ${ar(s.L)} · ${ln[2]}</span><br>${t?`<span class="aqtt">${t.e} ${t.n}</span>`:''}
+    <div class="xpbar" style="margin:8px 10px 2px;height:12px"><i style="width:${Math.round(f*100)}%"></i></div>
+    <small style="color:var(--muted)">✨ ${ar(s.x)} نقطة · باقي ${ar(need(s.L+1)-s.x)} للمستوى ${ar(s.L+1)}</small>
+    ${prof?'':`<div class="nav" style="margin-top:6px"><button class="btn sec" id="aqOn" style="padding:8px">🌐 اصنع لقبك ليراك أصدقاؤك</button></div>`}</div>
+   <div class="aqsec">🏡 بيتي في الجنة يكبر بأعمالي <small style="font-weight:500;color:var(--muted);font-size:13px">${ar(c.deeds)} عملًا صالحًا</small></div>
+   ${window.Bayt?`<div class="bhouse" id="aqHouse" style="height:210px">${Bayt.houseSVG(Bayt.done,-1,0,true)}</div>`:''}
+   <p class="hnote">كل عملٍ صالح يضيف إلى بيتك شيئًا جميلًا: 🌹 🐦 🌷 ⭐ 🌳 🌴 🦋 🍎 🌻 🏵️</p>
+   <div class="dls">${deedsHTML()}</div>
+   <div class="aqsec">🤲 أعمالٌ ترفع درجتك اليوم</div>
+   <div class="aqdo">${doBtns()}</div>
+   <div class="aqsec">👑 ألقابي <small style="font-weight:500;color:var(--muted);font-size:13px">${B('اضغط','اضغطي')} على لقبك ليظهر تحت اسمك</small></div>
+   <div class="aqts">${TITLES.map(x=>{const own=s.titles.includes(x.id);return `<button data-t="${x.id}" class="${own?'':'lock'} ${t&&t.id==x.id?'on':''}">${own?x.e:'🔒'} ${x.n}</button>`}).join('')}</div>
+   <div class="aqsec">🏅 أوسمتي</div>
+   <div class="aqm">${MEDALS.map(m=>{const tr=s.tiers[m.id],nx=m.at[tr],prev=tr?m.at[tr-1]:0,v=c[m.k],fr=nx?Math.min(1,(v-prev)/(nx-prev)):1,col=tr?TIERS[tr-1].c:'#b9cfc2';
+     return `<button class="t${tr}" data-m="${m.id}">${tr?`<span class="t">${TIERS[tr-1].e}</span>`:''}<div class="e">${m.e}</div><b>${m.n}</b><small>${tr?TIERS[tr-1].n:'لم يبدأ بعد'} · ${ar(v)} ${m.u}</small><div class="bar2"><i style="width:${fr*100}%;background:${col}"></i></div><small>${nx?`التالي ${TIERS[tr].e} عند ${ar(nx)}`:'أعلى درجة! 🌟'}</small></button>`}).join('')}</div>
+   <p class="tip">كل عملٍ صالح، وكل درسٍ ${B('تتعلّمه','تتعلّمينه')}، وكل تحدٍّ ${B('تفوز','تفوزين')} به، يرفع درجتك ✨<br>والأعمال تزيّن بيتك في الجنة أيضًا 🏡</p>`;
+  bindDo($('#aqBody'),openProfile);tilt($('#aqHouse'));
+  $('#aqBody').querySelectorAll('[data-dg]').forEach(b=>b.onclick=()=>{tone(880,.05,'sine',.08);goTo(DGO[b.dataset.dg],openProfile)});
+  const hh=$('#aqHouse');if(hh){hh.style.cursor='pointer';hh.onclick=()=>goTo('bayt')};
+  $('#aqBody').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{const x=TITLES.find(t=>t.id==b.dataset.t);
+    if(!s.titles.includes(x.id)){modal(`<div style="font-size:50px">${x.e}</div><h3 style="margin:4px 0">${x.n}</h3><p>${B('كيف تربحه','كيف تربحينه')}؟<br><b>${x.how}</b></p><div class="nav"><button class="btn gold" data-close>حسنًا 💪</button></div>`);return}
+    A().title=x.id;Aamal.save();tone(784,.1,'sine');publish();openProfile()});
+  $('#aqBody').querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{const m=MEDALS.find(m=>m.id==b.dataset.m),tr=s.tiers[m.id];
+    modal(`<div style="font-size:54px">${tr?TIERS[tr-1].e:''}${m.e}</div><h3 style="margin:4px 0">${m.n}</h3><p>${ar(c[m.k])} ${m.u}</p>
+      <p style="font-size:15px">${m.at.map((x,k)=>`${TIERS[k].e} ${TIERS[k].n}: ${ar(x)}${c[m.k]>=x?' ✅':''}`).join('<br>')}</p>
+      <div class="nav"><button class="btn gold" id="mGo">هيّا أعمل 💪</button><button class="btn sec" data-close>رجوع</button></div>`,()=>{$('#mGo').onclick=()=>{closeModal();goTo(m.go)}})});
+  const on=$('#aqOn');if(on)on.onclick=()=>{window.onlineReturn=openProfile;openOnline()};
+  window.scrollTo(0,0)}
+function doBtns(){const a=Aamal,tp=window.Salah?Salah.todayPray().filter(Boolean).length:0;
+  return `<button data-do="sal">${a.doneToday('sal')?'<i>✅</i>':''}<span>💚</span>صلِّ على النبي ١٠</button>
+   <button data-do="tas">${a.doneToday('tas')?'<i>✅</i>':''}<span>📿</span>سبّح الله ١٠</button>
+   <button data-do="pray">${tp==5?'<i>✅</i>':''}<span>🤲</span>صلّيتُ ${ar(tp)}/٥</button>
+   <button data-do="salah"><span>🕌</span>وضوئي وصلاتي</button>
+   <button data-do="hifz"><span>🎤</span>سمّعني آية</button>
+   <button data-do="nafsak"><span>🌷</span>اختبر أخلاقي</button>`}
+function bindDo(el,ret){el.querySelectorAll('[data-do]').forEach(b=>b.onclick=()=>{tone(880,.05,'sine',.08);goTo(b.dataset.do,ret)})}
+function goTo(g,ret){const click=s=>{const e=$(s);e&&e.click()};
+  ({sal:()=>count('sal',ret),tas:()=>count('tas',ret),pray:()=>window.Salah&&Salah.openPray(),salah:()=>window.Salah&&Salah.open(),
+    hifz:()=>click('#openHifz'),nafsak:()=>click('#openNafsak'),bayt:()=>click('#openBayt'),wird:()=>click('#openWird'),
+    online:()=>{window.onlineReturn=openProfile;openOnline()},map:goHome})[g]()}
+
+/* ---------- عدّاد الصلاة على النبي والتسبيح بالصوت ---------- */
+const PHR={sal:{t:'💚 صلِّ على النبي وآله',p:'اللّٰهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ وَآلِ مُحَمَّدٍ',e:'💚',why:'«من صلّى عليّ صلاةً صلّى الله عليه بها عشرًا»'},
+  tas:{t:'📿 سبّح الله',p:'سُبْحَانَ اللهِ',e:'📿',why:'التسبيح يملأ بيتك في الجنة بالخير 🌳'}};
+function count(k,ret){stopVc();show('alqab');aqBack=ret||null;const P=PHR[k];$('#aqTitle').textContent=P.t;
+  $('#aqBody').innerHTML=`<p class="bcap" style="margin:0 0 8px">${B('قلها','قوليها')} <b>١٠ مرات</b> بصوتك، والتطبيق يعدّ لك 🎤<br><small>${P.why}</small></p><div id="aqVc"></div><div id="aqCups"></div>
+    <div class="nav"><button class="btn sec" id="aqDone">رجوع</button></div>`;
+  vc=Voice.counter($('#aqVc'),{phrase:P.p,target:10,emoji:P.e,onDone:n=>{Aamal.add(k,n);Aamal.grow(k);const first=Aamal.firstToday(k);
+    try{fanfare();confetti()}catch(e){}
+    const el=$('#aqCups');el.innerHTML=`<div class="cupbox win"><b>${P.e} +${ar(n)}</b>${B('بارك الله فيك!','بارك الله فيكِ!')} مجموعك: ${ar(A()[k])}</div>`;
+    if(first&&window.cupsAward)cupsAward(1,'deeds',el);if(window.Deco)el.insertAdjacentHTML('beforeend',Deco.challenge(5,'deeds'));
+    $('#aqDone').textContent='🔁 مرة أخرى';$('#aqDone').className='btn gold';$('#aqDone').onclick=()=>count(k,ret);
+    el.insertAdjacentHTML('afterend',`<div class="nav"><button class="btn sec" id="aqBk">رجوع</button></div>`);$('#aqBk').onclick=()=>$('#aqBack').click();
+    soon()}});
+  $('#aqDone').onclick=()=>$('#aqBack').click();window.scrollTo(0,0)}
+
+/* ---------- البيت: أعمال تبني بيتك + بيت ثلاثي الأبعاد ---------- */
+function tilt(el){if(!el||el.dataset.t3)return;el.dataset.t3=1;el.classList.add('b3d','idle');const svg=el.querySelector('svg');if(!svg)return;
+  let t=0;const mv=e=>{const r=el.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+    el.classList.remove('idle');svg.style.transform=`rotateY(${x*24}deg) rotateX(${-y*14}deg) scale(1.04)`;clearTimeout(t);t=setTimeout(()=>{svg.style.transform='';el.classList.add('idle')},1500)};
+  el.addEventListener('pointermove',mv);el.addEventListener('pointerdown',mv)}
+if(window.Deco&&Deco.menuHook){const orig=Deco.menuHook;Deco.menuHook=function(B0){orig.apply(this,arguments);
+  const hb=B0.querySelector('.bhouse');tilt(hb);if(hb)hb.insertAdjacentHTML('afterend','<div class="b3hint">👆 حرّك إصبعك على البيت لتراه من كل الجهات، واضغط لتدخله</div>');
+  const own=Deco.deeds().filter(i=>Deco.owns(i.id)).length,all=Deco.deeds().length;
+  const box=document.createElement('div');box.className='dbuild';
+  box.innerHTML=`<h4>🤲 ${B('ابنِ','ابني')} بيتك بالأعمال الصالحة · ${ar(own)}/${ar(all)} جائزة</h4><div class="aqdo">${doBtns()}</div>`;
+  const jb=B0.querySelector('.jbar');(jb||hb).after(box);bindDo(box,()=>{show('bayt');Bayt.menu()});soon()}}
+window.Alqab={soon,check,openProfile,snap,deedFor(id){const m={d_rose:'sal',d_palms:'sal',d_noor:'sal',d_birds:'tas',d_lamps:'pray',d_fruit:'pray',d_star:'hifz',d_spring:'salah',d_mosque:'salah'};goTo(m[id]||'salah',()=>{show('bayt');Bayt.menu()})}};
+
+/* ---------- ربط الأحداث ---------- */
+// اختبر نفسك: الجولة الممتازة (كأسان أو أكثر) = عمل خُلقي
+const _ca=window.cupsAward;if(_ca)window.cupsAward=function(n,src,el){if(src=='nafsak'&&n>=2){Aamal.add('akhlaq',1);Aamal.grow('akhlaq')}const r=_ca.apply(this,arguments);soon();return r};
+const _rh=window.renderHome;window.renderHome=function(){_rh.apply(this,arguments);drawHome();soon()};
+const _wf=window.wirdFinish;if(_wf)window.wirdFinish=function(){const daily=typeof qz!='undefined'&&qz&&qz.mode=='daily';const r=_wf.apply(this,arguments);if(daily)Aamal.grow('wird');soon();return r};
+// نجاح في امتحان مرحلة من الكتاب = دوّار شمس في البيت
+const _ce=window.celebrate;if(typeof _ce=='function')window.celebrate=function(){const r=_ce.apply(this,arguments);Aamal.grow('dars');return r};
+setInterval(()=>{if(pending&&!busy())check()},4000);
+drawHome();setTimeout(check,1500);
+})();

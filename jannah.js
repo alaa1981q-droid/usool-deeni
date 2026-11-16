@@ -13,7 +13,7 @@ const boy=()=>!window.Cups||Cups.sex!='g';
 const esc=v=>String(v==null?'':v).replace(/[<>&"]/g,'');
 
 /* ---------- الكتالوج: [x,y,size] بإحداثيات رسم البيت (عرض ٣٦٠ × ارتفاع ٣٣٠، الأرض عند y=292) ---------- */
-const CATS=[['inside','🛋️','داخل البيت'],['onhouse','🪟','على البيت'],['garden','🌳','الأشجار والورد'],['light','💡','الإنارة'],['car','🚗','السيارات'],['animals','🦚','الحيوانات'],['sky','🕊️','السماء'],['deco','✨','الزينة'],['paint','🎨','الألوان'],['gift','🎁','هدايا الأصدقاء']];
+const CATS=[['deeds','🤲','جوائز الأعمال'],['inside','🛋️','داخل البيت'],['onhouse','🪟','على البيت'],['garden','🌳','الأشجار والورد'],['light','💡','الإنارة'],['car','🚗','السيارات'],['animals','🦚','الحيوانات'],['sky','🕊️','السماء'],['deco','✨','الزينة'],['paint','🎨','الألوان'],['gift','🎁','هدايا الأصدقاء']];
 const ITEMS=[
  {id:'tulips', cat:'garden',name:'صفّ توليب',   e:'🌷',price:20,layer:'front',at:[[118,304,15],[138,306,15],[188,306,15],[208,304,15]]},
  {id:'sunfl',  cat:'garden',name:'دوّار الشمس', e:'🌻',price:25,layer:'front',at:[[300,296,26],[318,300,22]]},
@@ -68,6 +68,16 @@ const ITEMS=[
  {id:'misbaha',cat:'inside',r:3,name:'مسبحة',e:'📿',price:20,layer:'room',at:[[118,146,24]]},
  {id:'lant_r', cat:'inside',r:3,name:'فانوس معلّق',e:'🏮',price:30,layer:'room',at:[[300,52,28]],anim:'bob'},
  {id:'aqua',   cat:'inside',r:3,name:'حوض أسماك',e:'🐠',price:50,layer:'room',svg:'aqua'},
+ // جوائز الأعمال الصالحة: لا تُشترى، تأتي بالعمل (تمنحها salah.js و alqab.js عبر Deco.grant)
+ {id:'d_rose',  cat:'deeds',name:'ورود الصلاة على النبي',e:'🌹',deed:'صلِّ على محمد وآل محمد ١٠ مرات بصوتك',layer:'front',at:[[112,312,14],[214,312,14],[62,314,13]]},
+ {id:'d_birds', cat:'deeds',name:'طيور التسبيح',e:'🐦',deed:'سبّح الله ١٠ مرات بصوتك',layer:'back',at:[[236,150,15],[96,146,13]],anim:'fly'},
+ {id:'d_lamps', cat:'deeds',name:'قناديل المصلّين',e:'🪔',deed:'سجّل ٥ صلوات صلّيتها في «سجلّ صلاتي»',layer:'front',at:[[146,302,14],[180,302,14]]},
+ {id:'d_star',  cat:'deeds',name:'نجوم القرآن',e:'🌠',deed:'سمّع ١٠ آيات بصوتك في «أنا حافظ صغير»',layer:'back',at:[[44,62,18],[300,96,16]],anim:'twinkle'},
+ {id:'d_spring',cat:'deeds',name:'عين ماء جارية',e:'💧',deed:'انجح في اختبار الوضوء',layer:'front',at:[[98,300,20],[88,306,12]],anim:'bob'},
+ {id:'d_mosque',cat:'deeds',name:'مسجد صغير',e:'🕌',deed:'انجح في اختبار الصلاة',layer:'back',at:[[320,254,40]]},
+ {id:'d_palms', cat:'deeds',name:'نخيل الجنة',e:'🌴',deed:'صلِّ على محمد وآل محمد ١٠٠ مرة',layer:'back',at:[[8,288,34],[352,290,30]]},
+ {id:'d_fruit', cat:'deeds',name:'بستان المصلّي',e:'🍊',deed:'سجّل ٣٥ صلاة صلّيتها',layer:'front',at:[[38,270,16],[326,264,15],[52,258,14]]},
+ {id:'d_noor',  cat:'deeds',name:'نورٌ على بيتك',e:'✨',deed:'صلِّ على محمد وآل محمد ٥٠٠ مرة',layer:'back',at:[[110,130,18],[250,120,16],[180,58,22],[60,92,14]],anim:'twinkle'},
  // هدايا الأصدقاء فقط
  {id:'g_balloon',cat:'gift',name:'بالونات',      e:'🎈',gift:1,layer:'front',at:[[72,206,20],[60,218,18],[84,222,17]],anim:'bob'},
  {id:'g_bear',   cat:'gift',name:'دبدوب',        e:'🧸',gift:1,layer:'front',at:[[150,306,18]]},
@@ -110,12 +120,24 @@ function itemSVG(it,full,withRoof){
   let s='';
   if(it.extra=='stars')s+=[[70,24],[96,52],[20,76],[130,22]].map(([x,y],k)=>`<text x="${x}" y="${y}" font-size="10" text-anchor="middle" class="dk-tw" style="animation-delay:${k*.3}s">⭐</text>`).join('');
   return s+it.at.map(([x,y,z],k)=>`<text x="${x}" y="${y}" font-size="${z}" text-anchor="middle"${cls} style="animation-delay:${k*.4}s">${it.e}</text>`).join('')}
+/* 🌱 حديقة الأعمال: حرف لكل عمل صالح (sawt.js Aamal.grow)، يُرسم في أماكن ثابتة حول البيت وفي السماء */
+const GL={a:'🌹',b:'🐦',c:'🌷',d:'⭐',e:'🌳',f:'🌴',g:'🦋',h:'🍎',i:'🌻',j:'🏵️'},SKY='bdg';
+const cleanG=g=>String(g||'').replace(/[^a-j]/g,'').slice(-80);
+const SLOTS=(()=>{let s=7;const r=()=>{s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+  const gr=[],sk=[];while(gr.length<60){let x,y;if(r()<.68){y=297+r()*14;x=6+r()*348;if(x>124&&x<202)continue}else{y=262+r()*28;x=r()<.5?4+r()*62:298+r()*56}gr.push([x,y])}
+  while(sk.length<30){const x=14+r()*332,y=40+r()*150;if(x>270&&y<80)continue;sk.push([x,y])}return {gr,sk}})();
+function gardenSVG(g,layer){g=cleanG(g);let gi=0,si=0;const out=[];
+  for(const c of g){const sky=SKY.includes(c),p=sky?SLOTS.sk[si++%30]:SLOTS.gr[gi++%60];if((layer=='back')!=sky)continue;
+    const big=c=='e'||c=='f',z=big?(p[1]<292?24:19):sky?12:13,an=c=='b'?'fly':c=='g'?'flut':c=='d'?'twinkle':'';
+    out.push([p[1],`<text x="${p[0].toFixed(1)}" y="${p[1].toFixed(1)}" font-size="${z}" text-anchor="middle"${an?` class="dk-${an}" style="animation-delay:${(out.length%7)*.3}s"`:''}>${GL[c]}</text>`])}
+  return out.sort((a,b)=>a[0]-b[0]).map(x=>x[1]).join('')}
 function lookItems(L){return String(L.i||'').split(',').filter(id=>IT[id])}
 const Deco={
-  myLook(){return {c:Bayt.cups,p:js.paint,w:js.wall||'cream',f:Bayt.done,i:Object.keys(js.on).filter(id=>js.on[id]&&js.own[id]).join(',')}},
+  myLook(){return {c:Bayt.cups,p:js.paint,w:js.wall||'cream',f:Bayt.done,i:Object.keys(js.on).filter(id=>js.on[id]&&js.own[id]).join(','),g:window.Aamal?cleanG(Aamal.d.gl):''}},
   svg(L,layer,full,withRoof){const ids=lookItems(L);let s='';
     if(layer=='back')s+='<style>.dk-bob,.dk-fly,.dk-flut,.dk-swim,.dk-drift,.dk-twinkle,.dk-tw{transform-box:fill-box;transform-origin:center}.dk-bob{animation:dkbob 2.2s ease-in-out infinite}.dk-fly{animation:dkfly 3s ease-in-out infinite}.dk-flut{animation:dkflut 1.6s ease-in-out infinite}.dk-swim{animation:dkswim 4s ease-in-out infinite}.dk-drift{animation:dkdrift 7s ease-in-out infinite}.dk-twinkle,.dk-tw{animation:dktw 1.4s ease-in-out infinite}@keyframes dkbob{50%{transform:translateY(-4px)}}@keyframes dkfly{50%{transform:translate(8px,-6px)}}@keyframes dkflut{50%{transform:translate(4px,-5px) rotate(-12deg)}}@keyframes dkswim{50%{transform:translateX(-14px)}}@keyframes dkdrift{50%{transform:translateX(16px)}}@keyframes dktw{50%{opacity:.35}}</style>';
-    ids.forEach(id=>{const it=IT[id];if(it.layer==layer&&it.layer!='room'&&(!it.need||ids.includes(it.need)))s+=itemSVG(it,full,withRoof)});return s},
+    ids.forEach(id=>{const it=IT[id];if(it.layer==layer&&it.layer!='room'&&(!it.need||ids.includes(it.need)))s+=itemSVG(it,full,withRoof)});
+    if(layer=='back'||layer=='front')s+=gardenSVG(L.g,layer);return s},
   paintFilter(L){const p=PT[L.p];if(!p||!p.f)return '';return `url(#pf_${p.id})`},
   addJ(n){js.j+=Math.max(0,Math.round(n));jsave();updJ()},
   floorJewels(score){const n=Math.max(5,Math.round(score/10));Deco.addJ(n);return `<div class="cupbox win" style="border-color:#9fd3f0;background:linear-gradient(160deg,#eaf6ff,#fff);color:#1d4e9e"><b>💎 +${ar(n)}</b>جواهر لتزيين بيتك! عندك الآن ${ar(js.j)} 💎</div>`},
@@ -124,6 +146,9 @@ const Deco={
     if(c>=8||n<=0){jsave();return ''}js.cnt[src]=c+1;Deco.addJ(n);
     return `<div class="cupbox win" style="border-color:#9fd3f0;background:linear-gradient(160deg,#eaf6ff,#fff);color:#1d4e9e"><b>💎 +${ar(n)}</b>ماسات لبيتك في الجنة! عندك ${ar(js.j)} 💎</div>`},
   setBack:f=>{backTo=f},
+  // جائزة عمل صالح: تُضاف للبيت وتظهر فورًا. ترجع true إذا كانت جديدة
+  grant(id){if(!IT[id]||js.own[id])return false;js.own[id]=1;js.on[id]=1;jsave();publishSoon();return true},
+  owns:id=>!!js.own[id],item:id=>IT[id],deeds:()=>ITEMS.filter(i=>i.deed),
   menuHook,get j(){return js.j}
 };
 window.Deco=Deco;
@@ -265,7 +290,7 @@ function chest(){
         $('#jPrOk').onclick=()=>{closeModal();Bayt.menu()}},550)}})}
 
 /* ---------- المتجر: زيّن بيتك ---------- */
-let tab='garden';
+let tab='deeds';
 function shop(keepBack){show('jannah');if(!keepBack)backTo=null;$('#jTitle').textContent='🎨 زيّن بيتك';updJ();drawShop();window.scrollTo(0,0)}
 function drawShop(){const B=$('#jBody');const L=Deco.myLook();
   let grid='';
@@ -275,8 +300,8 @@ function drawShop(){const B=$('#jBody');const L=Deco.myLook();
     return `<button class="jit ${own?'own':''} ${on?'on':''} ${!own&&js.j<w.price?'poor':''}" data-w="${w.id}"><span class="e"><span style="display:inline-block;width:34px;height:34px;border-radius:8px;background:${w.col};border:2px solid #0002;vertical-align:middle"></span></span><b>جدران ${w.name}</b><span class="pr">${on?'✓ الآن':own?'اختر':'💎 '+ar(w.price)}</span></button>`}).join('')+gridOf(ITEMS.filter(i=>i.cat=='inside'&&i.r==room));
   else grid=gridOf(ITEMS.filter(i=>i.cat==tab));
   function gridOf(list){return list.map(i=>{const own=js.own[i.id],on=own&&js.on[i.id],nd=i.need&&!js.own[i.need];
-    const pr=i.gift?(own?(on?'✓ في بيتي':'أظهِر'):'🎁 من صديق'):own?(on?'✓ في بيتي':'أظهِر'):nd?`يحتاج ${IT[i.need].name}`:'💎 '+ar(i.price);
-    return `<button class="jit ${own?'own':''} ${on?'on':''} ${!own&&(i.gift||nd)?'lock':''} ${!own&&!i.gift&&!nd&&js.j<i.price?'poor':''}" data-i="${i.id}"><span class="e">${i.e}</span><b>${i.name}</b><span class="pr">${pr}</span></button>`}).join('')}
+    const pr=i.deed?(own?(on?'✓ في بيتي':'أظهِر'):'🤲 بالعمل'):i.gift?(own?(on?'✓ في بيتي':'أظهِر'):'🎁 من صديق'):own?(on?'✓ في بيتي':'أظهِر'):nd?`يحتاج ${IT[i.need].name}`:'💎 '+ar(i.price);
+    return `<button class="jit ${own?'own':''} ${on?'on':''} ${!own&&(i.gift||i.deed||nd)?'lock':''} ${!own&&!i.gift&&!nd&&js.j<i.price?'poor':''}" data-i="${i.id}"><span class="e">${i.e}</span><b>${i.name}</b><span class="pr">${pr}</span></button>`}).join('')}
   if(tab=='inside'&&room>=Math.max(1,Bayt.done))room=Math.max(0,Bayt.done-1);
   const prev=tab=='inside'?`<div class="jroom" style="margin:0"><span class="lb">${ROOMS[room][1]} ${ROOMS[room][0]}</span>${roomSVG(room,{...L,f:Math.max(1,Bayt.done)})}</div>
     <div class="jrooms" style="margin-top:6px">${ROOMS.map((r,k)=>`<button data-room="${k}" class="${k==room?'on':''}" ${k>=Math.max(1,Bayt.done)?'disabled style="opacity:.45"':''}>${r[1]} ${r[0]}</button>`).join('')}</div>`
@@ -300,6 +325,7 @@ function tapWall(w){const k='w_'+w.id;
 function popAfter(sel){const e=$(sel);if(e){e.classList.remove('pop');void e.offsetWidth;e.classList.add('pop')}}
 function tapItem(i){
   if(js.own[i.id]){js.on[i.id]=js.on[i.id]?0:1;jsave();Bayt.sTap();drawShop();popAfter(`[data-i="${i.id}"]`);publishSoon();return}
+  if(i.deed){modal(`<div style="font-size:60px">${i.e}</div><h3 style="margin:4px 0">${i.name}</h3><p>هذه جائزةٌ لا تُشترى بالجواهر 🤲<br>تربحها بعملٍ صالح: <b>${i.deed}</b></p><div class="nav"><button class="btn gold" id="jDeedGo">هيّا أعمل 💪</button><button class="btn sec" data-close>لاحقًا</button></div>`,()=>{$('#jDeedGo').onclick=()=>{closeModal();if(window.Alqab)Alqab.deedFor(i.id)}});return}
   if(i.gift){modal(`<div style="font-size:60px">${i.e}</div><h3 style="margin:4px 0">${i.name}</h3><p>هذه هديةٌ لا تُشترى 🎁<br>تحصل عليها عندما يهديك إياها صديق.</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`);return}
   if(i.cat=='inside'&&i.r>=Bayt.done){modal(`<div style="font-size:60px">🔒</div><h3 style="margin:4px 0">${ROOMS[i.r][0]} مقفولة</h3><p>${boy()?'ابنِ':'ابني'} ${Bayt.LEVELS[i.r].floor} أولًا</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`);return}
   if(i.need&&!js.own[i.need]){modal(`<div style="font-size:60px">${i.e}</div><h3 style="margin:4px 0">${i.name}</h3><p>${boy()?'اشترِ':'اشتري'} «${IT[i.need].name}» أولًا ثم ${boy()?'علّق':'علّقي'} عليها ${i.name} 😊</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`);return}
@@ -317,8 +343,8 @@ const ready=()=>O()&&O().db&&O().me&&O().profile;
 let pubT=0;
 function publishSoon(){clearTimeout(pubT);pubT=setTimeout(publish,1200)}
 function publish(){if(!ready())return;const A=O(),L=Deco.myLook();
-  A.db.ref('houses/'+A.me).set({f:Bayt.done,c:Bayt.cups,p:L.p,w:L.w,i:L.i,n:A.profile.nick,a:A.profile.av,t:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{})}
-const clean=h=>({w:WALLS.some(w=>w.id==(h&&h.w))?h.w:'cream',f:Math.max(0,Math.min(4,h&&h.f|0)),c:Math.max(0,+(h&&h.c)||0),p:PT[h&&h.p]?h.p:'sand',i:lookItems({i:h&&h.i}).join(',')});
+  A.db.ref('houses/'+A.me).set({f:Bayt.done,c:Bayt.cups,p:L.p,w:L.w,i:L.i,g:L.g||'',n:A.profile.nick,a:A.profile.av,t:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{})}
+const clean=h=>({w:WALLS.some(w=>w.id==(h&&h.w))?h.w:'cream',f:Math.max(0,Math.min(4,h&&h.f|0)),c:Math.max(0,+(h&&h.c)||0),p:PT[h&&h.p]?h.p:'sand',i:lookItems({i:h&&h.i}).join(','),g:cleanG(h&&h.g)});
 
 async function friends(){show('jannah');backTo=null;$('#jTitle').textContent='👥 بيوت أصدقائي';updJ();const B=$('#jBody');
   B.innerHTML=`<div class="handoff"><div class="big spin">🌐</div><p>جارٍ الاتصال…</p></div>`;

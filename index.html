@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#14794f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="أصول ديني">
-<title>أصول ديني الخمسة</title>
-<meta name="description" content="أصول ديني الخمسة: تطبيق تفاعلي للأطفال، تصميم الشيخ علاء المطوري">
+<meta name="apple-mobile-web-app-title" content="جنّتي الصغيرة">
+<title>جنّتي الصغيرة</title>
+<meta name="description" content="جنّتي الصغيرة — أصول ديني الخمسة: تطبيق تفاعلي للأطفال، تصميم الشيخ علاء المطوري">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -321,8 +321,8 @@ button{font-family:inherit;cursor:pointer}
   <section class="screen on" id="home">
     <div class="hero">
       <div id="heroArt"></div>
-      <h1>أصولُ دِيني الخمسة</h1>
-      <p>رحلة ملوّنة مع الصور والآيات والأسئلة</p>
+      <h1>جنّتي الصغيرة</h1>
+      <p>مع كتاب «أصول ديني الخمسة»: رحلة ملوّنة بالصور والآيات والأسئلة</p>
       <div class="by">تصميم الشيخ علاء المطوري</div>
     </div>
     <div class="stats">
@@ -394,7 +394,7 @@ button{font-family:inherit;cursor:pointer}
 <div class="celebrate" id="celebrate" role="dialog" aria-live="assertive"><div class="in" id="celebIn"></div></div>
 <div class="modal" id="modal"><div class="in" id="modalIn"></div></div>
 
-<script src="questions.js?v=2.7"></script><!-- غيّر ?v= مع APP_VER حتى لا يأخذ المتصفح نسخة قديمة -->
+<script src="questions.js?v=2.8"></script><!-- غيّر ?v= مع APP_VER حتى لا يأخذ المتصفح نسخة قديمة -->
 <script>
 /* ---------- helpers ---------- */
 const AR='٠١٢٣٤٥٦٧٨٩';
@@ -1083,17 +1083,20 @@ document.addEventListener('keydown',e=>{if($('#zoomv').classList.contains('on'))
   if(!$('#reader').classList.contains('on'))return;
   if(e.key=='ArrowLeft')rGo(rCur+1);else if(e.key=='ArrowRight')rGo(rCur-1);else if(e.key=='Escape')closeReader()});
 
-const APP_VER='2.7';
+const APP_VER='2.8';
 $('#verLine').textContent=`الإصدار ${ar(APP_VER).replace('.','٫')} · ${ar(ALLQ.length)} سؤالًا`;
 renderHome();
 if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
-<script src="online.js?v=2.7"></script>
-<script src="bayt.js?v=2.7"></script>
-<script src="nafsak.js?v=2.7"></script>
-<script src="hifz.js?v=2.7"></script>
-<script src="jannah.js?v=2.7"></script>
-<script src="baytrace.js?v=2.7"></script>
-<script src="wird.js?v=2.7"></script>
+<script src="online.js?v=2.8"></script>
+<script src="bayt.js?v=2.8"></script>
+<script src="nafsak.js?v=2.8"></script>
+<script src="hifz.js?v=2.8"></script>
+<script src="jannah.js?v=2.8"></script>
+<script src="baytrace.js?v=2.8"></script>
+<script src="wird.js?v=2.8"></script>
+<script src="sawt.js?v=2.8"></script>
+<script src="salah.js?v=2.8"></script>
+<script src="alqab.js?v=2.8"></script>
 </body>
 </html>

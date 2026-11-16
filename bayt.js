@@ -23,7 +23,7 @@ const RANKS=[
  {at:40,icon:'👑',name:'بطل الجنة',color:'#7c4dc4',gift:'crown',giftName:'تاج مضيء فوق بيتك 👑'}
 ];
 const FLOOR_CUPS=[0,3,8,20]; // كم كأسًا يحتاج كل طابق ليُفتح
-const DAILY={contest:3,nafsak:3}; // كم جولة في اليوم تعطي كؤوسًا
+const DAILY={contest:3,nafsak:3,fiqh:4,prayer:1,tilawa:2,deeds:2}; // كم جولة في اليوم تعطي كؤوسًا
 const rankOf=n=>RANKS.filter(r=>n>=r.at).pop();
 const nextRank=n=>RANKS.find(r=>r.at>n);
 const hasGift=g=>RANKS.some(r=>r.gift==g&&cs.n>=r.at);
