@@ -2,7 +2,7 @@ name: Build Android APK
 on:
   push:
     branches: [main]
-    paths: ['index.html', 'online.js', 'questions.js', 'vendor/**', 'p/**', 'android/**', '.github/workflows/android.yml']
+    paths: ['index.html', '*.js', 'audio/**', 'vendor/**', 'p/**', 'android/**', '.github/workflows/android.yml']
   workflow_dispatch:
 permissions:
   contents: write
@@ -18,7 +18,7 @@ jobs:
       - name: Bundle the web app into the APK
         run: |
           mkdir -p android/app/src/main/assets/www
-          cp -r index.html online.js questions.js bayt.js nafsak.js hifz.js jannah.js baytrace.js wird.js audio vendor manifest.webmanifest icon-192.png icon-512.png apple-touch-icon.png p android/app/src/main/assets/www/
+          cp -r index.html online.js questions.js bayt.js nafsak.js hifz.js jannah.js baytrace.js wird.js sawt.js salah.js alqab.js audio vendor manifest.webmanifest icon-192.png icon-512.png apple-touch-icon.png p android/app/src/main/assets/www/
       - name: Build
         working-directory: android
         env:
@@ -30,4 +30,4 @@ jobs:
         run: |
           cp android/app/build/outputs/apk/release/app-release.apk usool-deeni.apk
           gh release delete latest --yes --cleanup-tag || true
-          gh release create latest usool-deeni.apk --title "أصول ديني الخمسة - تطبيق أندرويد" --notes "حمّل ملف usool-deeni.apk وثبّته على جهاز أندرويد."
+          gh release create latest usool-deeni.apk --title "جنّتي الصغيرة - تطبيق أندرويد" --notes "حمّل ملف usool-deeni.apk وثبّته على جهاز أندرويد."
