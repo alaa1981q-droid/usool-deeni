@@ -394,7 +394,7 @@ button{font-family:inherit;cursor:pointer}
 <div class="celebrate" id="celebrate" role="dialog" aria-live="assertive"><div class="in" id="celebIn"></div></div>
 <div class="modal" id="modal"><div class="in" id="modalIn"></div></div>
 
-<script src="questions.js?v=2.4"></script><!-- غيّر ?v= مع APP_VER حتى لا يأخذ المتصفح نسخة قديمة -->
+<script src="questions.js?v=2.5"></script><!-- غيّر ?v= مع APP_VER حتى لا يأخذ المتصفح نسخة قديمة -->
 <script>
 /* ---------- helpers ---------- */
 const AR='٠١٢٣٤٥٦٧٨٩';
@@ -801,6 +801,7 @@ $('#checkBtn').onclick=()=>{
     else{if(qz.sel==null)return;const btns=B.querySelectorAll('.opt');ok=q.opts[qz.sel].ok;
       btns[qz.sel].classList.add(ok?'ok':'bad');if(!ok)btns.forEach((b,i)=>{if(q.opts[i].ok)b.classList.add('ok')});}
     qz.checked=true;B.querySelectorAll('button.opt').forEach(b=>b.disabled=true);
+    if(window.onAnswer)onAnswer(q,ok,qz.mode);
     if(ok){qz.score++;$('#fb').className='fb ok';$('#fb').textContent=['أحسنت! إجابة صحيحة 🌟','ممتاز! بارك الله فيك 👏','رائع! هذا هو الجواب ✅'][Math.floor(Math.random()*3)]}
     else{qz.wrong.push(q);$('#fb').className='fb bad';$('#fb').innerHTML='ليست هذه الإجابة، لا تحزن 💪'+(fix?`<div class="fixa">${fix}</div>`:'')}
     beep(ok);
@@ -809,9 +810,10 @@ $('#checkBtn').onclick=()=>{
     if(qz.i<qz.qs.length-1){qz.i++;renderQ()}else finishQuiz();
   }
 };
-$('#quizBack').onclick=()=>modal(`<h3 style="margin:4px 0">تريد الخروج من الامتحان؟</h3><p>ستضيع إجاباتك في هذه المحاولة.</p><div class="nav"><button class="btn sec" data-close>أكمل الامتحان</button><button class="btn" id="mExit">خروج</button></div>`,()=>{$('#mExit').onclick=()=>{closeModal();renderPage();show('lesson')}});
+$('#quizBack').onclick=()=>modal(`<h3 style="margin:4px 0">تريد الخروج من الامتحان؟</h3><p>ستضيع إجاباتك في هذه المحاولة.</p><div class="nav"><button class="btn sec" data-close>أكمل الامتحان</button><button class="btn" id="mExit">خروج</button></div>`,()=>{$('#mExit').onclick=()=>{closeModal();if(qz&&qz.mode){renderHome();show('home')}else{renderPage();show('lesson')}}});
 
 function finishQuiz(){
+  if(qz.mode&&window.wirdFinish)return wirdFinish();
   const st=STAGES[cur.s],n=qz.qs.length,sc=qz.score,pass=sc>=PASS;
   const stars=sc>=5?3:sc==4?2:sc>=PASS?1:0, grade=GRADE(sc);
   let h=`<div class="result">`;
@@ -944,7 +946,7 @@ function ctAsk(){
   const btns=[...$('#ctBody').querySelectorAll('.opt')];
   const finish=(k)=>{if(done)return;done=true;ct.answered=true;ctStopTimer();$('#tbox').classList.remove('hot');
     $('#ctBody').querySelectorAll('.help').forEach(h=>h.disabled=true);
-    const ok=k!=null&&q.opts[k].ok;btns.forEach((b,i)=>{b.disabled=true;if(q.opts[i].ok)b.classList.add('ok')});
+    const ok=k!=null&&q.opts[k].ok;if(window.onAnswer)onAnswer(q,ok,'contest');btns.forEach((b,i)=>{b.disabled=true;if(q.opts[i].ok)b.classList.add('ok')});
     if(k!=null&&!ok)btns[k].classList.add('bad');
     let gain=0;
     if(ok){p.streak++;p.right++;gain=(10+left)*mult()*(golden?2:1);p.score+=gain;
@@ -1081,16 +1083,17 @@ document.addEventListener('keydown',e=>{if($('#zoomv').classList.contains('on'))
   if(!$('#reader').classList.contains('on'))return;
   if(e.key=='ArrowLeft')rGo(rCur+1);else if(e.key=='ArrowRight')rGo(rCur-1);else if(e.key=='Escape')closeReader()});
 
-const APP_VER='2.4';
+const APP_VER='2.5';
 $('#verLine').textContent=`الإصدار ${ar(APP_VER).replace('.','٫')} · ${ar(ALLQ.length)} سؤالًا`;
 renderHome();
 if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
-<script src="online.js?v=2.4"></script>
-<script src="bayt.js?v=2.4"></script>
-<script src="nafsak.js?v=2.4"></script>
-<script src="hifz.js?v=2.4"></script>
-<script src="jannah.js?v=2.4"></script>
-<script src="baytrace.js?v=2.4"></script>
+<script src="online.js?v=2.5"></script>
+<script src="bayt.js?v=2.5"></script>
+<script src="nafsak.js?v=2.5"></script>
+<script src="hifz.js?v=2.5"></script>
+<script src="jannah.js?v=2.5"></script>
+<script src="baytrace.js?v=2.5"></script>
+<script src="wird.js?v=2.5"></script>
 </body>
 </html>

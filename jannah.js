@@ -13,7 +13,7 @@ const boy=()=>!window.Cups||Cups.sex!='g';
 const esc=v=>String(v==null?'':v).replace(/[<>&"]/g,'');
 
 /* ---------- الكتالوج: [x,y,size] بإحداثيات رسم البيت (عرض ٣٦٠ × ارتفاع ٣٣٠، الأرض عند y=292) ---------- */
-const CATS=[['garden','🌳','الأشجار والورد'],['light','💡','الإنارة'],['car','🚗','السيارات'],['animals','🦚','الحيوانات'],['sky','🕊️','السماء'],['deco','✨','الزينة'],['paint','🎨','الألوان'],['gift','🎁','هدايا الأصدقاء']];
+const CATS=[['inside','🛋️','داخل البيت'],['onhouse','🪟','على البيت'],['garden','🌳','الأشجار والورد'],['light','💡','الإنارة'],['car','🚗','السيارات'],['animals','🦚','الحيوانات'],['sky','🕊️','السماء'],['deco','✨','الزينة'],['paint','🎨','الألوان'],['gift','🎁','هدايا الأصدقاء']];
 const ITEMS=[
  {id:'tulips', cat:'garden',name:'صفّ توليب',   e:'🌷',price:20,layer:'front',at:[[118,304,15],[138,306,15],[188,306,15],[208,304,15]]},
  {id:'sunfl',  cat:'garden',name:'دوّار الشمس', e:'🌻',price:25,layer:'front',at:[[300,296,26],[318,300,22]]},
@@ -41,6 +41,33 @@ const ITEMS=[
  {id:'bike',   cat:'car',name:'دراجة',          e:'🚲',price:80, layer:'front',at:[[34,318,24]]},
  {id:'car',    cat:'car',name:'سيارة العائلة',  e:'🚙',price:250,layer:'front',at:[[256,314,40]]},
  {id:'racecar',cat:'car',name:'سيارة سباق',     e:'🏎️',price:400,layer:'front',at:[[322,318,36]]},
+ // على جدران البيت نفسه
+ {id:'fbox',   cat:'onhouse',name:'أحواض ورد تحت الشبابيك',e:'🌺',price:40,layer:'front',svg:'fbox'},
+ {id:'curt',   cat:'onhouse',name:'ستائر ملوّنة',e:'🎀',price:35,layer:'front',svg:'curt'},
+ {id:'gdoor',  cat:'onhouse',name:'باب ذهبي مزخرف',e:'🚪',price:60,layer:'front',svg:'door'},
+ {id:'ivy',    cat:'onhouse',name:'نبتة متسلّقة',e:'🌿',price:30,layer:'front',svg:'ivy'},
+ // داخل البيت: r = رقم الغرفة (الطابق)، والإحداثيات داخل رسم الغرفة ٣٦٠×١٧٠
+ {id:'carpet', cat:'inside',r:0,name:'سجّادة ملوّنة',e:'🟥',price:30,layer:'room',svg:'carpet'},
+ {id:'sofa',   cat:'inside',r:0,name:'كنبة مريحة',e:'🛋️',price:40,layer:'room',at:[[105,146,58]]},
+ {id:'frame',  cat:'inside',r:0,name:'لوحة طبيعة',e:'🖼️',price:30,layer:'room',at:[[100,72,34]]},
+ {id:'clock',  cat:'inside',r:0,name:'ساعة حائط',e:'🕰️',price:30,layer:'room',at:[[262,70,30]]},
+ {id:'plantin',cat:'inside',r:0,name:'نبتة داخلية',e:'🪴',price:25,layer:'room',at:[[306,148,40]]},
+ {id:'fruits', cat:'inside',r:0,name:'صحن فواكه',e:'🍇',price:20,layer:'room',at:[[208,146,24]],svg:'table'},
+ {id:'shelf',  cat:'inside',r:1,name:'رفوف كتب',e:'📚',price:45,layer:'room',svg:'shelf'},
+ {id:'desk',   cat:'inside',r:1,name:'مكتب وكرسي',e:'🪑',price:30,layer:'room',at:[[250,150,38]],svg:'desk'},
+ {id:'quran',  cat:'inside',r:1,name:'مصحف على المكتب',e:'📖',price:30,layer:'room',at:[[226,122,24]],need:'desk'},
+ {id:'globe',  cat:'inside',r:1,name:'مجسّم الأرض',e:'🌍',price:30,layer:'room',at:[[310,146,30]]},
+ {id:'candle', cat:'inside',r:1,name:'قنديل',e:'🕯️',price:20,layer:'room',at:[[180,86,20]],anim:'twinkle'},
+ {id:'bed',    cat:'inside',r:2,name:'سرير جميل',e:'🛏️',price:50,layer:'room',at:[[240,148,70]]},
+ {id:'teddy',  cat:'inside',r:2,name:'دبّ لعبة',e:'🧸',price:25,layer:'room',at:[[88,150,32]]},
+ {id:'train',  cat:'inside',r:2,name:'قطار لعبة',e:'🚂',price:30,layer:'room',at:[[150,156,26]],anim:'swim'},
+ {id:'nlight', cat:'inside',r:2,name:'مصباح النوم',e:'🌙',price:20,layer:'room',at:[[300,62,26]],anim:'bob'},
+ {id:'kite_r', cat:'inside',r:2,name:'طائرة ورقية على الجدار',e:'🪁',price:20,layer:'room',at:[[96,74,30]]},
+ {id:'prayrug',cat:'inside',r:3,name:'سجّادة صلاة',e:'🕌',price:40,layer:'room',svg:'prayrug'},
+ {id:'rahl',   cat:'inside',r:3,name:'مصحف على رَحْل',e:'📖',price:35,layer:'room',svg:'rahl'},
+ {id:'misbaha',cat:'inside',r:3,name:'مسبحة',e:'📿',price:20,layer:'room',at:[[118,146,24]]},
+ {id:'lant_r', cat:'inside',r:3,name:'فانوس معلّق',e:'🏮',price:30,layer:'room',at:[[300,52,28]],anim:'bob'},
+ {id:'aqua',   cat:'inside',r:3,name:'حوض أسماك',e:'🐠',price:50,layer:'room',svg:'aqua'},
  // هدايا الأصدقاء فقط
  {id:'g_balloon',cat:'gift',name:'بالونات',      e:'🎈',gift:1,layer:'front',at:[[72,206,20],[60,218,18],[84,222,17]],anim:'bob'},
  {id:'g_bear',   cat:'gift',name:'دبدوب',        e:'🧸',gift:1,layer:'front',at:[[150,306,18]]},
@@ -57,25 +84,38 @@ const PAINTS=[
  {id:'lilac',name:'بنفسجي',   price:50,col:'#c9b2f0',f:'<feColorMatrix type="hueRotate" values="-110"/>'},
  {id:'pearl',name:'أبيض لؤلؤي',price:60,col:'#f6f1e6',f:'<feColorMatrix type="saturate" values=".15"/><feComponentTransfer><feFuncR type="linear" slope="1.08"/><feFuncG type="linear" slope="1.08"/><feFuncB type="linear" slope="1.1"/></feComponentTransfer>'}
 ];
+const WALLS=[{id:'cream',name:'كريمي',col:'#fbefd6',price:0},{id:'mint',name:'نعناعي',col:'#d6f3e4',price:25},{id:'peach',name:'خوخي',col:'#fde1cf',price:25},{id:'lav',name:'ليلكي',col:'#e7defa',price:25},{id:'skyw',name:'سماوي',col:'#d8ecfb',price:25}];
+const ROOMS=[['غرفة الجلوس','🛋️'],['المكتبة','📚'],['غرفة النوم','🛏️'],['غرفة الصلاة','🤲']];
 const IT=Object.fromEntries(ITEMS.map(i=>[i.id,i])),PT=Object.fromEntries(PAINTS.map(p=>[p.id,p]));
 const GIFTS=ITEMS.filter(i=>i.gift);
 
 /* ---------- رسم الزينة داخل SVG البيت ---------- */
+function kwrap(x){const k=Bayt.hk;if(k>=1)return x;const c=Bayt.FX+Bayt.FW/2+Bayt.DX/2;return `<g transform="translate(${c} ${Bayt.GY}) scale(${k}) translate(${-c} ${-Bayt.GY})">${x}</g>`}
+function wins(full){const B=Bayt,out=[];for(let i=0;i<full;i++){const y=B.fy(i);
+  if(i==0)out.push([B.FX+20,y+18],[B.FX+B.FW-46,y+18]);else out.push([B.FX+18,y+16],[B.FX+B.FW/2-13,y+16],[B.FX+B.FW-44,y+16])}return out}
+function houseItem(t,full){const B=Bayt;if(!(full>0))return '';let s='';
+  if(t=='fbox')s=wins(full).map(([x,y])=>`<rect x="${x-3}" y="${y+34}" width="32" height="6" rx="1.5" fill="#9a6a3a" stroke="#6f4a22" stroke-width=".8"/>${[0,1,2,3,4].map(k=>`<circle cx="${x+1+k*6}" cy="${y+33}" r="2.8" fill="${['#e2504a','#ff8ac2','#f2b632','#c45bd1','#fff'][k]}"/><circle cx="${x+3+k*6}" cy="${y+35}" r="1.8" fill="#2e9c55"/>`).join('')}`).join('');
+  if(t=='curt')s=wins(full).map(([x,y])=>`<path d="M${x+2} ${y+6} Q${x+10} ${y+14} ${x+4} ${y+29} L${x+1.5} ${y+29}Z" fill="#ff8ac2" opacity=".9"/><path d="M${x+24} ${y+6} Q${x+16} ${y+14} ${x+22} ${y+29} L${x+24.5} ${y+29}Z" fill="#ff8ac2" opacity=".9"/>`).join('');
+  if(t=='door'){const dx=B.FX+B.FW/2,g=B.GY;s=`<path d="M${dx-24} ${g} V${g-36} a24 24 0 0 1 48 0 V${g}" fill="none" stroke="#ffd54a" stroke-width="3.5"/><path d="M${dx-24} ${g} V${g-36} a24 24 0 0 1 48 0 V${g}" fill="none" stroke="#b9851a" stroke-width="1" stroke-dasharray="2 3"/>${[-24,-12,0,12,24].map(k=>`<circle cx="${dx+k*.9}" cy="${g-36-Math.sqrt(Math.max(0,576-k*k))+2}" r="2.4" fill="#fff6b0" class="dk-tw"/>`).join('')}<text x="${dx}" y="${g-64}" font-size="13" text-anchor="middle" class="dk-tw">✨</text>`}
+  if(t=='ivy'){const top=B.fy(full-1)+10;for(let y=B.GY-4;y>top;y-=9){const x=B.FX+3+Math.sin(y/9)*3;s+=`<ellipse cx="${x}" cy="${y}" rx="4.5" ry="3" fill="#2e9c55" transform="rotate(${(y%3)*25-20} ${x} ${y})"/><ellipse cx="${x+4}" cy="${y-4}" rx="3.5" ry="2.4" fill="#3fbf6f"/>`}
+    s=`<path d="M${B.FX+3} ${B.GY} Q${B.FX+8} ${(B.GY+top)/2} ${B.FX+3} ${top}" stroke="#4a7a2a" stroke-width="1.6" fill="none"/>`+s}
+  return kwrap(s)}
 function itemSVG(it,full,withRoof){
+  if(['fbox','curt','door','ivy'].includes(it.svg))return houseItem(it.svg,full);
   const cls=it.anim?` class="dk-${it.anim}"`:'';
   if(it.svg=='lights'){if(!(full>0&&withRoof))return '';const B=Bayt,y=B.fy(full-1),L=B.FX-12,R=B.FX+B.FW+12,M=B.FX+B.FW/2,H=66,C=['#e2504a','#f2b632','#3fbf6f','#2f8fd0','#c45bd1'];
     let s='<g>';for(let k=0;k<=10;k++){const t=k/10,x1=L+(M-L)*t,y1=y-H*t,x2=M+(R-M)*t,y2=y-H+H*t;
       s+=`<circle cx="${x1}" cy="${y1-3}" r="3.4" fill="${C[k%5]}" class="dk-tw" style="animation-delay:${k*.15}s"/><circle cx="${x2}" cy="${y2-3}" r="3.4" fill="${C[(k+2)%5]}" class="dk-tw" style="animation-delay:${k*.15+.07}s"/>`}
-    return s+'</g>'}
+    return kwrap(s+'</g>')}
   let s='';
   if(it.extra=='stars')s+=[[70,24],[96,52],[20,76],[130,22]].map(([x,y],k)=>`<text x="${x}" y="${y}" font-size="10" text-anchor="middle" class="dk-tw" style="animation-delay:${k*.3}s">⭐</text>`).join('');
   return s+it.at.map(([x,y,z],k)=>`<text x="${x}" y="${y}" font-size="${z}" text-anchor="middle"${cls} style="animation-delay:${k*.4}s">${it.e}</text>`).join('')}
 function lookItems(L){return String(L.i||'').split(',').filter(id=>IT[id])}
 const Deco={
-  myLook(){return {c:Bayt.cups,p:js.paint,i:Object.keys(js.on).filter(id=>js.on[id]&&js.own[id]).join(',')}},
+  myLook(){return {c:Bayt.cups,p:js.paint,w:js.wall||'cream',f:Bayt.done,i:Object.keys(js.on).filter(id=>js.on[id]&&js.own[id]).join(',')}},
   svg(L,layer,full,withRoof){const ids=lookItems(L);let s='';
     if(layer=='back')s+='<style>.dk-bob,.dk-fly,.dk-flut,.dk-swim,.dk-drift,.dk-twinkle,.dk-tw{transform-box:fill-box;transform-origin:center}.dk-bob{animation:dkbob 2.2s ease-in-out infinite}.dk-fly{animation:dkfly 3s ease-in-out infinite}.dk-flut{animation:dkflut 1.6s ease-in-out infinite}.dk-swim{animation:dkswim 4s ease-in-out infinite}.dk-drift{animation:dkdrift 7s ease-in-out infinite}.dk-twinkle,.dk-tw{animation:dktw 1.4s ease-in-out infinite}@keyframes dkbob{50%{transform:translateY(-4px)}}@keyframes dkfly{50%{transform:translate(8px,-6px)}}@keyframes dkflut{50%{transform:translate(4px,-5px) rotate(-12deg)}}@keyframes dkswim{50%{transform:translateX(-14px)}}@keyframes dkdrift{50%{transform:translateX(16px)}}@keyframes dktw{50%{opacity:.35}}</style>';
-    ids.forEach(id=>{const it=IT[id];if(it.layer==layer&&(!it.need||ids.includes(it.need)))s+=itemSVG(it,full,withRoof)});return s},
+    ids.forEach(id=>{const it=IT[id];if(it.layer==layer&&it.layer!='room'&&(!it.need||ids.includes(it.need)))s+=itemSVG(it,full,withRoof)});return s},
   paintFilter(L){const p=PT[L.p];if(!p||!p.f)return '';return `url(#pf_${p.id})`},
   addJ(n){js.j+=Math.max(0,Math.round(n));jsave();updJ()},
   floorJewels(score){const n=Math.max(5,Math.round(score/10));Deco.addJ(n);return `<div class="cupbox win" style="border-color:#9fd3f0;background:linear-gradient(160deg,#eaf6ff,#fff);color:#1d4e9e"><b>💎 +${ar(n)}</b>جواهر لتزيين بيتك! عندك الآن ${ar(js.j)} 💎</div>`},
@@ -100,6 +140,10 @@ css.textContent=`
 .jbtn{flex:1;border:none;border-radius:18px;padding:10px 4px 8px;font-weight:800;font-size:15px;color:#fff;box-shadow:0 5px 0 rgba(0,0,0,.18);position:relative;line-height:1.3}
 .jbtn span{display:block;font-size:30px;line-height:1.2}
 .jbtn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.18)}
+.jbar{flex-wrap:wrap}.jbtn{flex:1 1 40%}.jbtn.in{background:linear-gradient(160deg,#ffb36b,#c96a2a)}
+.jroom{display:block;width:100%;padding:0;border:3px solid #e6c07a;border-radius:18px;overflow:hidden;background:#fff;margin:0 0 10px;position:relative;color:inherit}
+.jroom svg{display:block;width:100%;height:auto}.jroom .lb{position:absolute;top:6px;right:8px;background:rgba(255,255,255,.9);border-radius:12px;padding:0 10px;font-weight:800;font-size:14px;z-index:1}.jroom .lb small{color:var(--muted);font-weight:500}
+.jrooms{display:flex;gap:6px;margin:0 0 8px}.jrooms button{flex:1;border:2px solid var(--line);background:#fff;border-radius:14px;font-size:13px;font-weight:700;padding:4px 2px}.jrooms button.on{border-color:#c96a2a;background:#fff4e6}
 .jbtn.shop{background:linear-gradient(160deg,#ff8ac2,#c45bd1)}.jbtn.fr{background:linear-gradient(160deg,#5fb8ff,#2f6fd0)}.jbtn.ch{background:linear-gradient(160deg,#ffd54a,#e57c1f)}
 .jbtn.ch.ready span{animation:jshake 1s infinite}.jbtn .dot{position:absolute;top:-6px;left:-4px;background:#e2504a;color:#fff;border-radius:12px;font-size:12px;padding:0 7px;animation:pulse 1s infinite}
 @keyframes jshake{0%,100%{transform:rotate(0)}20%{transform:rotate(-14deg)}40%{transform:rotate(12deg)}60%{transform:rotate(-8deg)}}
@@ -150,17 +194,53 @@ function sparkle(){try{Bayt.sStar()}catch(e){}}
 function hearts(x,y,n=5){for(let k=0;k<n;k++){const d=document.createElement('div');d.className='jheart';d.textContent=['❤️','💖','💗'][k%3];
   d.style.left=(x-20+Math.random()*40)+'px';d.style.top=(y-10)+'px';d.style.animationDelay=k*.12+'s';document.body.appendChild(d);setTimeout(()=>d.remove(),1700)}}
 
+/* ---------- داخل البيت: غرفة لكل طابق ---------- */
+function roomItem(it){
+  if(it.svg=='carpet')return `<g><polygon points="70,128 290,128 318,160 42,160" fill="#c43d38"/><polygon points="80,132 280,132 304,156 56,156" fill="none" stroke="#f2b632" stroke-width="2.5" stroke-dasharray="6 3"/><polygon points="150,136 210,136 222,152 138,152" fill="#2f6fd0" opacity=".8"/></g>`;
+  if(it.svg=='prayrug')return `<g><polygon points="120,126 230,126 246,162 104,162" fill="#14794f"/><path d="M134 158 L137 138 Q175 116 213 138 L216 158Z" fill="#1f9a66" stroke="#f2b632" stroke-width="2"/><polygon points="120,126 230,126 246,162 104,162" fill="none" stroke="#f2b632" stroke-width="2.5"/></g>`;
+  if(it.svg=='rahl')return `<g><path d="M268 158 L292 126 M316 158 L292 126" stroke="#8a5a2b" stroke-width="5" stroke-linecap="round"/><path d="M276 126 L292 116 L308 126 L292 132Z" fill="#14794f" stroke="#f2b632" stroke-width="1.5"/><text x="292" y="126" font-size="9" text-anchor="middle" fill="#f2b632">✦</text></g>`;
+  if(it.svg=='aqua')return `<g><rect x="34" y="104" width="62" height="40" rx="4" fill="#9fd9ff" stroke="#5c8ea8" stroke-width="2.5" opacity=".9"/><rect x="34" y="104" width="62" height="7" fill="#fff" opacity=".4"/><rect x="38" y="144" width="54" height="16" fill="#8a5a2b"/><text x="58" y="132" font-size="14" class="dk-swim">🐠</text><text x="80" y="124" font-size="11" class="dk-swim" style="animation-delay:1s">🐟</text><text x="44" y="142" font-size="12">🌿</text></g>`;
+  if(it.svg=='shelf')return `<g><rect x="34" y="40" width="74" height="112" fill="#a8743e" stroke="#7a4f22" stroke-width="2"/>${[0,1,2].map(k=>`<rect x="38" y="${44+k*36}" width="66" height="32" fill="#7a4f22"/><text x="71" y="${72+k*36}" font-size="26" text-anchor="middle">${['📚','📗','📘'][k]}${k==0?'':'📕'}</text>`).join('')}</g>`;
+  let s='';
+  if(it.svg=='desk')s+=`<g><rect x="190" y="128" width="78" height="7" rx="2" fill="#a8743e"/><rect x="196" y="135" width="5" height="25" fill="#7a4f22"/><rect x="258" y="135" width="5" height="25" fill="#7a4f22"/></g>`;
+  if(it.svg=='table')s+=`<g><ellipse cx="208" cy="148" rx="30" ry="6" fill="#a8743e"/><rect x="205" y="148" width="6" height="12" fill="#7a4f22"/></g>`;
+  if(it.id=='desk')return s+`<text x="282" y="160" font-size="34" text-anchor="middle">🪑</text>`;
+  return s+(it.at||[]).map(([x,y,z])=>`<text x="${x}" y="${y}" font-size="${z}" text-anchor="middle"${it.anim?` class="dk-${it.anim}"`:''}>${it.e}</text>`).join('')}
+function roomSVG(r,L){const ids=lookItems(L),built=r<(L.f|0),wall=(WALLS.find(w=>w.id==L.w)||WALLS[0]).col;
+  let s=`<svg viewBox="0 0 360 170" xmlns="http://www.w3.org/2000/svg"><style>.dk-bob,.dk-swim,.dk-twinkle{transform-box:fill-box;transform-origin:center}.dk-bob{animation:dkbob 2.2s ease-in-out infinite}.dk-swim{animation:dkswim 4s ease-in-out infinite}.dk-twinkle{animation:dktw 1.4s infinite}@keyframes dkbob{50%{transform:translateY(-4px)}}@keyframes dkswim{50%{transform:translateX(-12px)}}@keyframes dktw{50%{opacity:.4}}</style>
+  <polygon points="0,0 360,0 320,12 40,12" fill="#fff8ec"/>
+  <rect x="40" y="12" width="280" height="112" fill="${wall}"/>
+  <polygon points="0,0 40,12 40,124 0,170" fill="${wall}"/><polygon points="0,0 40,12 40,124 0,170" fill="#000" opacity=".1"/>
+  <polygon points="320,12 360,0 360,170 320,124" fill="${wall}"/><polygon points="320,12 360,0 360,170 320,124" fill="#000" opacity=".05"/>
+  <polygon points="40,124 320,124 360,170 0,170" fill="#d9a85e"/>${[1,2,3,4,5,6,7].map(k=>`<line x1="${40+k*35}" y1="124" x2="${k*45}" y2="170" stroke="#b9853f" stroke-width="1"/>`).join('')}
+  <rect x="40" y="118" width="280" height="6" fill="#fff" opacity=".6"/>
+  <g transform="translate(160 22)"><path d="M0 50 V18 a20 18 0 0 1 40 0 V50Z" fill="#bfe7ff" stroke="#e6c07a" stroke-width="3"/><circle cx="30" cy="16" r="5" fill="#ffd54a"/><line x1="20" y1="2" x2="20" y2="50" stroke="#fff" stroke-width="1.5"/></g>`;
+  if(built){ids.forEach(id=>{const it=IT[id];if(it.layer=='room'&&it.r==r&&(!it.need||ids.includes(it.need)))s+=roomItem(it)})}
+  else s+=`<rect width="360" height="170" fill="#5d6f66" opacity=".55"/><text x="180" y="92" font-size="16" font-weight="800" text-anchor="middle" fill="#fff" font-family="Tajawal,sans-serif">🔒 ابنِ ${Bayt.LEVELS[r].floor} لتفتح هذه الغرفة</text>`;
+  return s+'</svg>'}
+function inside(L,who){show('jannah');$('#jTitle').textContent=who?`🏠 داخل بيت ${who}`:'🛋️ داخل بيتي';updJ();const B=$('#jBody');
+  if(!who)backTo=null;
+  B.innerHTML=`<p class="bcap" style="margin:0 0 6px">${who?'هذه غرف بيت صديقك 🤍':`كل طابق تبنيه يفتح لك غرفة جديدة. ${boy()?'اضغط':'اضغطي'} على الغرفة لتزيّنها 🛠️`}</p>
+    ${[3,2,1,0].map(r=>`<button class="jroom" data-r="${r}" ${who?'disabled':''}><span class="lb">${ROOMS[r][1]} ${ROOMS[r][0]} <small>· ${Bayt.LEVELS[r].floor}</small></span>${roomSVG(r,L)}</button>`).join('')}`;
+  if(!who)B.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{const r=+b.dataset.r;if(r>=Bayt.done){tone(200,.15,'square',.08);modal(`<div style="font-size:50px">🔒</div><h3 style="margin:4px 0">${ROOMS[r][0]} مقفولة</h3><p>${boy()?'ابنِ':'ابني'} ${Bayt.LEVELS[r].floor} في السباق لتفتحها 🏗️</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`);return}
+    Bayt.sTap();tab='inside';room=r;backTo=()=>inside(Deco.myLook());shop(true)});
+  window.scrollTo(0,0)}
+let room=0;
+
 /* ---------- قائمة البيت: أزرار جديدة ---------- */
 function menuHook(B){
   const chestReady=js.chest!=today();
   const rk=B.querySelector('.brank');
   const html=`<div class="jbar">
     <button class="jbtn shop" id="jShop"><span>🎨</span>زيّن بيتك</button>
+    <button class="jbtn in" id="jIn"><span>🛋️</span>ادخل بيتك</button>
     <button class="jbtn fr" id="jFr"><span>👥</span>بيوت أصدقائي</button>
     <button class="jbtn ch ${chestReady?'ready':''}" id="jCh">${chestReady?'<i class="dot">!</i>':''}<span>🎁</span>صندوق اليوم</button></div>
     <div style="text-align:center;margin-top:8px"><span class="jj" id="jMenuJ">💎 ${ar(js.j)}</span></div>${goal()}<div id="jVis"></div>`;
   if(rk)rk.insertAdjacentHTML('afterend',html);else B.insertAdjacentHTML('afterbegin',html);
   $('#jShop').onclick=()=>{Bayt.sTap();shop()};
+  $('#jIn').onclick=()=>{Bayt.sTap();inside(Deco.myLook())};
+  const hb=B.querySelector('.bhouse');if(hb){hb.style.cursor='pointer';hb.onclick=()=>{Bayt.sTap();inside(Deco.myLook())}}
   $('#jFr').onclick=()=>{Bayt.sTap();friends()};
   $('#jCh').onclick=chest;
   publish();inbox();
@@ -186,15 +266,22 @@ function chest(){
 
 /* ---------- المتجر: زيّن بيتك ---------- */
 let tab='garden';
-function shop(){show('jannah');backTo=null;$('#jTitle').textContent='🎨 زيّن بيتك';updJ();drawShop();window.scrollTo(0,0)}
+function shop(keepBack){show('jannah');if(!keepBack)backTo=null;$('#jTitle').textContent='🎨 زيّن بيتك';updJ();drawShop();window.scrollTo(0,0)}
 function drawShop(){const B=$('#jBody');const L=Deco.myLook();
   let grid='';
   if(tab=='paint')grid=PAINTS.map(p=>{const own=p.price==0||js.own['p_'+p.id],on=js.paint==p.id;
     return `<button class="jit ${own?'own':''} ${on?'on':''} ${!own&&js.j<p.price?'poor':''}" data-p="${p.id}"><span class="e"><span style="display:inline-block;width:34px;height:34px;border-radius:10px;background:${p.col};border:2px solid #0002;vertical-align:middle"></span></span><b>${p.name}</b><span class="pr">${on?'✓ الآن':own?'اختر':'💎 '+ar(p.price)}</span></button>`}).join('');
-  else grid=ITEMS.filter(i=>i.cat==tab).map(i=>{const own=js.own[i.id],on=own&&js.on[i.id],nd=i.need&&!js.own[i.need];
+  else if(tab=='inside')grid=WALLS.map(w=>{const own=w.price==0||js.own['w_'+w.id],on=(js.wall||'cream')==w.id;
+    return `<button class="jit ${own?'own':''} ${on?'on':''} ${!own&&js.j<w.price?'poor':''}" data-w="${w.id}"><span class="e"><span style="display:inline-block;width:34px;height:34px;border-radius:8px;background:${w.col};border:2px solid #0002;vertical-align:middle"></span></span><b>جدران ${w.name}</b><span class="pr">${on?'✓ الآن':own?'اختر':'💎 '+ar(w.price)}</span></button>`}).join('')+gridOf(ITEMS.filter(i=>i.cat=='inside'&&i.r==room));
+  else grid=gridOf(ITEMS.filter(i=>i.cat==tab));
+  function gridOf(list){return list.map(i=>{const own=js.own[i.id],on=own&&js.on[i.id],nd=i.need&&!js.own[i.need];
     const pr=i.gift?(own?(on?'✓ في بيتي':'أظهِر'):'🎁 من صديق'):own?(on?'✓ في بيتي':'أظهِر'):nd?`يحتاج ${IT[i.need].name}`:'💎 '+ar(i.price);
-    return `<button class="jit ${own?'own':''} ${on?'on':''} ${!own&&(i.gift||nd)?'lock':''} ${!own&&!i.gift&&!nd&&js.j<i.price?'poor':''}" data-i="${i.id}"><span class="e">${i.e}</span><b>${i.name}</b><span class="pr">${pr}</span></button>`}).join('');
-  B.innerHTML=`<div class="jprev"><div class="bhouse">${Bayt.houseSVG(Bayt.done,-1,0,true,false,L)}</div>
+    return `<button class="jit ${own?'own':''} ${on?'on':''} ${!own&&(i.gift||nd)?'lock':''} ${!own&&!i.gift&&!nd&&js.j<i.price?'poor':''}" data-i="${i.id}"><span class="e">${i.e}</span><b>${i.name}</b><span class="pr">${pr}</span></button>`}).join('')}
+  if(tab=='inside'&&room>=Math.max(1,Bayt.done))room=Math.max(0,Bayt.done-1);
+  const prev=tab=='inside'?`<div class="jroom" style="margin:0"><span class="lb">${ROOMS[room][1]} ${ROOMS[room][0]}</span>${roomSVG(room,{...L,f:Math.max(1,Bayt.done)})}</div>
+    <div class="jrooms" style="margin-top:6px">${ROOMS.map((r,k)=>`<button data-room="${k}" class="${k==room?'on':''}" ${k>=Math.max(1,Bayt.done)?'disabled style="opacity:.45"':''}>${r[1]} ${r[0]}</button>`).join('')}</div>`
+    :`<div class="bhouse">${Bayt.houseSVG(Bayt.done,-1,0,true,false,L)}</div>`;
+  B.innerHTML=`<div class="jprev">${prev}
     <div class="jtabs">${CATS.map(([id,e,n])=>`<button data-t="${id}" class="${tab==id?'on':''}">${e} ${n}</button>`).join('')}</div></div>
     ${tab=='gift'?`<p class="bcap" style="margin:0 0 8px">هذه الزينة لا تُشترى! تأتيك هديةً من أصدقائك 🎁<br>${boy()?'أهدِ':'أهدي'} أصدقاءك أيضًا من «بيوت أصدقائي».</p>`:''}
     <div class="jgrid">${grid}</div>
@@ -202,11 +289,19 @@ function drawShop(){const B=$('#jBody');const L=Deco.myLook();
   B.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;Bayt.sTap();drawShop()});
   B.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>tapItem(IT[b.dataset.i]));
   B.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>tapPaint(PT[b.dataset.p]));
+  B.querySelectorAll('[data-room]').forEach(b=>b.onclick=()=>{room=+b.dataset.room;Bayt.sTap();drawShop()});
+  B.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>tapWall(WALLS.find(w=>w.id==b.dataset.w)));
 }
+function tapWall(w){const k='w_'+w.id;
+  if(w.price==0||js.own[k]){js.wall=w.id;jsave();Bayt.sTap();drawShop();publishSoon();return}
+  if(js.j<w.price){tone(200,.15,'square',.08);modal(`<h3 style="margin:4px 0">جدران ${w.name}</h3><p>تحتاج ${ar(w.price-js.j)} 💎 أخرى.</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`);return}
+  modal(`<div style="width:70px;height:70px;border-radius:18px;margin:0 auto;background:${w.col};border:3px solid #0002"></div><h3 style="margin:6px 0">لوّن جدران غرفك ${w.name}</h3><p>السعر: <b>💎 ${ar(w.price)}</b></p><div class="nav"><button class="btn sec" data-close>لا</button><button class="btn gold" id="jBuy">لوّن 🎨</button></div>`,()=>{
+    $('#jBuy').onclick=()=>{closeModal();js.j-=w.price;js.own[k]=1;js.wall=w.id;jsave();updJ();sparkle();drawShop();publishSoon()}})}
 function popAfter(sel){const e=$(sel);if(e){e.classList.remove('pop');void e.offsetWidth;e.classList.add('pop')}}
 function tapItem(i){
   if(js.own[i.id]){js.on[i.id]=js.on[i.id]?0:1;jsave();Bayt.sTap();drawShop();popAfter(`[data-i="${i.id}"]`);publishSoon();return}
   if(i.gift){modal(`<div style="font-size:60px">${i.e}</div><h3 style="margin:4px 0">${i.name}</h3><p>هذه هديةٌ لا تُشترى 🎁<br>تحصل عليها عندما يهديك إياها صديق.</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`);return}
+  if(i.cat=='inside'&&i.r>=Bayt.done){modal(`<div style="font-size:60px">🔒</div><h3 style="margin:4px 0">${ROOMS[i.r][0]} مقفولة</h3><p>${boy()?'ابنِ':'ابني'} ${Bayt.LEVELS[i.r].floor} أولًا</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`);return}
   if(i.need&&!js.own[i.need]){modal(`<div style="font-size:60px">${i.e}</div><h3 style="margin:4px 0">${i.name}</h3><p>${boy()?'اشترِ':'اشتري'} «${IT[i.need].name}» أولًا ثم ${boy()?'علّق':'علّقي'} عليها ${i.name} 😊</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`);return}
   if(js.j<i.price){tone(200,.15,'square',.08);modal(`<div style="font-size:60px">${i.e}</div><h3 style="margin:4px 0">${i.name}</h3><p>تحتاج ${ar(i.price-js.j)} 💎 أخرى.<br>${boy()?'ابنِ':'ابني'} طابقًا في السباق لتربح جواهر كثيرة! 🏗️</p><div class="nav"><button class="btn gold" id="jGoRace">إلى السباق 🏁</button><button class="btn sec" data-close>لاحقًا</button></div>`,()=>{$('#jGoRace').onclick=()=>{closeModal();toBayt()}});return}
   modal(`<div style="font-size:64px">${i.e}</div><h3 style="margin:4px 0">${i.name}</h3><p>السعر: <b>💎 ${ar(i.price)}</b> · عندك ${ar(js.j)}</p><div class="nav"><button class="btn sec" data-close>لا</button><button class="btn gold" id="jBuy">اشترِ وزيّن 🏡</button></div>`,()=>{
@@ -222,8 +317,8 @@ const ready=()=>O()&&O().db&&O().me&&O().profile;
 let pubT=0;
 function publishSoon(){clearTimeout(pubT);pubT=setTimeout(publish,1200)}
 function publish(){if(!ready())return;const A=O(),L=Deco.myLook();
-  A.db.ref('houses/'+A.me).set({f:Bayt.done,c:Bayt.cups,p:L.p,i:L.i,n:A.profile.nick,a:A.profile.av,t:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{})}
-const clean=h=>({f:Math.max(0,Math.min(3,h&&h.f|0)),c:Math.max(0,+(h&&h.c)||0),p:PT[h&&h.p]?h.p:'sand',i:lookItems({i:h&&h.i}).join(',')});
+  A.db.ref('houses/'+A.me).set({f:Bayt.done,c:Bayt.cups,p:L.p,w:L.w,i:L.i,n:A.profile.nick,a:A.profile.av,t:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{})}
+const clean=h=>({w:WALLS.some(w=>w.id==(h&&h.w))?h.w:'cream',f:Math.max(0,Math.min(4,h&&h.f|0)),c:Math.max(0,+(h&&h.c)||0),p:PT[h&&h.p]?h.p:'sand',i:lookItems({i:h&&h.i}).join(',')});
 
 async function friends(){show('jannah');backTo=null;$('#jTitle').textContent='👥 بيوت أصدقائي';updJ();const B=$('#jBody');
   B.innerHTML=`<div class="handoff"><div class="big spin">🌐</div><p>جارٍ الاتصال…</p></div>`;
@@ -241,7 +336,7 @@ async function friends(){show('jannah');backTo=null;$('#jTitle').textContent='�
     return {id,h:h.val(),p:p.val()||{nick:'؟',av:'❔'}}}catch(e){return {id,h:null,p:{nick:'؟',av:'❔'}}}}));
   rows.sort((a,b)=>(b.h?1:0)-(a.h?1:0));
   B.innerHTML=`${codeBox}<div class="jfr">${rows.map(r=>{const L=clean(r.h);
-    return `<button class="jfc" data-f="${r.id}"><div class="bhouse">${Bayt.houseSVG(L.f,-1,0,true,false,L)}</div><b>${esc(r.p.av)} ${esc(r.p.nick)}</b><small>${r.h?`${['لم يبنِ بعد','طابق واحد','طابقان','ثلاثة طوابق'][L.f]}${js.gave[r.id]==today()?' · 🎁 أهديتَه اليوم':''}`:'لم يفتح بيته بعد'}</small></button>`}).join('')}</div>
+    return `<button class="jfc" data-f="${r.id}"><div class="bhouse">${Bayt.houseSVG(L.f,-1,0,true,false,L)}</div><b>${esc(r.p.av)} ${esc(r.p.nick)}</b><small>${r.h?`${['لم يبنِ بعد','طابق واحد','طابقان','ثلاثة طوابق','أربعة طوابق'][L.f]}${js.gave[r.id]==today()?' · 🎁 أهديتَه اليوم':''}`:'لم يفتح بيته بعد'}</small></button>`}).join('')}</div>
     <div class="nav" style="margin-top:12px"><button class="btn sec" id="jAdd">➕ أضف صديقًا</button></div>`;
   B.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{const r=rows.find(x=>x.id==b.dataset.f);Bayt.sTap();visit(r)});
   $('#jAdd').onclick=()=>{window.onlineReturn=friends;A.openAdd()}}
@@ -256,9 +351,11 @@ async function visit(r){const A=O(),B=$('#jBody'),L=clean(r.h),day=today();backT
     <div class="who"><span class="av">${esc(r.p.av)}</span><span style="flex:1"><b>${esc(r.p.nick)}</b><small>${rk.icon} ${rk.name} · ❤️ <span id="jLk">${ar(likes)}</span> إعجاب</small></span></div>
     <div class="jacts"><button class="btn" id="jLike" style="background:#e2504a" ${js.liked[r.id]==day?'disabled':''}>${js.liked[r.id]==day?'❤️ أعجبك اليوم':'❤️ أعجبني!'}</button>
     <button class="btn gold" id="jGift" ${js.gave[r.id]==day?'disabled':''}>${js.gave[r.id]==day?'🎁 أهديتَه اليوم':'🎁 أهدِه هدية'}</button></div>
+    <div class="nav"><button class="btn" id="jInF" style="background:linear-gradient(160deg,#ffb36b,#c96a2a)">🛋️ ادخل بيته</button></div>
     <p class="bcap">${boy()?'تستطيع':'تستطيعين'} أن ${boy()?'تعجب':'تعجبي'} ببيت كل صديق، و${boy()?'تهديه':'تهديه'} هديةً واحدة كل يوم 🤍</p>
     <div class="nav"><button class="btn sec" id="jBackFr">بيوت أصدقائي</button></div></div>`;
   $('#jBackFr').onclick=friends;
+  $('#jInF').onclick=()=>{Bayt.sTap();inside(L,r.p.nick);backTo=()=>visit(r)};
   $('#jLike').onclick=async e=>{const b=e.currentTarget;b.disabled=true;
     try{const ref=A.db.ref(`hlikes/${r.id}/${A.me}`);const cur=(await ref.get()).val();await ref.set({n:((cur&&cur.n)|0)+1,d:day});
       js.liked[r.id]=day;jsave();likes++;$('#jLk').textContent=ar(likes);b.textContent='❤️ أعجبك اليوم';
