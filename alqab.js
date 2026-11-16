@@ -77,6 +77,11 @@ css.textContent=`
 .hpro .nm small{display:block;font-size:13px;color:#8a5a00;font-weight:700}
 .xpbar{height:9px;background:#efe3c0;border-radius:8px;overflow:hidden;margin-top:3px}.xpbar i{display:block;height:100%;background:linear-gradient(90deg,#f2b632,#e57c1f);border-radius:8px;transition:width .6s}
 .hpro .md{font-size:18px;letter-spacing:1px;flex:none;max-width:80px;text-align:center;line-height:1.3}
+.hfbtn{display:flex;align-items:center;gap:12px;width:100%;margin-top:10px;background:#fff;border:2px solid #2f6fd0;border-radius:20px;padding:10px 12px;text-align:right;color:inherit;box-shadow:0 5px 0 #b9cff2}
+.hfbtn:active{transform:translateY(3px);box-shadow:0 2px 0 #b9cff2}
+.hfbtn .e{font-size:40px;width:58px;text-align:center;flex:none}.hfbtn .nm{flex:1;min-width:0}.hfbtn b{display:block;font-size:19px;color:#1d4e9e}.hfbtn small{display:block;font-size:14px;color:var(--muted);line-height:1.5}
+.hfbtn .go{font-size:26px;color:#2f6fd0;flex:none}
+#homeHeroes{margin-top:16px}
 .hbox{background:#fff;border:2px solid var(--line);border-radius:20px;padding:8px 10px;margin-top:10px}
 .hbox h4{margin:0 0 6px;font-size:16px;display:flex;align-items:center;gap:6px}.hbox h4 span{flex:1}
 .hbox h4 button{border:0;border-radius:12px;padding:2px 10px;font-weight:800;font-size:13px;background:var(--green);color:#fff}
@@ -131,29 +136,42 @@ document.head.appendChild(css);
 /* ---------- واجهة البرنامج: بطاقتي + أصدقائي + أبطال الأسبوع ---------- */
 const home=document.createElement('div');home.id='homeSocial';
 const stats=document.querySelector('#home .stats');(stats||$('#map')).after(home);
-let fcache=null,hcache=null,loading=false,lastLoad=0;
+// أبطال الأسبوع: في أسفل الواجهة
+const heroes=document.createElement('div');heroes.id='homeHeroes';heroes.className='hbox';
+const foot=document.querySelector('#home .footer-links');if(foot)foot.before(heroes);else $('#home').appendChild(heroes);
+let fcache=null,hcache=null,loading=false,lastLoad=0,frOpen=false;
 try{const c=J('usul5_social_v1');fcache=c.f||null;hcache=c.h||null}catch(e){}
 function drawHome(){const s=snap(),ln=lvName(s.L),t=shownTitle(s),f=(s.x-need(s.L))/(need(s.L+1)-need(s.L));
   const meds=MEDALS.filter(m=>s.tiers[m.id]).sort((a,b)=>s.tiers[b.id]-s.tiers[a.id]).slice(0,3).map(m=>TIERS[s.tiers[m.id]-1].e+m.e).join(' ');
-  const prof=O()&&O().profile;
   home.innerHTML=`<button class="hpro" id="hProf"><span class="av">${esc(myAv())}<span class="lv">${ar(s.L)}</span></span>
     <span class="nm"><b>${esc(myName())}</b><small>${ln[1]} ${ln[2]} · المستوى ${ar(s.L)}${t?` · ${t.e} ${t.n}`:''}</small><div class="xpbar"><i style="width:${Math.round(f*100)}%"></i></div></span>
     <span class="md">${meds||'🏅'}</span></button>
-   <div class="hbox"><h4><span>👥 أصدقائي</span>${prof?`<button id="hAdd">➕ أضف صديقًا</button>`:''}</h4><div id="hFr">${friendsHTML()}</div></div>
-   <div class="hbox"><h4><span>🏅 أبطال هذا الأسبوع</span><button class="sec" id="hAll">الكل</button></h4><div id="hHe">${heroesHTML()}</div></div>`;
+   <button class="hfbtn" id="hFrBtn"><span class="e">👥</span><span class="nm"><b>أصدقائي</b><small id="hFrSum">${frSum()}</small></span><span class="go">‹</span></button>`;
   $('#hProf').onclick=()=>{tone(880,.05,'sine',.08);openProfile()};
-  const ad=$('#hAdd');if(ad)ad.onclick=()=>{window.onlineReturn=goHome;O().openAdd()};
-  $('#hAll').onclick=()=>{if(O()&&O().openBoard){window.onlineReturn=goHome;O().openBoard()}};
-  home.querySelectorAll('[data-fr]').forEach(b=>b.onclick=()=>friendCard(b.dataset.fr));
-  const go=$('#hGoOn');if(go)go.onclick=()=>{window.onlineReturn=goHome;openOnline()};
-  const ad2=$('#hAdd2');if(ad2)ad2.onclick=()=>{window.onlineReturn=goHome;O().openAdd()};
-  loadSocial()}
+  $('#hFrBtn').onclick=()=>{tone(880,.05,'sine',.08);openFriends()};
+  drawHeroes();loadSocial()}
+function drawHeroes(){heroes.innerHTML=`<h4><span>🏅 أبطال هذا الأسبوع</span><button class="sec" id="hAll">الكل</button></h4><div id="hHe">${heroesHTML()}</div>`;
+  $('#hAll').onclick=()=>{if(O()&&O().openBoard){window.onlineReturn=goHome;O().openBoard()}}}
+function frSum(){const prof=O()&&O().profile;
+  if(!state.online&&!prof)return B('اصنع لقبك وأضف أصدقاءك 🌐','اصنعي لقبك وأضيفي أصدقاءك 🌐');
+  if(!fcache)return 'اضغط لترى أصدقاءك وتضيف صديقًا';
+  const on=fcache.filter(r=>r.on).length;
+  const n=fcache.length;
+  return n?`${n==1?'صديق واحد':n==2?'صديقان':ar(n)+' '+(n<=10?'أصدقاء':'صديقًا')}${on?` · 🟢 ${ar(on)} متصل الآن`:''} · ➕ أضف صديقًا`:'لا أصدقاء بعد · ➕ أضف صديقًا'}
 const goHome=()=>{renderHome();show('home')};
-function friendsHTML(){const prof=O()&&O().profile;
-  if(!state.online&&!prof)return `<p class="hnote">${B('اصنع لقبك','اصنعي لقبك')} ${B('وأضف','وأضيفي')} أصدقاءك، ${B('وتحدَّهم','وتحدّيهم')} ${B('وزُر','وزوري')} بيوتهم في الجنة 🏡</p><div class="nav" style="margin-top:4px"><button class="btn gold" id="hGoOn" style="padding:8px">🌐 اصنع لقبي</button></div>`;
-  if(!fcache)return `<p class="hnote">${navigator.onLine?'<span class="spin">⏳</span> جارٍ تحميل أصدقائك…':'📡 لا يوجد إنترنت الآن'}</p>`;
-  return `<div class="hfrs">${fcache.map(r=>`<button class="hfr" data-fr="${esc(r.id)}">${r.on?'<i class="on"></i>':''}<span class="av">${esc(r.av)}</span><b>${esc(r.nick)}</b><small>${r.lv?`⭐ ${ar(r.lv)}`:''}${r.tt?' '+esc(r.tt):''}</small></button>`).join('')}
-    <button class="hfr add" id="hAdd2"><span class="av">➕</span><b>أضف صديقًا</b></button></div>${fcache.length?'':`<p class="hnote">لا أصدقاء بعد. ${B('أعطِ','أعطي')} صديقك رمزك: <b dir="ltr">${esc((O()&&O().profile&&O().profile.code)||'')}</b></p>`}`}
+/* ---------- شاشة أصدقائي: القائمة + أضف صديقًا ---------- */
+function openFriends(){stopVc();aqBack=null;frOpen=true;show('alqab');$('#aqTitle').textContent='👥 أصدقائي';drawFriends();loadSocial(true)}
+function drawFriends(){const prof=O()&&O().profile,el=$('#aqBody');
+  if(!state.online&&!prof){el.innerHTML=`<div class="handoff"><div class="big">👥</div><h2>${B('اصنع لقبك أولًا','اصنعي لقبك أولًا')}</h2><p>${B('ثم أضف','ثم أضيفي')} أصدقاءك برموزهم، ${B('وتحدَّهم','وتحدّيهم')} ${B('وزُر','وزوري')} بيوتهم في الجنة 🏡</p><button class="btn gold" id="frOn" style="flex:none;min-width:200px">🌐 اصنع لقبي</button></div>`;
+    $('#frOn').onclick=()=>{window.onlineReturn=openFriends;openOnline()};return}
+  const code=prof&&prof.code;
+  el.innerHTML=`<button class="btn gold" id="frAdd" style="flex:none;width:100%">➕ أضف صديقًا</button>
+    ${code?`<div class="code-card" style="margin-top:10px"><small>رمزك — ${B('أعطه','أعطيه')} لصديقك ليضيفك</small><b dir="ltr">${esc(code)}</b></div>`:''}
+    <div class="flist" style="margin-top:6px">${!fcache?`<p class="hnote">${navigator.onLine?'<span class="spin">⏳</span> جارٍ تحميل أصدقائك…':'📡 لا يوجد إنترنت الآن'}</p>`
+      :fcache.length?fcache.map(r=>`<button class="frow" data-fr="${esc(r.id)}" style="width:100%;text-align:right;color:inherit"><span class="av">${esc(r.av)}</span><span class="who-n"><b>${esc(r.nick)}</b><small>${r.on?'🟢 متصل الآن':'⚪ غير متصل'}${r.lv?` · ⭐ المستوى ${ar(r.lv)}`:''}${r.tt?' · '+esc(r.tt):''}</small></span><span class="go" style="color:var(--gold);font-size:22px">‹</span></button>`).join('')
+      :`<p class="hnote">لا أصدقاء بعد 🤝 ${B('اضغط','اضغطي')} «أضف صديقًا» ${B('واكتب','واكتبي')} رمز صديقك.</p>`}</div>`;
+  $('#frAdd').onclick=()=>{window.onlineReturn=openFriends;O().openAdd()};
+  el.querySelectorAll('[data-fr]').forEach(b=>b.onclick=()=>friendCard(b.dataset.fr))}
 const medal=i=>['🥇','🥈','🥉'][i]||ar(i+1);
 function heroesHTML(){if(!hcache)return `<p class="hnote">${state.online?'⏳':'العب وتعلّم واعمل الخير لتصير من أبطال الأسبوع! 🌟'}</p>`;
   if(!hcache.length)return `<p class="hnote">لا أبطال بعد هذا الأسبوع. ${B('كن','كوني')} الأول! 🌟</p>`;
@@ -170,7 +188,8 @@ async function loadSocial(force){if(loading||!navigator.onLine||!O()||!state.onl
     const s=(await API.db.ref('leader/'+API.week()).get()).val()||{};
     hcache=Object.entries(s).map(([id,v])=>({id,nick:v.nick||'؟',av:v.av||'❔',xp:v.xp|0,wins:v.wins|0})).sort((a,b)=>(Math.max(b.xp,b.wins*10)-Math.max(a.xp,a.wins*10))).slice(0,10);
     try{localStorage.setItem('usul5_social_v1',JSON.stringify({f:fcache,h:hcache}))}catch(e){}
-    if($('#home').classList.contains('on')){const a=$('#hFr'),b=$('#hHe');if(a){a.innerHTML=friendsHTML();a.querySelectorAll('[data-fr]').forEach(x=>x.onclick=()=>friendCard(x.dataset.fr));const ad2=$('#hAdd2');if(ad2)ad2.onclick=()=>{window.onlineReturn=goHome;O().openAdd()}}if(b)b.innerHTML=heroesHTML()}}
+    if($('#home').classList.contains('on')){const a=$('#hFrSum');if(a)a.textContent=frSum();drawHeroes()}
+    if(frOpen&&$('#alqab').classList.contains('on')&&$('#aqTitle').textContent=='👥 أصدقائي')drawFriends()}
   catch(e){}finally{loading=false}}
 async function friendCard(id){const r=(fcache||[]).find(x=>x.id==id);if(!r)return;const API=O();
   let p={};try{p=(await API.db.ref('profiles/'+id).get()).val()||{}}catch(e){}
