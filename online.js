@@ -51,6 +51,7 @@
       db.ref('.info/serverTimeOffset').on('value', s => { off = s.val() || 0; });
       const p = await withTimeout(db.ref('profiles/' + me).once('value'), 20000, 'db');
       profile = p.val();
+      if (profile && profile.nick && state.nick !== profile.nick) { state.nick = profile.nick; save(); }
       if (profile) { startPresence(); db.ref('profiles/' + me).update({ seen: firebase.database.ServerValue.TIMESTAMP }).catch(() => {}); }
       try { ban = (await db.ref('bans/' + me).get()).val(); } catch (e) { ban = null; }
       return true;
@@ -119,7 +120,7 @@
           const code = (profile && profile.code) || await claimCode();
           profile = Object.assign({ wins: 0, games: 0 }, profile || {}, { nick, av, code, own: isOwn });
           await db.ref('profiles/' + me).set(profile);
-          state.online = true; save();
+          state.online = true; state.nick = nick; save();
           startPresence(); hub();
         } catch (e) { $('#saveProf').disabled = false; toast('تعذّر الحفظ، حاول مرة أخرى'); }
       };

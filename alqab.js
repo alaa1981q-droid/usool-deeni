@@ -78,7 +78,7 @@ function autoTitle(s){const r=AREAS.map(a=>({a,t:areaTier(a,s)})).filter(x=>x.t>
   if(strong.length==2)return {id:'two_'+strong[0].a.id+strong[1].a.id,e:strong[0].a.e,n:`شاطر ب${strong[0].a.n} و${strong[1].a.n}`};
   const top=r[0];return {id:top.a.id+(top.t>=3?2:1),e:top.a.e,n:top.a.t[top.t>=3?1:0]}}
 const shownTitle=s=>autoTitle(s);
-const myName=()=>(O()&&O().profile&&O().profile.nick)||state.name||B('بطلنا','بطلتنا');
+const myName=()=>(O()&&O().profile&&O().profile.nick)||state.nick||state.name||B('بطلنا','بطلتنا');
 const myAv=()=>(O()&&O().profile&&O().profile.av)||(boy()?'👦':'👧');
 
 /* ---------- الشكل ---------- */
