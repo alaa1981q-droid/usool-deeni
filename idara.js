@@ -55,7 +55,9 @@ async function inbox(){const API=O();if(!API||!navigator.onLine)return;
       d.newsSeen[id]=1;Aamal.save();queue.push({title:v.title,msg:v.msg,j:Math.min(500,v.j|0),em:'📢'})})}catch(e){}
   try{const p=(await API.db.ref('prizes/'+API.me).get()).val()||{};
     Object.entries(p).forEach(([id,v])=>{if(!v||d.newsSeen['p'+id])return;d.newsSeen['p'+id]=1;Aamal.save();
-      queue.push({title:v.title||'🎁 جائزة خاصة لك من الإدارة!',msg:v.msg,j:Math.min(1000,v.j|0),em:'🎁',done:()=>API.db.ref(`prizes/${API.me}/${id}`).remove().catch(()=>{})})})}catch(e){}
+      queue.push({title:v.w?'⚠️ تنبيه من الإدارة':(v.title||'🎁 جائزة خاصة لك من الإدارة!'),msg:v.msg,j:v.w?0:Math.min(1000,v.j|0),em:v.w?'⚠️':'🎁',done:()=>API.db.ref(`prizes/${API.me}/${id}`).remove().catch(()=>{})})})}catch(e){}
+  try{const b=(await API.db.ref('bans/'+API.me).get()).val();if(b&&b.until>API.now()&&d.banSeen!==b.until){d.banSeen=b.until;Aamal.save();const t=new Date(b.until);
+    queue.unshift({em:'⛔',title:'توقّف لعبك أونلاين مؤقتًا',msg:`أوقفت الإدارة اللعب أونلاين حتى ${t.toLocaleDateString('ar-IQ',{weekday:'long',day:'numeric',month:'long'})}.${b.why?`\nالسبب: ${b.why}`:''}\nتستطيع أن تتعلّم وتحفظ وتبني بيتك كالعادة 🤍`})}}catch(e){}
   try{if(API.profile)await weekPrize(API)}catch(e){}
   nextMsg()}
 // 🏆 بطل الأسبوع الماضي: الأول ١٠٠ جوهرة، الثاني ٦٠، الثالث ٣٠ (مرة واحدة لكل أسبوع)
@@ -93,14 +95,63 @@ let all=null,heroes=null,tab='heroes',q='';
 const key=r=>Math.max(r.xp|0,(r.wins|0)*10);
 async function loadKids(API){
   if(!heroes){try{const s=(await API.db.ref('leader/'+API.week()).get()).val()||{};heroes=Object.entries(s).map(([id,v])=>({id,...v})).sort((a,b)=>key(b)-key(a)).slice(0,15)}catch(e){heroes=[]}}
-  if(!all){try{const s=(await API.db.ref('profiles').get()).val()||{};all=Object.entries(s).map(([id,v])=>({id,nick:v.nick||'؟',av:v.av||'❔',lv:v.lv|0,tt:v.tt||'',wins:v.wins|0,code:v.code||''}))}catch(e){all=[]}}}
-function kidRow(r,i){const p=all&&all.find(x=>x.id==r.id)||{};const lv=r.lv||p.lv,tt=r.tt||p.tt;
-  return `<div class="idrow"><span>${i!=null?(['🥇','🥈','🥉'][i]||ar(i+1)):''}</span><span class="av">${esc(r.av||p.av)}</span><b>${esc(r.nick||p.nick)}<small style="display:block;color:#8a5a00;font-weight:500">${lv?`⭐ المستوى ${ar(lv)} `:''}${esc(tt||'')}${r.xp?` · ✨${ar(r.xp)}`:''}${(r.wins||p.wins)?` · 🏆${ar(r.wins||p.wins)}`:''}</small></b><button class="mini go" data-g="${esc(r.id)}">🎁 جائزة</button></div>`}
+  if(!all){try{const s=(await API.db.ref('profiles').get()).val()||{};all=Object.entries(s).map(([id,v])=>({id,nick:v.nick||'؟',av:v.av||'❔',lv:v.lv|0,tt:v.tt||'',wins:v.wins|0,games:v.games|0,code:v.code||'',seen:+v.seen||0,acc:v.acc||{},md:v.md||''}))}catch(e){all=[]}}
+  try{bans=(await API.db.ref('bans').get()).val()||{}}catch(e){bans={}}}
+let bans={};
+const banOf=id=>{const b=bans[id];return b&&b.until>Date.now()?b:null};
+// يتعمّد الأخطاء؟ دقّة أقل من ٣٥٪ بعد ١٦ سؤالًا أونلاين، أو مباراتان بلا أي إجابة صحيحة
+const accOf=p=>{const a=p.acc||{};return a.q?a.r/a.q:null};
+const sus=p=>{const a=p.acc||{};return (a.q>=16&&a.r/a.q<.35)||(a.z|0)>=2};
+function ago(t){if(!t)return 'لم يُسجَّل بعد';const m=Math.round((Date.now()-t)/60000);
+  const w=(n,one,two,few,many)=>n==1?one:n==2?two:n<=10?`${ar(n)} ${few}`:`${ar(n)} ${many}`;
+  if(m<2)return 'الآن';if(m<60)return 'قبل '+w(m,'دقيقة','دقيقتين','دقائق','دقيقة');const h=Math.round(m/60);if(h<24)return 'قبل '+w(h,'ساعة','ساعتين','ساعات','ساعة');
+  const d=Math.round(h/24);return d<30?'قبل '+w(d,'يوم','يومين','أيام','يومًا'):new Date(t).toLocaleDateString('ar-IQ')}
+function kidRow(r,i){const p=all&&all.find(x=>x.id==r.id)||{};const lv=r.lv||p.lv,tt=r.tt||p.tt,b=banOf(r.id),ac=accOf(p);
+  return `<div class="idrow" data-k="${esc(r.id)}" style="cursor:pointer"><span>${i!=null?(['🥇','🥈','🥉'][i]||ar(i+1)):''}</span><span class="av">${esc(r.av||p.av)}</span><b>${esc(r.nick||p.nick)}${b?' ⛔':''}${sus(p)?' ⚠️':''}<small style="display:block;color:#8a5a00;font-weight:500">${lv?`⭐ المستوى ${ar(lv)} `:''}${esc(tt||'')}${r.xp?` · ✨${ar(r.xp)}`:''}${(r.wins||p.wins)?` · 🏆${ar(r.wins||p.wins)}`:''}</small><small style="display:block;color:var(--muted);font-weight:500">🕒 ${ago(p.seen)}${ac!=null?` · 🎯 ${ar(Math.round(ac*100))}٪`:''}</small></b><button class="mini go" data-g="${esc(r.id)}">🎁</button></div>`}
+/* 👁 بطاقة الطفل: كل معلوماته، وأزرار التنبيه والحظر والجائزة */
+async function kidCard(id){const API=O();let p=(all||[]).find(x=>x.id==id);
+  try{const v=(await API.db.ref('profiles/'+id).get()).val();if(v)p=Object.assign({id},p||{},{nick:v.nick,av:v.av,lv:v.lv|0,tt:v.tt||'',wins:v.wins|0,games:v.games|0,code:v.code||'',seen:+v.seen||0,acc:v.acc||{},md:v.md||''})}catch(e){}
+  if(!p)return;let on=false;try{on=!!(await API.db.ref('presence/'+id).get()).val()}catch(e){}
+  const b=banOf(id),a=p.acc||{},ac=accOf(p);
+  const md=String(p.md||'').split(',').filter(Boolean).map(x=>{const [k,t]=x.split(':');return `${['','🥉','🥈','🥇','💎'][t|0]||''}${{usul:'📚',pray:'🤲',fiqh:'🕌',hifz:'📖',tilawa:'🎤',sal:'💚',tas:'📿',champ:'⚔️',akhlaq:'🌷',wird:'🔥',banna:'🏡',garden:'🌱'}[k]||''}`}).join(' ');
+  modal(`<div style="font-size:56px;line-height:1.2">${esc(p.av)}</div><h3 style="margin:2px 0">${esc(p.nick)}</h3>
+    <p style="margin:2px 0">${p.lv?`<span class="aqlv">⭐ المستوى ${ar(p.lv)}</span>`:''} ${p.tt?`<span class="aqtt">${esc(p.tt)}</span>`:''}</p>
+    ${md?`<p style="font-size:20px;margin:4px 0">${md}</p>`:''}
+    <div style="text-align:right;font-size:15px;line-height:1.9;background:#f6fbf8;border-radius:14px;padding:6px 10px">
+      ${on?'🟢 متصل الآن':`🕒 آخر دخول: <b>${ago(p.seen)}</b>`}<br>
+      🏆 ${ar(p.wins)} فوز من ${ar(p.games)} مباراة أونلاين<br>
+      🎯 دقّة الإجابات: <b>${ac!=null?ar(Math.round(ac*100))+'٪':'—'}</b>${a.q?` (${ar(a.r|0)} صحيحة من ${ar(a.q)})`:''}${a.z?`<br>⚠️ ${ar(a.z)} مباراة بلا أي إجابة صحيحة`:''}<br>
+      🔑 الرمز: <b dir="ltr">${esc(p.code)}</b>
+      ${b?`<br>⛔ <b style="color:#c43d38">محظور حتى ${new Date(b.until).toLocaleString('ar-IQ',{weekday:'long',hour:'numeric',minute:'2-digit'})}</b>${b.why?` — ${esc(b.why)}`:''}`:''}
+      ${sus(p)?`<br><b style="color:#b06a2c">⚠️ قد يتعمّد الإجابات الخاطئة</b>`:''}</div>
+    <div class="nav"><button class="btn gold" id="kGift">🎁 جائزة</button><button class="btn" id="kWarn" style="background:#e57c1f;box-shadow:0 5px 0 #a8551a">⚠️ تنبيه</button></div>
+    <div class="nav">${b?`<button class="btn" id="kUnban">✅ رفع الحظر</button>`:`<button class="btn" id="kBan1" style="background:#c43d38;box-shadow:0 5px 0 #8a2a26">⛔ حظر ٢٤ ساعة</button><button class="btn" id="kBan7" style="background:#7a1f1b;box-shadow:0 5px 0 #4a1210">⛔ حظر أسبوع</button>`}</div>
+    <div class="nav"><button class="btn sec" id="kHero">🗑️ شيله من أبطال الأسبوع</button></div>
+    <div class="nav"><button class="btn sec" data-close>رجوع</button></div>`,()=>{
+    $('#kGift').onclick=()=>{closeModal();giftTo(id,p.nick,p.av)};
+    $('#kWarn').onclick=()=>warnTo(id,p);
+    const ban=(h,label)=>modal(`<div style="font-size:50px">⛔</div><h3 style="margin:4px 0">حظر ${esc(p.nick)} ${label}؟</h3><p style="font-size:15px">يُمنع من اللعب أونلاين فقط، ويبقى يتعلّم ويبني بيته.</p>
+      <input class="inp" id="bWhy" maxlength="80" placeholder="السبب (يراه الطفل)، مثل: تعمّد الإجابات الخاطئة" style="text-align:right;font-size:16px">
+      <div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn" id="bYes" style="background:var(--bad)">حظر</button></div>`,()=>{
+      $('#bYes').onclick=async()=>{const why=$('#bWhy').value.trim();try{const until=API.now()+h*3600e3;await API.db.ref('bans/'+id).set({until,why,ts:firebase.database.ServerValue.TIMESTAMP});bans[id]={until,why};
+        await API.db.ref(`leader/${API.week()}/${id}`).remove().catch(()=>{});closeModal();API.toast(`تم حظر ${p.nick} ${label} ✓`);drawKids()}catch(e){API.toast('تعذّر الحظر')}}});
+    const b1=$('#kBan1');if(b1)b1.onclick=()=>ban(24,'٢٤ ساعة');
+    const b7=$('#kBan7');if(b7)b7.onclick=()=>ban(24*7,'أسبوعًا');
+    const ub=$('#kUnban');if(ub)ub.onclick=async()=>{try{await API.db.ref('bans/'+id).remove();delete bans[id];closeModal();API.toast('رُفع الحظر ✓');drawKids()}catch(e){API.toast('تعذّر')}};
+    $('#kHero').onclick=async()=>{try{await API.db.ref(`leader/${API.week()}/${id}`).remove();heroes=(heroes||[]).filter(x=>x.id!=id);closeModal();API.toast('شيل من أبطال الأسبوع ✓');drawKids()}catch(e){API.toast('تعذّر')}}})}
+function warnTo(id,p){const API=O();
+  modal(`<div style="font-size:50px">⚠️</div><h3 style="margin:4px 0">تنبيه إلى ${esc(p.nick)}</h3>
+    <textarea class="inp" id="wMsg" maxlength="400" style="min-height:80px;text-align:right;font-size:16px">نرجو منك أن تلعب بصدق وأمانة، وأن تجيب بانتباه في التحديات. إذا تكرّر تعمّد الأخطاء سيتوقّف لعبك أونلاين 🤍</textarea>
+    <div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn" id="wSend" style="background:#e57c1f">⚠️ أرسل التنبيه</button></div>`,()=>{
+    $('#wSend').onclick=async()=>{const msg=$('#wMsg').value.trim();if(!msg)return;try{await API.db.ref('prizes/'+id).push({msg,j:0,w:1,ts:firebase.database.ServerValue.TIMESTAMP});closeModal();API.toast('أُرسل التنبيه ✓')}catch(e){API.toast('تعذّر الإرسال')}}})}
 function drawKids(){const el=$('#idKids');if(!el)return;let rows=[],num=false;
   if(tab=='heroes'){rows=heroes||[];num=true}
   else if(tab=='top'){rows=(all||[]).slice().sort((a,b)=>(b.lv-a.lv)||(b.wins-a.wins)).slice(0,20);num=true}
+  else if(tab=='sus'){rows=(all||[]).filter(p=>sus(p)||banOf(p.id)).sort((a,b)=>(accOf(a)||0)-(accOf(b)||0))}
+  else if(tab=='recent'){rows=(all||[]).filter(p=>p.seen).sort((a,b)=>b.seen-a.seen).slice(0,30)}
   else{const t=q.trim().replace(/[أإآ]/g,'ا');rows=(all||[]).filter(r=>!t||String(r.nick).replace(/[أإآ]/g,'ا').includes(t)||String(r.code).toUpperCase()==t.toUpperCase()).slice(0,40)}
-  el.innerHTML=rows.length?rows.map((r,i)=>kidRow(r,num?i:null)).join(''):`<p class="tip">${tab=='all'?(q?'لا يوجد طفل بهذا الاسم':`عدد الأطفال: ${ar((all||[]).length)} — اكتب اسمًا للبحث`):'لا أحد بعد'}</p>`;
+  el.innerHTML=rows.length?rows.map((r,i)=>kidRow(r,num?i:null)).join(''):`<p class="tip">${tab=='all'?(q?'لا يوجد طفل بهذا الاسم':`عدد الأطفال: ${ar((all||[]).length)} — اكتب اسمًا للبحث`):tab=='sus'?'لا أحد مشبوه 👍':'لا أحد بعد'}</p>`;
+  el.querySelectorAll('[data-k]').forEach(b=>b.onclick=e=>{if(e.target.closest('[data-g]'))return;kidCard(b.dataset.k)});
   el.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{const id=b.dataset.g,r=rows.find(x=>x.id==id)||{},p=(all||[]).find(x=>x.id==id)||{};giftTo(id,r.nick||p.nick,r.av||p.av)})}
 function giftTo(uid,nick,av){const API=O();
   modal(`<div style="font-size:50px;line-height:1.2">${esc(av||'🎁')}</div><h3 style="margin:2px 0">جائزة إلى ${esc(nick||'')}</h3>
@@ -110,8 +161,8 @@ function giftTo(uid,nick,av){const API=O();
     $('#gSend').onclick=async()=>{const msg=$('#gMsg').value.trim(),j=+$('#gJ').value;$('#gSend').disabled=true;
       try{await API.db.ref('prizes/'+uid).push({msg,j,ts:firebase.database.ServerValue.TIMESTAMP});closeModal();API.toast(`أُرسلت الجائزة إلى ${nick||''} ✓`)}catch(e){$('#gSend').disabled=false;API.toast('تعذّر الإرسال')}}})}
 async function panel(){const API=O();heroes=null;all=null;
-  body().innerHTML=`<div class="idbox"><h3>🎁 أعطِ جائزة لطفل</h3>
-      <div class="jrooms" style="margin-bottom:6px"><button data-tab="heroes">🏅 أبطال الأسبوع</button><button data-tab="top">⭐ المميّزون</button><button data-tab="all">🔎 ابحث</button></div>
+  body().innerHTML=`<div class="idbox"><h3>👥 الأطفال <small style="font-weight:500;color:var(--muted);font-size:13px">اضغط على أي طفل لترى ملفّه</small></h3>
+      <div class="jrooms" style="margin-bottom:6px;flex-wrap:wrap"><button data-tab="heroes">🏅 الأبطال</button><button data-tab="top">⭐ المميّزون</button><button data-tab="recent">🕒 دخلوا مؤخرًا</button><button data-tab="sus">⚠️ المشبوهون</button><button data-tab="all">🔎 ابحث</button></div>
       <input class="inp" id="kQ" placeholder="🔎 اكتب اسم الطفل أو رمزه" style="text-align:right;display:none">
       <div id="idKids"><p class="tip">⏳ جارٍ التحميل…</p></div>
       <p class="tip">بطل الأسبوع يأخذ تلقائيًا 💎١٠٠ (والثاني ٦٠ والثالث ٣٠) عند بداية الأسبوع الجديد.</p></div>

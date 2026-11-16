@@ -51,7 +51,8 @@
       db.ref('.info/serverTimeOffset').on('value', s => { off = s.val() || 0; });
       const p = await withTimeout(db.ref('profiles/' + me).once('value'), 20000, 'db');
       profile = p.val();
-      if (profile) startPresence();
+      if (profile) { startPresence(); db.ref('profiles/' + me).update({ seen: firebase.database.ServerValue.TIMESTAMP }).catch(() => {}); }
+      try { ban = (await db.ref('bans/' + me).get()).val(); } catch (e) { ban = null; }
       return true;
     })();
     ready.catch(e => { lastErr = (e && (e.code || e.message)) || String(e); ready = null; try { if (db) db.goOffline(); } catch (x) {} });
@@ -76,8 +77,22 @@
       body().innerHTML = `<div class="handoff"><div class="big">📡</div><h2>لا يوجد اتصال</h2><p>تعذّر الاتصال بخادم اللعب. تأكّد من الإنترنت ثم حاول مرة أخرى.</p><button class="btn gold" id="onRetry" style="flex:none;min-width:200px">حاول مرة أخرى</button><p class="tip" dir="ltr" style="opacity:.7">${esc(lastErr)}</p></div>`;
       $('#onRetry').onclick = openOnline; return;
     }
+    if (banned()) return bannedScreen();
     if (!profile) return setupProfile();
     hub();
+  }
+  // ⛔ الحظر: يمنع اللعب أونلاين فقط (التعلّم والبيت يبقيان مفتوحين). قواعد Firebase تمنعه أيضًا.
+  let ban = null;
+  const banned = () => !!(ban && ban.until && ban.until > now());
+  function bannedScreen() {
+    setHead('⛔ اللعب أونلاين موقوف');
+    const d = new Date(ban.until);
+    body().innerHTML = `<div class="handoff"><div class="big">⛔</div><h2>اللعب أونلاين موقوف مؤقتًا</h2>
+      <p>أوقفت الإدارة لعبك أونلاين حتى<br><b>${d.toLocaleDateString('ar-IQ', { weekday: 'long', day: 'numeric', month: 'long' })} · ${d.toLocaleTimeString('ar-IQ', { hour: 'numeric', minute: '2-digit' })}</b></p>
+      ${ban.why ? `<p class="tip">السبب: ${esc(ban.why)}</p>` : ''}
+      <p>تستطيع أن تتعلّم وتحفظ وتبني بيتك كالعادة 🤍<br>العب بصدق وأمانة، فالله يحبّ الصادقين.</p>
+      <button class="btn gold" id="banHome" style="flex:none;min-width:200px">الرئيسية</button></div>`;
+    $('#banHome').onclick = () => { renderHome(); show('home'); };
   }
 
   function setupProfile() {
@@ -378,7 +393,9 @@
     // own stats only
     const w = week(), winInc = win && !tie ? 1 : 0;
     profile.wins = (profile.wins || 0) + winInc; profile.games = (profile.games || 0) + 1;
-    db.ref('profiles/' + me).update({ wins: profile.wins, games: profile.games });
+    // دقّة الإجابات: تساعد الإدارة على معرفة من يتعمّد الإجابات الخاطئة
+    const acc = profile.acc || {}; profile.acc = { r: (acc.r | 0) + a.right, q: (acc.q | 0) + N_Q, z: (acc.z | 0) + (a.right === 0 ? 1 : 0) };
+    db.ref('profiles/' + me).update({ wins: profile.wins, games: profile.games, acc: profile.acc, seen: firebase.database.ServerValue.TIMESTAMP });
     db.ref(`leader/${w}/${me}`).transaction(v => { v = v || { wins: 0, pts: 0 }; return Object.assign({}, v, { nick: profile.nick, av: profile.av, wins: (v.wins || 0) + winInc, pts: (v.pts || 0) + a.sc }); });
     if (winInc && window.Aamal) Aamal.grow('win');
     if (window.Alqab) Alqab.soon();
@@ -424,9 +441,10 @@
     init: () => init(), get db() { return db; }, get me() { return me; }, get profile() { return profile; },
     get lastErr() { return lastErr; }, now, esc, toast, get busy() { return !!(room && room.data && room.data.state === 'play'); },
     friendIds: async () => Object.keys((await db.ref('friends/' + me).get()).val() || {}),
-    week, challenge: async (uid) => { show('online'); try { await init(); } catch (e) { return openOnline(); } if (!profile) return setupProfile(); challenge(uid); },
+    week, get banned() { return banned(); }, get ban() { return ban; },
+    challenge: async (uid) => { show('online'); try { await init(); } catch (e) { return openOnline(); } if (banned()) return bannedScreen(); if (!profile) return setupProfile(); challenge(uid); },
     openBoard: async () => { show('online'); try { await init(); } catch (e) { return openOnline(); } if (!profile) return setupProfile(); board(); },
-    openAdd: async () => { show('online'); try { await init(); } catch (e) { return openOnline(); } if (!profile) return setupProfile(); addFriend(); }
+    openAdd: async () => { show('online'); try { await init(); } catch (e) { return openOnline(); } if (banned()) return bannedScreen(); if (!profile) return setupProfile(); addFriend(); }
   };
   window.onlineBack = () => { if (room && room.data && room.data.state === 'play' && !room.done) {
       modal(`<h3 style="margin:4px 0">تريد الانسحاب؟</h3><p>إذا خرجت يفوز خصمك.</p><div class="nav"><button class="btn sec" data-close>أكمل</button><button class="btn" id="mQuit">انسحاب</button></div>`,
