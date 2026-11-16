@@ -83,6 +83,7 @@ const Deco={
   challenge(n,src){const d=today();if(js.cday!=d){js.cday=d;js.cnt={}}js.cnt=js.cnt||{};const c=js.cnt[src]||0;
     if(c>=8||n<=0){jsave();return ''}js.cnt[src]=c+1;Deco.addJ(n);
     return `<div class="cupbox win" style="border-color:#9fd3f0;background:linear-gradient(160deg,#eaf6ff,#fff);color:#1d4e9e"><b>💎 +${ar(n)}</b>ماسات لبيتك في الجنة! عندك ${ar(js.j)} 💎</div>`},
+  setBack:f=>{backTo=f},
   menuHook,get j(){return js.j}
 };
 window.Deco=Deco;

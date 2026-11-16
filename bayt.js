@@ -276,7 +276,7 @@ $('#openContest').after(card);
 const updCard=()=>{$('#baytLine').textContent=bs.done>=3?`بيتك ثلاثة طوابق! أفضل نتيجة: ${ar(bs.best)} نقطة 🏰`:bs.done?`بيتك الآن ${['','طابق واحد','طابقان'][bs.done]}، أكمل البناء!`:'سباق بناء: اجمع الكلمات بالترتيب قبل أن ينتهي الوقت'};
 updCard();updHome();
 card.onclick=()=>{sTap();menu();show('bayt')};
-$('#byBack').onclick=()=>{clearTimeout(autoT);if(G){stop();menu()}else{updCard();renderHome&&renderHome();show('home')}};
+$('#byBack').onclick=()=>{clearTimeout(autoT);if(G&&G.net){G.net.quit(G);return}if(G){stop();menu()}else{updCard();renderHome&&renderHome();show('home')}};
 let autoT=0;
 
 /* سبب قفل الطابق i، أو '' إذا كان مفتوحًا */
@@ -304,15 +304,16 @@ function menu(){G=null;clearTimeout(autoT);const B=$('#byBody');
 /* ---------- game ---------- */
 let G=null;
 const need=()=>G.lv.seq[G.p];
-function play(i,total,race){clearTimeout(autoT);const lv=LEVELS[i],B=$('#byBody');
-  G={i,lv,race:!!race,p:0,lives:lv.lives,hints:2,bricks:[],run:false,spawnT:0,since:0,last:0,raf:0,
-     time:lv.time,score:total||0,start:total||0,combo:0,maxCombo:0,starT:5+Math.random()*4,lastTick:99};
+function play(i,total,race,net){clearTimeout(autoT);const lv=LEVELS[i],B=$('#byBody');const tmax=net?Math.round(lv.time*1.3):lv.time;
+  G={i,lv,race:!!race,net:net||null,tmax,p:0,lives:lv.lives,hints:2,bricks:[],run:false,spawnT:0,since:0,last:0,raf:0,
+     time:tmax,score:total||0,start:total||0,combo:0,maxCombo:0,starT:5+Math.random()*4,lastTick:99};
   B.innerHTML=`<div class="bhouse sm" id="byHouse"></div>
   <div class="bhud"><span class="nm" style="color:${lv.color}">${lv.icon} ${lv.floor}</span><span class="pts" id="byPts"></span><span id="byCombo"></span><span class="lives" id="byLives"></span><button class="hintb" id="byHint">💡</button></div>
   <div class="btime" id="byTime"><i id="byTimeBar"></i><span id="byTimeTx"></span></div>
-  <div class="bstrip" id="byStrip"></div>
-  <div class="bboard" id="byBoard"><div class="bover"><div style="font-size:46px">${lv.icon}</div><p><b>${lv.floor}: ${lv.name}</b><br>${lv.tip}<br>⏱️ عندك ${ar(lv.time)} ثانية</p><button class="btn gold" id="byGo">ابدأ البناء</button></div></div>`;
+  <div class="bstrip" id="byStrip"></div>${net?'<div id="byOpp"></div>':''}
+  <div class="bboard" id="byBoard">${net?'':`<div class="bover"><div style="font-size:46px">${lv.icon}</div><p><b>${lv.floor}: ${lv.name}</b><br>${lv.tip}<br>⏱️ عندك ${ar(lv.time)} ثانية</p><button class="btn gold" id="byGo">ابدأ البناء</button></div>`}</div>`;
   G.board=$('#byBoard');drawHouse();drawHud();drawTime();drawStrip();
+  if(net){$('#byHint').onclick=hint;net.ready(G);return}
   $('#byGo').onclick=()=>{$('#byGo').parentNode.remove();begin()};
   $('#byHint').onclick=hint}
 function begin(){ctCountdown(()=>{if(!G)return;G.run=true;G.last=performance.now();G.raf=requestAnimationFrame(loop)})}
@@ -320,7 +321,7 @@ function drawHouse(){$('#byHouse').innerHTML=houseSVG(G.i,G.i,G.p/G.lv.seq.lengt
 function drawHud(){$('#byLives').textContent='❤️'.repeat(Math.max(0,G.lives))+'🤍'.repeat(G.lv.lives-Math.max(0,G.lives));
   $('#byPts').textContent=`⭐ ${ar(G.score)}`;$('#byHint').disabled=G.hints<=0;$('#byHint').textContent=`💡${ar(G.hints)}`;
   const m=mult();$('#byCombo').className=m>1?'combo':'';$('#byCombo').textContent=m>1?`🔥×${ar(m)}`:''}
-function drawTime(){const f=Math.max(0,G.time)/G.lv.time;$('#byTimeBar').style.width=f*100+'%';
+function drawTime(){const f=Math.max(0,G.time)/G.tmax;$('#byTimeBar').style.width=f*100+'%';
   $('#byTimeTx').textContent=`⏱️ ${ar(Math.ceil(Math.max(0,G.time)))}`;$('#byTime').classList.toggle('warn',G.time<=10)}
 const mult=()=>1+Math.floor(G.combo/5);
 function drawStrip(hintOn,newIdx){const lv=G.lv,p=Math.min(G.p,lv.seq.length-1),li=lv.lineOf[p];const start=lv.lineOf.indexOf(li);
@@ -358,12 +359,12 @@ function loop(t){if(!G||!G.run)return;const dt=Math.min(.05,(t-G.last)/1000);G.l
   for(const b of [...G.bricks]){b.y+=sp*(b.star?1.25:1)*dt;b.el.style.transform=`translate(${b.x}px,${b.y}px)`;
     if(b.y+b.h>=H){const wasNeed=!b.star&&b.txt==need();takeOut(b,wasNeed?'no':'');if(wasNeed){mistake('فاتتك الكلمة الصحيحة!');if(!G||!G.run)return}}}
   G.raf=requestAnimationFrame(loop)}
-function gotStar(b){takeOut(b,'ok');G.time=Math.min(G.lv.time,G.time+5);G.score+=25;sStar();fly(b,'+٥ ثوانٍ');drawHud();drawTime()}
+function gotStar(b){takeOut(b,'ok');G.time=Math.min(G.tmax,G.time+5);G.score+=25;sStar();fly(b,'+٥ ثوانٍ');drawHud();drawTime()}
 function good(b){takeOut(b,'ok');const lv=G.lv,idx=G.p;G.p++;G.combo++;G.maxCombo=Math.max(G.maxCombo,G.combo);
   const m=mult(),pts=10*m;G.score+=pts;sBrick(idx,G.combo);fly(b,`+${ar(pts)}`);
   if(G.combo>0&&G.combo%5==0){msg(`🔥 رائع! ${ar(G.combo)} متتالية`,'gold')}
   const lineDone=G.p==lv.seq.length||lv.lineOf[G.p]!=lv.lineOf[idx];
-  drawHouse();drawStrip(false,idx);drawHud();
+  drawHouse();drawStrip(false,idx);drawHud();if(G.net)G.net.prog(G);
   if(G.p==lv.seq.length){finish();return}
   if(lineDone&&lv.quran){setTimeout(sLine,150);G.score+=20;if(G.combo%5)msg('أحسنت! آية كاملة ✨ +٢٠','good')}}
 function bad(b){takeOut(b,'no');mistake('ليست هذه الكلمة!')}
@@ -373,15 +374,23 @@ function mistake(t){G.lives--;G.combo=0;const lose=Math.min(2,G.p);G.p-=lose;G.s
   const sc=h.clientHeight/VH,ox=(h.clientWidth-VW*sc)/2;
   for(let k=0;k<Math.max(1,lose)+2;k++){const d=document.createElement('div');d.className='bdeb';
     d.style.top=(fy(G.i)+Math.random()*30)*sc+'px';d.style.left=ox+(FX+20+Math.random()*(FW-20))*sc+'px';d.style.animationDelay=k*.07+'s';h.appendChild(d);setTimeout(()=>d.remove(),1300)}
-  drawHouse();drawStrip();drawHud();
+  drawHouse();drawStrip();drawHud();if(G.net)G.net.prog(G);
   if(G.lives<=0){collapse('انتهت القلوب 💔');return}
   msg(lose?`${t} سقط من بيتك ${lose==2?'طوبتان':'طوبة'} 💥`:t,'bad')}
 function stop(){if(!G)return;G.run=false;cancelAnimationFrame(G.raf);clearTimeout(G.ht);G.bricks.forEach(b=>b.el.remove());G.bricks=[]}
-function collapse(why){const i=G.i,start=G.start,race=G.race;stop();sCollapse();const h=$('#byHouse');h.innerHTML=houseSVG(i,i,.75,false);h.classList.add('fall');
+function collapse(why){
+  if(G.net){const timeUp=G.time<=0;G.run=false;cancelAnimationFrame(G.raf);G.bricks.forEach(b=>b.el.remove());G.bricks=[];sCollapse();
+    const h=$('#byHouse');h.innerHTML=houseSVG(G.i,G.i,Math.max(.2,G.p/G.lv.seq.length),false);h.classList.add('fall');
+    if(timeUp){G.net.timeout(G);return}
+    msg('انهدم! ابنِ من جديد بسرعة 💪','bad');
+    setTimeout(()=>{if(!G||!G.net||G.over)return;h.classList.remove('fall');G.p=0;G.lives=G.lv.lives;G.combo=0;drawHouse();drawStrip();drawHud();G.net.prog(G);
+      G.run=true;G.last=performance.now();G.raf=requestAnimationFrame(loop)},1500);return}
+  const i=G.i,start=G.start,race=G.race;stop();sCollapse();const h=$('#byHouse');h.innerHTML=houseSVG(i,i,.75,false);h.classList.add('fall');
   setTimeout(()=>{if(!G)return;h.classList.remove('fall');G.p=0;G.score=start;drawHouse();drawHud();
     const o=document.createElement('div');o.className='bover';o.innerHTML=`<div style="font-size:46px">🏚️</div><p><b>انهدم الطابق! ${why}</b><br>لا بأس، البنّاء الشاطر لا ييأس. حاول مرة أخرى.</p><button class="btn gold" id="byAgain">ابنِ من جديد</button>`;
     G.board.appendChild(o);$('#byAgain').onclick=()=>{sTap();play(i,start,race)}},1100)}
-function finish(){const i=G.i,lv=G.lv,last=i==LEVELS.length-1;stop();
+function finish(){if(G.net){stop();G.net.finish(G);return}
+  const i=G.i,lv=G.lv,last=i==LEVELS.length-1;stop();
   const tBonus=Math.ceil(Math.max(0,G.time))*3,lBonus=G.lives*20;G.score+=tBonus+lBonus;
   const stars=G.lives==lv.lives?3:G.lives>=Math.ceil(lv.lives/2)?2:1;
   setTimeout(()=>{fanfare();confetti()},250);
@@ -408,5 +417,5 @@ function finish(){const i=G.i,lv=G.lv,last=i==LEVELS.length-1;stop();
 document.addEventListener('visibilitychange',()=>{if(!G)return;if(document.hidden&&G.run){G.run=false;cancelAnimationFrame(G.raf);G.paused=true}
   else if(!document.hidden&&G.paused){G.paused=false;G.run=true;G.last=performance.now();G.raf=requestAnimationFrame(loop)}});
 window.__bayt={get G(){return G},need:()=>G&&need()};
-window.Bayt={houseSVG,menu,get done(){return bs.done},get cups(){return cs.n},rankOf,RANKS,sTap,sStar,sLine,VW,VH,GY,FX,FW,DX,fy};
+window.Bayt={houseSVG,menu,LEVELS,begin:()=>begin(),stop:()=>{stop();G=null},play:(i,net)=>{show('bayt');play(i,0,false,net)},get G(){return G},get done(){return bs.done},get cups(){return cs.n},rankOf,RANKS,sTap,sStar,sLine,VW,VH,GY,FX,FW,DX,fy};
 })();

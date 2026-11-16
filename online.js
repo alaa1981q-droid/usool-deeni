@@ -82,25 +82,35 @@
 
   function setupProfile() {
     setHead('اختر لقبك');
-    let av = AVATARS[0], w1 = W1[0], w2 = W2[0];
+    let av = (profile && profile.av) || AVATARS[0], w1 = W1[0], w2 = W2[0], own = (profile && profile.own) ? profile.nick : '';
     const num = 10 + Math.floor(Math.random() * 90);
+    const nickNow = () => own ? own : `${w1} ${w2} ${ar(num)}`;
     const draw = () => {
       body().innerHTML = `<div class="card" style="flex:none">
         <h2 style="text-align:center">مرحبًا يا بطل! 👋</h2>
         <p style="text-align:center;color:var(--muted)">اختر صورتك ولقبك. لا نستخدم اسمك الحقيقي حفاظًا عليك.</p>
-        <div class="preview"><span class="av">${av}</span><b>${w1} ${w2} ${ar(num)}</b></div>
+        <div class="preview"><span class="av">${av}</span><b id="nickPrev">${esc(nickNow())}</b></div>
         <div class="pick-h">صورتك</div><div class="chips">${AVATARS.map(a => `<button class="pk ${a === av ? 'on' : ''}" data-av="${a}">${a}</button>`).join('')}</div>
         <div class="pick-h">الكلمة الأولى</div><div class="chips">${W1.map(w => `<button class="pk w ${w === w1 ? 'on' : ''}" data-w1="${w}">${w}</button>`).join('')}</div>
         <div class="pick-h">الكلمة الثانية</div><div class="chips">${W2.map(w => `<button class="pk w ${w === w2 ? 'on' : ''}" data-w2="${w}">${w}</button>`).join('')}</div>
+        <div class="pick-h">✏️ أو اكتب لقبك بنفسك</div>
+        <input class="inp" id="ownNick" maxlength="16" placeholder="مثل: صقر الإيمان" value="${esc(own)}" autocomplete="off">
+        <div class="fb" id="nickMsg" style="font-size:14px">لا تكتب اسمك الحقيقي، حروف عربية فقط (٣ إلى ١٦ حرفًا)</div>
         <div class="nav"><button class="btn gold" id="saveProf">هذا لقبي ✓</button></div></div>`;
       body().querySelectorAll('[data-av]').forEach(b => b.onclick = () => { av = b.dataset.av; draw(); });
-      body().querySelectorAll('[data-w1]').forEach(b => b.onclick = () => { w1 = b.dataset.w1; draw(); });
-      body().querySelectorAll('[data-w2]').forEach(b => b.onclick = () => { w2 = b.dataset.w2; draw(); });
+      body().querySelectorAll('[data-w1]').forEach(b => b.onclick = () => { w1 = b.dataset.w1; own = ''; draw(); });
+      body().querySelectorAll('[data-w2]').forEach(b => b.onclick = () => { w2 = b.dataset.w2; own = ''; draw(); });
+      $('#ownNick').oninput = e => { own = e.target.value; $('#nickPrev').textContent = nickNow(); };
       $('#saveProf').onclick = async () => {
         $('#saveProf').disabled = true;
         try {
-          const code = await claimCode();
-          profile = { nick: `${w1} ${w2} ${ar(num)}`, av, code, wins: 0, games: 0 };
+          let nick = `${w1} ${w2} ${ar(num)}`, isOwn = false;
+          if (own.trim()) {
+            const why = badNick(own); if (why) { $('#nickMsg').className = 'fb bad'; $('#nickMsg').textContent = why; $('#saveProf').disabled = false; return; }
+            nick = own.trim().replace(/\s+/g, ' '); isOwn = true;
+          }
+          const code = (profile && profile.code) || await claimCode();
+          profile = Object.assign({ wins: 0, games: 0 }, profile || {}, { nick, av, code, own: isOwn });
           await db.ref('profiles/' + me).set(profile);
           state.online = true; save();
           startPresence(); hub();
@@ -108,6 +118,16 @@
       };
     };
     draw();
+  }
+  // لقب يكتبه الطفل: حروف عربية ومسافات فقط (بلا أرقام هواتف ولا روابط)، وبلا كلمات غير لائقة
+  const BAD = ['غبي', 'حمار', 'كلب', 'زبال', 'قذر', 'حقير', 'تافه', 'لعن', 'منيوك', 'طيز', 'شرموط', 'عاهر', 'قحب', 'خنزير', 'وسخ', 'سافل', 'جحش', 'زمال'];
+  function badNick(t) {
+    t = t.trim().replace(/\s+/g, ' ');
+    if (t.length < 3) return 'اللقب قصير، اكتب ٣ حروف على الأقل';
+    if (!/^[\u0621-\u064A\u0660-\u0669\u064B-\u0652 ]+$/.test(t) || /[\u0660-\u0669]/.test(t)) return 'حروف عربية فقط، بلا أرقام ولا رموز';
+    const plain = t.replace(/[\u064B-\u0652]/g, '').replace(/[أإآ]/g, 'ا');
+    if (BAD.some(w => plain.includes(w.replace(/[أإآ]/g, 'ا')))) return 'اختر لقبًا جميلًا 🌷';
+    return '';
   }
   async function claimCode() {
     for (let i = 0; i < 8; i++) {
@@ -120,7 +140,7 @@
 
   function hub() {
     leaveRoom(); setHead('🌐 العب أونلاين');
-    body().innerHTML = `<div class="me-card"><span class="av">${profile.av}</span><span class="who-n"><b>${esc(profile.nick)}</b><small>🏆 ${ar(profile.wins || 0)} فوز · ${ar(profile.games || 0)} مباراة</small></span></div>
+    body().innerHTML = `<div class="me-card"><span class="av">${profile.av}</span><span class="who-n"><b>${esc(profile.nick)}</b><small>🏆 ${ar(profile.wins || 0)} فوز · ${ar(profile.games || 0)} مباراة</small></span><button class="mini" id="editProf">✏️ لقبي</button></div>
       <div class="code-card"><small>رمزك — أعطه لصديقك ليضيفك</small><b dir="ltr">${profile.code}</b><button class="mini" id="cpCode">نسخ</button></div>
       <div class="modes">
         <button class="mode" id="oFriends"><span class="e">👥</span><span><b>أصدقائي</b><small>تحدَّ صديقًا متصلًا الآن.</small></span></button>
@@ -129,6 +149,7 @@
         <button class="mode" id="oBoard"><span class="e">🏅</span><span><b>لوحة الأبطال</b><small>ترتيب هذا الأسبوع، يبدأ من جديد كل جمعة.</small></span></button>
       </div>`;
     $('#cpCode').onclick = () => { try { navigator.clipboard.writeText(profile.code).then(() => toast('نُسخ الرمز ✓'), () => toast(profile.code)); } catch (e) { toast(profile.code); } };
+    $('#editProf').onclick = setupProfile;
     $('#oFriends').onclick = friends; $('#oAdd').onclick = addFriend; $('#oQuick').onclick = quick; $('#oBoard').onclick = board;
   }
 
@@ -394,10 +415,11 @@
       const v = s.val(), from = s.key;
       if (!v || now() - (v.t || 0) > 120000 || (room && room.data && room.data.state === 'play')) { s.ref.remove(); return; }
       tone(880, .1, 'sine'); tone(1320, .15, 'sine', .16, .12);
-      modal(`<div style="font-size:52px">${v.av}</div><h3 style="margin:4px 0">${esc(v.nick)}</h3><p>يتحدّاك الآن! ⚔️</p>
+      const isBayt = v.kind === 'bayt';
+      modal(`<div style="font-size:52px">${v.av}</div><h3 style="margin:4px 0">${esc(v.nick)}</h3><p>${isBayt ? 'يدعوك إلى سباق بناء البيت! 🏗️🏁' : 'يتحدّاك الآن! ⚔️'}</p>
         <div class="nav"><button class="btn sec" id="invNo">لاحقًا</button><button class="btn gold" id="invYes">قبول التحدّي</button></div>`, () => {
         $('#invNo').onclick = () => { closeModal(); s.ref.remove(); db.ref('rooms/' + v.room).update({ state: 'gone' }); };
-        $('#invYes').onclick = () => { closeModal(); s.ref.remove(); show('online'); joinRoom(v.room); };
+        $('#invYes').onclick = () => { closeModal(); s.ref.remove(); if (isBayt && window.BaytRace) return BaytRace.join(v.room); show('online'); joinRoom(v.room); };
       });
     });
     invOff = () => ref.off('child_added', cb);
@@ -409,7 +431,7 @@
   // for «بيتك في الجنة»: friends' houses, gifts and likes
   window.OnlineAPI = {
     init: () => init(), get db() { return db; }, get me() { return me; }, get profile() { return profile; },
-    get lastErr() { return lastErr; }, now, esc, toast,
+    get lastErr() { return lastErr; }, now, esc, toast, get busy() { return !!(room && room.data && room.data.state === 'play'); },
     friendIds: async () => Object.keys((await db.ref('friends/' + me).get()).val() || {}),
     openAdd: async () => { show('online'); try { await init(); } catch (e) { return openOnline(); } if (!profile) return setupProfile(); addFriend(); }
   };

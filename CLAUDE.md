@@ -15,6 +15,7 @@ Children's app for the book «أصول ديني الخمسة» by الشيخ ع�
 - `database.rules.json` — security rules; if changed, the owner must paste them in Firebase console → Realtime Database → Rules → Publish.
 - `hifz.js` — «أنا حافظ صغير»: الحمد + short surahs with per-ayah audio in `audio/SSSAAA.mp3` (Abdul Basit Murattal 64kbps, everyayah.com; host allowed in the `usool-deeni` environment). Text: الحمد/التوحيد from the book, others Tanzil simple 1.0.2 unchanged (credit tanzil.net). To add a surah: append to `SUR`, download its files, list them in `sw.js`.
 - `jannah.js` — house decorations shop (💎 jewels from floors, cups, contest/online/nafsak, daily chest, likes), friends' houses, gifts, likes, visitors (Firebase paths houses/gifts/hlikes/hvisit). `bayt.js` exposes `window.Bayt`; `houseSVG(...,look)` draws any house and makes SVG ids unique per drawing.
+- `baytrace.js` — live house-building race with a friend (rooms with type:'bayt', invites with kind:'bayt', winner via transaction "uid|why", fixed emoji cheers only). Nicknames: word lists or typed by the child (Arabic letters only, 3–16, small bad-word list in online.js `badNick`).
 - `bayt.js`, `nafsak.js` — house game/cups and «اختبر نفسك». New .js files must also be added to the `cp` line in `.github/workflows/android.yml`.
 - `sw.js` — offline cache; must never intercept Firebase/other-origin requests. Bump `CACHE` when caching logic changes.
 - `vendor/` — Firebase compat SDK 10.14.1. `android/` — WebView wrapper.
