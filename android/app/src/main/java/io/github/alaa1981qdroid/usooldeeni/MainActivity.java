@@ -2,6 +2,8 @@ package io.github.alaa1981qdroid.usooldeeni;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.provider.Settings;
 import android.content.pm.PackageManager;
 import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
@@ -63,6 +65,7 @@ public class MainActivity extends Activity {
                     for (String r : req.getResources()) if (PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(r)) audio = true;
                     if (!audio) { req.deny(); return; }
                     if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                        if (pendingMic != null) { try { pendingMic.deny(); } catch (Exception ignored) { } }
                         pendingMic = req;
                         requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, MIC_REQ);
                     } else {
@@ -80,7 +83,25 @@ public class MainActivity extends Activity {
         super.onRequestPermissionsResult(code, perms, res);
         if (code != MIC_REQ || pendingMic == null) return;
         if (res.length > 0 && res[0] == PackageManager.PERMISSION_GRANTED) pendingMic.grant(new String[]{PermissionRequest.RESOURCE_AUDIO_CAPTURE});
-        else pendingMic.deny();
+        else {
+            pendingMic.deny();
+            // إذا رفض الإذن سابقًا بـ«عدم السؤال مجددًا» لا تظهر نافذة الإذن، فنوجّه للإعدادات.
+            if (Build.VERSION.SDK_INT >= 23 && !shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)) {
+                try {
+                    new AlertDialog.Builder(this)
+                        .setTitle("المايك 🎤")
+                        .setMessage("حتى يسمع التطبيق صوتك، اسمح له باستعمال الميكروفون من الإعدادات:\nالأذونات ← الميكروفون ← سماح")
+                        .setPositiveButton("افتح الإعدادات", (d, w) -> {
+                            try {
+                                startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                        Uri.fromParts("package", getPackageName(), null)));
+                            } catch (Exception ignored) { }
+                        })
+                        .setNegativeButton("لاحقًا", null)
+                        .show();
+                } catch (Exception ignored) { }
+            }
+        }
         pendingMic = null;
     }
 

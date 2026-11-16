@@ -77,9 +77,24 @@ function hear(onLevel){stopAll();return new Promise(res=>{let rec;try{rec=new SR
   try{rec.start()}catch(e){end({err:'start'})}})}
 
 /* كاشف الصوت (بلا إنترنت): يعدّ المقاطع المنطوقة. يرجع كائنًا فيه stop() */
+const IN_APK=location.host=='appassets.androidplatform.net';
+async function openMic(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw {name:'NoMedia'};
+  try{return await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}})}
+  catch(e){if(e&&(e.name=='NotAllowedError'||e.name=='SecurityError'))throw e;
+    return await navigator.mediaDevices.getUserMedia({audio:true})}}
+/* رسالة واضحة للطفل/الأهل حسب سبب فشل المايك */
+function micHelp(e){const n=(e&&e.name)||'err';
+  if(n=='NotAllowedError'||n=='SecurityError')return IN_APK
+    ?'المايك ممنوع عن التطبيق. افتح إعدادات الهاتف ← التطبيقات ← جنّتي الصغيرة ← الأذونات ← الميكروفون ← سماح'
+    :'المتصفح منع المايك. اضغط 🔒 بجانب رابط الموقع ← الأذونات ← الميكروفون ← سماح، ثم أعد فتح الصفحة';
+  if(n=='NotFoundError'||n=='OverconstrainedError')return 'لم نجد مايكًا في هذا الجهاز';
+  if(n=='NotReadableError'||n=='AbortError')return 'المايك مشغول بتطبيق آخر (مكالمة أو تسجيل). أغلقه وجرّب';
+  return 'لم نستطع فتح المايك';}
 async function vad({onLevel,onUtter,minMs=650}){
-  const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
-  const ac=new (window.AudioContext||window.webkitAudioContext)();if(ac.state=='suspended')await ac.resume();
+  const stream=await openMic();
+  const ac=new (window.AudioContext||window.webkitAudioContext)();
+  if(ac.state=='suspended')await Promise.race([ac.resume(),new Promise(r=>setTimeout(r,1500))]);
   const src=ac.createMediaStreamSource(stream),an=ac.createAnalyser();an.fftSize=1024;src.connect(an);
   const buf=new Float32Array(an.fftSize);let floor=[],thr=.02,talking=false,start=0,lastLoud=0,raf=0,stopped=false;const t0=performance.now();
   function loop(){if(stopped)return;an.getFloatTimeDomainData(buf);let s=0;for(const v of buf)s+=v*v;const rms=Math.sqrt(s/buf.length),t=performance.now();
@@ -151,7 +166,7 @@ function reciteBox(el,text,opts={}){const T=words(text),raw=String(text).split(/
         onUtter:()=>{if(!vh)return;vh.stop();vh=null;busy=false;mic.classList.remove('on');ring.style.opacity=0;chime();
           say(B('سمعتك! أحسنت 👍 هل قرأتَ كل الكلمات صحيحة؟','سمعتكِ! أحسنتِ 👍 هل قرأتِ كل الكلمات صحيحة؟'),'ok');
           el.querySelector('.tx').classList.remove('hide');opts.onResult&&opts.onResult(1,'vad')}})}
-      catch(e){busy=false;mic.classList.remove('on');say('لم نستطع فتح المايك. اسمح للتطبيق باستعمال المايك 🎤','bad')}}};
+      catch(e){busy=false;mic.classList.remove('on');say(micHelp(e)+' 🎤','bad')}}};
   let vh=null;
   return {stop(){stopAll();if(vh){vh.stop();vh=null}}}}
 
@@ -170,7 +185,7 @@ function counter(el,{phrase,target=10,emoji='💚',onDone}){let n=0,vh=null,done
     try{mic.classList.add('on');msg.className='vmsg mid';msg.textContent=B('أسمعك… قلها الآن 👂','أسمعكِ… قوليها الآن 👂');
       vh=await vad({minMs:600,onLevel:(l,loud)=>{ring.style.opacity=loud?.9:0;ring.style.transform=`scale(${1+l*.35})`},
         onUtter:d=>bump(Math.min(3,Math.max(1,Math.round(d/2600))))})}
-    catch(e){mic.classList.remove('on');vh=null;msg.className='vmsg bad';msg.textContent=B('لم نستطع فتح المايك. اضغط «✋» كلما قلتها','لم نستطع فتح المايك. اضغطي «✋» كلما قلتِها')}};
+    catch(e){mic.classList.remove('on');vh=null;msg.className='vmsg bad';msg.textContent=micHelp(e)+'. '+B('أو اضغط «✋» كلما قلتها','أو اضغطي «✋» كلما قلتِها')}};
   el.querySelector('#vcTap').onclick=()=>bump(1);
   return {stop(){if(vh){vh.stop();vh=null}}}}
 
