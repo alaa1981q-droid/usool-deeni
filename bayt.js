@@ -62,13 +62,13 @@ const LEVELS=[
   speed:46,accel:2,spawn:1.1,maxOn:3,lives:3,time:35,
   tip:'انتبه! الصلاة والصوم والحج والزكاة من فروع الدين، ليست من الأصول.'},
  {name:'سورة التوحيد',floor:'الطابق الثاني',icon:'🏡',color:'#2f6fd0',quran:true,
-  lines:surah('سورة التوحيد'),extra:[],speed:54,accel:1.3,spawn:.95,maxOn:4,lives:4,time:75,
+  lines:surah('سورة التوحيد'),extra:[],speed:38,accel:.5,spawn:1.15,maxOn:4,lives:4,time:90,
   tip:'اجمع كلمات السورة بالترتيب. الكلمات التي بعدها تنزل معها لتخدعك!'},
  {name:'سورة الحمد',floor:'الطابق الثالث',icon:'🏰',color:'#e57c1f',quran:true,
-  lines:surah('سورة الحمد'),extra:[],speed:62,accel:.8,spawn:.85,maxOn:4,lives:5,time:140,
+  lines:surah('سورة الحمد'),extra:[],speed:40,accel:.35,spawn:1.05,maxOn:4,lives:5,time:170,
   tip:'أطول سورة وأسرع طوب. سابق الوقت!'},
  {name:'آياتٌ أحفظها',floor:'الطابق الرابع',icon:'👑',color:'#7c4dc4',quran:true,hard:true,
-  lines:MEMO.map(m=>m.w),extra:EXTRA,speed:70,accel:.9,spawn:.75,maxOn:5,lives:4,time:120,hints:1,
+  lines:MEMO.map(m=>m.w),extra:EXTRA,speed:46,accel:.4,spawn:.95,maxOn:4,lives:4,time:160,hints:1,
   tip:'أصعب طابق! آيات الحفظ من المراحل الخمس بالترتيب، والطوب أسرع، وكلماتٌ من آياتٍ أخرى تنزل لتخدعك. مساعدة واحدة فقط 💡'}
 ];
 LEVELS.forEach(l=>{l.seq=[];l.lineOf=[];l.lines.forEach((ln,i)=>ln.forEach(w=>{l.seq.push(w);l.lineOf.push(i)}));
@@ -186,6 +186,7 @@ const VW=360,VH=330,GY=292,FH=60,FX=78,FW=170,DX=46,DY=-24,SK=Math.atan2(DY,DX)*
 const fy=i=>GY-FH*(i+1);
 function defs(){return `<defs>
 <linearGradient id="hSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fd4ff"/><stop offset=".65" stop-color="#d8f1ff"/><stop offset="1" stop-color="#fff3d1"/></linearGradient>
+<radialGradient id="hHalo" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff6c8" stop-opacity=".9"/><stop offset="1" stop-color="#fff6c8" stop-opacity="0"/></radialGradient>
 <radialGradient id="hSun" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff9d6"/><stop offset=".45" stop-color="#ffe066"/><stop offset="1" stop-color="#ffe066" stop-opacity="0"/></radialGradient>
 <linearGradient id="hGrass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8ee09a"/><stop offset="1" stop-color="#4fb86a"/></linearGradient>
 <linearGradient id="hRiver" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4aa3e8"/><stop offset=".5" stop-color="#7cc8ff"/><stop offset="1" stop-color="#4aa3e8"/></linearGradient>
@@ -227,13 +228,17 @@ function floorFull(i,cls=''){const y=fy(i);let s=`<g class="${cls}">`;
   s+=`<rect x="${FX}" y="${y}" width="${FW}" height="${FH}" fill="url(#hStone)"/>`;
   s+=`<rect x="${FX}" y="${y}" width="${FW}" height="6" fill="#e9c27c"/><rect x="${FX}" y="${y+FH-3}" width="${FW}" height="3" fill="#d9a85e"/>`;
   s+=`<rect x="${FX}" y="${y}" width="8" height="${FH}" fill="#f6d9a2"/><rect x="${FX+FW-8}" y="${y}" width="8" height="${FH}" fill="#e2b46f"/>`;
-  s+=`<rect x="${FX}" y="${y+6}" width="${FW}" height="5" fill="#8a5a2b" opacity=".12"/><rect x="${FX+FW-3}" y="${y}" width="3" height="${FH}" fill="#000" opacity=".12"/>`;
+  s+=`<g fill="#fff3d6">${Array.from({length:Math.floor((FW-16)/8)},(_,k)=>`<rect x="${FX+10+k*8}" y="${y+6}" width="5" height="4" rx="1"/>`).join('')}</g><rect x="${FX}" y="${y+10}" width="${FW}" height="1.2" fill="#c99a52"/>`;
+  s+=`<rect x="${FX-1}" y="${y+6}" width="10" height="4" fill="url(#hGold)"/><rect x="${FX+FW-9}" y="${y+6}" width="10" height="4" fill="url(#hGold)"/>`;
+  s+=`<rect x="${FX}" y="${y+11}" width="${FW}" height="4" fill="#8a5a2b" opacity=".1"/><rect x="${FX+FW-3}" y="${y}" width="3" height="${FH}" fill="#000" opacity=".12"/>`;
   if(i==0){const dx=FX+FW/2;
     s+=winF(FX+20,y+18)+winF(FX+FW-46,y+18)+
      `<path d="M${dx-19} ${GY} V${GY-34} a19 19 0 0 1 38 0 V${GY}Z" fill="url(#hGold)"/>
       <path d="M${dx-15} ${GY} V${GY-33} a15 15 0 0 1 30 0 V${GY}Z" fill="#8a4f22"/><line x1="${dx}" y1="${GY-48}" x2="${dx}" y2="${GY}" stroke="#5e3414" stroke-width="2"/>
       <circle cx="${dx-4}" cy="${GY-17}" r="2.2" fill="#ffd54a"/><circle cx="${dx+4}" cy="${GY-17}" r="2.2" fill="#ffd54a"/>
-      <rect x="${dx-26}" y="${GY}" width="52" height="5" fill="#e8d3a8"/><rect x="${dx-32}" y="${GY+5}" width="64" height="5" fill="#d9c08f"/>`}
+      <rect x="${dx-26}" y="${GY}" width="52" height="5" fill="#f4ede0"/><rect x="${dx-32}" y="${GY+5}" width="64" height="5" fill="#e3d8c4"/><rect x="${dx-26}" y="${GY}" width="52" height="1.2" fill="#fff"/>
+      ${[dx-31,dx+25].map(x=>`<g><rect x="${x}" y="${GY-44}" width="6" height="44" fill="#fbf7ee"/><rect x="${x+4}" y="${GY-44}" width="2" height="44" fill="#d8cdb8"/><line x1="${x+2}" y1="${GY-42}" x2="${x+2}" y2="${GY-2}" stroke="#e6dccb" stroke-width=".8"/><rect x="${x-2}" y="${GY-48}" width="10" height="4" rx="1" fill="url(#hGold)"/><rect x="${x-1.5}" y="${GY-3}" width="9" height="3" fill="#e3d8c4"/></g>`).join('')}
+      <path d="M${dx-28} ${GY-50} Q${dx} ${GY-66} ${dx+28} ${GY-50}" stroke="url(#hGold)" stroke-width="3" fill="none"/><circle cx="${dx}" cy="${GY-60}" r="2.6" fill="#fff6b0"/>`}
   else{s+=winF(FX+18,y+16)+winF(FX+FW/2-13,y+16)+winF(FX+FW-44,y+16)+
      `<rect x="${FX+FW/2-36}" y="${y+FH-14}" width="72" height="4" fill="url(#hGold)"/>${[0,1,2,3,4,5,6].map(k=>`<rect x="${FX+FW/2-34+k*11}" y="${y+FH-10}" width="3" height="10" fill="#e6c07a"/>`).join('')}<rect x="${FX+FW/2-38}" y="${y+FH-1}" width="76" height="3" fill="#c99a52"/>`}
   return s+'</g>'}
@@ -255,7 +260,8 @@ function roof(n,cls=''){const y=fy(n-1),L=FX-12,R=FX+FW+12,M=FX+FW/2,H=66;
   ${[1,2,3,4].map(k=>`<line x1="${M+(R-M)*k/5}" y1="${y-H+H*k/5}" x2="${M+(R-M)*k/5+DX}" y2="${y-H+H*k/5+DY}" stroke="#0b5a32" stroke-width="1.2" opacity=".6"/>`).join('')}
   <polygon points="${L},${y} ${M},${y-H} ${R},${y}" fill="url(#hRoofF)" stroke="#0e6438" stroke-width="2" stroke-linejoin="round"/>
   <polygon points="${L+18},${y-4} ${M},${y-H+16} ${R-18},${y-4}" fill="#f6e3b8"/>
-  <circle cx="${M}" cy="${y-24}" r="11" fill="url(#hWin)" stroke="url(#hGold)" stroke-width="3"/>
+  <polyline points="${L-1},${y+1} ${M},${y-H-1} ${R+1},${y+1}" fill="none" stroke="url(#hGold)" stroke-width="2.6" stroke-linejoin="round"/>
+  <circle cx="${M}" cy="${y-24}" r="12" fill="#fff"/>${['#e2504a','#f2b632','#3fbf6f','#2f8fd0','#c45bd1','#ff8ac2','#13958c','#f2b632'].map((c,k)=>{const a1=k*Math.PI/4,a2=(k+1)*Math.PI/4;return `<path d="M${M} ${y-24} L${M+11*Math.cos(a1)} ${y-24+11*Math.sin(a1)} A11 11 0 0 1 ${M+11*Math.cos(a2)} ${y-24+11*Math.sin(a2)}Z" fill="${c}" opacity=".85"/>`}).join('')}<circle cx="${M}" cy="${y-24}" r="3.5" fill="#fff6b0"/><circle cx="${M}" cy="${y-24}" r="12" fill="none" stroke="url(#hGold)" stroke-width="3"/>
   <line x1="${M}" y1="${y-H}" x2="${M+DX}" y2="${y-H+DY}" stroke="url(#hGold)" stroke-width="4" stroke-linecap="round"/>
   <path d="M${M} ${y-H-2} q-9 -4 -7 -14 a9 9 0 0 0 14 0 q2 10 -7 14z" fill="url(#hGold)"/><circle cx="${M}" cy="${y-H-22}" r="3" fill="#ffd54a"/></g>`}
 let HK=1;
@@ -266,12 +272,14 @@ function houseSVG(full,part,frac,withRoof,anim,look){
   if(hasGift('rainbow'))s+=`<g fill="none" stroke-width="7" opacity=".55">${['#e2504a','#f2b632','#ffe066','#3fbf6f','#2f8fd0','#7c4dc4'].map((c,k)=>`<path d="M-10 ${GY-10} A190 170 0 0 1 370 ${GY-10}" stroke="${c}" transform="translate(0 ${k*7}) scale(1 ${1-k*.03})"/>`).join('')}</g>`;
   const top=Math.max(full,part+1);
   HK=top>=4?.8:1;const HCX=FX+FW/2+DX/2;if(HK<1)s+=`<g transform="translate(${HCX} ${GY}) scale(${HK}) translate(${-HCX} ${-GY})">`;
+  if(top>0)s+=`<ellipse cx="${FX+FW/2+DX/2}" cy="${fy(top-1)+FH*top/2-10}" rx="${FW/2+DX+40}" ry="${FH*top/2+60}" fill="url(#hHalo)"/>`;
   if(top>0)s+=`<ellipse cx="${FX+FW/2+DX/2}" cy="${GY+3}" rx="${FW/2+DX}" ry="9" fill="#2f7a45" opacity=".35"/>`;
   const paint=D?D.paintFilter(L):'';if(paint)s+=`<g filter="${paint}">`;
   for(let i=0;i<full;i++)s+=floorFull(i,anim&&i==full-1?'fl-new':'');
   if(paint)s+='</g>';
   if(part>=0){s+=topSlab(part);s+=floorPart(part,frac)}
   if(withRoof&&full>0)s+=roof(full,anim?'fl-new':'');
+  if(full>0)s+=[[FX+2,14],[FX+38,0],[FX+FW-38,0],[FX+FW-2,14]].filter(([x,w])=>true).map(([x])=>`<g><ellipse cx="${x}" cy="${GY+1}" rx="13" ry="8" fill="#2a8a4a"/><ellipse cx="${x-3}" cy="${GY-2}" rx="8" ry="5" fill="#3fbf6f"/><circle cx="${x+5}" cy="${GY-3}" r="1.6" fill="#fff"/></g>`).join('');
   if(hasGift('lanterns')&&full>0){const dx=FX+FW/2;s+=[dx-34,dx+34].map(x=>`<g><line x1="${x}" y1="${GY-56}" x2="${x}" y2="${GY-48}" stroke="#8a5a00" stroke-width="1.5"/><circle cx="${x}" cy="${GY-40}" r="11" fill="#ffe066" opacity=".45"/><rect x="${x-5}" y="${GY-48}" width="10" height="14" rx="3" fill="url(#hGold)" stroke="#8a5a00"/><rect x="${x-3}" y="${GY-45}" width="6" height="8" rx="2" fill="#fff6b0"/></g>`).join('')}
   if(hasGift('crown')&&withRoof&&full>0){const y=fy(full-1)-66-40,M=FX+FW/2;s+=`<g><circle cx="${M}" cy="${y+6}" r="22" fill="#ffe066" opacity=".35"/><path d="M${M-16} ${y+14} L${M-18} ${y-2} L${M-8} ${y+6} L${M} ${y-8} L${M+8} ${y+6} L${M+18} ${y-2} L${M+16} ${y+14}Z" fill="url(#hGold)" stroke="#9a6a00" stroke-width="1.5"/><circle cx="${M}" cy="${y+8}" r="2.6" fill="#e2504a"/><circle cx="${M-9}" cy="${y+10}" r="2" fill="#2f8fd0"/><circle cx="${M+9}" cy="${y+10}" r="2" fill="#3fbf6f"/></g>`}
   if(HK<1)s+='</g>';
