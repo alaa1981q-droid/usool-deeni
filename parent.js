@@ -33,7 +33,7 @@ function data(){
   return {days,q,ok,acc:q?Math.round(100*ok/q):0,active,prayN,wirdN,weak,
     done:STAGES.filter(s=>state.stars[s.id]>0).length,stars:Object.values(state.stars).reduce((a,b)=>a+b,0),
     miss:Object.keys(state.miss||{}).length,streak:(state.wird&&state.wird.streak)||0,
-    hifz:Object.keys(A.surOk||{}).length,sal:A.sal||0,tas:A.tas||0,name:(window.myName&&myName())||state.nick||state.name||'طفلكم'}}
+    hifz:Object.keys(A.surOk||{}).length,qisas:window.Qisas?Object.keys(Qisas.done).length:0,sal:A.sal||0,tas:A.tas||0,name:(window.myName&&myName())||state.nick||state.name||'طفلكم'}}
 
 function text(d){
   return `تقرير «جنّتي الصغيرة» لهذا الأسبوع 🌙\nالطفل: ${d.name}\n`+
@@ -63,6 +63,7 @@ function report(){
     <div class="prow"><span>الصلوات المسجّلة</span><b>${ar(d.prayN)}</b></div>
     <div class="prow"><span>المراحل المكتملة</span><b>${ar(d.done)} من ${ar(STAGES.length)}</b></div>
     <div class="prow"><span>سور محفوظة</span><b>${ar(d.hifz)}</b></div>
+    <div class="prow"><span>قصص أنبياء قرأها</span><b>${ar(d.qisas)}</b></div>
     <div class="prow"><span>مرات الصلاة على النبي (المجموع)</span><b>${ar(d.sal)}</b></div>
     <div class="prow"><span>مرات التسبيح (المجموع)</span><b>${ar(d.tas)}</b></div>
     <div class="prow"><span>أسئلة تنتظر المراجعة</span><b>${ar(d.miss)}</b></div>
