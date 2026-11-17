@@ -218,7 +218,7 @@ function defs(){return `<defs>
 <pattern id="hStone" width="34" height="15" patternUnits="userSpaceOnUse"><rect width="34" height="15" fill="url(#hFront)"/><path d="M0 14.5H34M17 0V7.5M0 7.5H34M0 7.5V15M34 7.5V15" stroke="#dcae6a" stroke-width="1"/></pattern>
 <pattern id="hStoneS" width="23" height="15" patternUnits="userSpaceOnUse"><rect width="23" height="15" fill="#c9924f"/><path d="M0 14.5H23M11.5 0V7.5M0 7.5H23" stroke="#a87436" stroke-width="1"/></pattern>
 </defs>`}
-function scene(){let s=`<rect width="${VW+200}" height="${VH}" fill="url(#hSky)"/>
+function scene(){let s=`<rect x="-500" width="${VW+1100}" height="${GY-6}" fill="url(#hSky)"/>
 <g class="hsun"><g opacity=".35" fill="#fff8c8">${[0,1,2,3,4].map(k=>`<polygon points="318,30 ${80+k*48},${GY} ${104+k*48},${GY}"/>`).join('')}</g>
 <circle cx="318" cy="30" r="40" fill="url(#hSun)"/><circle cx="318" cy="30" r="16" fill="#ffd54a"/></g>
 <g fill="#fff" opacity=".95" class="hcl"><ellipse cx="54" cy="44" rx="30" ry="11"/><ellipse cx="76" cy="36" rx="18" ry="12"/><ellipse cx="200" cy="26" rx="22" ry="8"/><ellipse cx="214" cy="21" rx="12" ry="8"/></g>
