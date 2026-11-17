@@ -38,6 +38,8 @@ css.textContent=`
 .bnm .pay button[disabled]{opacity:.45}
 .bnm .clock{font-size:30px;font-weight:900;color:#1d4e9e;margin:4px 0}.bnm .pbar{height:12px;border-radius:8px;background:#e3ecf7;overflow:hidden}.bnm .pbar i{display:block;height:100%;background:linear-gradient(90deg,#4fb3f0,#2f6fd0);border-radius:8px}
 .bhouse [data-up]{cursor:pointer}
+/* v8.8: الزينة الكثيرة (ورود، سيارة، مصابيح…) كانت تغطّي السور فلا يُلمس، خاصة عند المدير. الآن لا يلتقط اللمس إلا أجزاء الورشة */
+#byBody .bhouse svg *{pointer-events:none}#byBody .bhouse svg [data-up],#byBody .bhouse svg [data-up] *{pointer-events:auto}
 .bhouse .bn-mk{animation:bnmk 1.3s ease-in-out infinite;transform-box:fill-box;transform-origin:center}@keyframes bnmk{50%{transform:translateY(-3px) scale(1.12)}}
 .bhouse .bn-hm{animation:bnhm .45s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:0% 100%}@keyframes bnhm{from{transform:rotate(-35deg)}to{transform:rotate(25deg)}}
 .bhouse .bn-dust{animation:bndu 1.1s ease-out infinite;transform-box:fill-box;transform-origin:center}@keyframes bndu{0%{opacity:.8;transform:scale(.4)}100%{opacity:0;transform:scale(1.6) translateY(-6px)}}

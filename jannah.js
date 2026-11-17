@@ -384,7 +384,8 @@ function menuHook(B){
     $('#dirtB').onclick=()=>{Bayt.sTap();window.Alqab&&Alqab.openProfile()}}
   $('#jShop').onclick=()=>{Bayt.sTap();shop()};
   $('#jIn').onclick=()=>{Bayt.sTap();inside(Deco.myLook())};
-  const hb=B.querySelector('.bhouse');if(hb){hb.style.cursor='pointer';hb.onclick=()=>{Bayt.sTap();inside(Deco.myLook())}}
+  // v8.8: لمس البيت صار يفتحه بالعرض (bayt.js wideView)، والدخول للغرف من زر «ادخل بيتك» فقط
+  const hb=B.querySelector('.bhouse');if(hb)hb.style.cursor='pointer';
   $('#jFr').onclick=()=>{Bayt.sTap();friends()};
   $('#jCh').onclick=chest;
   publish();inbox();
