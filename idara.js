@@ -28,6 +28,21 @@ body.night .bhouse::before{content:'🌙';position:absolute;right:3%;top:1%;widt
 .idbox select.inp{font-size:17px}
 .idrow{display:flex;align-items:center;gap:8px;border-bottom:1px dashed var(--line);padding:6px 0;font-size:14px}.idrow:last-child{border:0}
 .idrow b{flex:1;min-width:0}.idrow .av{font-size:24px}
+.idban{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#0e5a3a,#14794f 60%,#1fa463);color:#fff;border-radius:22px;padding:14px 16px;margin-bottom:12px;box-shadow:0 6px 0 #0a3d27,0 10px 24px rgba(10,60,40,.25);position:relative;overflow:hidden}
+.idban::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 15% 0,rgba(255,226,140,.35),transparent 55%);pointer-events:none}
+.idban .sh{font-size:44px;line-height:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.3))}.idban b{display:block;font-size:22px;color:#ffe08a;letter-spacing:.3px}.idban small{font-size:14px;opacity:.95}
+.idbox{border:2px solid #cfe2d6;border-radius:22px;box-shadow:0 5px 0 #e1eee6;background:linear-gradient(#fff,#fbfefc)}
+.idbox h3{font-size:20px;border-bottom:2px solid #eef5f0;padding-bottom:8px;margin-bottom:10px}
+.idk{display:flex;align-items:center;gap:10px;background:#fff;border:2px solid #e6efe9;border-radius:18px;padding:8px 10px;margin-bottom:8px;cursor:pointer;box-shadow:0 3px 0 #eef5f0}
+.idk:active{transform:translateY(2px);box-shadow:0 1px 0 #eef5f0}
+.idk.top1{border-color:#e9c14a;background:linear-gradient(#fffbea,#fff)}.idk.top2{border-color:#b9c3cc}.idk.top3{border-color:#d6a27a}
+.idk .rk{width:30px;text-align:center;font-weight:800;font-size:21px;color:#6b7f74;flex:none}
+.idk .av{position:relative;font-size:38px;line-height:1;flex:none}.idk .av i.on{position:absolute;bottom:0;left:-2px;width:12px;height:12px;border-radius:50%;background:#1fa463;border:2px solid #fff}
+.idk .nm{flex:1;min-width:0}.idk .nm b{display:block;font-size:20px;font-weight:800;color:#0b3d27;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.idk .nm small{display:block;font-size:13.5px;color:#8a5a00;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.idk .nm small.st1{color:#14794f;font-size:14.5px;white-space:pre}
+.idk .stt{font-size:14px;font-weight:800;color:#3d5a4b;text-align:center;white-space:pre;flex:none;background:#f1f7f3;border-radius:12px;padding:4px 8px}
+.idk .gb{flex:none;width:44px;height:44px;border-radius:14px;border:0;font-size:22px;background:linear-gradient(#f59a3c,#e0731f);box-shadow:0 3px 0 #a8551a;color:#fff}
 .idmsg .em{font-size:60px;line-height:1.2}.idmsg p{white-space:pre-wrap;text-align:right;line-height:1.9}
 `;
 document.head.appendChild(css);
@@ -106,8 +121,13 @@ function ago(t){if(!t)return 'لم يُسجَّل بعد';const m=Math.round((Da
   const w=(n,one,two,few,many)=>n==1?one:n==2?two:n<=10?`${ar(n)} ${few}`:`${ar(n)} ${many}`;
   if(m<2)return 'الآن';if(m<60)return 'قبل '+w(m,'دقيقة','دقيقتين','دقائق','دقيقة');const h=Math.round(m/60);if(h<24)return 'قبل '+w(h,'ساعة','ساعتين','ساعات','ساعة');
   const d=Math.round(h/24);return d<30?'قبل '+w(d,'يوم','يومين','أيام','يومًا'):new Date(t).toLocaleDateString('ar-IQ')}
-function kidRow(r,i){const p=all&&all.find(x=>x.id==r.id)||{};const lv=r.lv||p.lv,tt=r.tt||p.tt,b=banOf(r.id),ac=accOf(p);
-  return `<div class="idrow" data-k="${esc(r.id)}" style="cursor:pointer"><span>${i!=null?(['🥇','🥈','🥉'][i]||ar(i+1)):''}</span><span class="av">${esc(r.av||p.av)}</span><b>${esc(r.nick||p.nick)}${b?' ⛔':''}${sus(p)?' ⚠️':''}<small style="display:block;color:#8a5a00;font-weight:500">${lv?`⭐ المستوى ${ar(lv)} `:''}${esc(tt||'')}${r.xp?` · ✨${ar(r.xp)}`:''}${(r.wins||p.wins)?` · 🏆${ar(r.wins||p.wins)}`:''}</small><small style="display:block;color:var(--muted);font-weight:500">🕒 ${ago(p.seen)}${ac!=null?` · 🎯 ${ar(Math.round(ac*100))}٪`:''}</small></b><button class="mini go" data-g="${esc(r.id)}">🎁</button></div>`}
+function kidRow(r,i){const p=all&&all.find(x=>x.id==r.id)||{};const lv=r.lv||p.lv,tt=r.tt||p.tt,b=banOf(r.id),w=r.wins||p.wins,on=p.seen&&Date.now()-p.seen<180000;
+  const rk=i!=null?(['🥇','🥈','🥉'][i]||ar(i+1)):'';
+  const sub=esc(tt||'');
+  const st=[lv?`⭐ ${ar(lv)}`:'',r.xp?`✨ ${ar(r.xp)}`:'',w?`🏆 ${ar(w)}`:''].filter(Boolean).join('   ');
+  return `<div class="idk ${i!=null&&i<3?'top'+(i+1):''}" data-k="${esc(r.id)}"><span class="rk">${rk}</span><span class="av">${esc(r.av||p.av)}${on?'<i class="on"></i>':''}</span>
+    <span class="nm"><b>${esc(r.nick||p.nick)}${b?' ⛔':''}${sus(p)?' ⚠️':''}</b>${st?`<small class="st1">${st}</small>`:''}${sub?`<small>${sub}</small>`:''}</span>
+    <button class="gb" data-g="${esc(r.id)}" aria-label="جائزة">🎁</button></div>`}
 /* 👁 بطاقة الطفل: كل معلوماته، وأزرار التنبيه والحظر والجائزة */
 async function kidCard(id){const API=O();let p=(all||[]).find(x=>x.id==id);
   try{const v=(await API.db.ref('profiles/'+id).get()).val();if(v)p=Object.assign({id},p||{},{nick:v.nick,av:v.av,lv:v.lv|0,tt:v.tt||'',wins:v.wins|0,games:v.games|0,code:v.code||'',seen:+v.seen||0,acc:v.acc||{},md:v.md||''})}catch(e){}
@@ -161,7 +181,8 @@ function giftTo(uid,nick,av){const API=O();
     $('#gSend').onclick=async()=>{const msg=$('#gMsg').value.trim(),j=+$('#gJ').value;$('#gSend').disabled=true;
       try{await API.db.ref('prizes/'+uid).push({msg,j,ts:firebase.database.ServerValue.TIMESTAMP});closeModal();API.toast(`أُرسلت الجائزة إلى ${nick||''} ✓`)}catch(e){$('#gSend').disabled=false;API.toast('تعذّر الإرسال')}}})}
 async function panel(){const API=O();heroes=null;all=null;
-  body().innerHTML=`<div class="idbox"><h3>👥 الأطفال <small style="font-weight:500;color:var(--muted);font-size:13px">اضغط على أي طفل لترى ملفّه</small></h3>
+  body().innerHTML=`<div class="idban"><span class="sh">🛡️</span><span><b>لوحة الإدارة</b><small id="idCnt">جارٍ التحميل…</small></span></div>
+    <div class="idbox"><h3>👥 الأطفال <small style="font-weight:500;color:var(--muted);font-size:13px">اضغط على أي طفل لترى ملفّه</small></h3>
       <div class="jrooms" style="margin-bottom:6px;flex-wrap:wrap"><button data-tab="heroes">🏅 الأبطال</button><button data-tab="top">⭐ المميّزون</button><button data-tab="recent">🕒 دخلوا مؤخرًا</button><button data-tab="sus">⚠️ المشبوهون</button><button data-tab="all">🔎 ابحث</button></div>
       <input class="inp" id="kQ" placeholder="🔎 اكتب اسم الطفل أو رمزه" style="text-align:right;display:none">
       <div id="idKids"><p class="tip">⏳ جارٍ التحميل…</p></div>
@@ -179,7 +200,7 @@ async function panel(){const API=O();heroes=null;all=null;
     if(!title&&!msg){API.toast('اكتب العنوان أو الرسالة');return}
     modal(`<h3 style="margin:4px 0">إرسال لكل الأطفال؟</h3><p><b>${esc(title)}</b><br>${esc(msg).slice(0,140)}${j?`<br>💎 ${ar(j)} لكل طفل`:''}</p><div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn gold" id="nYes">نعم، أرسل</button></div>`,()=>{
       $('#nYes').onclick=async()=>{closeModal();try{await API.db.ref('news').push({title,msg,j,ts:firebase.database.ServerValue.TIMESTAMP});API.toast('أُرسلت ✓');panel()}catch(e){API.toast('تعذّر الإرسال')}}})};
-  await loadKids(API);tabs();
+  await loadKids(API);{const c=$('#idCnt');if(c)c.textContent=`عدد الأطفال: ${ar((all||[]).length)}`}tabs();
   // الرسائل
   try{const s=(await API.db.ref('news').orderByChild('ts').limitToLast(10).get()).val()||{};const rows=Object.entries(s).sort((a,b)=>(b[1].ts||0)-(a[1].ts||0));
     $('#idNews').innerHTML=rows.length?rows.map(([id,v])=>`<div class="idrow"><b>📢 ${esc(v.title||v.msg||'').slice(0,40)}</b><small>${v.j?'💎'+ar(v.j):''} ${v.ts?new Date(v.ts).toLocaleDateString('ar-IQ'):''}</small><button class="mini" style="background:#e2504a" data-del="${esc(id)}">🗑️</button></div>`).join(''):'<p class="tip">لم تُرسل رسائل بعد</p>';
