@@ -10,7 +10,7 @@ css.textContent=`.dlcard{border-color:#1fa463!important;box-shadow:0 5px 0 #bfe8
 document.head.appendChild(css);
 const card=document.createElement('button');card.className='bookcard dlcard';card.id='dlBook';
 function line(){const n=st.n;return n>0?`حمّله ${ar(n)} ${n==1?'شخص':n==2?'شخصان':n<=10?'أشخاص':'شخصًا'} حتى الآن 🌟`:'ملف PDF تحفظه في هاتفك وتقرأه بلا إنترنت'}
-function draw(){card.innerHTML=`<span class="cup">⬇️</span><span><b>حمّل الكتاب</b><small id="dlLine">${line()}</small></span><span class="go">‹</span>`}
+function draw(){card.innerHTML=`<span class="cup" style="line-height:0"><svg viewBox="0 0 50 70" width="50" height="70" aria-hidden="true" style="border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.18)"><defs><linearGradient id="dlg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3fbf6f"/><stop offset="1" stop-color="#14794f"/></linearGradient></defs><rect width="50" height="70" rx="8" fill="url(#dlg)"/><path d="M25 12v26M14 28l11 12 11-12" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="11" y="48" width="28" height="4" rx="2" fill="#fff"/><text x="25" y="63" font-size="9" font-weight="800" text-anchor="middle" fill="#fff">PDF</text></svg></span><span><b>حمّل الكتاب</b><small id="dlLine">${line()}</small></span><span class="go">‹</span>`}
 draw();$('#openBook').after(card);
 async function sync(add){
   if(!navigator.onLine||!window.OnlineAPI)return;
