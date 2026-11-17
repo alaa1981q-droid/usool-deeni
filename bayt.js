@@ -207,6 +207,10 @@ function defs(){return `<defs>
 <linearGradient id="hRoofS" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f9658"/><stop offset="1" stop-color="#0e6438"/></linearGradient>
 <linearGradient id="hGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe9a3"/><stop offset=".5" stop-color="#f2b632"/><stop offset="1" stop-color="#b9851a"/></linearGradient>
 <radialGradient id="hWin" cx=".5" cy=".35" r=".7"><stop offset="0" stop-color="#fffbe0"/><stop offset=".6" stop-color="#bfe7ff"/><stop offset="1" stop-color="#6fbde8"/></radialGradient>
+<linearGradient id="hLight" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#3a2410" stop-opacity=".22"/></linearGradient>
+<linearGradient id="hAO" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a1800" stop-opacity=".0"/><stop offset="1" stop-color="#2a1800" stop-opacity=".28"/></linearGradient>
+<linearGradient id="hEave" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a0f00" stop-opacity=".42"/><stop offset="1" stop-color="#1a0f00" stop-opacity="0"/></linearGradient>
+<linearGradient id="hLedge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff4d2"/><stop offset="1" stop-color="#e2b46f"/></linearGradient>
 <pattern id="hStone" width="34" height="15" patternUnits="userSpaceOnUse"><rect width="34" height="15" fill="url(#hFront)"/><path d="M0 14.5H34M17 0V7.5M0 7.5H34M0 7.5V15M34 7.5V15" stroke="#dcae6a" stroke-width="1"/></pattern>
 <pattern id="hStoneS" width="23" height="15" patternUnits="userSpaceOnUse"><rect width="23" height="15" fill="#c9924f"/><path d="M0 14.5H23M11.5 0V7.5M0 7.5H23" stroke="#a87436" stroke-width="1"/></pattern>
 </defs>`}
@@ -242,6 +246,8 @@ function floorFull(i,cls=''){const y=fy(i);let s=`<g class="${cls}">`;
   s+=`<g fill="#fff3d6">${Array.from({length:Math.floor((FW-16)/8)},(_,k)=>`<rect x="${FX+10+k*8}" y="${y+6}" width="5" height="4" rx="1"/>`).join('')}</g><rect x="${FX}" y="${y+10}" width="${FW}" height="1.2" fill="#c99a52"/>`;
   s+=`<rect x="${FX-1}" y="${y+6}" width="10" height="4" fill="url(#hGold)"/><rect x="${FX+FW-9}" y="${y+6}" width="10" height="4" fill="url(#hGold)"/>`;
   s+=`<rect x="${FX}" y="${y+11}" width="${FW}" height="4" fill="#8a5a2b" opacity=".1"/><rect x="${FX+FW-3}" y="${y}" width="3" height="${FH}" fill="#000" opacity=".12"/>`;
+  s+=`<rect x="${FX}" y="${y}" width="${FW}" height="${FH}" fill="url(#hLight)"/><rect x="${FX}" y="${y+FH-16}" width="${FW}" height="16" fill="url(#hAO)"/>`;
+  s+=side(i,`<rect y="${FH-20}" width="${DX}" height="20" fill="url(#hAO)"/><rect width="${DX}" height="${FH}" fill="#000" opacity=".10"/>`);
   if(i==0){const dx=FX+FW/2;
     s+=winF(FX+20,y+18)+winF(FX+FW-46,y+18)+
      `<path d="M${dx-19} ${GY} V${GY-34} a19 19 0 0 1 38 0 V${GY}Z" fill="url(#hGold)"/>
@@ -252,6 +258,9 @@ function floorFull(i,cls=''){const y=fy(i);let s=`<g class="${cls}">`;
       <path d="M${dx-28} ${GY-50} Q${dx} ${GY-66} ${dx+28} ${GY-50}" stroke="url(#hGold)" stroke-width="3" fill="none"/><circle cx="${dx}" cy="${GY-60}" r="2.6" fill="#fff6b0"/>`}
   else{s+=winF(FX+18,y+16)+winF(FX+FW/2-13,y+16)+winF(FX+FW-44,y+16)+
      `<rect x="${FX+FW/2-36}" y="${y+FH-14}" width="72" height="4" fill="url(#hGold)"/>${[0,1,2,3,4,5,6].map(k=>`<rect x="${FX+FW/2-34+k*11}" y="${y+FH-10}" width="3" height="10" fill="#e6c07a"/>`).join('')}<rect x="${FX+FW/2-38}" y="${y+FH-1}" width="76" height="3" fill="#c99a52"/>`}
+  s+=`<rect x="${FX-2}" y="${y+7}" width="${FW+4}" height="9" fill="url(#hEave)" opacity=".55"/>`;
+  s+=`<rect x="${FX-5}" y="${y-4}" width="${FW+10}" height="9" rx="1.5" fill="url(#hLedge)" stroke="#c99a52" stroke-width="1"/><rect x="${FX-5}" y="${y+3}" width="${FW+10}" height="2" fill="#a8742f" opacity=".5"/>`;
+  s+=side(i,`<polygon points="-5,-4 ${DX},-4 ${DX},5 -5,5" fill="#d9a85e" stroke="#b98445" stroke-width="1"/><rect x="-5" y="3" width="${DX+5}" height="2" fill="#7a4f22" opacity=".5"/>`);
   return s+'</g>'}
 function topSlab(n){if(n<=0)return '';const y=fy(n-1);
   return `<polygon points="${FX},${y} ${FX+DX},${y+DY} ${FX+FW+DX},${y+DY} ${FX+FW},${y}" fill="#f8e2b5" stroke="#d9a85e" stroke-width="1"/>`}
@@ -267,7 +276,7 @@ function floorPart(i,frac){const y=fy(i),cols=7,rows=3,bw=FW/cols,bh=FH/rows,k=M
   s+=`<g stroke="#8a5a2b" stroke-width="2.4" opacity=".75"><line x1="${FX-8}" y1="${y-8}" x2="${FX-8}" y2="${y+FH}"/><line x1="${FX+FW+DX+6}" y1="${y+DY-8}" x2="${FX+FW+DX+6}" y2="${y+FH+DY}"/><line x1="${FX-8}" y1="${y+FH/2}" x2="${FX}" y2="${y+FH/2}"/></g>`;
   return s+'</g>'}
 function roof(n,cls=''){const y=fy(n-1),L=FX-12,R=FX+FW+12,M=FX+FW/2,H=66;
-  return `<g class="${cls}"><polygon points="${M},${y-H} ${M+DX},${y-H+DY} ${R+DX},${y+DY} ${R},${y}" fill="url(#hRoofS)"/>
+  return `<g class="${cls}"><rect x="${L+6}" y="${y}" width="${R-L-12}" height="14" fill="url(#hEave)"/><polygon points="${L},${y+1} ${R},${y+1} ${R+DX},${y+1+DY} ${L+DX*.2},${y+1}" fill="#000" opacity="0"/><polygon points="${M},${y-H} ${M+DX},${y-H+DY} ${R+DX},${y+DY} ${R},${y}" fill="url(#hRoofS)"/>
   ${[1,2,3,4].map(k=>`<line x1="${M+(R-M)*k/5}" y1="${y-H+H*k/5}" x2="${M+(R-M)*k/5+DX}" y2="${y-H+H*k/5+DY}" stroke="#0b5a32" stroke-width="1.2" opacity=".6"/>`).join('')}
   <polygon points="${L},${y} ${M},${y-H} ${R},${y}" fill="url(#hRoofF)" stroke="#0e6438" stroke-width="2" stroke-linejoin="round"/>
   <polygon points="${L+18},${y-4} ${M},${y-H+16} ${R-18},${y-4}" fill="#f6e3b8"/>
@@ -284,7 +293,7 @@ function houseSVG(full,part,frac,withRoof,anim,look){
   const top=Math.max(full,part+1);
   HK=top>=5?.66:top>=4?.8:1;const HCX=FX+FW/2+DX/2;if(HK<1)s+=`<g transform="translate(${HCX} ${GY}) scale(${HK}) translate(${-HCX} ${-GY})">`;
   if(top>0)s+=`<ellipse cx="${FX+FW/2+DX/2}" cy="${fy(top-1)+FH*top/2-10}" rx="${FW/2+DX+40}" ry="${FH*top/2+60}" fill="url(#hHalo)"/>`;
-  if(top>0)s+=`<ellipse cx="${FX+FW/2+DX/2}" cy="${GY+3}" rx="${FW/2+DX}" ry="9" fill="#2f7a45" opacity=".35"/>`;
+  if(top>0)s+=`<ellipse cx="${FX+FW/2+DX/2}" cy="${GY+3}" rx="${FW/2+DX}" ry="9" fill="#2f7a45" opacity=".35"/><polygon points="${FX-4},${GY+1} ${FX-62},${GY+14} ${FX+FW-30},${GY+15} ${FX+FW+DX},${GY+4} ${FX+FW},${GY}" fill="#1d5a30" opacity=".22"/>`;
   const paint=D?D.paintFilter(L):'';if(paint)s+=`<g filter="${paint}">`;
   for(let i=0;i<full;i++)s+=floorFull(i,anim&&i==full-1?'fl-new':'');
   if(paint)s+='</g>';
@@ -321,6 +330,12 @@ function lockWhy(i){if(i>bs.done)return 'أكمل الطابق الذي قبله
 function rankBox(){const r=rankOf(cs.n),nx=nextRank(cs.n),f=nx?(cs.n-r.at)/(nx.at-r.at):1;
   return `<div class="brank"><span class="ri">${r.icon}</span><span style="flex:1"><b style="color:${r.color}">${r.name} · ${ar(cs.n)} 🏆</b>
   <small>${nx?`باقي ${ar(nx.at-cs.n)} ${cupWord(nx.at-cs.n)} لتصير ${nx.icon} ${nx.name}، وهديتك: ${nx.giftName}`:'وصلتَ أعلى رتبة! ما شاء الله 🌟'}</small><div class="bar2"><i style="width:${f*100}%"></i></div></span></div>`}
+function tilt3d(h){const sv=h&&h.querySelector('svg');if(!sv)return;sv.style.transition='transform .18s ease-out';sv.style.transformOrigin='50% 90%';
+  const set=(rx,ry)=>{sv.style.transform=`perspective(700px) rotateX(${rx.toFixed(1)}deg) rotateY(${ry.toFixed(1)}deg) scale(1.04)`};
+  const mv=e=>{const r=h.getBoundingClientRect(),t=e.touches?e.touches[0]:e,x=(t.clientX-r.left)/r.width-.5,y=(t.clientY-r.top)/r.height-.5;set(-y*7,x*12)};
+  h.addEventListener('pointermove',mv);h.addEventListener('pointerleave',()=>set(0,0));h.addEventListener('pointerup',()=>setTimeout(()=>set(0,0),500));
+  const dev=e=>{if(!document.contains(h)){removeEventListener('deviceorientation',dev);return}if(e.gamma==null)return;set(Math.max(-5,Math.min(5,((e.beta||45)-50)/9)),Math.max(-9,Math.min(9,e.gamma/4)))};
+  addEventListener('deviceorientation',dev,{passive:true})}
 function menu(){G=null;clearTimeout(autoT);const B=$('#byBody');
   B.innerHTML=`<div class="bhouse">${houseSVG(bs.done,-1,0,true)}</div>
   ${rankBox()}
@@ -334,6 +349,7 @@ function menu(){G=null;clearTimeout(autoT);const B=$('#byBody');
   $('#byHow').onclick=()=>modal(`<div style="font-size:46px">🏡</div><h3 style="margin:4px 0">كيف ألعب؟</h3><p class="bcap" style="text-align:right;line-height:1.9">المس الكلمة <b>التالية</b> بالترتيب قبل أن ينتهي الوقت ⏱️<br>الصحيح المتتابع يضاعف نقاطك 🔥 والنجمة الذهبية ⭐ تعطيك وقتًا إضافيًا.<br>الخطأ أو ترك الكلمة الصحيحة تسقط يهدم من بيتك!<br>🏆 كل نجمة جديدة تربحها في طابق = كأس، والسباق الكامل لكل الطوابق = كأسان.<br>واجمع كؤوسًا أكثر من «اختبر نفسك» و«مسابقة الأبطال».</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`);
   $('#byRace').onclick=()=>{sTap();play(0,0,true)};
   if(window.Deco)Deco.menuHook(B);
+  tilt3d(B.querySelector('.bhouse'));
   B.querySelectorAll('[data-lv]').forEach(b=>b.onclick=()=>{const i=+b.dataset.lv,why=lockWhy(i);
     if(why){tone(200,.15,'square',.08);modal(`<div style="font-size:50px">🔒</div><h3 style="margin:4px 0">${LEVELS[i].floor} مقفول</h3><p>${why}</p>${cs.n<FLOOR_CUPS[i]?'<p style="font-size:15px;color:var(--muted)">اجمع الكؤوس من «اختبر نفسك» و«مسابقة الأبطال»، أو أعد بناء الطوابق بنجوم أكثر ⭐</p>':''}<div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`);return}
     sTap();play(i,0)})}
