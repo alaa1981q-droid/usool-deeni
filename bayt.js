@@ -109,6 +109,10 @@ css.textContent=`
 .blv b{display:block;font-size:18px}.blv small{color:var(--muted);font-size:14px;line-height:1.5;display:block}
 .blv .mk{margin-inline-start:auto;font-size:22px;flex:none}
 .blv.locked{opacity:.5;filter:grayscale(.8)}
+.blvg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.blvg .blv{margin:0;flex-direction:column;justify-content:center;text-align:center;gap:4px;padding:10px 6px;min-width:0}
+.blvg .blv b{font-size:16px}.blvg .blv small{font-size:12.5px;line-height:1.4}.blvg .blv .ic{width:46px;height:46px;font-size:24px}.blvg .blv .mk{margin:0;font-size:18px}
+#byBody>.bhouse:not(.sm){max-height:190px}#byBody>.bhouse:not(.sm) svg{height:100%;width:100%}
 .bhud{display:flex;align-items:center;gap:6px;margin:8px 0 4px;flex-wrap:wrap}
 .bhud .nm{flex:1;font-weight:800;font-size:15px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bhud .lives{font-size:16px;direction:ltr}
@@ -315,11 +319,12 @@ function menu(){G=null;clearTimeout(autoT);const B=$('#byBody');
   ${rankBox()}
   <div class="bbest"><div><b>${ar(bs.done)} / ${ar(LEVELS.length)}</b><span>طوابق بيتك</span></div><div><b>${ar(bs.best)}</b><span>أفضل نتيجة ⭐</span></div></div>
   <button class="btn gold brace" id="byRace">🏁 ابدأ السباق من الطابق الأول</button>
-  ${LEVELS.map((l,i)=>{const why=lockWhy(i),dn=i<bs.done;
+  <div class="blvg">${LEVELS.map((l,i)=>{const why=lockWhy(i),dn=i<bs.done;
     return `<button class="blv ${why?'locked':''}" data-lv="${i}"><span class="ic" style="background:${l.color}">${why?'🔒':l.icon}</span>
-    <span><b>${l.floor}: ${l.name}</b><small>${why||`${ar(l.seq.length)} ${l.quran?'كلمة':'أصول'} · ${ar(l.time)} ثانية · ${ar(l.lives)} قلوب`}</small></span>
-    <span class="mk">${dn?'⭐'.repeat(bs.stars[i]||1):why?'':'▶️'}</span></button>`}).join('')}
-  <p class="bcap" style="margin-top:12px">المس الكلمة <b>التالية</b> بالترتيب قبل أن ينتهي الوقت ⏱️<br>الصحيح المتتابع يضاعف نقاطك 🔥 والنجمة الذهبية ⭐ تعطيك وقتًا إضافيًا.<br>الخطأ أو ترك الكلمة الصحيحة تسقط يهدم من بيتك!<br>🏆 كل نجمة جديدة تربحها في طابق = كأس، والسباق الكامل لكل الطوابق = كأسان.<br>واجمع كؤوسًا أكثر من «اختبر نفسك» و«مسابقة الأبطال».</p>`;
+    <span><b>${l.floor}</b><small>${l.name}</small></span>
+    <span class="mk">${dn?'⭐'.repeat(bs.stars[i]||1):why?'🔒':'▶️'}</span></button>`}).join('')}</div>
+  <button class="link-btn" id="byHow" style="align-self:center;margin-top:10px">❓ كيف ألعب؟</button>`;
+  $('#byHow').onclick=()=>modal(`<div style="font-size:46px">🏡</div><h3 style="margin:4px 0">كيف ألعب؟</h3><p class="bcap" style="text-align:right;line-height:1.9">المس الكلمة <b>التالية</b> بالترتيب قبل أن ينتهي الوقت ⏱️<br>الصحيح المتتابع يضاعف نقاطك 🔥 والنجمة الذهبية ⭐ تعطيك وقتًا إضافيًا.<br>الخطأ أو ترك الكلمة الصحيحة تسقط يهدم من بيتك!<br>🏆 كل نجمة جديدة تربحها في طابق = كأس، والسباق الكامل لكل الطوابق = كأسان.<br>واجمع كؤوسًا أكثر من «اختبر نفسك» و«مسابقة الأبطال».</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`);
   $('#byRace').onclick=()=>{sTap();play(0,0,true)};
   if(window.Deco)Deco.menuHook(B);
   B.querySelectorAll('[data-lv]').forEach(b=>b.onclick=()=>{const i=+b.dataset.lv,why=lockWhy(i);
