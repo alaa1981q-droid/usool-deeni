@@ -74,7 +74,7 @@ const ITEMS=[
  {id:'d_lamps', cat:'deeds',name:'قناديل المصلّين',e:'🪔',deed:'سجّل ٥ صلوات صلّيتها في «سجلّ صلاتي»',layer:'front',at:[[146,302,14],[180,302,14]]},
  {id:'d_star',  cat:'deeds',name:'نجوم القرآن',e:'🌠',deed:'سمّع ١٠ آيات بصوتك في «أنا حافظ صغير»',layer:'back',at:[[44,62,18],[300,96,16]],anim:'twinkle'},
  {id:'d_spring',cat:'deeds',name:'عين ماء جارية',e:'💧',deed:'انجح في اختبار الوضوء',layer:'front',at:[[98,300,20],[88,306,12]],anim:'bob'},
- {id:'d_mosque',cat:'deeds',name:'مسجد صغير',e:'🕌',deed:'انجح في اختبار الصلاة',layer:'back',at:[[320,254,40]]},
+ {id:'d_mosque',cat:'deeds',name:'مسجد جميل بجانب بيتك',e:'🕌',deed:'تعلّم الصلاة، وقلها بصوتك، وانجح في اختبارها',layer:'back',svg:'mosque',at:[[320,254,40]]},
  {id:'d_palms', cat:'deeds',name:'نخيل الجنة',e:'🌴',deed:'صلِّ على محمد وآل محمد ١٠٠ مرة',layer:'back',at:[[8,288,34],[352,290,30]]},
  {id:'d_fruit', cat:'deeds',name:'بستان المصلّي',e:'🍊',deed:'سجّل ٣٥ صلاة صلّيتها',layer:'front',at:[[38,270,16],[326,264,15],[52,258,14]]},
  {id:'d_h1',    cat:'deeds',name:'حمامات الحافظ',e:'🕊️',deed:'احفظ سورة واحدة',layer:'back',at:[[200,70,18],[226,58,15],[178,84,14]],anim:'fly'},
@@ -114,7 +114,22 @@ function houseItem(t,full){const B=Bayt;if(!(full>0))return '';let s='';
   if(t=='ivy'){const top=B.fy(full-1)+10;for(let y=B.GY-4;y>top;y-=9){const x=B.FX+3+Math.sin(y/9)*3;s+=`<ellipse cx="${x}" cy="${y}" rx="4.5" ry="3" fill="#2e9c55" transform="rotate(${(y%3)*25-20} ${x} ${y})"/><ellipse cx="${x+4}" cy="${y-4}" rx="3.5" ry="2.4" fill="#3fbf6f"/>`}
     s=`<path d="M${B.FX+3} ${B.GY} Q${B.FX+8} ${(B.GY+top)/2} ${B.FX+3} ${top}" stroke="#4a7a2a" stroke-width="1.6" fill="none"/>`+s}
   return kwrap(s)}
+function mosqueSVG(){const g=292;
+  return `<g class="dk-msq"><defs><linearGradient id="hMsqWall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffaf0"/><stop offset="1" stop-color="#f1dfbc"/></linearGradient>
+  <radialGradient id="hMsqDome" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#5fd49a"/><stop offset=".55" stop-color="#1fa463"/><stop offset="1" stop-color="#0e6438"/></radialGradient></defs>
+  <ellipse cx="322" cy="${g+3}" rx="42" ry="6" fill="#2f7a45" opacity=".32"/>
+  <rect x="344" y="${g-86}" width="10" height="86" fill="url(#hMsqWall)" stroke="#d9a85e" stroke-width="1"/><rect x="342" y="${g-62}" width="14" height="5" rx="1.5" fill="url(#hGold)"/>
+  <path d="M344 ${g-86} q5 -16 10 0z" fill="url(#hMsqDome)"/><line x1="349" y1="${g-94}" x2="349" y2="${g-100}" stroke="#b9851a" stroke-width="1.6"/><circle cx="349" cy="${g-103}" r="3" fill="#ffd54a"/>
+  <path d="M346.5 ${g-74} a2.5 4 0 0 1 5 0v6h-5z" fill="#3a5a6a"/><path d="M346.5 ${g-48} a2.5 4 0 0 1 5 0v6h-5z" fill="#3a5a6a"/>
+  <rect x="291" y="${g-32}" width="53" height="32" fill="url(#hMsqWall)" stroke="#d9a85e" stroke-width="1.2"/><rect x="291" y="${g-32}" width="53" height="4" fill="url(#hGold)"/>
+  <rect x="302" y="${g-42}" width="30" height="11" fill="url(#hMsqWall)" stroke="#d9a85e" stroke-width="1"/>
+  <path d="M300 ${g-42} Q317 ${g-82} 334 ${g-42}Z" fill="url(#hMsqDome)" stroke="#0e6438" stroke-width="1"/><path d="M306 ${g-50} Q310 ${g-66} 318 ${g-70}" stroke="#fff" stroke-width="2" fill="none" opacity=".45" stroke-linecap="round"/>
+  <line x1="317" y1="${g-62}" x2="317" y2="${g-74}" stroke="#b9851a" stroke-width="2"/><path d="M317 ${g-86} a6 6 0 1 0 5 8 a4.6 4.6 0 1 1 -5 -8z" fill="url(#hGold)"/>
+  <path d="M310 ${g} V${g-14} a7 7 0 0 1 14 0 V${g}Z" fill="#8a4f22" stroke="url(#hGold)" stroke-width="1.6"/>
+  ${[296,330].map(x=>`<path d="M${x} ${g-8} V${g-17} a4 4 0 0 1 8 0 V${g-8}Z" fill="#9fdcff" stroke="#e6c07a" stroke-width="1.4"/>`).join('')}
+  <circle cx="317" cy="${g-26}" r="3" fill="#ffd54a" opacity=".9" class="dk-tw"/></g>`}
 function itemSVG(it,full,withRoof){
+  if(it.svg=='mosque')return mosqueSVG();
   if(['fbox','curt','door','ivy'].includes(it.svg))return houseItem(it.svg,full);
   const cls=it.anim?` class="dk-${it.anim}"`:'';
   if(it.svg=='lights'){if(!(full>0&&withRoof))return '';const B=Bayt,y=B.fy(full-1),L=B.FX-12,R=B.FX+B.FW+12,M=B.FX+B.FW/2,H=66,C=['#e2504a','#f2b632','#3fbf6f','#2f8fd0','#c45bd1'];
@@ -366,7 +381,7 @@ async function friends(){show('jannah');backTo=null;$('#jTitle').textContent='�
     return {id,h:h.val(),p:p.val()||{nick:'؟',av:'❔'}}}catch(e){return {id,h:null,p:{nick:'؟',av:'❔'}}}}));
   rows.sort((a,b)=>(b.h?1:0)-(a.h?1:0));
   B.innerHTML=`${codeBox}<div class="jfr">${rows.map(r=>{const L=clean(r.h);
-    return `<button class="jfc" data-f="${r.id}"><div class="bhouse">${Bayt.houseSVG(L.f,-1,0,true,false,L)}</div><b>${esc(r.p.av)} ${esc(r.p.nick)}</b><small>${r.h?`${['لم يبنِ بعد','طابق واحد','طابقان','ثلاثة طوابق','أربعة طوابق'][L.f]}${js.gave[r.id]==today()?' · 🎁 أهديتَه اليوم':''}`:'لم يفتح بيته بعد'}</small></button>`}).join('')}</div>
+    return `<button class="jfc" data-f="${r.id}"><div class="bhouse">${Bayt.houseSVG(L.f,-1,0,true,false,L)}</div><b>${esc(r.p.av)} ${esc(r.p.nick)}</b><small>${r.h?`${['لم يبنِ بعد','طابق واحد','طابقان','ثلاثة طوابق','أربعة طوابق','خمسة طوابق'][L.f]}${js.gave[r.id]==today()?' · 🎁 أهديتَه اليوم':''}`:'لم يفتح بيته بعد'}</small></button>`}).join('')}</div>
     <div class="nav" style="margin-top:12px"><button class="btn sec" id="jAdd">➕ أضف صديقًا</button></div>`;
   B.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{const r=rows.find(x=>x.id==b.dataset.f);Bayt.sTap();visit(r)});
   $('#jAdd').onclick=()=>{window.onlineReturn=friends;A.openAdd()}}

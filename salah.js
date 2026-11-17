@@ -134,7 +134,7 @@ function hub(){stopV();back=null;setColor();const w=way(),f=fq();title('🕌 و�
     <button class="sli" data-go="v">${tk(f.sv)}<span class="e">🎤</span><b>قلها بصوتك</b><small>أذكار الصلاة والحمد، والتطبيق يصحّح</small></button>
     <button class="sli" data-go="pr">${tk(todayPray().every(Boolean))}<span class="e">🤲</span><b>سجلّ صلاتي</b><small>صلّيتُ اليوم ${ar(todayPray().filter(Boolean).length)} من ٥</small></button>
     <button class="sli" data-go="tw">${tk(f.wt>=.75)}<span class="e">📝</span><b>اختبار الوضوء</b><small>${f.wt?`أفضل نتيجة: ${ar(Math.round(f.wt*8))} من ٨`:'٨ أسئلة · الجائزة: 💧 عين ماء لبيتك'}</small></button>
-    <button class="sli" data-go="ts">${tk(f.st>=.75)}<span class="e">📝</span><b>اختبار الصلاة</b><small>${f.st?`أفضل نتيجة: ${ar(Math.round(f.st*8))} من ٨`:'٨ أسئلة · الجائزة: 🕌 مسجد لبيتك'}</small></button>
+    <button class="sli" data-go="ts">${tk(f.st>=.75)}<span class="e">📝</span><b>اختبار الصلاة</b><small>${f.st?`أفضل نتيجة: ${ar(Math.round(f.st*8))} من ٨`:'٨ أسئلة · بعد التعلّم والتسميع: 🕌 مسجد جميل لبيتك'}</small></button>
    </div>
    <p class="tip">⚠️ اسأل أهلك أو إمام مسجدك عن أيّ شيءٍ لم تفهمه، فهم يعلّمونك بالطريقة الصحيحة 🤍</p>`;
   const go={lw:()=>learn('wudu',0),ls:()=>learn('salah',0),ow:()=>order('wudu'),os:()=>order('salah'),v:voice,pr:pray,tw:()=>test('wudu'),ts:()=>test('salah')};
@@ -215,11 +215,11 @@ function test(kind){stopV();back=hub;const w=way(),bank=kind=='wudu'?w.wq:w.sq,N
       $('#slQn').disabled=false});
     $('#slQn').onclick=()=>{i++;i<N?ask():end()}};
   const end=()=>{const f=fq(),key=kind=='wudu'?'wt':'st',frac=sc/N,pass=frac>=.75,firstPass=pass&&!(f[key]>=.75);f[key]=Math.max(f[key]||0,frac);Aamal.save();
-    const prize=kind=='wudu'?{id:'d_spring',e:'💧',n:'عين ماء جارية'}:{id:'d_mosque',e:'🕌',n:'مسجد صغير'};
-    let got=false;if(pass&&window.Deco&&Deco.grant)got=Deco.grant(prize.id);
+    const prize=kind=='wudu'?{id:'d_spring',e:'💧',n:'عين ماء جارية'}:{id:'d_mosque',e:'🕌',n:'مسجد جميل بجانب بيتك'};
+    const full=kind=='wudu'||(f.sl&&f.sv);let got=false;if(pass&&full&&window.Deco&&Deco.grant)got=Deco.grant(prize.id);
     body().innerHTML=`<div class="result"><div class="big">${pass?'🎉':'🌱'}</div><h2 style="color:${pass?'var(--ok)':'#b06a2c'}">${pass?(sc==N?'ممتاز! كلّها صحيحة':B('نجحت يا بطل!','نجحتِ يا بطلة!')):'محاولة جيدة!'}</h2>
       <div class="score">${B('أجبتَ','أجبتِ')} عن ${ar(sc)} من ${ar(N)}${pass?'':` — تحتاج ${ar(6)} للنجاح`}</div>
-      ${got?`<div class="cupbox win"><b>${prize.e}</b>جائزتك: ${prize.n} في بيتك في الجنة! 🏡</div>`:''}<div id="slCups"></div>
+      ${got?`<div class="cupbox win"><b>${prize.e}</b>جائزتك: ${prize.n} في بيتك في الجنة! 🏡</div>`:''}${pass&&!full?`<div class="cupbox"><b>🕌</b>${B('أكمل','أكملي')} ${!f.sl?'«تعلّم الصلاة»':''}${!f.sl&&!f.sv?' و':''}${!f.sv?'«قلها بصوتك»':''} لتربح مسجدًا جميلًا بجانب بيتك!</div>`:''}<div id="slCups"></div>
       ${pass?'':`<p>${B('ارجع','ارجعي')} إلى الدرس ثم ${B('حاول','حاولي')} مرة أخرى 💪</p>`}
       <div class="nav">${pass?`<button class="btn gold" id="slBayt">🏡 شاهد بيتك</button>`:`<button class="btn gold" id="slLearn">📖 الدرس</button>`}</div><div class="nav"><button class="btn sec" id="slAgain">🔁 اختبار جديد</button></div></div>`;
     if(pass){try{fanfare();confetti()}catch(e){}if(window.cupsAward)cupsAward(firstPass?3:1,'fiqh',$('#slCups'));Aamal.grow('fiqh',firstPass?2:1)}

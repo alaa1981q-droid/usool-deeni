@@ -5,7 +5,7 @@
    نصوص السور مأخوذة كما هي من دروس الكتاب (STAGES) ولا تُكتب هنا يدويًا. */
 (function(){
 const BKEY='usul5_bayt_v1';
-let bs={done:0,best:0,stars:[0,0,0,0]};
+let bs={done:0,best:0,stars:[0,0,0,0,0]};
 try{const s=JSON.parse(localStorage.getItem(BKEY)||'null');if(s&&typeof s.done=='number')bs=Object.assign(bs,s)}catch(e){}
 const bsave=()=>{try{localStorage.setItem(BKEY,JSON.stringify(bs))}catch(e){}};
 
@@ -22,7 +22,7 @@ const RANKS=[
  {at:25,icon:'💎',name:'البنّاء الماسي',color:'#2f8fd0',gift:'rainbow',giftName:'قوس قزح فوق بيتك 🌈'},
  {at:40,icon:'👑',name:'بطل الجنة',color:'#7c4dc4',gift:'crown',giftName:'تاج مضيء فوق بيتك 👑'}
 ];
-const FLOOR_CUPS=[0,3,8,20]; // كم كأسًا يحتاج كل طابق ليُفتح
+const FLOOR_CUPS=[0,3,8,20,35]; // كم كأسًا يحتاج كل طابق ليُفتح
 const DAILY={contest:3,nafsak:3,fiqh:4,prayer:1,tilawa:2,deeds:2}; // كم جولة في اليوم تعطي كؤوسًا
 const rankOf=n=>RANKS.filter(r=>n>=r.at).pop();
 const nextRank=n=>RANKS.find(r=>r.at>n);
@@ -69,7 +69,14 @@ const LEVELS=[
   tip:'أطول سورة وأسرع طوب. سابق الوقت!'},
  {name:'آياتٌ أحفظها',floor:'الطابق الرابع',icon:'👑',color:'#7c4dc4',quran:true,hard:true,
   lines:MEMO.map(m=>m.w),extra:EXTRA,speed:46,accel:.4,spawn:.95,maxOn:4,lives:4,time:160,hints:1,
-  tip:'أصعب طابق! آيات الحفظ من المراحل الخمس بالترتيب، والطوب أسرع، وكلماتٌ من آياتٍ أخرى تنزل لتخدعك. مساعدة واحدة فقط 💡'}
+  tip:'أصعب طابق! آيات الحفظ من المراحل الخمس بالترتيب، والطوب أسرع، وكلماتٌ من آياتٍ أخرى تنزل لتخدعك. مساعدة واحدة فقط 💡'},
+ // الطابق الخامس: خطوات صلاة الصبح بالترتيب (الركعتان)، وكل خطوة باسم مميّز حتى لا يلتبس الأمر
+ {name:'ترتيب الصلاة',floor:'الطابق الخامس',icon:'🕌',color:'#0e7fa6',quran:false,
+  lines:[['النيّة','تكبيرة الإحرام','سورة الحمد','سورة التوحيد','الركوع','القيام بعد الركوع','السجدة الأولى','الجلوس بين السجدتين','السجدة الثانية'],
+         ['القيام للركعة الثانية','الحمد ٢','سورة بعدها','الركوع ٢','القيام ٢','السجدة الأولى ٢','الجلوس ٢','السجدة الثانية ٢','التشهّد','التسليم']],
+  extra:['الأذان','الإقامة','الصوم','الحج'],
+  speed:44,accel:.4,spawn:1,maxOn:4,lives:4,time:150,hints:2,
+  tip:'رتّب الصلاة كما تعلّمتها: الركعة الأولى ثم الثانية. وكلمات ليست من الصلاة تنزل لتخدعك!'}
 ];
 LEVELS.forEach(l=>{l.seq=[];l.lineOf=[];l.lines.forEach((ln,i)=>ln.forEach(w=>{l.seq.push(w);l.lineOf.push(i)}));
   l.pool=[...new Set(l.seq.concat(l.extra))]});
@@ -77,7 +84,8 @@ const FLOORMSG=[
  ['مبروك! صار لك بيت 🏠','جمعتَ أصول الدين الخمسة بالترتيب، فبنيتَ الطابق الأول.'],
  ['صار بيتك طابقين! 🏡','جمعتَ سورة التوحيد كاملة، فارتفع بيتك طابقًا جديدًا.'],
  ['بيتك ثلاثة طوابق! 🏰','جمعتَ سورة الحمد كاملة. بارك الله فيك يا بطل!'],
- ['قصرك أربعة طوابق! 👑','جمعتَ آيات الحفظ من المراحل الخمس بالترتيب. ما شاء الله، أنت بطلٌ حقيقي!']
+ ['قصرك أربعة طوابق! 👑','جمعتَ آيات الحفظ من المراحل الخمس بالترتيب. ما شاء الله، أنت بطلٌ حقيقي!'],
+ ['قصرك خمسة طوابق! 🕌','رتّبتَ الصلاة كلّها بالترتيب. ما شاء الله، بنيتَ أعلى طابق في بيتك!']
 ];
 
 /* ---------- styles ---------- */
@@ -274,7 +282,7 @@ function houseSVG(full,part,frac,withRoof,anim,look){
   if(D)s+=D.svg(L,'back');
   if(hasGift('rainbow'))s+=`<g fill="none" stroke-width="7" opacity=".55">${['#e2504a','#f2b632','#ffe066','#3fbf6f','#2f8fd0','#7c4dc4'].map((c,k)=>`<path d="M-10 ${GY-10} A190 170 0 0 1 370 ${GY-10}" stroke="${c}" transform="translate(0 ${k*7}) scale(1 ${1-k*.03})"/>`).join('')}</g>`;
   const top=Math.max(full,part+1);
-  HK=top>=4?.8:1;const HCX=FX+FW/2+DX/2;if(HK<1)s+=`<g transform="translate(${HCX} ${GY}) scale(${HK}) translate(${-HCX} ${-GY})">`;
+  HK=top>=5?.66:top>=4?.8:1;const HCX=FX+FW/2+DX/2;if(HK<1)s+=`<g transform="translate(${HCX} ${GY}) scale(${HK}) translate(${-HCX} ${-GY})">`;
   if(top>0)s+=`<ellipse cx="${FX+FW/2+DX/2}" cy="${fy(top-1)+FH*top/2-10}" rx="${FW/2+DX+40}" ry="${FH*top/2+60}" fill="url(#hHalo)"/>`;
   if(top>0)s+=`<ellipse cx="${FX+FW/2+DX/2}" cy="${GY+3}" rx="${FW/2+DX}" ry="9" fill="#2f7a45" opacity=".35"/>`;
   const paint=D?D.paintFilter(L):'';if(paint)s+=`<g filter="${paint}">`;
@@ -301,7 +309,7 @@ document.querySelector('.app').appendChild(sec);
 const card=document.createElement('button');card.className='bookcard baytcard';card.id='openBayt';
 card.innerHTML=`<span class="cup">🏡</span><span><b>بيتي في الجنة</b><small id="baytLine"></small></span><span class="go">‹</span>`;
 $('#openContest').after(card);
-const updCard=()=>{$('#baytLine').textContent=bs.done>=LEVELS.length?`قصرك أربعة طوابق! أفضل نتيجة: ${ar(bs.best)} نقطة 👑`:bs.done?`بيتك الآن ${['','طابق واحد','طابقان','ثلاثة طوابق'][bs.done]}، أكمل البناء!`:'ابنِ بيتك في الجنة وزيّنه، وسابق أصدقاءك 🏁'};
+const updCard=()=>{$('#baytLine').textContent=bs.done>=LEVELS.length?`قصرك خمسة طوابق! أفضل نتيجة: ${ar(bs.best)} نقطة 👑`:bs.done?`بيتك الآن ${['','طابق واحد','طابقان','ثلاثة طوابق','أربعة طوابق'][bs.done]}، أكمل البناء!`:'ابنِ بيتك في الجنة وزيّنه، وسابق أصدقاءك 🏁'};
 updCard();updHome();
 card.onclick=()=>{sTap();menu();show('bayt')};
 $('#byBack').onclick=()=>{clearTimeout(autoT);if(G&&G.net){G.net.quit(G);return}if(G){stop();menu()}else{updCard();renderHome&&renderHome();show('home')}};
