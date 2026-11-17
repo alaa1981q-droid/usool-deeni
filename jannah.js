@@ -12,6 +12,7 @@ const jsave=()=>{try{localStorage.setItem(JKEY,JSON.stringify(js))}catch(e){}};
 const today=()=>new Date().toDateString();
 const O=()=>window.OnlineAPI;
 const boy=()=>!window.Cups||Cups.sex!='g';
+const B_=(m,f)=>boy()?m:f;
 const esc=v=>String(v==null?'':v).replace(/[<>&"]/g,'');
 
 /* ---------- الكتالوج: [x,y,size] بإحداثيات رسم البيت (عرض ٣٦٠ × ارتفاع ٣٣٠، الأرض عند y=292) ---------- */
@@ -197,6 +198,22 @@ if(!js.seeded){js.seeded=true;js.j+=30+Bayt.done*40+Bayt.cups*5;jsave()}
 /* ---------- styles ---------- */
 const css=document.createElement('style');
 css.textContent=`
+.msqb{position:relative;margin-top:10px;border-radius:22px;overflow:hidden;border:2px solid #bfe3cc;background:#cfeeff;cursor:pointer;
+ box-shadow:0 5px 0 #bfe3cc,0 8px 16px rgba(20,60,40,.12)}
+.msqb svg{display:block;width:100%;height:auto}
+.msqb:active{transform:translateY(3px);box-shadow:0 2px 0 #bfe3cc}
+.msqt{position:absolute;top:8px;left:10px;background:rgba(255,255,255,.88);border:1.5px solid #bfe3cc;border-radius:14px;padding:2px 10px;font-weight:800;font-size:15px;color:#0b5a32;box-shadow:0 2px 0 #bfe3cc}
+.msqc{background:linear-gradient(#e8f6ee,#fff);border-top:1.5px solid #bfe3cc;text-align:center;font-weight:800;font-size:14.5px;color:#0b5a32;padding:6px 8px}
+.msqb.lock svg{filter:grayscale(.85) brightness(1.08);opacity:.75}
+.msql{position:absolute;inset:auto 10px 10px 10px;background:rgba(255,255,255,.94);border:2px dashed #b9cfc2;border-radius:16px;padding:6px 8px;text-align:center}
+.msql b{display:block;font-size:16px;color:#0b5a32}.msql small{display:block;font-size:13px;font-weight:700;color:#3d5a4b}
+.msq-walk{animation:msqw 22s linear infinite}
+@keyframes msqw{0%{transform:translateX(-50px);opacity:0}6%{opacity:1}88%{opacity:1}100%{transform:translateX(205px);opacity:0}}
+.msq-bob{animation:msqbb .45s ease-in-out infinite alternate}@keyframes msqbb{to{transform:translateY(-1.2px)}}
+.msq-cl{animation:msqcl 16s ease-in-out infinite alternate}.msq-cl2{animation:msqcl 20s ease-in-out infinite alternate-reverse}@keyframes msqcl{to{transform:translateX(26px)}}
+.msq-tw{animation:msqtw 2.4s ease-in-out infinite}@keyframes msqtw{50%{opacity:.7}}
+.msqb.lock .msq-walk,.msqb.lock .msq-bob{animation-play-state:paused}
+body.night .msqb svg{filter:brightness(.55) saturate(1.2) hue-rotate(-15deg)}body.night .msqb.lock svg{filter:grayscale(.85) brightness(.6)}
 .jbar{display:flex;gap:8px;margin-top:10px}
 .jbtn{flex:1;border:none;border-radius:18px;padding:10px 4px 8px;font-weight:800;font-size:15px;color:#fff;box-shadow:0 5px 0 rgba(0,0,0,.18);position:relative;line-height:1.3}
 .jbtn span{display:block;font-size:30px;line-height:1.2}
@@ -289,6 +306,91 @@ function inside(L,who){show('jannah');$('#jTitle').textContent=who?`🏠 داخ�
 let room=0;
 
 /* ---------- قائمة البيت: أزرار جديدة ---------- */
+
+/* ---------- 🕌 لوحة «مسجد حيّي»: مسجد كبير بعرض الشاشة، وأهل الحيّ يمشون إليه (v7.7) ----------
+   تظهر تحت البيت. إذا لم يربح الطفل المسجد بعد: تظهر باهتة مع قفل وطريقة ربحه. الأشخاص بلا ملامح وجه. */
+const SK='#f1c7a0';
+// شخص بلا ملامح: x,y = موضع القدمين، h = الطول، o = الشكل
+function person(x,y,h,o){const k=h/34,hd=4.6*k,top=y-h,lg=`<g class="msq-lg"><rect x="${x-3.2*k}" y="${y-6*k}" width="${2.4*k}" height="${6*k}" rx="${k}" fill="${o.leg||'#5b4636'}"/><rect x="${x+0.8*k}" y="${y-6*k}" width="${2.4*k}" height="${6*k}" rx="${k}" fill="${o.leg||'#5b4636'}"/></g>`;
+  const robe=`<path d="M${x-4.5*k} ${top+2*hd+1} Q${x} ${top+2*hd-1} ${x+4.5*k} ${top+2*hd+1} L${x+(o.w||7)*k} ${y-5*k} Q${x} ${y-3.5*k} ${x-(o.w||7)*k} ${y-5*k}Z" fill="${o.c}" stroke="${o.s||'rgba(0,0,0,.18)'}" stroke-width="${.8*k}"/>`;
+  let head=`<circle cx="${x}" cy="${top+hd}" r="${hd}" fill="${SK}"/>`;
+  if(o.hat=='cap')head+=`<path d="M${x-hd} ${top+hd-.6} a${hd} ${hd*.9} 0 0 1 ${2*hd} 0z" fill="#fff" stroke="#ddd" stroke-width=".6"/>`;
+  if(o.hat=='turban')head+=`<path d="M${x-hd-.6} ${top+hd-.2} a${hd+.6} ${hd*1.05} 0 0 1 ${2*hd+1.2} 0z" fill="${o.t||'#fff'}"/><rect x="${x-hd-.6}" y="${top+hd-1.2}" width="${2*hd+1.2}" height="1.6" rx=".8" fill="${o.t2||'#e8e1d0'}"/>`;
+  if(o.hat=='hijab')head=`<path d="M${x-hd-1.4} ${top+2*hd+2} Q${x-hd-1.8} ${top-1} ${x} ${top-.8} Q${x+hd+1.8} ${top-1} ${x+hd+1.4} ${top+2*hd+2}Z" fill="${o.t}"/><ellipse cx="${x}" cy="${top+hd+.6}" rx="${hd*.62}" ry="${hd*.78}" fill="${SK}"/>`;
+  const cane=o.cane?`<line x1="${x+6*k}" y1="${top+2*hd+5*k}" x2="${x+9*k}" y2="${y}" stroke="#7a4f22" stroke-width="${1.3*k}" stroke-linecap="round"/>`:'';
+  return `<g>${lg}${robe}${head}${cane}</g>`}
+// مجموعات تمشي من اليسار إلى باب المسجد، كل واحدة بتأخير مختلف حتى لا ينقطع الطريق
+const GROUPS=[
+  // أبٌ يمسك يد ابنه
+  ()=>person(14,192,36,{c:'#fbfbf6',hat:'cap'})+`<line x1="20" y1="174" x2="27" y2="178" stroke="${SK}" stroke-width="2" stroke-linecap="round"/>`+person(31,193,22,{c:'#3f8fd8',hat:'cap'}),
+  // جدٌّ بعصاه وحفيده
+  ()=>person(14,191,34,{c:'#d9cfb8',hat:'turban',t:'#fff',cane:1})+person(36,193,20,{c:'#2fae5f',hat:'cap'}),
+  // أمٌّ وابنتها
+  ()=>person(14,192,33,{c:'#2b2b38',hat:'hijab',t:'#2b2b38',w:8,leg:'#2b2b38'})+person(32,193,21,{c:'#f08ab6',hat:'hijab',t:'#fff',leg:'#c25b8a'}),
+  // صديقان مسرعان
+  ()=>person(14,193,23,{c:'#f2a33a',hat:'cap'})+person(32,193,22,{c:'#7c5ac8',hat:'cap'}),
+  // شابّ وحده
+  ()=>person(14,192,35,{c:'#e9eef2',hat:'turban',t:'#fff'})];
+function mosqueBigSVG(){const g=176,M=245;
+  return `<svg viewBox="0 -34 360 244" xmlns="http://www.w3.org/2000/svg" aria-label="مسجد كبير وأهل الحيّ يمشون إليه">
+  <defs><linearGradient id="mbSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fd6ff"/><stop offset="1" stop-color="#e9f7ff"/></linearGradient>
+  <linearGradient id="mbWall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffaf0"/><stop offset="1" stop-color="#ecd7ae"/></linearGradient>
+  <linearGradient id="mbSide" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f6e6c4"/><stop offset="1" stop-color="#e2c48e"/></linearGradient>
+  <radialGradient id="mbDome" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#7fe0b0"/><stop offset=".5" stop-color="#1fa463"/><stop offset="1" stop-color="#0b5a32"/></radialGradient>
+  <linearGradient id="mbGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff1a8"/><stop offset=".5" stop-color="#f2b632"/><stop offset="1" stop-color="#b9851a"/></linearGradient>
+  <linearGradient id="mbWin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6fc3f0"/><stop offset="1" stop-color="#2c6f9e"/></linearGradient>
+  <linearGradient id="mbPath" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3dfb5"/><stop offset="1" stop-color="#e6c992"/></linearGradient></defs>
+  <rect y="-34" width="360" height="244" fill="url(#mbSky)"/>
+  <circle cx="104" cy="6" r="14" fill="#ffe27a" opacity=".9"/><circle cx="104" cy="6" r="23" fill="#ffe27a" opacity=".25"/>
+  <g class="msq-cl" fill="#fff" opacity=".9"><ellipse cx="40" cy="48" rx="20" ry="8"/><ellipse cx="54" cy="43" rx="13" ry="8"/></g>
+  <g class="msq-cl2" fill="#fff" opacity=".85"><ellipse cx="300" cy="-6" rx="16" ry="6"/><ellipse cx="310" cy="-10" rx="10" ry="6"/></g>
+  <path d="M0 ${g-14} Q80 ${g-30} 170 ${g-16} T360 ${g-18} V210 H0Z" fill="#a6e6ae"/>
+  <rect y="${g}" width="360" height="34" fill="#7ccf8a"/>
+  <!-- الطريق إلى باب المسجد -->
+  <path d="M0 ${g+8} H${M-22} L${M-16} ${g} H${M+16} L${M+22} ${g+8} V${g+22} H0Z" fill="url(#mbPath)"/>
+  <path d="M0 ${g+15} H${M-20}" stroke="#fff" stroke-width="1.4" stroke-dasharray="7 6" opacity=".7"/>
+  <!-- ظل -->
+  <ellipse cx="${M}" cy="${g+2}" rx="100" ry="7" fill="#2f7a45" opacity=".28"/>
+  <!-- المنارتان -->
+  ${[M-98,M+82].map(x=>`<g><rect x="${x}" y="${g-150}" width="16" height="150" fill="url(#mbWall)" stroke="#d9a85e" stroke-width="1.2"/><rect x="${x+11}" y="${g-150}" width="5" height="150" fill="#000" opacity=".06"/>
+    <rect x="${x-3}" y="${g-112}" width="22" height="6" rx="2" fill="url(#mbGold)"/><rect x="${x-3}" y="${g-62}" width="22" height="5" rx="2" fill="url(#mbGold)"/>
+    <path d="M${x+4} ${g-96} a4 6 0 0 1 8 0v10h-8z" fill="url(#mbWin)"/><path d="M${x+4} ${g-44} a4 6 0 0 1 8 0v10h-8z" fill="url(#mbWin)"/>
+    <path d="M${x-1} ${g-150} Q${x+8} ${g-178} ${x+17} ${g-150}Z" fill="url(#mbDome)" stroke="#0b5a32" stroke-width="1"/>
+    <line x1="${x+8}" y1="${g-170}" x2="${x+8}" y2="${g-180}" stroke="#b9851a" stroke-width="1.8"/><path d="M${x+8} ${g-190} a5 5 0 1 0 4 7 a3.8 3.8 0 1 1 -4 -7z" fill="url(#mbGold)"/></g>`).join('')}
+  <!-- البناء الأساسي -->
+  <rect x="${M-80}" y="${g-72}" width="160" height="72" fill="url(#mbWall)" stroke="#d9a85e" stroke-width="1.4"/>
+  <polygon points="${M+80},${g-72} ${M+82},${g-72} ${M+82},${g} ${M+80},${g}" fill="url(#mbSide)"/>
+  <rect x="${M-82}" y="${g-76}" width="164" height="7" rx="2" fill="url(#mbGold)"/>
+  <g fill="url(#mbGold)">${Array.from({length:16},(_,k)=>`<path d="M${M-78+k*10} ${g-76} l5 -6 l5 6z"/>`).join('')}</g>
+  <!-- الأسطوانة والقبّة الكبيرة -->
+  <rect x="${M-40}" y="${g-96}" width="80" height="22" fill="url(#mbWall)" stroke="#d9a85e" stroke-width="1.2"/>
+  <g fill="url(#mbWin)">${[-28,-12,4,20].map(d=>`<path d="M${M+d} ${g-78} v-9 a4 4 0 0 1 8 0 v9z"/>`).join('')}</g>
+  <path d="M${M-46} ${g-95} C${M-52} ${g-140} ${M-12} ${g-150} ${M} ${g-172} C${M+12} ${g-150} ${M+52} ${g-140} ${M+46} ${g-95}Z" fill="url(#mbDome)" stroke="#0b5a32" stroke-width="1.4"/>
+  <path d="M${M-30} ${g-110} Q${M-28} ${g-138} ${M-8} ${g-150}" stroke="#fff" stroke-width="3" fill="none" opacity=".45" stroke-linecap="round"/>
+  <rect x="${M-48}" y="${g-98}" width="96" height="5" rx="2" fill="url(#mbGold)"/>
+  <line x1="${M}" y1="${g-172}" x2="${M}" y2="${g-184}" stroke="#b9851a" stroke-width="2.4"/><circle cx="${M}" cy="${g-178}" r="3" fill="url(#mbGold)"/>
+  <path d="M${M} ${g-200} a9 9 0 1 0 7 12 a7 7 0 1 1 -7 -12z" fill="url(#mbGold)" class="msq-tw"/>
+  <!-- الشبابيك -->
+  ${[M-62,M-42,M+30,M+50].map(x=>`<path d="M${x} ${g-22} v-22 a6 7 0 0 1 12 0 v22z" fill="url(#mbWin)" stroke="url(#mbGold)" stroke-width="1.4"/><line x1="${x+6}" y1="${g-50}" x2="${x+6}" y2="${g-22}" stroke="#fff" stroke-width="1" opacity=".7"/>`).join('')}
+  <!-- الباب الكبير -->
+  <path d="M${M-20} ${g} V${g-38} Q${M} ${g-64} ${M+20} ${g-38} V${g}Z" fill="#fff4d6" stroke="url(#mbGold)" stroke-width="2.4"/>
+  <path d="M${M-14} ${g} V${g-34} Q${M} ${g-54} ${M+14} ${g-34} V${g}Z" fill="#8a4f22"/>
+  <line x1="${M}" y1="${g-48}" x2="${M}" y2="${g}" stroke="#5e3414" stroke-width="1.6"/><circle cx="${M-4}" cy="${g-18}" r="1.8" fill="#ffd54a"/><circle cx="${M+4}" cy="${g-18}" r="1.8" fill="#ffd54a"/>
+  <rect x="${M-24}" y="${g}" width="48" height="4" fill="#f4ede0"/><rect x="${M-28}" y="${g+4}" width="56" height="4" fill="#e3d8c4"/>
+  <!-- فوانيس -->
+  ${[M-30,M+26].map(x=>`<g class="msq-tw"><line x1="${x+2}" y1="${g-58}" x2="${x+2}" y2="${g-52}" stroke="#8a5a00" stroke-width="1"/><circle cx="${x+2}" cy="${g-45}" r="8" fill="#ffe066" opacity=".45"/><rect x="${x-1.5}" y="${g-52}" width="7" height="10" rx="2" fill="#ffd54a" stroke="#b9851a" stroke-width=".8"/></g>`).join('')}
+  <!-- نخيل وورد -->
+  ${palmS(330,g+4,.7)}${palmS(20,g-6,.55)}
+  ${[[300,g+8],[318,g+12],[150,g+10],[132,g+6]].map(([x,y])=>`<g><ellipse cx="${x}" cy="${y}" rx="9" ry="5" fill="#2e9c55"/><circle cx="${x-3}" cy="${y-2}" r="2.2" fill="#e2504a"/><circle cx="${x+3}" cy="${y-3}" r="2.2" fill="#f2b632"/></g>`).join('')}
+  <!-- أهل الحيّ يمشون إلى المسجد -->
+  ${GROUPS.map((f,i)=>`<g class="msq-walk" style="animation-delay:${-i*4.4}s"><g class="msq-bob">${f()}</g></g>`).join('')}
+  </svg>`}
+function palmS(x,y,k){return `<g transform="translate(${x} ${y}) scale(${k})"><path d="M-3 0 Q-6 -40 2 -78 L7 -78 Q2 -40 4 0Z" fill="#9a6a3a"/><g fill="#2fae5f"><path d="M4 -78 Q-22 -92 -40 -70 Q-18 -80 4 -74Z"/><path d="M4 -78 Q30 -94 46 -72 Q24 -82 4 -74Z"/><path d="M4 -78 Q-8 -104 -26 -104 Q-6 -94 4 -76Z"/><path d="M4 -78 Q18 -106 36 -100 Q14 -94 4 -76Z"/></g></g>`}
+function mosqueBoard(){const own=Deco.owns('d_mosque');
+  return `<div class="msqb ${own?'':'lock'}" id="msqB">${mosqueBigSVG()}
+    <div class="msqt">🕌 مسجد حيّي</div>
+    ${own?`<div class="msqc">هيّا إلى المسجد! 🤍 الصلاة في المسجد نورٌ وبركة</div>`:`<div class="msql"><b>🔒 ابنِ مسجد حيّك</b><small>تعلّم الصلاة، وقلها بصوتك، وانجح في اختبارها</small></div>`}</div>`}
+
 function menuHook(B){
   const chestReady=js.chest!=today();
   const rk=B.querySelector('.brank');
@@ -299,6 +401,10 @@ function menuHook(B){
     <button class="jbtn ch ${chestReady?'ready':''}" id="jCh">${chestReady?'<i class="dot">!</i>':''}<span>🎁</span>صندوق اليوم</button></div>
     <div style="text-align:center;margin-top:8px"><span class="jj" id="jMenuJ">💎 ${ar(js.j)}</span></div>${goal()}<div id="jVis"></div>`;
   if(rk)rk.insertAdjacentHTML('afterend',html);else B.insertAdjacentHTML('afterbegin',html);
+  // 🕌 لوحة المسجد الكبيرة تحت البيت
+  const bh=B.querySelector('.bhouse');if(bh){bh.insertAdjacentHTML('afterend',mosqueBoard());const mb=$('#msqB');
+    mb.onclick=()=>{Bayt.sTap();if(Deco.owns('d_mosque'))modal(`<div style="font-size:54px">🕌</div><h3 style="margin:4px 0">مسجد حيّك</h3><p>${B_('بنيتَه','بنيتِه')} لأنك تعلّمت الصلاة 🤍<br>وكلّما صلّيت يزدان بيتك في الجنة.</p><div class="nav"><button class="btn gold" data-close>حسنًا 🌷</button></div>`);
+      else if(window.Alqab)Alqab.deedFor('d_mosque')}}
   $('#jShop').onclick=()=>{Bayt.sTap();shop()};
   $('#jIn').onclick=()=>{Bayt.sTap();inside(Deco.myLook())};
   const hb=B.querySelector('.bhouse');if(hb){hb.style.cursor='pointer';hb.onclick=()=>{Bayt.sTap();inside(Deco.myLook())}}
