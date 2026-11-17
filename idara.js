@@ -45,7 +45,10 @@ body.night .bhouse::before{content:'🌙';position:absolute;right:3%;top:1%;widt
 .idk .stt{font-size:14px;font-weight:800;color:#3d5a4b;text-align:center;white-space:pre;flex:none;background:#f1f7f3;border-radius:12px;padding:4px 8px}
 .idk .gb{flex:none;width:44px;height:44px;border-radius:14px;border:0;font-size:22px;background:linear-gradient(#f59a3c,#e0731f);box-shadow:0 3px 0 #a8551a;color:#fff}
 .idsts{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
-.idst{background:#f6fbf8;border:1.5px solid #e1eee6;border-radius:12px;padding:3px 2px 4px;text-align:center;min-width:0}
+.idst{--c:#e8f6ee;--d:#bfe3cc;background:linear-gradient(160deg,#fff 0%,var(--c) 85%);border:1.5px solid var(--d);border-radius:12px;padding:3px 2px 4px;text-align:center;min-width:0;box-shadow:0 3px 0 var(--d),0 5px 8px rgba(20,60,40,.08),inset 0 1px 0 #fff}
+/* v7.2: مجسّمة بألوان خفيفة متناوبة */
+.idst:nth-child(6n+2){--c:#e7f1fd;--d:#bcd5f3}.idst:nth-child(6n+3){--c:#fdeaf2;--d:#f2c3d6}.idst:nth-child(6n+4){--c:#fff5dc;--d:#efd99a}
+.idst:nth-child(6n+5){--c:#efe9fb;--d:#d3c6f0}.idst:nth-child(6n){--c:#e3f6f6;--d:#b4e0df}
 .idst div{display:flex;align-items:center;justify-content:center;gap:4px;line-height:1.25}.idst span{font-size:15px}.idst b{font-size:19px;color:#0b3d27}
 .idst small{display:block;font-size:13.5px;font-weight:700;color:#3d5a4b;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .idmsg .em{font-size:60px;line-height:1.2}.idmsg p{white-space:pre-wrap;text-align:right;line-height:1.9}
