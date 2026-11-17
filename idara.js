@@ -44,6 +44,19 @@ body.night .bhouse::before{content:'🌙';position:absolute;right:3%;top:1%;widt
 .idk .nm small.st1{color:#14794f;font-size:14.5px;white-space:pre}
 .idk .stt{font-size:14px;font-weight:800;color:#3d5a4b;text-align:center;white-space:pre;flex:none;background:#f1f7f3;border-radius:12px;padding:4px 8px}
 .idk .gb{flex:none;width:44px;height:44px;border-radius:14px;border:0;font-size:22px;background:linear-gradient(#f59a3c,#e0731f);box-shadow:0 3px 0 #a8551a;color:#fff}
+.idkg{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+/* v7.3: بطاقات الأطفال صغيرة، اثنتان في كل سطر، مجسّمة بألوان خفيفة */
+.idkg .idk{--c:#e8f6ee;--d:#bfe3cc;position:relative;flex-direction:column;gap:0;margin:0;padding:6px 4px 6px;text-align:center;border-radius:14px;min-width:0;
+ background:linear-gradient(160deg,#fff 0%,var(--c) 90%);border:1.5px solid var(--d);box-shadow:0 3px 0 var(--d),0 5px 8px rgba(20,60,40,.08),inset 0 1px 0 #fff}
+.idkg .idk:nth-child(6n+2){--c:#e7f1fd;--d:#bcd5f3}.idkg .idk:nth-child(6n+3){--c:#fdeaf2;--d:#f2c3d6}.idkg .idk:nth-child(6n+4){--c:#fff5dc;--d:#efd99a}
+.idkg .idk:nth-child(6n+5){--c:#efe9fb;--d:#d3c6f0}.idkg .idk:nth-child(6n){--c:#e3f6f6;--d:#b4e0df}
+.idkg .idk.top1{--c:#fff1c2;--d:#e9c14a}.idkg .idk.top2{--c:#eef1f4;--d:#b9c3cc}.idkg .idk.top3{--c:#f8e6d8;--d:#d6a27a}
+.idkg .idk.gone{--c:#f1f1ef;--d:#c4c9c6}
+.idkg .idk .rk{position:absolute;top:3px;right:5px;width:auto;font-size:15px}
+.idkg .idk .gb{position:absolute;top:4px;left:4px;width:30px;height:30px;border-radius:10px;font-size:15px;box-shadow:0 2px 0 #a8551a}
+.idkg .idk .av{font-size:28px;line-height:1.15}
+.idkg .idk .nm{width:100%}.idkg .idk .nm b{font-size:15px;line-height:1.3;padding:0 2px}
+.idkg .idk .nm small,.idkg .idk .nm small.st1{font-size:12px;line-height:1.35;white-space:nowrap}
 .idsts{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
 .idst{--c:#e8f6ee;--d:#bfe3cc;background:linear-gradient(160deg,#fff 0%,var(--c) 85%);border:1.5px solid var(--d);border-radius:12px;padding:3px 2px 4px;text-align:center;min-width:0;box-shadow:0 3px 0 var(--d),0 5px 8px rgba(20,60,40,.08),inset 0 1px 0 #fff}
 /* v7.2: مجسّمة بألوان خفيفة متناوبة */
@@ -147,7 +160,7 @@ function ago(t){if(!t)return 'لم يُسجَّل بعد';const m=Math.round((Da
 function kidRow(r,i){const p=all&&all.find(x=>x.id==r.id)||{};const lv=r.lv||p.lv,tt=r.tt||p.tt,b=banOf(r.id),w=r.wins||p.wins,on=p.seen&&Date.now()-p.seen<180000;
   const rk=i!=null?(['🥇','🥈','🥉'][i]||ar(i+1)):'';
   const sub=esc(tt||'');
-  const st=[lv?`⭐ ${ar(lv)}`:'',r.xp?`✨ ${ar(r.xp)}`:'',w?`🏆 ${ar(w)}`:''].filter(Boolean).join('   ');
+  const st=[lv?`⭐ ${ar(lv)}`:'',r.xp?`✨ ${ar(r.xp)}`:'',w?`🏆 ${ar(w)}`:''].filter(Boolean).join('  ');
   const gn=gone(p);
   return `<div class="idk ${i!=null&&i<3?'top'+(i+1):''} ${gn?'gone':''}" data-k="${esc(r.id)}"><span class="rk">${rk}</span><span class="av">${esc(p.av||r.av)}${on?'<i class="on"></i>':''}</span>
     <span class="nm"><b>${esc(p.nick||r.nick)}${b?' ⛔':''}${sus(p)?' ⚠️':''}${gn?' 💤':''}</b>${gn?`<small class="gn">💤 غائب منذ ${ar(goneDays(p))} يومًا</small>`:''}${tab=='names'&&p.hist?`<small class="gn">✏️ كان: ${esc(p.hist.split('|').join('، '))} · ${ago(p.nts)}</small>`:''}${st?`<small class="st1">${st}</small>`:''}${sub?`<small>${sub}</small>`:''}</span>
@@ -230,7 +243,7 @@ function drawKids(){const el=$('#idKids');if(!el)return;let rows=[],num=false;
   else if(tab=='names'){rows=(all||[]).filter(p=>p.hist).sort((a,b)=>b.nts-a.nts)}
   else if(tab=='recent'){rows=(all||[]).filter(p=>p.seen).sort((a,b)=>b.seen-a.seen).slice(0,30)}
   else{const t=q.trim().replace(/[أإآ]/g,'ا');rows=(all||[]).filter(r=>!t||String(r.nick).replace(/[أإآ]/g,'ا').includes(t)||String(r.code).toUpperCase()==t.toUpperCase()).slice(0,40)}
-  el.innerHTML=rows.length?rows.map((r,i)=>kidRow(r,num?i:null)).join(''):`<p class="tip">${tab=='all'?(q?'لا يوجد طفل بهذا الاسم':`عدد الأطفال: ${ar((all||[]).length)} — اكتب اسمًا للبحث`):tab=='sus'?'لا أحد مشبوه 👍':tab=='gone'?'لا أحد غائب أكثر من شهر 👍':tab=='names'?'لم يغيّر أحد اسمه بعد':'لا أحد بعد'}</p>`;
+  el.innerHTML=rows.length?'<div class="idkg">'+rows.map((r,i)=>kidRow(r,num?i:null)).join('')+'</div>':`<p class="tip">${tab=='all'?(q?'لا يوجد طفل بهذا الاسم':`عدد الأطفال: ${ar((all||[]).length)} — اكتب اسمًا للبحث`):tab=='sus'?'لا أحد مشبوه 👍':tab=='gone'?'لا أحد غائب أكثر من شهر 👍':tab=='names'?'لم يغيّر أحد اسمه بعد':'لا أحد بعد'}</p>`;
   el.querySelectorAll('[data-k]').forEach(b=>b.onclick=e=>{if(e.target.closest('[data-g]'))return;kidCard(b.dataset.k)});
   el.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{const id=b.dataset.g,r=rows.find(x=>x.id==id)||{},p=(all||[]).find(x=>x.id==id)||{};giftTo(id,r.nick||p.nick,r.av||p.av)})}
 function giftTo(uid,nick,av){const API=O();
