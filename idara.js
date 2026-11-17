@@ -44,6 +44,10 @@ body.night .bhouse::before{content:'🌙';position:absolute;right:3%;top:1%;widt
 .idk .nm small.st1{color:#14794f;font-size:14.5px;white-space:pre}
 .idk .stt{font-size:14px;font-weight:800;color:#3d5a4b;text-align:center;white-space:pre;flex:none;background:#f1f7f3;border-radius:12px;padding:4px 8px}
 .idk .gb{flex:none;width:44px;height:44px;border-radius:14px;border:0;font-size:22px;background:linear-gradient(#f59a3c,#e0731f);box-shadow:0 3px 0 #a8551a;color:#fff}
+.idsts{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.idst{background:#f6fbf8;border:1.5px solid #e1eee6;border-radius:12px;padding:3px 2px 4px;text-align:center;min-width:0}
+.idst div{display:flex;align-items:center;justify-content:center;gap:4px;line-height:1.25}.idst span{font-size:15px}.idst b{font-size:19px;color:#0b3d27}
+.idst small{display:block;font-size:13.5px;font-weight:700;color:#3d5a4b;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .idmsg .em{font-size:60px;line-height:1.2}.idmsg p{white-space:pre-wrap;text-align:right;line-height:1.9}
 `;
 document.head.appendChild(css);
@@ -271,8 +275,9 @@ async function stats(API){const el=$('#idStats');if(!el)return;const L=all||[],t
   const lvs=L.filter(p=>p.lv),avg=lvs.length?lvs.reduce((a,p)=>a+p.lv,0)/lvs.length:0,mx=lvs.reduce((m,p)=>p.lv>m.lv?p:m,{lv:0});
   const ren=L.filter(p=>p.hist).length,bn=Object.values(bans).filter(x=>x&&x.until>t).length,sus2=L.filter(sus).length;
   let dl='—';try{dl=ar((await API.db.ref('stats/bookDl').get()).val()|0)}catch(e){}
-  const tile=(e,v,l)=>`<div style="flex:1 1 30%;min-width:96px;background:#f6fbf8;border:2px solid #e1eee6;border-radius:16px;padding:8px 4px;text-align:center"><div style="font-size:22px">${e}</div><b style="display:block;font-size:22px;color:#0b3d27">${v}</b><small style="color:var(--muted);font-size:12.5px">${l}</small></div>`;
-  el.innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:8px">
+  // v7.1: مربعات صغيرة (الأيقونة والرقم في سطر واحد) وكتابة أوضح، حتى لا تطول الصفحة
+  const tile=(e,v,l)=>`<div class="idst"><div><span>${e}</span><b>${v}</b></div><small>${l}</small></div>`;
+  el.innerHTML=`<div class="idsts">
     ${tile('👥',ar(n),'كل المشتركين')}${tile('👦',ar(b),'أولاد')}${tile('👧',ar(g),'بنات')}
     ${tile('🟢',ar(on),'داخلين الآن تقريبًا')}${tile('☀️',ar(d1),'دخلوا اليوم')}${tile('📅',ar(d7),'دخلوا هذا الأسبوع')}
     ${tile('🗓️',ar(d30),'دخلوا هذا الشهر')}${tile('🆕',ar(nw),'جدد هذا الأسبوع')}${tile('🏅',ar((heroes||[]).length),'في أبطال الأسبوع')}
