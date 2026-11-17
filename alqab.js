@@ -79,7 +79,7 @@ function autoTitle(s){const r=AREAS.map(a=>({a,t:areaTier(a,s)})).filter(x=>x.t>
   const top=r[0];return {id:top.a.id+(top.t>=3?2:1),e:top.a.e,n:top.a.t[top.t>=3?1:0]}}
 const shownTitle=s=>autoTitle(s);
 const myName=()=>(O()&&O().profile&&O().profile.nick)||state.nick||state.name||B('بطلنا','بطلتنا');
-const myAv=()=>(O()&&O().profile&&O().profile.av)||(boy()?'👦':'👧');
+const myAv=()=>(O()&&O().profile&&O().profile.av)||state.av||(boy()?'👦':'👧');
 
 /* ---------- الشكل ---------- */
 const css=document.createElement('style');
@@ -320,7 +320,7 @@ function openProfile(){stopVc();aqBack=null;show('alqab');$('#aqTitle').textCont
     <span class="aqlv">${ln[1]} المستوى ${ar(s.L)} · ${ln[2]}</span><br>${t?`<span class="aqtt">${t.e} ${t.n}</span>`:''}
     <div class="xpbar" style="margin:8px 10px 2px;height:12px"><i style="width:${Math.round(f*100)}%"></i></div>
     <small style="color:var(--muted)">✨ ${ar(s.x)} نقطة · باقي ${ar(need(s.L+1)-s.x)} للمستوى ${ar(s.L+1)}</small>
-    ${prof?'':`<div class="nav" style="margin-top:6px"><button class="btn sec" id="aqOn" style="padding:8px">🌐 اصنع لقبك ليراك أصدقاؤك</button></div>`}</div>
+    <div class="nav" style="margin-top:6px"><button class="btn sec" id="aqOn" style="padding:8px">${prof||state.nick?'✏️ غيّر اسمي وصورتي':'✏️ اكتب اسمك واختر صورتك'}</button></div></div>
    <div class="aqsec">🏡 بيتي في الجنة يكبر بأعمالي <small style="font-weight:500;color:var(--muted);font-size:13px">${ar(c.deeds)} عملًا صالحًا</small></div>
    ${window.Bayt?`<div class="bhouse" id="aqHouse" style="height:210px">${Bayt.houseSVG(Bayt.done,-1,0,true)}</div>`:''}
    <p class="hnote">كل عملٍ صالح يضيف إلى بيتك شيئًا جميلًا: 🌹 🐦 🌷 ⭐ 🌳 🌴 🦋 🍎 🌻 🏵️</p>
@@ -348,7 +348,7 @@ function openProfile(){stopVc();aqBack=null;show('alqab');$('#aqTitle').textCont
     modal(`<div style="font-size:54px">${tr?TIERS[tr-1].e:''}${m.e}</div><h3 style="margin:4px 0">${m.n}</h3><p>${ar(c[m.k])} ${m.u}</p>
       <p style="font-size:15px">${m.at.map((x,k)=>`${TIERS[k].e} ${TIERS[k].n}: ${ar(x)}${c[m.k]>=x?' ✅':''}`).join('<br>')}</p>
       <div class="nav"><button class="btn gold" id="mGo">هيّا أعمل 💪</button><button class="btn sec" data-close>رجوع</button></div>`,()=>{$('#mGo').onclick=()=>{closeModal();goTo(m.go)}})});
-  const on=$('#aqOn');if(on)on.onclick=()=>{window.onlineReturn=openProfile;openOnline()};
+  const on=$('#aqOn');if(on)on.onclick=()=>{stopVc();if(O()&&O().editProfile)O().editProfile(openProfile);else{window.onlineReturn=openProfile;openOnline()}};
   window.scrollTo(0,0)}
 function doBtns(){const a=Aamal,tp=window.Salah?Salah.todayPray().filter(Boolean).length:0;
   return `<button data-do="sal">${a.doneToday('sal')?'<i>✅</i>':''}<span>💚</span>صلِّ على النبي ١٠</button>

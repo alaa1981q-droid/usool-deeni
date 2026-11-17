@@ -12,7 +12,11 @@
     appId: '1:1017863256932:web:d5381aeafb4e216b055871'
   };
   const N_Q = 8, Q_MS = 15000, REVEAL_MS = 4000, ROUND = Q_MS + REVEAL_MS, LEAD_MS = 5000;
-  const AVATARS = ['🦁', '🐯', '🦅', '🐬', '🐎', '🐪', '🦋', '🐝', '🌙', '⭐', '🌳', '🌷'];
+  // صور الطفل: شخصيات أولاد وبنات بألوان متنوّعة (من v6.3 بدل الحيوانات)
+  const AV_B = ['👦', '👦🏻', '👦🏼', '👦🏽', '👦🏾', '🧒', '🧒🏻', '🧒🏽'];
+  const AV_G = ['👧', '👧🏻', '👧🏼', '👧🏽', '👧🏾', '🧕', '🧕🏻', '🧕🏽'];
+  const isGirl = () => !!(window.Cups && Cups.sex === 'g');
+  let afterProf = null; // من «ملفّي»: بعد الحفظ نرجع إليه
   const W1 = ['نجم', 'بطل', 'فارس', 'قمر', 'نور', 'سراج', 'غيث', 'زهرة'];
   const W2 = ['التوحيد', 'العدل', 'الهدى', 'الإيمان', 'العلم', 'الصدق', 'الصبر', 'اليقين'];
   const CODE_CH = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -51,7 +55,7 @@
       db.ref('.info/serverTimeOffset').on('value', s => { off = s.val() || 0; });
       const p = await withTimeout(db.ref('profiles/' + me).once('value'), 20000, 'db');
       profile = p.val();
-      if (profile && profile.nick && state.nick !== profile.nick) { state.nick = profile.nick; save(); }
+      if (profile && profile.nick && (state.nick !== profile.nick || state.av !== profile.av)) { state.nick = profile.nick; state.av = profile.av; save(); }
       if (profile) { startPresence(); db.ref('profiles/' + me).update({ seen: firebase.database.ServerValue.TIMESTAMP }).catch(() => {}); }
       try { ban = (await db.ref('bans/' + me).get()).val(); } catch (e) { ban = null; }
       return true;
@@ -97,15 +101,16 @@
   }
 
   function setupProfile() {
-    setHead('اختر لقبك');
+    setHead('✏️ اسمي وصورتي');
     // الطفل يكتب اسمه المستعار بنفسه، واللقب (شاطر العقيدة، نجم الصلاة...) يأتي تلقائيًا من مستواه (alqab.js)
-    let av = (profile && profile.av) || AVATARS[0], own = (profile && profile.nick) || '';
+    let av = (profile && profile.av) || (isGirl() ? AV_G[0] : AV_B[0]), own = (profile && profile.nick) || '';
     const draw = () => {
       body().innerHTML = `<div class="card" style="flex:none">
         <h2 style="text-align:center">مرحبًا يا بطل! 👋</h2>
         <p style="text-align:center;color:var(--muted)">اختر صورتك واكتب اسمك الذي يراه أصدقاؤك.<br>ولقبك يأتي وحده من شطارتك: بالعقيدة، بالصلاة، بالقرآن، بالتحديات… 🌟</p>
         <div class="preview"><span class="av">${av}</span><b id="nickPrev">${esc(own || 'اسمك هنا')}</b></div>
-        <div class="pick-h">صورتك</div><div class="chips">${AVATARS.map(a => `<button class="pk ${a === av ? 'on' : ''}" data-av="${a}">${a}</button>`).join('')}</div>
+        <div class="pick-h">صورتك 👦 أولاد</div><div class="chips">${AV_B.map(a => `<button class="pk ${a === av ? 'on' : ''}" data-av="${a}">${a}</button>`).join('')}</div>
+        <div class="pick-h">صورتك 👧 بنات</div><div class="chips">${AV_G.map(a => `<button class="pk ${a === av ? 'on' : ''}" data-av="${a}">${a}</button>`).join('')}</div>
         <div class="pick-h">✏️ اسمك</div>
         <input class="inp" id="ownNick" maxlength="16" placeholder="مثل: حيدر، زهراء، أبو علي الصغير" value="${esc(own)}" autocomplete="off">
         <div class="fb" id="nickMsg" style="font-size:14px">اسمك الأول أو اسم تحبّه، بلا اسم العائلة 🤍 حروف عربية فقط (٣ إلى ١٦ حرفًا)</div>
@@ -120,8 +125,9 @@
           const code = (profile && profile.code) || await claimCode();
           profile = Object.assign({ wins: 0, games: 0 }, profile || {}, { nick, av, code, own: isOwn });
           await db.ref('profiles/' + me).set(profile);
-          state.online = true; state.nick = nick; save();
-          startPresence(); hub();
+          state.online = true; state.nick = nick; state.av = av; save();
+          startPresence();
+          if (afterProf) { const f = afterProf; afterProf = null; window.onlineReturn = null; toast('حُفظ اسمك وصورتك ✓'); f(); } else hub();
         } catch (e) { $('#saveProf').disabled = false; toast('تعذّر الحفظ، حاول مرة أخرى'); }
       };
     };
@@ -148,12 +154,11 @@
 
   function hub() {
     leaveRoom(); setHead('🌐 العب أونلاين');
-    body().innerHTML = `<div class="me-card"><span class="av">${profile.av}</span><span class="who-n"><b>${esc(profile.nick)}</b><small>${profile.tt ? esc(profile.tt) + ' · ' : ''}🏆 ${ar(profile.wins || 0)} فوز · ${ar(profile.games || 0)} مباراة</small></span><button class="mini" id="editProf">✏️ اسمي</button></div>
+    body().innerHTML = `<div class="me-card"><span class="av">${profile.av}</span><span class="who-n"><b>${esc(profile.nick)}</b><small>${profile.tt ? esc(profile.tt) + ' · ' : ''}🏆 ${ar(profile.wins || 0)} فوز · ${ar(profile.games || 0)} مباراة</small></span></div>
       <div class="modes">
         <button class="mode" id="oQuick"><span class="e">🔢</span><span><b>غرفة سريعة</b><small>لصديق بجانبك: رمز من ٤ أرقام.</small></span></button>
       </div>
       <p class="tip">👥 لتحدّي صديقك أو إضافة صديق: من الواجهة ← «أصدقائي»<br>🏅 وأبطال هذا الأسبوع في أسفل الواجهة</p>`;
-    $('#editProf').onclick = setupProfile;
     $('#oQuick').onclick = quick;
   }
 
@@ -445,6 +450,9 @@
     week, get banned() { return banned(); }, get ban() { return ban; },
     challenge: async (uid) => { show('online'); try { await init(); } catch (e) { return openOnline(); } if (banned()) return bannedScreen(); if (!profile) return setupProfile(); challenge(uid); },
     openBoard: async () => { show('online'); try { await init(); } catch (e) { return openOnline(); } if (!profile) return setupProfile(); board(); },
+    editProfile: async (back) => { afterProf = back || null; window.onlineReturn = back || null; show('online'); setHead('✏️ اسمي وصورتي');
+      body().innerHTML = `<div class="handoff"><div class="big spin">🌐</div><p>جارٍ الاتصال…</p></div>`;
+      try { await init(); } catch (e) { afterProf = null; return openOnline(); } setupProfile(); },
     openAdd: async () => { show('online'); try { await init(); } catch (e) { return openOnline(); } if (banned()) return bannedScreen(); if (!profile) return setupProfile(); addFriend(); }
   };
   window.onlineBack = () => { if (room && room.data && room.data.state === 'play' && !room.done) {
