@@ -56,6 +56,7 @@
       const p = await withTimeout(db.ref('profiles/' + me).once('value'), 20000, 'db');
       profile = p.val();
       if (profile && profile.nick && (state.nick !== profile.nick || state.av !== profile.av)) { state.nick = profile.nick; state.av = profile.av; save(); }
+      if (profile && profile.sx && window.Cups && !Cups.sex) Cups.setSex(profile.sx);
       if (profile) { startPresence(); db.ref('profiles/' + me).update({ seen: firebase.database.ServerValue.TIMESTAMP }).catch(() => {}); }
       try { ban = (await db.ref('bans/' + me).get()).val(); } catch (e) { ban = null; }
       return true;
@@ -103,18 +104,26 @@
   function setupProfile() {
     setHead('✏️ اسمي وصورتي');
     // الطفل يكتب اسمه المستعار بنفسه، واللقب (شاطر العقيدة، نجم الصلاة...) يأتي تلقائيًا من مستواه (alqab.js)
-    let av = (profile && profile.av) || (isGirl() ? AV_G[0] : AV_B[0]), own = (profile && profile.nick) || '';
+    // ولد أو بنت: يختاره الطفل عند التسجيل، والصور تظهر حسب اختياره
+    let sx = (window.Cups && Cups.sex) || (profile && profile.sx) || '';
+    if (!sx && profile && profile.av) sx = AV_G.includes(profile.av) ? 'g' : AV_B.includes(profile.av) ? 'b' : '';
+    let av = (profile && profile.av) || '', own = (profile && profile.nick) || '';
+    const list = () => sx === 'g' ? AV_G : AV_B;
     const draw = () => {
+      if (sx && !list().includes(av)) av = list()[0];
       body().innerHTML = `<div class="card" style="flex:none">
-        <h2 style="text-align:center">مرحبًا يا بطل! 👋</h2>
-        <p style="text-align:center;color:var(--muted)">اختر صورتك واكتب اسمك الذي يراه أصدقاؤك.<br>ولقبك يأتي وحده من شطارتك: بالعقيدة، بالصلاة، بالقرآن، بالتحديات… 🌟</p>
+        <h2 style="text-align:center">${sx === 'g' ? 'مرحبًا يا بطلة! 👋' : 'مرحبًا يا بطل! 👋'}</h2>
+        <div class="pick-h">أنا…</div>
+        <div class="sxpick"><button class="${sx === 'b' ? 'on' : ''}" data-sx="b"><span>👦</span>ولد</button><button class="${sx === 'g' ? 'on' : ''}" data-sx="g"><span>👧</span>بنت</button></div>
+        ${sx ? `<p style="text-align:center;color:var(--muted)">اختر${sx === 'g' ? 'ي' : ''} صورتك واكتب${sx === 'g' ? 'ي' : ''} اسمك الذي يراه أصدقاؤك.<br>ولقبك يأتي وحده من شطارتك: بالعقيدة، بالصلاة، بالقرآن، بالتحديات… 🌟</p>
         <div class="preview"><span class="av">${av}</span><b id="nickPrev">${esc(own || 'اسمك هنا')}</b></div>
-        <div class="pick-h">صورتك 👦 أولاد</div><div class="chips">${AV_B.map(a => `<button class="pk ${a === av ? 'on' : ''}" data-av="${a}">${a}</button>`).join('')}</div>
-        <div class="pick-h">صورتك 👧 بنات</div><div class="chips">${AV_G.map(a => `<button class="pk ${a === av ? 'on' : ''}" data-av="${a}">${a}</button>`).join('')}</div>
+        <div class="pick-h">صورتك</div><div class="chips">${list().map(a => `<button class="pk ${a === av ? 'on' : ''}" data-av="${a}">${a}</button>`).join('')}</div>
         <div class="pick-h">✏️ اسمك</div>
-        <input class="inp" id="ownNick" maxlength="16" placeholder="مثل: حيدر، زهراء، أبو علي الصغير" value="${esc(own)}" autocomplete="off">
+        <input class="inp" id="ownNick" maxlength="16" placeholder="${sx === 'g' ? 'مثل: زهراء، فاطمة، مريم' : 'مثل: حيدر، علي، أبو علي الصغير'}" value="${esc(own)}" autocomplete="off">
         <div class="fb" id="nickMsg" style="font-size:14px">اسمك الأول أو اسم تحبّه، بلا اسم العائلة 🤍 حروف عربية فقط (٣ إلى ١٦ حرفًا)</div>
-        <div class="nav"><button class="btn gold" id="saveProf">هذا اسمي ✓</button></div></div>`;
+        <div class="nav"><button class="btn gold" id="saveProf">هذا اسمي ✓</button></div>` : `<p style="text-align:center;color:var(--muted)">اختر: ولد أو بنت 👆</p>`}</div>`;
+      body().querySelectorAll('[data-sx]').forEach(b => b.onclick = () => { sx = b.dataset.sx; draw(); });
+      if (!sx) return;
       body().querySelectorAll('[data-av]').forEach(b => b.onclick = () => { av = b.dataset.av; draw(); });
       $('#ownNick').oninput = e => { own = e.target.value; $('#nickPrev').textContent = own.trim() || 'اسمك هنا'; };
       $('#saveProf').onclick = async () => {
@@ -123,7 +132,8 @@
           const why = badNick(own); if (why) { $('#nickMsg').className = 'fb bad'; $('#nickMsg').textContent = why; $('#saveProf').disabled = false; $('#ownNick').focus(); return; }
           const nick = own.trim().replace(/\s+/g, ' '), isOwn = true;
           const code = (profile && profile.code) || await claimCode();
-          profile = Object.assign({ wins: 0, games: 0 }, profile || {}, { nick, av, code, own: isOwn });
+          profile = Object.assign({ wins: 0, games: 0 }, profile || {}, { nick, av, sx, code, own: isOwn });
+          if (window.Cups && Cups.setSex) Cups.setSex(sx);
           await db.ref('profiles/' + me).set(profile);
           state.online = true; state.nick = nick; state.av = av; save();
           startPresence();
