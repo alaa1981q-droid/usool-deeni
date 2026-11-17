@@ -102,7 +102,9 @@
     },
     "news": {
       ".read": "auth != null",
-      ".indexOn": ["ts"],
+      ".indexOn": [
+        "ts"
+      ],
       "$id": {
         ".write": "auth != null && root.child('admins/' + auth.uid).val() === true",
         ".validate": "!newData.exists() || (newData.child('msg').isString() && newData.child('msg').val().length <= 600 && newData.child('title').isString() && newData.child('title').val().length <= 60 && newData.child('j').isNumber() && newData.child('j').val() <= 500)"
@@ -123,6 +125,19 @@
         "$from": {
           ".write": "auth != null && auth.uid === $from && root.child('friends/' + $uid + '/' + $from).exists()",
           ".validate": "newData.child('n').isString() && newData.child('n').val().length <= 40"
+        }
+      }
+    },
+    "stats": {
+      "bookDl": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= (data.exists() ? data.val() : 0) + 1"
+      },
+      "bookDlBy": {
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid && !data.exists()",
+          ".validate": "newData.val() === true"
         }
       }
     }
