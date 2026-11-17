@@ -149,7 +149,13 @@ function streetSVG(xs){const g=292;xs=xs||[10,42,74];
     <path d="M${x+2} ${g-39} h10 l-1.5 9 h-7z" fill="url(#hGold)" stroke="#9a6a00" stroke-width=".8"/><rect x="${x+3.6}" y="${g-31}" width="6.8" height="6" rx="2" fill="#fff6b8"/><circle cx="${x+7}" cy="${g-28}" r="2.4" fill="#fffbe0"/>
     <path d="M${x+1} ${g-40} h12 l-6 -5z" fill="#37515a"/></g>`).join('')}
 /* 🏯 v8.7: برج الحافظ الذهبي مرسوم بوضوح (كان رمزًا صغيرًا يضيع خلف النخلة): قاعدة، جذع بوجهين للتجسيم، شرفة، قبّة ذهبية وهلال، ونور حوله */
-function towerSVG(){const c=30,g=292,L='#f6e3b8',R='#d8b880',T='#b9851a';
+/* 🔭 v9.0: في عرض البيت بالعرض (L.wide) تتفرّق الزينة والهدايا على مساحة أوسع حتى لا تتكدّس فوق بعضها:
+   ما كان يسار البيت يبتعد يسارًا، وما كان يمينه يبتعد يمينًا (وبعد المسجد إن وُجد)، وما في السماء ينتشر. ما على البيت نفسه يبقى مكانه. */
+let SP=null;const HL=100,HR=292;
+function mkSpread(L){if(!L||!L.wide)return null;const MQ=lookItems(L).includes('d_mosque');
+  return (x,y)=>y<175?180+(x-180)*1.6:x<HL?HL-(HL-x)*2:x>HR?(MQ?474+(x-HR)*1.7:HR+(x-HR)*2):x}
+const spX=(x,y)=>SP?SP(x,y):x;
+function towerSVG(){const c=spX(30,292),g=292,L='#f6e3b8',R='#d8b880',T='#b9851a';
   const band=y=>`<rect x="${c-11}" y="${y}" width="22" height="3" fill="url(#hGold)"/>`;
   const win=y=>`<path d="M${c-4} ${y} V${y-7} a4 4 0 0 1 8 0 V${y}Z" fill="#7cc8ff" stroke="${T}" stroke-width="1"/>`;
   return `<g class="dk-tower"><ellipse cx="${c}" cy="${g-90}" rx="34" ry="78" fill="#ffe066" opacity=".22" class="dk-tw"/>
@@ -167,8 +173,8 @@ function towerSVG(){const c=30,g=292,L='#f6e3b8',R='#d8b880',T='#b9851a';
   <line x1="${c}" y1="${g-172}" x2="${c}" y2="${g-180}" stroke="${T}" stroke-width="1.6"/><path d="M${c} ${g-191} a5.5 5.5 0 1 0 4.6 7.6 a4.2 4.2 0 1 1 -4.6 -7.6z" fill="url(#hGold)"/>
   ${[[-24,-150],[22,-120],[-20,-70],[24,-40]].map(([a,b],k)=>`<text x="${c+a}" y="${g+b}" font-size="9" text-anchor="middle" class="dk-tw" style="animation-delay:${k*.35}s">✨</text>`).join('')}</g>`}
 function itemSVG(it,full,withRoof){
-  if(it.svg=='street')return streetSVG();
-  if(it.svg=='street2')return streetSVG([266,288]);
+  if(it.svg=='street')return streetSVG([10,42,74].map(x=>spX(x,292)));
+  if(it.svg=='street2')return streetSVG([266,288].map(x=>spX(x+(SP?30:0),292)));
   if(it.svg=='mosque')return mosqueSVG();
   if(it.svg=='tower')return towerSVG();
   if(['fbox','curt','door','ivy'].includes(it.svg))return houseItem(it.svg,full);
@@ -178,8 +184,8 @@ function itemSVG(it,full,withRoof){
       s+=`<circle cx="${x1}" cy="${y1-3}" r="3.4" fill="${C[k%5]}" class="dk-tw" style="animation-delay:${k*.15}s"/><circle cx="${x2}" cy="${y2-3}" r="3.4" fill="${C[(k+2)%5]}" class="dk-tw" style="animation-delay:${k*.15+.07}s"/>`}
     return kwrap(s+'</g>')}
   let s='';
-  if(it.extra=='stars')s+=[[70,24],[96,52],[20,76],[130,22]].map(([x,y],k)=>`<text x="${x}" y="${y}" font-size="10" text-anchor="middle" class="dk-tw" style="animation-delay:${k*.3}s">⭐</text>`).join('');
-  return s+it.at.map(([x,y,z],k)=>`<text x="${x}" y="${y}" font-size="${z}" text-anchor="middle"${cls} style="animation-delay:${k*.4}s">${it.e}</text>`).join('')}
+  if(it.extra=='stars')s+=[[70,24],[96,52],[20,76],[130,22]].map(([x,y],k)=>`<text x="${spX(x,y)}" y="${y}" font-size="10" text-anchor="middle" class="dk-tw" style="animation-delay:${k*.3}s">⭐</text>`).join('');
+  return s+it.at.map(([x,y,z],k)=>`<text x="${it.cat=='onhouse'||it.id=='candles'||it.id=='lamps'||it.id=='d_lamps'?x:spX(x,y)}" y="${y}" font-size="${z}" text-anchor="middle"${cls} style="animation-delay:${k*.4}s">${it.e}</text>`).join('')}
 /* 🌱 حديقة الأعمال: حرف لكل عمل صالح (sawt.js Aamal.grow)، يُرسم في أماكن ثابتة حول البيت وفي السماء */
 const GL={a:'🌹',b:'🐦',c:'🌷',d:'⭐',e:'🌳',f:'🌴',g:'🦋',h:'🍎',i:'🌻',j:'🏵️',k:'🎈'},SKY='bdgk';
 const cleanG=g=>String(g||'').replace(/[^a-k]/g,'').slice(-80);
@@ -189,12 +195,12 @@ const SLOTS=(()=>{let s=7;const r=()=>{s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15
 function gardenSVG(g,layer){g=cleanG(g);let gi=0,si=0;const out=[];
   for(const c of g){const sky=SKY.includes(c),p=sky?SLOTS.sk[si++%30]:SLOTS.gr[gi++%60];if((layer=='back')!=sky)continue;
     const big=c=='e'||c=='f',z=big?(p[1]<292?24:19):sky?(c=='k'?15:12):13,an=c=='b'?'fly':c=='g'?'flut':c=='d'?'twinkle':c=='k'?'bob':'';
-    out.push([p[1],`<text x="${p[0].toFixed(1)}" y="${p[1].toFixed(1)}" font-size="${z}" text-anchor="middle"${an?` class="dk-${an}" style="animation-delay:${(out.length%7)*.3}s"`:''}>${GL[c]}</text>`])}
+    out.push([p[1],`<text x="${spX(p[0],p[1]).toFixed(1)}" y="${p[1].toFixed(1)}" font-size="${z}" text-anchor="middle"${an?` class="dk-${an}" style="animation-delay:${(out.length%7)*.3}s"`:''}>${GL[c]}</text>`])}
   return out.sort((a,b)=>a[0]-b[0]).map(x=>x[1]).join('')}
 function lookItems(L){return String(L.i||'').split(',').filter(id=>IT[id])}
 const Deco={
   myLook(){return {c:Bayt.cups,p:myPaint(),w:myWall(),f:Bayt.done,i:Object.keys(js.on).filter(id=>js.on[id]&&js.own[id]).join(','),g:window.Aamal?cleanG(Aamal.d.gl):'',dt:window.Aamal&&Aamal.dirt?Aamal.dirt():0,u:window.Binaa?Binaa.code():'',job:window.Binaa?Binaa.job:null,fx:window.Binaa?Binaa.fx:null}},
-  svg(L,layer,full,withRoof){const ids=lookItems(L);let s='';
+  svg(L,layer,full,withRoof){const ids=lookItems(L);let s='';SP=mkSpread(L);
     if(layer=='back')s+='<style>.dk-bob,.dk-fly,.dk-flut,.dk-swim,.dk-drift,.dk-twinkle,.dk-tw{transform-box:fill-box;transform-origin:center}.dk-bob{animation:dkbob 2.2s ease-in-out infinite}.dk-fly{animation:dkfly 3s ease-in-out infinite}.dk-flut{animation:dkflut 1.6s ease-in-out infinite}.dk-swim{animation:dkswim 4s ease-in-out infinite}.dk-drift{animation:dkdrift 7s ease-in-out infinite}.dk-twinkle,.dk-tw{animation:dktw 1.4s ease-in-out infinite}@keyframes dkbob{50%{transform:translateY(-4px)}}@keyframes dkfly{50%{transform:translate(8px,-6px)}}@keyframes dkflut{50%{transform:translate(4px,-5px) rotate(-12deg)}}@keyframes dkswim{50%{transform:translateX(-14px)}}@keyframes dkdrift{50%{transform:translateX(16px)}}@keyframes dktw{50%{opacity:.35}}</style>';
     ids.forEach(id=>{const it=IT[id];if(id!='d_mosque'&&it.layer==layer&&it.layer!='room'&&(!it.need||ids.includes(it.need)))s+=itemSVG(it,full,withRoof)});
     if(layer=='back'||layer=='front')s+=gardenSVG(L.g,layer);return s},

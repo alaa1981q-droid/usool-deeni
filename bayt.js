@@ -329,7 +329,7 @@ function houseSVG(full,part,frac,withRoof,anim,look){
   if(dt)s+=trashSVG(dt);
   if(MQ)s+=walkers(196,GY+15-192*.75,(MM-215)/.75,.75,'msq-walk');
   if(hasGift('flowers'))s+=[[FX-14,GY+2],[FX+10,GY+4],[FX+FW-6,GY+4],[FX+FW+DX-10,GY-2],[FX+FW+24,GY+2]].map(([x,y])=>`<g><ellipse cx="${x}" cy="${y}" rx="13" ry="8" fill="#2e9c55"/>${[[-6,-3,'#e2504a'],[1,-6,'#ff8ac2'],[7,-2,'#f2b632'],[-1,1,'#fff']].map(([a,b,c])=>`<circle cx="${x+a}" cy="${y+b}" r="2.8" fill="${c}"/>`).join('')}</g>`).join('');
-  if(hasGift('fountain')){const x=0,y=0;s+=`<g transform="translate(50 ${GY+14}) scale(1.5)"><ellipse cx="${x}" cy="${y}" rx="20" ry="6" fill="#bfc9cf" stroke="#8b979e"/><ellipse cx="${x}" cy="${y-1}" rx="16" ry="4" fill="#7cc8ff"/><rect x="${x-2.5}" y="${y-22}" width="5" height="21" fill="#bfc9cf"/><ellipse cx="${x}" cy="${y-22}" rx="9" ry="3" fill="#bfc9cf"/><path d="M${x} ${y-24} q-10 -12 -14 4 M${x} ${y-24} q10 -12 14 4 M${x} ${y-24} v-10" stroke="#7cc8ff" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>`}
+  if(hasGift('fountain')){const x=0,y=0;s+=`<g transform="translate(${L.wide?4:50} ${GY+14}) scale(1.5)"><ellipse cx="${x}" cy="${y}" rx="20" ry="6" fill="#bfc9cf" stroke="#8b979e"/><ellipse cx="${x}" cy="${y-1}" rx="16" ry="4" fill="#7cc8ff"/><rect x="${x-2.5}" y="${y-22}" width="5" height="21" fill="#bfc9cf"/><ellipse cx="${x}" cy="${y-22}" rx="9" ry="3" fill="#bfc9cf"/><path d="M${x} ${y-24} q-10 -12 -14 4 M${x} ${y-24} q10 -12 14 4 M${x} ${y-24} v-10" stroke="#7cc8ff" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>`}
   if(D)s+=D.svg(L,'front',full,withRoof);
   if(full==0&&part<0)s+=floorPart(0,0)+`<text x="${FX+FW/2}" y="${fy(0)-14}" text-anchor="middle" font-size="16" font-weight="800" fill="#3d5a4a" font-family="Tajawal,sans-serif">هنا سيُبنى بيتك</text>`;
   // معرّفات فريدة لكل رسمة: إذا تكرّرت ووقعت الأولى في شاشة مخفية تختفي الألوان من الباقي
@@ -673,10 +673,11 @@ const wvCss=document.createElement('style');wvCss.textContent=`
 .wv .wvb{pointer-events:auto;width:46px;height:46px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.45);color:#fff;font:inherit;font-size:22px;font-weight:900;display:grid;place-items:center}
 .wv .wvhint{position:absolute;bottom:8px;left:0;right:0;text-align:center;color:#fff;font-size:13px;font-weight:700;text-shadow:0 2px 4px #000;pointer-events:none;transition:opacity 1s}`;
 document.head.appendChild(wvCss);
-function wideView(){const look=window.Deco?Deco.myLook():undefined;
+function wideView(){const look=window.Deco?Object.assign(Deco.myLook(),{wide:1}):undefined;
   const raw=houseSVG(bs.done,-1,0,true,false,look);
-  // نوسّع إطار الصورة يمينًا ويسارًا حتى تملأ الشاشة العريضة (الخلفية مرسومة أصلًا خارج الحدود)
-  const svg=raw.replace(/viewBox="0 0 (\d+) (\d+)"/,(m,w,h)=>{w=+w;h=+h;const W2=Math.round(h*1.9);return `viewBox="${Math.round((w-Math.max(w,W2))/2)} 0 ${Math.max(w,W2)} ${h}"`}).replace('preserveAspectRatio="xMidYMax meet"','preserveAspectRatio="xMidYMid meet"');
+  // v9.0: الزينة تتفرّق يمينًا ويسارًا (jannah.js mkSpread)، فنوسّع الإطار ليشملها كلّها (الخلفية مرسومة أصلًا خارج الحدود)
+  const svg=raw.replace(/viewBox="0 0 (\d+) (\d+)"/,(m,w,h)=>{w=+w;h=+h;let a=-125,b=w>VW?615:455;const need=Math.round(h*1.9);
+    if(b-a<need){const e=(need-(b-a))/2;a-=e;b+=e}return `viewBox="${Math.round(a)} 0 ${Math.round(b-a)} ${h}"`}).replace('preserveAspectRatio="xMidYMax meet"','preserveAspectRatio="xMidYMid meet"');
   const ov=document.createElement('div');ov.className='wv';
   ov.innerHTML=`<div class="wvr"><div class="wvs" id="wvS"><div class="bhouse wvh">${svg}</div>
     <div class="wvbar"><button class="wvb" id="wvX" aria-label="إغلاق">✖</button><b>🏡 بيتي في الجنة</b><button class="wvb" id="wvM" aria-label="تصغير">−</button><button class="wvb" id="wvP" aria-label="تكبير">+</button></div>
