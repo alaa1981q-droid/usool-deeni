@@ -324,12 +324,13 @@ function houseSVG(full,part,frac,withRoof,anim,look){
   if(full>0)s+=[[FX+2,14],[FX+38,0],[FX+FW-38,0],[FX+FW-2,14]].filter(([x,w])=>true).map(([x])=>`<g><ellipse cx="${x}" cy="${GY+1}" rx="13" ry="8" fill="#2a8a4a"/><ellipse cx="${x-3}" cy="${GY-2}" rx="8" ry="5" fill="#3fbf6f"/><circle cx="${x+5}" cy="${GY-3}" r="1.6" fill="#fff"/></g>`).join('');
   if(hasGift('lanterns')&&full>0){const dx=FX+FW/2;s+=[dx-34,dx+34].map(x=>`<g><line x1="${x}" y1="${GY-56}" x2="${x}" y2="${GY-48}" stroke="#8a5a00" stroke-width="1.5"/><circle cx="${x}" cy="${GY-40}" r="11" fill="#ffe066" opacity=".45"/><rect x="${x-5}" y="${GY-48}" width="10" height="14" rx="3" fill="url(#hGold)" stroke="#8a5a00"/><rect x="${x-3}" y="${GY-45}" width="6" height="8" rx="2" fill="#fff6b0"/></g>`).join('')}
   if(hasGift('crown')&&withRoof&&full>0){const y=fy(full-1)-66-40,M=FX+FW/2;s+=`<g><circle cx="${M}" cy="${y+6}" r="22" fill="#ffe066" opacity=".35"/><path d="M${M-16} ${y+14} L${M-18} ${y-2} L${M-8} ${y+6} L${M} ${y-8} L${M+8} ${y+6} L${M+18} ${y-2} L${M+16} ${y+14}Z" fill="url(#hGold)" stroke="#9a6a00" stroke-width="1.5"/><circle cx="${M}" cy="${y+8}" r="2.6" fill="#e2504a"/><circle cx="${M-9}" cy="${y+10}" r="2" fill="#2f8fd0"/><circle cx="${M+9}" cy="${y+10}" r="2" fill="#3fbf6f"/></g>`}
-  if(full>0)s+=`<g class="hyard">${yard(L.u,L.job,L.ed,L.fx)}</g>`;
+  if(full>0&&!L.wide)s+=`<g class="hyard">${yard(L.u,L.job,L.ed,L.fx)}</g>`;
   if(HK<1)s+='</g>';
+  if(full>0&&L.wide)s+=`<g class="hyard">${yard(L.u,L.job,L.ed,L.fx,YWIDE(MQ))}</g>`;
   if(dt)s+=trashSVG(dt);
   if(MQ)s+=walkers(196,GY+15-192*.75,(MM-215)/.75,.75,'msq-walk');
   if(hasGift('flowers'))s+=[[FX-14,GY+2],[FX+10,GY+4],[FX+FW-6,GY+4],[FX+FW+DX-10,GY-2],[FX+FW+24,GY+2]].map(([x,y])=>`<g><ellipse cx="${x}" cy="${y}" rx="13" ry="8" fill="#2e9c55"/>${[[-6,-3,'#e2504a'],[1,-6,'#ff8ac2'],[7,-2,'#f2b632'],[-1,1,'#fff']].map(([a,b,c])=>`<circle cx="${x+a}" cy="${y+b}" r="2.8" fill="${c}"/>`).join('')}</g>`).join('');
-  if(hasGift('fountain')){const x=0,y=0;s+=`<g transform="translate(${L.wide?4:50} ${GY+14}) scale(1.5)"><ellipse cx="${x}" cy="${y}" rx="20" ry="6" fill="#bfc9cf" stroke="#8b979e"/><ellipse cx="${x}" cy="${y-1}" rx="16" ry="4" fill="#7cc8ff"/><rect x="${x-2.5}" y="${y-22}" width="5" height="21" fill="#bfc9cf"/><ellipse cx="${x}" cy="${y-22}" rx="9" ry="3" fill="#bfc9cf"/><path d="M${x} ${y-24} q-10 -12 -14 4 M${x} ${y-24} q10 -12 14 4 M${x} ${y-24} v-10" stroke="#7cc8ff" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>`}
+  if(hasGift('fountain')){const x=0,y=0;s+=`<g transform="translate(${L.wide?-62:50} ${GY+14}) scale(1.5)"><ellipse cx="${x}" cy="${y}" rx="20" ry="6" fill="#bfc9cf" stroke="#8b979e"/><ellipse cx="${x}" cy="${y-1}" rx="16" ry="4" fill="#7cc8ff"/><rect x="${x-2.5}" y="${y-22}" width="5" height="21" fill="#bfc9cf"/><ellipse cx="${x}" cy="${y-22}" rx="9" ry="3" fill="#bfc9cf"/><path d="M${x} ${y-24} q-10 -12 -14 4 M${x} ${y-24} q10 -12 14 4 M${x} ${y-24} v-10" stroke="#7cc8ff" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>`}
   if(D)s+=D.svg(L,'front',full,withRoof);
   if(full==0&&part<0)s+=floorPart(0,0)+`<text x="${FX+FW/2}" y="${fy(0)-14}" text-anchor="middle" font-size="16" font-weight="800" fill="#3d5a4a" font-family="Tajawal,sans-serif">هنا سيُبنى بيتك</text>`;
   // معرّفات فريدة لكل رسمة: إذا تكرّرت ووقعت الأولى في شاشة مخفية تختفي الألوان من الباقي
@@ -337,6 +338,7 @@ function houseSVG(full,part,frac,withRoof,anim,look){
 let svgN=0;
 /* 🧱 الفناء (v8.2): السور والحديقة والأشجار أمام البيت، وكلّ جزء يُلمَس وحده (data-up). u = «سور حديقة شجرة١ شجرة٢ شجرة٣» */
 const YFY=GY+13,YXL=FX-50,YXR=FX+FW+DX+4,YCX=FX+FW/2,YTS=[[58,GY+6],[232,GY+7],[306,GY-3]],YFR=['#e2504a','#c2185b','#f39c12'];
+const YXL0=YXL,YXR0=YXR,YCX0=YCX,YTS0=YTS;
 function ySeg(x1,y1,x2,y2,lv){const d=Math.hypot(x2-x1,y2-y1);let s='';
   if(lv==1){const n=Math.max(2,Math.round(d/8));s+=`<line x1="${x1}" y1="${y1-4}" x2="${x2}" y2="${y2-4}" stroke="#8a5a2b" stroke-width="1.6"/><line x1="${x1}" y1="${y1-8.5}" x2="${x2}" y2="${y2-8.5}" stroke="#8a5a2b" stroke-width="1.6"/>`;
     for(let k=0;k<=n;k++){const x=x1+(x2-x1)*k/n,y=y1+(y2-y1)*k/n;s+=`<path d="M${x-1.7} ${y} V${y-10} L${x} ${y-12.5} L${x+1.7} ${y-10} V${y}Z" fill="#c08a4c" stroke="#7a4f22" stroke-width=".6"/>`}}
@@ -368,14 +370,16 @@ function yDust(x,y){return `<g class="bn-dust"><circle cx="${x}" cy="${y}" r="3"
 function ySign(x,y,w=44){return `<g><line x1="${x}" y1="${y+7}" x2="${x}" y2="${y+16}" stroke="#7a4f22" stroke-width="1.4"/><rect x="${x-w/2}" y="${y-8}" width="${w}" height="16" rx="4" fill="#fffbe9" stroke="#e0a21b" stroke-width="1.2"/>
   <text data-timer="1" x="${x}" y="${y+2.4}" text-anchor="middle" font-size="8.5" font-weight="900" fill="#7a4f00" font-family="Tajawal,sans-serif">⏳</text>
   <rect x="${x-w/2+3}" y="${y+4.2}" width="${w-6}" height="2.2" rx="1" fill="#f2e5c3"/><rect data-tbar="${w-6}" x="${x-w/2+3}" y="${y+4.2}" width="0" height="2.2" rx="1" fill="#2f8fd0"/></g>`}
-function yTree(i,lv,ed,canPlant){const [x,y]=YTS[i],c=YFR[i];let s=`<g data-up="t${i}"><g transform="translate(${x} ${y}) scale(1.65) translate(${-x} ${-y})"><circle cx="${x}" cy="${y-12}" r="15" fill="#000" opacity="0"/>`;
+function yTree(i,lv,ed,canPlant,ts=YTS,tk=1.65){const [x,y]=ts[i],c=YFR[i];let s=`<g data-up="t${i}"><g transform="translate(${x} ${y}) scale(${tk}) translate(${-x} ${-y})"><circle cx="${x}" cy="${y-12}" r="15" fill="#000" opacity="0"/>`;
   if(lv==0&&ed&&canPlant)s+=`<ellipse cx="${x}" cy="${y}" rx="8" ry="2.8" fill="#8a5a2b"/><ellipse cx="${x}" cy="${y-.8}" rx="5" ry="1.6" fill="#a8742a"/>`;
   if(lv==1)s+=`<ellipse cx="${x}" cy="${y}" rx="6" ry="2" fill="#7a4f22" opacity=".5"/><line x1="${x}" y1="${y}" x2="${x}" y2="${y-9}" stroke="#5e8f2e" stroke-width="1.4"/><path d="M${x} ${y-7} q-6 -3 -6 -7 q5 1 6 6z M${x} ${y-8} q6 -3 6 -7 q-5 1 -6 6z" fill="#3fbf6f"/>`;
   if(lv==2)s+=`<ellipse cx="${x}" cy="${y+.5}" rx="9" ry="2.6" fill="#2f7a45" opacity=".35"/><rect x="${x-1.6}" y="${y-13}" width="3.2" height="13" rx="1" fill="#8a5a2b"/><circle cx="${x}" cy="${y-19}" r="9" fill="#2fae5f"/><circle cx="${x-3}" cy="${y-22}" r="4" fill="#5fd48a" opacity=".7"/>`;
   if(lv>=3)s+=`<ellipse cx="${x}" cy="${y+.5}" rx="13" ry="3.4" fill="#2f7a45" opacity=".35"/><rect x="${x-2.2}" y="${y-17}" width="4.4" height="17" rx="1.4" fill="#7a4f22"/><circle cx="${x-7}" cy="${y-22}" r="8" fill="#239a52"/><circle cx="${x+7}" cy="${y-22}" r="8" fill="#239a52"/><circle cx="${x}" cy="${y-29}" r="10" fill="#2fae5f"/><circle cx="${x-4}" cy="${y-32}" r="4.5" fill="#5fd48a" opacity=".6"/>
     ${[[-8,-20],[6,-18],[-2,-27],[8,-27],[-9,-29],[2,-21]].map(([a,b])=>`<circle cx="${x+a}" cy="${y+b}" r="2.1" fill="${c}" stroke="#fff" stroke-width=".4"/>`).join('')}`;
   return s+'</g></g>'}
-function yard(u,job,ed,fx){u=/^[0-3]{5}$/.test(u||'')?u:'00000';const w=+u[0],g=+u[1],T=[+u[2],+u[3],+u[4]];
+/* v9.1: في عرض البيت بالعرض الفناء أوسع: السور يمتدّ على الجانبين، والحديقة أطول، والأشجار أكبر وفي الجوانب، ولا يصغر مع طوابق البيت */
+const YWIDE=mq=>({xl:-30,xr:mq?318:400,cx:YCX,ts:mq?[[10,GY+7],[62,GY+9],[300,GY+8]]:[[15,GY+7],[330,GY+8],[382,GY+5]],tk:2.3});
+function yard(u,job,ed,fx,Gm){const {xl:YXL,xr:YXR,cx:YCX,ts:YTS,tk}=Gm||{xl:YXL0,xr:YXR0,cx:YCX0,ts:YTS0,tk:1.65};u=/^[0-3]{5}$/.test(u||'')?u:'00000';const w=+u[0],g=+u[1],T=[+u[2],+u[3],+u[4]];
   const busy=!!(job&&!job.ready),rdy=!!(job&&job.ready),pop=(p,html)=>fx&&fx.p==p?`<g class="bn-pop">${html}</g>`:html;
   // الحديقة
   let G=`<g data-up="g"><rect x="${YXL+4}" y="${GY+1}" width="${YCX-24-YXL-4}" height="${YFY-GY-4}" fill="#000" opacity="0"/><rect x="${YCX+24}" y="${GY+1}" width="${YXR-YCX-28}" height="${YFY-GY-4}" fill="#000" opacity="0"/>`;
@@ -390,7 +394,7 @@ function yard(u,job,ed,fx){u=/^[0-3]{5}$/.test(u||'')?u:'00000';const w=+u[0],g=
   G+='</g>';
   let s=pop('g',G);
   // الأشجار
-  T.forEach((lv,i)=>{s+=pop('t'+i,yTree(i,lv,ed,g>=1))});
+  T.forEach((lv,i)=>{s+=pop('t'+i,yTree(i,lv,ed,g>=1,YTS,tk))});
   // السور: أمامي بفتحة الباب + جانبان
   let Wl=`<g data-up="w" transform="translate(0 ${YFY}) scale(1 1.55) translate(0 ${-YFY})"><rect x="${YXL-4}" y="${YFY-16}" width="${YXR-YXL+8}" height="19" fill="#000" opacity="0"/>`;
   const segs=[[YXL+20,YFY-14,YXL,YFY],[YXL,YFY,YCX-23,YFY],[YCX+23,YFY,YXR,YFY],[YXR,YFY,YXR+24,YFY-14]];
@@ -673,10 +677,10 @@ const wvCss=document.createElement('style');wvCss.textContent=`
 .wv .wvb{pointer-events:auto;width:46px;height:46px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.45);color:#fff;font:inherit;font-size:22px;font-weight:900;display:grid;place-items:center}
 .wv .wvhint{position:absolute;bottom:8px;left:0;right:0;text-align:center;color:#fff;font-size:13px;font-weight:700;text-shadow:0 2px 4px #000;pointer-events:none;transition:opacity 1s}`;
 document.head.appendChild(wvCss);
-function wideView(){const look=window.Deco?Object.assign(Deco.myLook(),{wide:1}):undefined;
+function wideView(){const look=window.Deco?Object.assign(Deco.myLook(),{wide:1,ed:1}):undefined;
   const raw=houseSVG(bs.done,-1,0,true,false,look);
   // v9.0: الزينة تتفرّق يمينًا ويسارًا (jannah.js mkSpread)، فنوسّع الإطار ليشملها كلّها (الخلفية مرسومة أصلًا خارج الحدود)
-  const svg=raw.replace(/viewBox="0 0 (\d+) (\d+)"/,(m,w,h)=>{w=+w;h=+h;let a=-125,b=w>VW?615:455;const need=Math.round(h*1.9);
+  const svg=raw.replace(/viewBox="0 0 (\d+) (\d+)"/,(m,w,h)=>{w=+w;h=+h;let a=-128,b=w>VW?615:490;const need=Math.round(h*1.9);
     if(b-a<need){const e=(need-(b-a))/2;a-=e;b+=e}return `viewBox="${Math.round(a)} 0 ${Math.round(b-a)} ${h}"`}).replace('preserveAspectRatio="xMidYMax meet"','preserveAspectRatio="xMidYMid meet"');
   const ov=document.createElement('div');ov.className='wv';
   ov.innerHTML=`<div class="wvr"><div class="wvs" id="wvS"><div class="bhouse wvh">${svg}</div>
@@ -695,7 +699,7 @@ function wideView(){const look=window.Deco?Object.assign(Deco.myLook(),{wide:1})
   const rot=()=>ov.classList.contains('rot');
   const loc=e=>{const r=S.getBoundingClientRect();return rot()?[e.clientY-r.top,r.right-e.clientX]:[e.clientX-r.left,e.clientY-r.top]};
   const pts=new Map();let last=null,pinch=null,tapT=0;
-  S.onpointerdown=e=>{if(e.target.closest('.wvb'))return;try{S.setPointerCapture(e.pointerId)}catch(x){}pts.set(e.pointerId,loc(e));$('#wvH').style.opacity=0;
+  S.onpointerdown=e=>{if(e.target.closest('.wvb')||e.target.closest('[data-up]'))return;try{S.setPointerCapture(e.pointerId)}catch(x){}pts.set(e.pointerId,loc(e));$('#wvH').style.opacity=0;
     if(pts.size==2){const [a,b]=[...pts.values()];pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1]),k}}else{last=loc(e);
       const now=Date.now();if(now-tapT<300){zoomAt(k>1.5?1:2.2,...last)}tapT=now}};
   S.onpointermove=e=>{if(!pts.has(e.pointerId))return;const p=loc(e);pts.set(e.pointerId,p);
@@ -707,7 +711,7 @@ function wideView(){const look=window.Deco?Object.assign(Deco.myLook(),{wide:1})
   const close=()=>{removeEventListener('resize',fit);ov.remove();document.body.style.overflow='';
     try{screen.orientation&&screen.orientation.unlock&&screen.orientation.unlock()}catch(e){}
     try{document.fullscreenElement&&document.exitFullscreen()}catch(e){}};
-  $('#wvX').onclick=()=>{sTap();close()};
+  $('#wvX').onclick=()=>{sTap();close()};ov._close=close;
   fit();
   // ملء الشاشة + قفلها بالعرض (يعمل في أندرويد)، وإن فشل تبقى الصورة مُدارة
   try{const fs=document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen({navigationUI:'hide'});

@@ -153,7 +153,8 @@ function streetSVG(xs){const g=292;xs=xs||[10,42,74];
    ما كان يسار البيت يبتعد يسارًا، وما كان يمينه يبتعد يمينًا (وبعد المسجد إن وُجد)، وما في السماء ينتشر. ما على البيت نفسه يبقى مكانه. */
 let SP=null;const HL=100,HR=292;
 function mkSpread(L){if(!L||!L.wide)return null;const MQ=lookItems(L).includes('d_mosque');
-  return (x,y)=>y<175?180+(x-180)*1.6:x<HL?HL-(HL-x)*2:x>HR?(MQ?474+(x-HR)*1.7:HR+(x-HR)*2):x}
+  // v9.1: الأرض بجانب البيت صارت للحديقة والأشجار، فالزينة الأرضية تنتقل كلّها إلى الأطراف
+  return (x,y)=>y<175?180+(x-180)*1.6:x<HL?x-118:x>HR?(MQ?474+(x-HR)*1.7:x+118):x}
 const spX=(x,y)=>SP?SP(x,y):x;
 function towerSVG(){const c=spX(30,292),g=292,L='#f6e3b8',R='#d8b880',T='#b9851a';
   const band=y=>`<rect x="${c-11}" y="${y}" width="22" height="3" fill="url(#hGold)"/>`;
