@@ -40,6 +40,7 @@ body.night .bhouse::before{content:'🌙';position:absolute;right:3%;top:1%;widt
 .idk .av{position:relative;font-size:38px;line-height:1;flex:none}.idk .av i.on{position:absolute;bottom:0;left:-2px;width:12px;height:12px;border-radius:50%;background:#1fa463;border:2px solid #fff}
 .idk .nm{flex:1;min-width:0}.idk .nm b{display:block;font-size:20px;font-weight:800;color:#0b3d27;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .idk .nm small{display:block;font-size:13.5px;color:#8a5a00;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.idk.gone{background:#f4f4f2;border-style:dashed;border-color:#c4c9c6}.idk.gone .av{filter:grayscale(.8);opacity:.75}.idk .nm small.gn{color:#8a8f8c;font-size:13.5px}
 .idk .nm small.st1{color:#14794f;font-size:14.5px;white-space:pre}
 .idk .stt{font-size:14px;font-weight:800;color:#3d5a4b;text-align:center;white-space:pre;flex:none;background:#f1f7f3;border-radius:12px;padding:4px 8px}
 .idk .gb{flex:none;width:44px;height:44px;border-radius:14px;border:0;font-size:22px;background:linear-gradient(#f59a3c,#e0731f);box-shadow:0 3px 0 #a8551a;color:#fff}
@@ -116,6 +117,7 @@ let bans={};
 const banOf=id=>{const b=bans[id];return b&&b.until>Date.now()?b:null};
 // يتعمّد الأخطاء؟ دقّة أقل من ٣٥٪ بعد ١٦ سؤالًا أونلاين، أو مباراتان بلا أي إجابة صحيحة
 const accOf=p=>{const a=p.acc||{};return a.q?a.r/a.q:null};
+const MONTH=30*864e5,gone=p=>!!(p&&p.seen&&Date.now()-p.seen>MONTH),goneDays=p=>Math.floor((Date.now()-p.seen)/864e5);
 const sus=p=>{const a=p.acc||{};return (a.q>=16&&a.r/a.q<.35)||(a.z|0)>=2};
 function ago(t){if(!t)return 'لم يُسجَّل بعد';const m=Math.round((Date.now()-t)/60000);
   const w=(n,one,two,few,many)=>n==1?one:n==2?two:n<=10?`${ar(n)} ${few}`:`${ar(n)} ${many}`;
@@ -125,8 +127,9 @@ function kidRow(r,i){const p=all&&all.find(x=>x.id==r.id)||{};const lv=r.lv||p.l
   const rk=i!=null?(['🥇','🥈','🥉'][i]||ar(i+1)):'';
   const sub=esc(tt||'');
   const st=[lv?`⭐ ${ar(lv)}`:'',r.xp?`✨ ${ar(r.xp)}`:'',w?`🏆 ${ar(w)}`:''].filter(Boolean).join('   ');
-  return `<div class="idk ${i!=null&&i<3?'top'+(i+1):''}" data-k="${esc(r.id)}"><span class="rk">${rk}</span><span class="av">${esc(r.av||p.av)}${on?'<i class="on"></i>':''}</span>
-    <span class="nm"><b>${esc(r.nick||p.nick)}${b?' ⛔':''}${sus(p)?' ⚠️':''}</b>${st?`<small class="st1">${st}</small>`:''}${sub?`<small>${sub}</small>`:''}</span>
+  const gn=gone(p);
+  return `<div class="idk ${i!=null&&i<3?'top'+(i+1):''} ${gn?'gone':''}" data-k="${esc(r.id)}"><span class="rk">${rk}</span><span class="av">${esc(r.av||p.av)}${on?'<i class="on"></i>':''}</span>
+    <span class="nm"><b>${esc(r.nick||p.nick)}${b?' ⛔':''}${sus(p)?' ⚠️':''}${gn?' 💤':''}</b>${gn?`<small class="gn">💤 غائب منذ ${ar(goneDays(p))} يومًا</small>`:''}${st?`<small class="st1">${st}</small>`:''}${sub?`<small>${sub}</small>`:''}</span>
     <button class="gb" data-g="${esc(r.id)}" aria-label="جائزة">🎁</button></div>`}
 /* 👁 بطاقة الطفل: كل معلوماته، وأزرار التنبيه والحظر والجائزة */
 async function kidCard(id){const API=O();let p=(all||[]).find(x=>x.id==id);
@@ -168,9 +171,10 @@ function drawKids(){const el=$('#idKids');if(!el)return;let rows=[],num=false;
   if(tab=='heroes'){rows=heroes||[];num=true}
   else if(tab=='top'){rows=(all||[]).slice().sort((a,b)=>(b.lv-a.lv)||(b.wins-a.wins)).slice(0,20);num=true}
   else if(tab=='sus'){rows=(all||[]).filter(p=>sus(p)||banOf(p.id)).sort((a,b)=>(accOf(a)||0)-(accOf(b)||0))}
+  else if(tab=='gone'){rows=(all||[]).filter(gone).sort((a,b)=>a.seen-b.seen)}
   else if(tab=='recent'){rows=(all||[]).filter(p=>p.seen).sort((a,b)=>b.seen-a.seen).slice(0,30)}
   else{const t=q.trim().replace(/[أإآ]/g,'ا');rows=(all||[]).filter(r=>!t||String(r.nick).replace(/[أإآ]/g,'ا').includes(t)||String(r.code).toUpperCase()==t.toUpperCase()).slice(0,40)}
-  el.innerHTML=rows.length?rows.map((r,i)=>kidRow(r,num?i:null)).join(''):`<p class="tip">${tab=='all'?(q?'لا يوجد طفل بهذا الاسم':`عدد الأطفال: ${ar((all||[]).length)} — اكتب اسمًا للبحث`):tab=='sus'?'لا أحد مشبوه 👍':'لا أحد بعد'}</p>`;
+  el.innerHTML=rows.length?rows.map((r,i)=>kidRow(r,num?i:null)).join(''):`<p class="tip">${tab=='all'?(q?'لا يوجد طفل بهذا الاسم':`عدد الأطفال: ${ar((all||[]).length)} — اكتب اسمًا للبحث`):tab=='sus'?'لا أحد مشبوه 👍':tab=='gone'?'لا أحد غائب أكثر من شهر 👍':'لا أحد بعد'}</p>`;
   el.querySelectorAll('[data-k]').forEach(b=>b.onclick=e=>{if(e.target.closest('[data-g]'))return;kidCard(b.dataset.k)});
   el.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{const id=b.dataset.g,r=rows.find(x=>x.id==id)||{},p=(all||[]).find(x=>x.id==id)||{};giftTo(id,r.nick||p.nick,r.av||p.av)})}
 function giftTo(uid,nick,av){const API=O();
@@ -183,7 +187,7 @@ function giftTo(uid,nick,av){const API=O();
 async function panel(){const API=O();heroes=null;all=null;
   body().innerHTML=`<div class="idban"><span class="sh">🛡️</span><span><b>لوحة الإدارة</b><small id="idCnt">جارٍ التحميل…</small></span></div>
     <div class="idbox"><h3>👥 الأطفال <small style="font-weight:500;color:var(--muted);font-size:13px">اضغط على أي طفل لترى ملفّه</small></h3>
-      <div class="jrooms" style="margin-bottom:6px;flex-wrap:wrap"><button data-tab="heroes">🏅 الأبطال</button><button data-tab="top">⭐ المميّزون</button><button data-tab="recent">🕒 دخلوا مؤخرًا</button><button data-tab="sus">⚠️ المشبوهون</button><button data-tab="all">🔎 ابحث</button></div>
+      <div class="jrooms" style="margin-bottom:6px;flex-wrap:wrap"><button data-tab="heroes">🏅 الأبطال</button><button data-tab="top">⭐ المميّزون</button><button data-tab="recent">🕒 دخلوا مؤخرًا</button><button data-tab="gone">💤 غائبون</button><button data-tab="sus">⚠️ المشبوهون</button><button data-tab="all">🔎 ابحث</button></div>
       <input class="inp" id="kQ" placeholder="🔎 اكتب اسم الطفل أو رمزه" style="text-align:right;display:none">
       <div id="idKids"><p class="tip">⏳ جارٍ التحميل…</p></div>
       <p class="tip">بطل الأسبوع يأخذ تلقائيًا 💎١٠٠ (والثاني ٦٠ والثالث ٣٠) عند بداية الأسبوع الجديد.</p></div>
@@ -200,7 +204,8 @@ async function panel(){const API=O();heroes=null;all=null;
     if(!title&&!msg){API.toast('اكتب العنوان أو الرسالة');return}
     modal(`<h3 style="margin:4px 0">إرسال لكل الأطفال؟</h3><p><b>${esc(title)}</b><br>${esc(msg).slice(0,140)}${j?`<br>💎 ${ar(j)} لكل طفل`:''}</p><div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn gold" id="nYes">نعم، أرسل</button></div>`,()=>{
       $('#nYes').onclick=async()=>{closeModal();try{await API.db.ref('news').push({title,msg,j,ts:firebase.database.ServerValue.TIMESTAMP});API.toast('أُرسلت ✓');panel()}catch(e){API.toast('تعذّر الإرسال')}}})};
-  await loadKids(API);{const c=$('#idCnt');if(c)c.textContent=`عدد الأطفال: ${ar((all||[]).length)}`}tabs();
+  await loadKids(API);{const c=$('#idCnt'),n=(all||[]).length,g=(all||[]).filter(gone).length,u=(all||[]).filter(x=>!x.seen).length;
+    if(c)c.innerHTML=`المشتركون: <b style="display:inline;font-size:22px">${ar(n)}</b> طفل<br>💤 غائبون شهرًا أو أكثر: ${ar(g)}${u?` · ❔ بلا تسجيل دخول: ${ar(u)}`:''}`}tabs();
   // الرسائل
   try{const s=(await API.db.ref('news').orderByChild('ts').limitToLast(10).get()).val()||{};const rows=Object.entries(s).sort((a,b)=>(b[1].ts||0)-(a[1].ts||0));
     $('#idNews').innerHTML=rows.length?rows.map(([id,v])=>`<div class="idrow"><b>📢 ${esc(v.title||v.msg||'').slice(0,40)}</b><small>${v.j?'💎'+ar(v.j):''} ${v.ts?new Date(v.ts).toLocaleDateString('ar-IQ'):''}</small><button class="mini" style="background:#e2504a" data-del="${esc(id)}">🗑️</button></div>`).join(''):'<p class="tip">لم تُرسل رسائل بعد</p>';
