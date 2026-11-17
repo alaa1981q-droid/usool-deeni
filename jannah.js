@@ -218,7 +218,7 @@ css.textContent=`
 .msq-cl{animation:msqcl 16s ease-in-out infinite alternate}.msq-cl2{animation:msqcl 20s ease-in-out infinite alternate-reverse}@keyframes msqcl{to{transform:translateX(26px)}}
 .msq-tw{animation:msqtw 2.4s ease-in-out infinite}@keyframes msqtw{50%{opacity:.7}}
 .msqb.lock .msq-walk,.msqb.lock .msq-bob{animation-play-state:paused}
-body.night .msqb svg{filter:brightness(.55) saturate(1.2) hue-rotate(-15deg)}body.night .msqb.lock svg{filter:grayscale(.85) brightness(.6)}
+body.night .msqb svg .hsun{display:none}body.night .msqb svg{filter:brightness(.55) saturate(1.2) hue-rotate(-15deg)}body.night .msqb.lock svg{filter:grayscale(.85) brightness(.6)}
 .jbar{display:flex;gap:8px;margin-top:10px}
 .jbtn{flex:1;border:none;border-radius:18px;padding:10px 4px 8px;font-weight:800;font-size:15px;color:#fff;box-shadow:0 5px 0 rgba(0,0,0,.18);position:relative;line-height:1.3}
 .jbtn span{display:block;font-size:30px;line-height:1.2}
@@ -319,7 +319,7 @@ function mosqueBigSVG(){const g=176,M=245;
   <defs><linearGradient id="mbSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fd6ff"/><stop offset="1" stop-color="#e9f7ff"/></linearGradient>
   <linearGradient id="mbPath" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3dfb5"/><stop offset="1" stop-color="#e6c992"/></linearGradient></defs>
   <rect y="-34" width="360" height="244" fill="url(#mbSky)"/>
-  <circle cx="104" cy="6" r="14" fill="#ffe27a" opacity=".9"/><circle cx="104" cy="6" r="23" fill="#ffe27a" opacity=".25"/>
+  <g class="hsun"><circle cx="104" cy="6" r="14" fill="#ffe27a" opacity=".9"/><circle cx="104" cy="6" r="23" fill="#ffe27a" opacity=".25"/></g>
   <g class="msq-cl" fill="#fff" opacity=".9"><ellipse cx="40" cy="48" rx="20" ry="8"/><ellipse cx="54" cy="43" rx="13" ry="8"/></g>
   <g class="msq-cl2" fill="#fff" opacity=".85"><ellipse cx="300" cy="-6" rx="16" ry="6"/><ellipse cx="310" cy="-10" rx="10" ry="6"/></g>
   <path d="M0 ${g-14} Q80 ${g-30} 170 ${g-16} T360 ${g-18} V210 H0Z" fill="#a6e6ae"/>

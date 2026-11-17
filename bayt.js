@@ -94,7 +94,10 @@ css.textContent=`
 .baytcard{border-color:#3fbf6f;box-shadow:0 5px 0 #a9e2bd}
 .baytcard:active{box-shadow:0 2px 0 #a9e2bd}
 .baytcard .cup{font-size:44px;width:62px;text-align:center;flex:none}
-.bhouse{position:relative;border-radius:22px;border:2px solid var(--line);overflow:hidden;background:#cfeeff}
+.bhouse{position:relative;border-radius:22px;border:2px solid var(--line);overflow:hidden;background:linear-gradient(#8fd4ff,#d8f1ff 62%,#a6e6ae 84%,#4fb86a)}
+/* v8.1: في الليل تصير حواف الصورة ليلية أيضًا، وتختفي الشمس */
+body.night .bhouse{background:linear-gradient(#16244a,#24365e 62%,#24402f 84%,#1a3324)}
+body.night .bhouse svg .hsun{display:none}
 .bhouse svg .hcl,.bhouse svg .hbd{transform-box:fill-box}.bhouse svg .hcl{animation:hcl 14s ease-in-out infinite alternate}.bhouse svg .hbd{animation:hbd 6s ease-in-out infinite alternate}.bhouse svg .hwv{stroke-dasharray:10 6;animation:hwv 2.5s linear infinite}@keyframes hcl{to{transform:translateX(26px)}}@keyframes hbd{to{transform:translate(40px,-10px)}}@keyframes hwv{to{stroke-dashoffset:-32}}
 .bhouse svg{display:block;width:100%;height:auto}
 .bhouse.sm{height:200px}.bhouse.sm svg{height:100%;width:100%}
@@ -215,8 +218,8 @@ function defs(){return `<defs>
 <pattern id="hStoneS" width="23" height="15" patternUnits="userSpaceOnUse"><rect width="23" height="15" fill="#c9924f"/><path d="M0 14.5H23M11.5 0V7.5M0 7.5H23" stroke="#a87436" stroke-width="1"/></pattern>
 </defs>`}
 function scene(){let s=`<rect width="${VW+200}" height="${VH}" fill="url(#hSky)"/>
-<g opacity=".35" fill="#fff8c8">${[0,1,2,3,4].map(k=>`<polygon points="318,30 ${80+k*48},${GY} ${104+k*48},${GY}"/>`).join('')}</g>
-<circle cx="318" cy="30" r="40" fill="url(#hSun)"/><circle cx="318" cy="30" r="16" fill="#ffd54a"/>
+<g class="hsun"><g opacity=".35" fill="#fff8c8">${[0,1,2,3,4].map(k=>`<polygon points="318,30 ${80+k*48},${GY} ${104+k*48},${GY}"/>`).join('')}</g>
+<circle cx="318" cy="30" r="40" fill="url(#hSun)"/><circle cx="318" cy="30" r="16" fill="#ffd54a"/></g>
 <g fill="#fff" opacity=".95" class="hcl"><ellipse cx="54" cy="44" rx="30" ry="11"/><ellipse cx="76" cy="36" rx="18" ry="12"/><ellipse cx="200" cy="26" rx="22" ry="8"/><ellipse cx="214" cy="21" rx="12" ry="8"/></g>
 <g class="hbd"><path d="M150 60 q5 -5 10 0 q5 -5 10 0" stroke="#3b5560" stroke-width="1.6" fill="none"/><path d="M118 74 q4 -4 8 0 q4 -4 8 0" stroke="#3b5560" stroke-width="1.4" fill="none"/></g>
 <path d="M0 ${GY-18} Q90 ${GY-34} 180 ${GY-20} T360 ${GY-22} V${VH} H0Z" fill="#a6e6ae"/>
@@ -289,7 +292,8 @@ function houseSVG(full,part,frac,withRoof,anim,look){
   const L=look||(window.Deco?Deco.myLook():{c:cs.n}),D=window.Deco,hasGift=g=>RANKS.some(r=>r.gift==g&&(L.c||0)>=r.at);
   // 🕌 من ربح المسجد: الصورة تتّسع لليمين ويقف المسجد الكبير بجانب البيت
   const MQ=String(L.i||'').split(',').includes('d_mosque'),MW=MQ?100:0,W=VW+MW,MM=VW+20;
-  let s=`<svg viewBox="0 0 ${W} ${VH}" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">${defs()}${scene()}`;
+  // الخلفية تمتدّ خارج حدود الصورة: إذا كان الإطار أعرض من الصورة لا تظهر حواف فارغة (ولا «نصّ ليل ونصّ نهار»)
+  let s=`<svg viewBox="0 0 ${W} ${VH}" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">${defs()}<g><rect x="-500" y="-200" width="${W+1000}" height="201" fill="#8fd4ff"/><rect x="-500" width="${W+1000}" height="${VH}" fill="url(#hSky)"/><rect x="-500" y="${GY-20}" width="${W+1000}" height="20" fill="#a6e6ae"/><rect x="-500" y="${GY-6}" width="${W+1000}" height="${VH-GY+6}" fill="url(#hGrass)"/><rect x="-500" y="${GY+21}" width="${W+1000}" height="12" fill="#5fb3ee"/></g>${scene()}`;
   if(MQ)s+=`
     <path d="M${VW-2} ${GY-22} Q${VW+60} ${GY-36} ${VW+110} ${GY-22} T${W} ${GY-20} V${VH} H${VW-2}Z" fill="#a6e6ae"/>
     <rect x="${VW-3}" y="${GY-6}" width="${MW+3}" height="${VH-GY+6}" fill="url(#hGrass)"/>
