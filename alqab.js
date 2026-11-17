@@ -115,6 +115,11 @@ css.textContent=`
 .hher{display:flex;flex-direction:column;gap:5px}
 .hher div{display:flex;align-items:center;gap:8px;background:#fafdfb;border-radius:12px;padding:2px 8px;font-size:14px}
 .hher div.me{background:#fff8e0;outline:2px solid var(--gold)}
+.hher{gap:8px}.hher div{gap:10px;padding:8px 10px;font-size:16px;border:1px solid #e3eee7;background:#fff}
+.hher .rk{width:34px;font-size:22px}.hher .av{font-size:36px;line-height:1}
+.hher b{font-size:20px;font-weight:800;color:#0b3d27;line-height:1.5}
+.hher b small{font-size:13.5px!important;color:#8a5a00!important;white-space:normal}
+.hher div>small{font-size:15px;color:#3d5a4b}
 .hher .rk{width:24px;text-align:center;font-weight:800}.hher .av{font-size:22px}.hher b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hher small{color:var(--muted);font-weight:700;white-space:nowrap}
 .hnote{font-size:13px;color:var(--muted);text-align:center;line-height:1.6;margin:2px 0}
 .aqhead{text-align:center;background:linear-gradient(160deg,#fff8e0,#fff);border:3px solid var(--gold);border-radius:26px;padding:12px}
