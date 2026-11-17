@@ -112,7 +112,6 @@ css.textContent=`
 .blvg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .blvg .blv{margin:0;flex-direction:column;justify-content:center;text-align:center;gap:4px;padding:10px 6px;min-width:0}
 .blvg .blv b{font-size:16px}.blvg .blv small{font-size:12.5px;line-height:1.4}.blvg .blv .ic{width:46px;height:46px;font-size:24px}.blvg .blv .mk{margin:0;font-size:18px}
-#byBody>.bhouse:not(.sm){max-height:190px}#byBody>.bhouse:not(.sm) svg{height:100%;width:100%}
 .bhud{display:flex;align-items:center;gap:6px;margin:8px 0 4px;flex-wrap:wrap}
 .bhud .nm{flex:1;font-weight:800;font-size:15px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bhud .lives{font-size:16px;direction:ltr}
