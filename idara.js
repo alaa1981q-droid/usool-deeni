@@ -171,15 +171,33 @@ function kidRow(r,i){const p=all&&all.find(x=>x.id==r.id)||{};const lv=r.lv||p.l
   return `<div class="idk ${i!=null&&i<3?'top'+(i+1):''} ${gn?'gone':''}" data-k="${esc(r.id)}"><span class="rk">${rk}</span><span class="av">${esc(p.av||r.av)}${on?'<i class="on"></i>':''}</span>
     <span class="nm"><b>${esc(p.nick||r.nick)}${b?' ⛔':''}${sus(p)?' ⚠️':''}${gn?' 💤':''}</b>${gn?`<small class="gn">💤 غائب منذ ${ar(goneDays(p))} يومًا</small>`:''}${tab=='names'&&p.hist?`<small class="gn">✏️ كان: ${esc(p.hist.split('|').join('، '))} · ${ago(p.nts)}</small>`:''}${st?`<small class="st1">${st}</small>`:''}${sub?`<small>${sub}</small>`:''}</span>
     <button class="gb" data-g="${esc(r.id)}" aria-label="جائزة">🎁</button></div>`}
+/* 📋 تفاصيل تقدّم الطفل للمدير: مربعات صغيرة مجسّمة */
+function kidDetails(sm,HL){const u=String((sm&&sm.u)||(HL&&HL.u)||'00000'),W=['لا يوجد','خشبي','حجري','رخامي'],G=['لم تُزرع','خضراء','ورود وممرّ','نافورة'];
+  const RK=HL&&window.Bayt&&Bayt.rankOf?Bayt.rankOf(HL.c):null;
+  if(!sm&&!HL)return `<p class="tip" style="margin:6px 0">📋 تظهر تفاصيل تقدّمه بعد أن يفتح التطبيق المحدّث مع الإنترنت</p>`;
+  const t=(e,v,l)=>`<div class="idst"><div><span>${e}</span><b>${v}</b></div><small>${l}</small></div>`,T=[+u[2],+u[3],+u[4]].filter(x=>x>0);
+  return `<div class="idsts" style="margin:6px 0">
+    ${t('🏠',ar(HL?HL.f:(sm?sm.fl:0))+' / ٥','طوابق بيته')}${t('🏆',ar(HL?Math.round(HL.c):(sm?sm.cu:0)),RK?RK.name:'كؤوس')}${sm?t('💎',ar(sm.j),'جواهره'):''}
+    ${sm?t('📚',ar(sm.st)+' / ٦','مراحل الكتاب'):''}${sm?t('⭐',ar(sm.sr),'نجوم الدروس'):''}${sm?t('✨',ar(sm.xp),'نقاطه'):''}
+    ${sm?t('📖',ar(sm.hz),'سور حفظها'):''}${sm?t('🤲',ar(sm.pr),'صلوات سجّلها'):''}${sm?t('🕌',ar(sm.fq),'تعلّم الصلاة'):''}
+    ${sm?t('💚',ar(sm.sl),'صلاة على النبي'):''}${sm?t('📿',ar(sm.ts),'تسبيح'):''}${sm?t('🔥',ar(sm.wd),'أطول ورد'):''}
+    ${sm?t('🌷',ar(sm.ak),'أخلاق'):''}${sm?t('🏅',ar(sm.ttl),'إنجازات'):''}${t('🕌',(sm?sm.mq:(HL&&HL.i.includes('d_mosque')))?'✓':'—','عنده مسجد')}
+    ${t('🧱',W[+u[0]],'سور البيت')}${t('🌳',G[+u[1]],'الحديقة')}${t('🍎',ar(T.length)+' / ٣','أشجاره')}
+    ${sm?t(sm.dt?'🧹':'✨',sm.dt?'متّسخ':'نظيف','بيته الآن'):''}</div>`}
 /* 👁 بطاقة الطفل: كل معلوماته، وأزرار التنبيه والحظر والجائزة */
 async function kidCard(id){const API=O();let p=(all||[]).find(x=>x.id==id);
   try{const v=(await API.db.ref('profiles/'+id).get()).val();if(v)p=Object.assign({id},p||{},{nick:v.nick,av:v.av,lv:v.lv|0,tt:v.tt||'',wins:v.wins|0,games:v.games|0,code:v.code||'',seen:+v.seen||0,acc:v.acc||{},md:v.md||'',hist:typeof v.hist=='string'?v.hist:'',nts:+v.nts||0,since:+v.since||0,sx:v.sx||sexOf(v.av)})}catch(e){}
   if(!p)return;let on=false;try{on=!!(await API.db.ref('presence/'+id).get()).val()}catch(e){}
+  // v8.2: بيت الطفل كما يراه، وملخّص تقدّمه (sm)
+  let hv=null,sm=null;try{hv=(await API.db.ref('houses/'+id).get()).val()}catch(e){}try{sm=(await API.db.ref('profiles/'+id+'/sm').get()).val()}catch(e){}
+  const HL=hv&&window.Deco&&Deco.cleanLook?Deco.cleanLook(hv):null;
   const b=banOf(id),a=p.acc||{},ac=accOf(p);
   const md=String(p.md||'').split(',').filter(Boolean).map(x=>{const [k,t]=x.split(':');return `${['','🥉','🥈','🥇','💎'][t|0]||''}${{usul:'📚',pray:'🤲',fiqh:'🕌',hifz:'📖',tilawa:'🎤',sal:'💚',tas:'📿',champ:'⚔️',akhlaq:'🌷',wird:'🔥',banna:'🏡',garden:'🌱'}[k]||''}`}).join(' ');
-  modal(`<div style="font-size:56px;line-height:1.2">${esc(p.av)}</div><h3 style="margin:2px 0">${esc(p.nick)}</h3>
+  modal(`${HL&&window.Bayt?`<div class="bhouse" style="height:170px;margin-bottom:6px">${Bayt.houseSVG(HL.f,-1,0,true,false,HL)}</div>`:''}
+    <div style="font-size:${HL?40:56}px;line-height:1.2">${esc(p.av)}</div><h3 style="margin:2px 0">${esc(p.nick)}</h3>
     <p style="margin:2px 0">${p.lv?`<span class="aqlv">⭐ المستوى ${ar(p.lv)}</span>`:''} ${p.tt?`<span class="aqtt">${esc(p.tt)}</span>`:''}</p>
     ${md?`<p style="font-size:20px;margin:4px 0">${md}</p>`:''}
+    ${kidDetails(sm,HL)}
     <div style="text-align:right;font-size:15px;line-height:1.9;background:#f6fbf8;border-radius:14px;padding:6px 10px">
       ${on?'🟢 متصل الآن':`🕒 آخر دخول: <b>${ago(p.seen)}</b>`}<br>
       🏆 ${ar(p.wins)} فوز من ${ar(p.games)} مباراة أونلاين<br>

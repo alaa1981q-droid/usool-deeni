@@ -263,9 +263,12 @@ function publish(){const API=O();if(!API||!API.profile||!API.db)return;const s=s
   const md=MEDALS.filter(m=>s.tiers[m.id]).map(m=>m.id+':'+s.tiers[m.id]).join(',');
   const a=A(),w=API.week();if(!a.wk||a.wk.w!==w){a.wk={w,base:s.x};Aamal.save()}
   const wx=Math.max(0,s.x-a.wk.base);
-  const key=[s.L,t&&t.id,md,wx,API.profile.nick,API.profile.av].join('|');if(key==pubKey)return;pubKey=key;
-  const tt=t?`${t.e} ${t.n}`:'';Object.assign(API.profile,{lv:s.L,tt,md});
-  API.db.ref('profiles/'+API.me).update({lv:s.L,tt,md}).catch(()=>{});
+  // ملخّص تقدّم الطفل للمدير (v8.2): يُنشر في profiles/$uid/sm
+  const c=s.c,sm={st:c.stages|0,sr:c.stars|0,hz:c.hifz|0,pr:c.pray|0,sl:c.sal|0,ts:c.tas|0,wd:c.wird|0,ak:c.akhlaq|0,fq:c.fiqh|0,cu:c.cups|0,fl:c.floors|0,xp:s.x|0,
+    j:window.Deco?Deco.j|0:0,dt:window.Aamal&&Aamal.dirt?Aamal.dirt():0,u:window.Binaa?Binaa.code():'',mq:window.Deco&&Deco.owns('d_mosque')?1:0,ttl:s.titles.length};
+  const key=[s.L,t&&t.id,md,wx,API.profile.nick,API.profile.av,JSON.stringify(sm)].join('|');if(key==pubKey)return;pubKey=key;
+  const tt=t?`${t.e} ${t.n}`:'';Object.assign(API.profile,{lv:s.L,tt,md,sm});
+  API.db.ref('profiles/'+API.me).update({lv:s.L,tt,md,sm}).catch(()=>{});
   if(wx>0)API.db.ref(`leader/${w}/${API.me}`).update({nick:API.profile.nick,av:API.profile.av,xp:wx,lv:s.L,tt}).catch(()=>{})}
 
 /* ---------- الاحتفال: ارتفعت درجتك / وسام جديد / لقب جديد / جائزة للبيت ---------- */
@@ -417,7 +420,7 @@ function tilt(el){if(!el||el.dataset.t3)return;el.dataset.t3=1;el.classList.add(
     el.classList.remove('idle');svg.style.transform=`rotateY(${x*24}deg) rotateX(${-y*14}deg) scale(1.04)`;clearTimeout(t);t=setTimeout(()=>{svg.style.transform='';el.classList.add('idle')},1500)};
   el.addEventListener('pointermove',mv);el.addEventListener('pointerdown',mv)}
 if(window.Deco&&Deco.menuHook){const orig=Deco.menuHook;Deco.menuHook=function(B0){orig.apply(this,arguments);
-  const hb=B0.querySelector('.bhouse');tilt(hb);if(hb){hb.insertAdjacentHTML('afterend','<button class="btn v3open" id="v3Open">🏡✨ شاهد بيتك ثلاثي الأبعاد</button>');$('#v3Open').onclick=()=>{tone(880,.05,'sine',.08);view3D()}}
+  const hb=B0.querySelector('.bhouse');if(hb){hb.insertAdjacentHTML('afterend','<button class="btn v3open" id="v3Open">🏡✨ شاهد بيتك ثلاثي الأبعاد</button>');$('#v3Open').onclick=()=>{tone(880,.05,'sine',.08);view3D()}}
   const own=Deco.deeds().filter(i=>Deco.owns(i.id)).length,all=Deco.deeds().length;
   const box=document.createElement('div');box.className='dbuild';
   box.innerHTML=`<h4>🤲 ${B('ابنِ','ابني')} بيتك بالأعمال الصالحة · ${ar(own)}/${ar(all)} جائزة</h4><div class="aqdo">${doBtns()}</div>`;

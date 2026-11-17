@@ -169,7 +169,7 @@ function gardenSVG(g,layer){g=cleanG(g);let gi=0,si=0;const out=[];
   return out.sort((a,b)=>a[0]-b[0]).map(x=>x[1]).join('')}
 function lookItems(L){return String(L.i||'').split(',').filter(id=>IT[id])}
 const Deco={
-  myLook(){return {c:Bayt.cups,p:myPaint(),w:myWall(),f:Bayt.done,i:Object.keys(js.on).filter(id=>js.on[id]&&js.own[id]).join(','),g:window.Aamal?cleanG(Aamal.d.gl):'',dt:window.Aamal&&Aamal.dirt?Aamal.dirt():0}},
+  myLook(){return {c:Bayt.cups,p:myPaint(),w:myWall(),f:Bayt.done,i:Object.keys(js.on).filter(id=>js.on[id]&&js.own[id]).join(','),g:window.Aamal?cleanG(Aamal.d.gl):'',dt:window.Aamal&&Aamal.dirt?Aamal.dirt():0,u:window.Binaa?Binaa.code():'',job:window.Binaa?Binaa.job:null}},
   svg(L,layer,full,withRoof){const ids=lookItems(L);let s='';
     if(layer=='back')s+='<style>.dk-bob,.dk-fly,.dk-flut,.dk-swim,.dk-drift,.dk-twinkle,.dk-tw{transform-box:fill-box;transform-origin:center}.dk-bob{animation:dkbob 2.2s ease-in-out infinite}.dk-fly{animation:dkfly 3s ease-in-out infinite}.dk-flut{animation:dkflut 1.6s ease-in-out infinite}.dk-swim{animation:dkswim 4s ease-in-out infinite}.dk-drift{animation:dkdrift 7s ease-in-out infinite}.dk-twinkle,.dk-tw{animation:dktw 1.4s ease-in-out infinite}@keyframes dkbob{50%{transform:translateY(-4px)}}@keyframes dkfly{50%{transform:translate(8px,-6px)}}@keyframes dkflut{50%{transform:translate(4px,-5px) rotate(-12deg)}}@keyframes dkswim{50%{transform:translateX(-14px)}}@keyframes dkdrift{50%{transform:translateX(16px)}}@keyframes dktw{50%{opacity:.35}}</style>';
     ids.forEach(id=>{const it=IT[id];if(id!='d_mosque'&&it.layer==layer&&it.layer!='room'&&(!it.need||ids.includes(it.need)))s+=itemSVG(it,full,withRoof)});
@@ -186,7 +186,7 @@ const Deco={
   // جائزة عمل صالح: تُضاف للبيت وتظهر فورًا. ترجع true إذا كانت جديدة
   grant(id){if(!IT[id]||js.own[id])return false;js.own[id]=1;js.on[id]=1;jsave();publishSoon();return true},
   owns:id=>!!js.own[id],item:id=>IT[id],deeds:()=>ITEMS.filter(i=>i.deed),
-  menuHook,get j(){return js.j}
+  menuHook,get j(){return js.j},pub:()=>publishSoon(),cleanLook:h=>clean(h)
 };
 window.Deco=Deco;
 // فلاتر الألوان تُضاف مرة واحدة في الصفحة
@@ -438,8 +438,8 @@ const ready=()=>O()&&O().db&&O().me&&O().profile;
 let pubT=0;
 function publishSoon(){clearTimeout(pubT);pubT=setTimeout(publish,1200)}
 function publish(){if(!ready())return;const A=O(),L=Deco.myLook();
-  A.db.ref('houses/'+A.me).set({f:Bayt.done,c:Bayt.cups,p:L.p,w:L.w,i:L.i,g:L.g||'',n:A.profile.nick,a:A.profile.av,t:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{})}
-const clean=h=>({w:WALLS.some(w=>w.id==(h&&h.w))?h.w:'cream',f:Math.max(0,Math.min(5,h&&h.f|0)),c:Math.max(0,+(h&&h.c)||0),p:PT[h&&h.p]?h.p:'sand',i:lookItems({i:h&&h.i}).join(','),g:cleanG(h&&h.g)});
+  A.db.ref('houses/'+A.me).set({f:Bayt.done,c:Bayt.cups,p:L.p,w:L.w,i:L.i,g:L.g||'',u:L.u||'',n:A.profile.nick,a:A.profile.av,t:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{})}
+const clean=h=>({w:WALLS.some(w=>w.id==(h&&h.w))?h.w:'cream',f:Math.max(0,Math.min(5,h&&h.f|0)),c:Math.max(0,+(h&&h.c)||0),p:PT[h&&h.p]?h.p:'sand',i:lookItems({i:h&&h.i}).join(','),g:cleanG(h&&h.g),u:/^[0-3]{5}$/.test(h&&h.u||'')?h.u:''});
 
 async function friends(){show('jannah');backTo=null;$('#jTitle').textContent='👥 بيوت أصدقائي';updJ();const B=$('#jBody');
   B.innerHTML=`<div class="handoff"><div class="big spin">🌐</div><p>جارٍ الاتصال…</p></div>`;
