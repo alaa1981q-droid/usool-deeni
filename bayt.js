@@ -98,6 +98,7 @@ css.textContent=`
 /* v8.1: في الليل تصير حواف الصورة ليلية أيضًا، وتختفي الشمس */
 body.night .bhouse{background:linear-gradient(#16244a,#24365e 62%,#24402f 84%,#1a3324)}
 body.night .bhouse svg .hsun{display:none}
+body.night .bhouse svg .bn-mk,body.night .bhouse svg .bn-rdy{filter:brightness(2.3)}
 .bhouse svg .hcl,.bhouse svg .hbd{transform-box:fill-box}.bhouse svg .hcl{animation:hcl 14s ease-in-out infinite alternate}.bhouse svg .hbd{animation:hbd 6s ease-in-out infinite alternate}.bhouse svg .hwv{stroke-dasharray:10 6;animation:hwv 2.5s linear infinite}@keyframes hcl{to{transform:translateX(26px)}}@keyframes hbd{to{transform:translate(40px,-10px)}}@keyframes hwv{to{stroke-dashoffset:-32}}
 .bhouse svg{display:block;width:100%;height:auto}
 .bhouse.sm{height:200px}.bhouse.sm svg{height:100%;width:100%}
@@ -341,7 +342,8 @@ function ySeg(x1,y1,x2,y2,lv){const d=Math.hypot(x2-x1,y2-y1);let s='';
     const n=Math.max(1,Math.round(d/28));for(let k=0;k<=n;k++){const x=x1+(x2-x1)*k/n,y=y1+(y2-y1)*k/n;s+=`<rect x="${x-2.5}" y="${y-15}" width="5" height="15" fill="#fffaf0" stroke="#d8cdb8" stroke-width=".6"/><circle cx="${x}" cy="${y-16.5}" r="2.4" fill="url(#hGold)"/>`}
     s+=`<path d="M${x1} ${y1-5} L${x2} ${y2-5}" stroke="#e9dcc0" stroke-width=".8" stroke-dasharray="3 3"/>`}
   return s}
-function yMark(x,y,plus){return `<g class="bn-mk"><circle cx="${x}" cy="${y}" r="8.5" fill="#ffd54a" stroke="#fff" stroke-width="1.6"/><text x="${x}" y="${y+4}" text-anchor="middle" font-size="11.5" font-weight="900" fill="#7a4f00" font-family="Tajawal,sans-serif">${plus?'+':'⬆'}</text></g>`}
+// v8.5: الدائرة الصفراء نفسها تُلمَس (كانت خارج data-up فلا يحدث شيء)، وأكبر، وتبقى مضيئة في الليل
+function yMark(x,y,plus,p){return `<g data-up="${p}"><circle cx="${x}" cy="${y}" r="18" fill="#000" opacity="0"/><g class="bn-mk"><circle cx="${x}" cy="${y}" r="14" fill="#ffe066" opacity=".45"/><circle cx="${x}" cy="${y}" r="11" fill="#ffd21f" stroke="#fff" stroke-width="2.2"/><text x="${x}" y="${y+5.5}" text-anchor="middle" font-size="16" font-weight="900" fill="#7a4f00" font-family="Tajawal,sans-serif">${plus?'+':'⬆'}</text></g></g>`}
 // عامل بلا ملامح: role = hammer (يطرق) | walk (يمشي رايح جاي شايل طابوقة) | cheer (يقفز فرحًا بعد الانتهاء)
 function yWorker(x,y,k=1,role='hammer'){
   const legs=`<rect x="-3" y="-6" width="2.2" height="6" rx="1" fill="#3d4a5a"/><rect x=".8" y="-6" width="2.2" height="6" rx="1" fill="#3d4a5a"/>`;
@@ -401,8 +403,8 @@ function yard(u,job,ed,fx){u=/^[0-3]{5}$/.test(u||'')?u:'00000';const w=+u[0],g=
   else if(rdy){const p=job.p,n=Math.max(1,Math.min(3,job.to|0)),P=spots(p);
     s+=P.slice(0,n).map(([x,y],i)=>`<g style="animation-delay:${i*.2}s">${yWorker(x,y,1.6,'cheer')}</g>`).join('');
     const [sx,sy]=signAt(p);s+=yReady(sx,sy+6,p)}
-  else if(ed){const mk=[];if(w<3)mk.push([YXL+60,YFY-26,w==0]);if(w>=1&&g<3)mk.push([YCX+70,GY-2,g==0]);if(g>=1)T.forEach((lv,i)=>{if(lv<3){const [x,y]=YTS[i];mk.push([x+12,y-(lv==2?50:lv==1?26:14),lv==0])}});
-    s+=mk.map(([x,y,pl])=>yMark(x,y,pl)).join('')}
+  else if(ed){const mk=[];if(w<3)mk.push([YXL+60,YFY-26,w==0,'w']);if(w>=1&&g<3)mk.push([YCX+70,GY-2,g==0,'g']);if(g>=1)T.forEach((lv,i)=>{if(lv<3){const [x,y]=YTS[i];mk.push([x+12,y-(lv==2?50:lv==1?26:14),lv==0,'t'+i])}});
+    s+=mk.map(([x,y,pl,p])=>yMark(x,y,pl,p)).join('')}
   if(fx){const [x,y]=fx.p=='w'?[YCX-60,YFY]:fx.p=='g'?[YCX+60,GY+8]:YTS[+fx.p[1]];s+=ySpark(x,y)+ySpark(fx.p=='w'?YCX+70:x+4,y-6)}
   return s}
 
