@@ -135,6 +135,7 @@
         ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= (data.exists() ? data.val() : 0) + 1"
       },
       "bookDlBy": {
+        ".read": "auth != null && root.child('admins/' + auth.uid).val() === true",
         "$uid": {
           ".write": "auth != null && auth.uid === $uid && !data.exists()",
           ".validate": "newData.val() === true"

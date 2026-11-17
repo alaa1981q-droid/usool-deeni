@@ -44,8 +44,10 @@ body.night .bhouse::before{content:'🌙';position:absolute;right:3%;top:1%;widt
 .idk .nm small.st1{color:#14794f;font-size:14.5px;white-space:pre}
 .idk .stt{font-size:14px;font-weight:800;color:#3d5a4b;text-align:center;white-space:pre;flex:none;background:#f1f7f3;border-radius:12px;padding:4px 8px}
 .idk .gb{flex:none;width:44px;height:44px;border-radius:14px;border:0;font-size:22px;background:linear-gradient(#f59a3c,#e0731f);box-shadow:0 3px 0 #a8551a;color:#fff}
+.idfh{font-size:17px;font-weight:800;color:#0b3d27;background:linear-gradient(160deg,#fff,#e8f6ee);border:1.5px solid #bfe3cc;box-shadow:0 3px 0 #bfe3cc;border-radius:14px;padding:6px 10px;margin-bottom:8px;text-align:center}
 .idsubs{display:flex;align-items:center;gap:12px;width:100%;margin-bottom:12px;padding:10px 14px;border-radius:20px;text-align:right;color:inherit;
  background:linear-gradient(160deg,#fff 0%,#e7f1fd 90%);border:2px solid #bcd5f3;box-shadow:0 5px 0 #bcd5f3,0 8px 14px rgba(20,60,90,.1),inset 0 1px 0 #fff}
+.idst:active{transform:translateY(2px);box-shadow:0 1px 0 var(--d)}
 .idsubs:active{transform:translateY(3px);box-shadow:0 2px 0 #bcd5f3}
 .idsubs .e{font-size:38px;line-height:1}.idsubs .t{flex:1;min-width:0}.idsubs b{display:block;font-size:21px;color:#1d4e9e}.idsubs small{display:block;font-size:13.5px;font-weight:700;color:#3d5a4b}.idsubs .go{font-size:28px;color:#2f6fd0}
 .idkg{display:grid;grid-template-columns:1fr 1fr;gap:7px}
@@ -62,7 +64,7 @@ body.night .bhouse::before{content:'🌙';position:absolute;right:3%;top:1%;widt
 .idkg .idk .nm{width:100%}.idkg .idk .nm b{font-size:15px;line-height:1.3;padding:0 2px}
 .idkg .idk .nm small,.idkg .idk .nm small.st1{font-size:12px;line-height:1.35;white-space:nowrap}
 .idsts{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
-.idst{--c:#e8f6ee;--d:#bfe3cc;background:linear-gradient(160deg,#fff 0%,var(--c) 85%);border:1.5px solid var(--d);border-radius:12px;padding:3px 2px 4px;text-align:center;min-width:0;box-shadow:0 3px 0 var(--d),0 5px 8px rgba(20,60,40,.08),inset 0 1px 0 #fff}
+.idst{font:inherit;color:inherit;width:100%;cursor:pointer;display:block;--c:#e8f6ee;--d:#bfe3cc;background:linear-gradient(160deg,#fff 0%,var(--c) 85%);border:1.5px solid var(--d);border-radius:12px;padding:3px 2px 4px;text-align:center;min-width:0;box-shadow:0 3px 0 var(--d),0 5px 8px rgba(20,60,40,.08),inset 0 1px 0 #fff}
 /* v7.2: مجسّمة بألوان خفيفة متناوبة */
 .idst:nth-child(6n+2){--c:#e7f1fd;--d:#bcd5f3}.idst:nth-child(6n+3){--c:#fdeaf2;--d:#f2c3d6}.idst:nth-child(6n+4){--c:#fff5dc;--d:#efd99a}
 .idst:nth-child(6n+5){--c:#efe9fb;--d:#d3c6f0}.idst:nth-child(6n){--c:#e3f6f6;--d:#b4e0df}
@@ -240,7 +242,12 @@ function warnTo(id,p){const API=O();
     <div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn" id="wSend" style="background:#e57c1f">⚠️ أرسل التنبيه</button></div>`,()=>{
     $('#wSend').onclick=async()=>{const msg=$('#wMsg').value.trim();if(!msg)return;try{await API.db.ref('prizes/'+id).push({msg,j:0,w:1,ts:firebase.database.ServerValue.TIMESTAMP});closeModal();API.toast('أُرسل التنبيه ✓')}catch(e){API.toast('تعذّر الإرسال')}}})}
 function drawKids(){const el=$('#idKids');if(!el)return;let rows=[],num=false;
-  if(tab=='heroes'){rows=heroes||[];num=true}
+  const fl=FL[tab],hd=$('#kHd');if(hd)hd.remove();
+  if(fl)el.insertAdjacentHTML('beforebegin',`<div id="kHd" class="idfh">${fl[0]}</div>`);
+  if(tab=='dl'&&dlSet===false){el.innerHTML=`<p class="tip">لرؤية أسماء من نزّلوا الكتاب يجب تحديث قواعد Firebase مرة واحدة (أرسلها لك Claude).<br>العدد الكلّي ظاهر في الإحصائيات.</p>`;return}
+  if(tab=='dl'&&dlSet===null){el.innerHTML='<p class="tip">⏳</p>';return}
+  if(fl){rows=(all||[]).filter(fl[1]).sort(fl[2]);num=tab=='lv'||tab=='play';$('#kHd').textContent=`${fl[0]} · ${ar(rows.length)}`}
+  else if(tab=='heroes'){rows=heroes||[];num=true}
   else if(tab=='top'){rows=(all||[]).slice().sort((a,b)=>(b.lv-a.lv)||(b.wins-a.wins)).slice(0,20);num=true}
   else if(tab=='sus'){rows=(all||[]).filter(p=>sus(p)||banOf(p.id)).sort((a,b)=>(accOf(a)||0)-(accOf(b)||0))}
   else if(tab=='gone'){rows=(all||[]).filter(gone).sort((a,b)=>a.seen-b.seen)}
@@ -284,8 +291,16 @@ async function panel(){const API=O();heroes=null;all=null;view='main';
     $('#idNews').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>modal(`<h3 style="margin:4px 0">حذف هذه الرسالة؟</h3><p>لن يراها الأطفال الذين لم يفتحوها بعد.</p><div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn" id="dYes" style="background:var(--bad)">حذف</button></div>`,()=>{
       $('#dYes').onclick=async()=>{closeModal();try{await API.db.ref('news/'+b.dataset.del).remove();panel()}catch(e){API.toast('تعذّر الحذف')}}}))}catch(e){$('#idNews').innerHTML='<p class="tip">تعذّر التحميل</p>'}}
 /* 👥 صفحة المشتركين: كل الأطفال (حتى لو صاروا ألفًا) بصفحات من ٤٠، مع بحث وتبويبات */
-let view='main',lim=40;
-function openKids(){view='kids';tab='all';q='';lim=40;window.scrollTo(0,0);
+let view='main',lim=40,dlSet=null;
+// الفلاتر التي تفتحها مربعات الإحصائيات
+const DAY=864e5,ago_=p=>p.seen?Date.now()-p.seen:Infinity,bySeen=(a,b)=>(b.seen||0)-(a.seen||0);
+const FL={b:['👦 الأولاد',p=>p.sx=='b',bySeen],g:['👧 البنات',p=>p.sx=='g',bySeen],nosx:['❔ لم يختاروا ولد أو بنت',p=>!p.sx,bySeen],
+  now:['🟢 داخلين الآن تقريبًا',p=>ago_(p)<180000,bySeen],d1:['☀️ دخلوا اليوم',p=>ago_(p)<DAY,bySeen],d7:['📅 دخلوا هذا الأسبوع',p=>ago_(p)<7*DAY,bySeen],
+  d30:['🗓️ دخلوا هذا الشهر',p=>ago_(p)<30*DAY,bySeen],new:['🆕 الجدد هذا الأسبوع',p=>p.since&&Date.now()-p.since<7*DAY,(a,b)=>b.since-a.since],
+  play:['🎮 لعبوا أونلاين (الأكثر لعبًا أولًا)',p=>p.games>0,(a,b)=>b.games-a.games||b.wins-a.wins],
+  lv:['⭐ كل الأطفال حسب المستوى',p=>true,(a,b)=>(b.lv-a.lv)||bySeen(a,b)],
+  dl:['📥 نزّلوا الكتاب',p=>dlSet&&dlSet[p.id],bySeen],ban:['⛔ المحظورون الآن',p=>!!banOf(p.id),bySeen]};
+function openKids(t0){view='kids';tab=t0||'all';q='';lim=40;window.scrollTo(0,0);
   body().innerHTML=`<div class="idban"><span class="sh">👥</span><span><b>المشتركون</b><small>${ar((all||[]).length)} طفل · اضغط على أي طفل لترى ملفّه</small></span></div>
     <input class="inp" id="kQ" placeholder="🔎 ابحث باسم الطفل أو رمزه" style="text-align:right;margin-bottom:6px">
     <div class="jrooms" style="margin-bottom:8px;flex-wrap:wrap"><button data-tab="all">👥 الكل</button><button data-tab="heroes">🏅 الأبطال</button><button data-tab="top">⭐ المميّزون</button><button data-tab="names">✏️ غيّروا أسماءهم</button><button data-tab="gone">💤 غائبون</button><button data-tab="sus">⚠️ المشبوهون</button></div>
@@ -295,7 +310,8 @@ function openKids(){view='kids';tab='all';q='';lim=40;window.scrollTo(0,0);
   const tabs=()=>{body().querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab==tab));lim=40;drawKids()};
   body().querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;tabs()});
   $('#kQ').oninput=e=>{q=e.target.value;if(q.trim())tab='all';tabs()};
-  $('#idKBack').onclick=backMain;tabs()}
+  $('#idKBack').onclick=backMain;tabs();
+  if(tab=='dl'&&!dlSet)O().db.ref('stats/bookDlBy').get().then(x=>{dlSet=x.val()||{};drawKids()}).catch(()=>{dlSet=false;drawKids()})}
 function backMain(){view='main';window.scrollTo(0,0);panel()}
 /* 📊 الإحصائيات */
 async function stats(API){const el=$('#idStats');if(!el)return;const L=all||[],t=Date.now(),D1=864e5;
@@ -307,14 +323,16 @@ async function stats(API){const el=$('#idStats');if(!el)return;const L=all||[],t
   const ren=L.filter(p=>p.hist).length,bn=Object.values(bans).filter(x=>x&&x.until>t).length,sus2=L.filter(sus).length;
   let dl='—';try{dl=ar((await API.db.ref('stats/bookDl').get()).val()|0)}catch(e){}
   // v7.1: مربعات صغيرة (الأيقونة والرقم في سطر واحد) وكتابة أوضح، حتى لا تطول الصفحة
-  const tile=(e,v,l)=>`<div class="idst"><div><span>${e}</span><b>${v}</b></div><small>${l}</small></div>`;
+  const tile=(e,v,l,f)=>`<button class="idst" data-f="${f}"><div><span>${e}</span><b>${v}</b></div><small>${l}</small></button>`;
   el.innerHTML=`<div class="idsts">
-    ${tile('👥',ar(n),'كل المشتركين')}${tile('👦',ar(b),'أولاد')}${tile('👧',ar(g),'بنات')}
-    ${tile('🟢',ar(on),'داخلين الآن تقريبًا')}${tile('☀️',ar(d1),'دخلوا اليوم')}${tile('📅',ar(d7),'دخلوا هذا الأسبوع')}
-    ${tile('🗓️',ar(d30),'دخلوا هذا الشهر')}${tile('🆕',ar(nw),'جدد هذا الأسبوع')}${tile('🏅',ar((heroes||[]).length),'في أبطال الأسبوع')}
-    ${tile('⚔️',ar(games),'مباراة أونلاين')}${tile('🎮',ar(players),'لعبوا أونلاين')}${tile('📥',dl,'نزّلوا الكتاب')}
-    ${tile('⭐',avg?ar(Math.round(avg*10)/10):'—','متوسط المستوى')}${tile('👑',mx.lv?ar(mx.lv):'—',mx.lv?'أعلى مستوى: '+esc(mx.nick):'أعلى مستوى')}${tile('✏️',ar(ren),'غيّروا أسماءهم')}
-    ${tile('⚠️',ar(sus2),'مشبوهون')}${tile('⛔',ar(bn),'محظورون الآن')}</div>
-    ${n-b-g>0?`<p class="tip" style="margin:6px 0 0">❔ ${ar(n-b-g)} لم يُعرف إن كان ولدًا أو بنتًا بعد (يُعرف عندما يختار)</p>`:''}`}
+    ${tile('👥',ar(n),'كل المشتركين','all')}${tile('👦',ar(b),'أولاد','b')}${tile('👧',ar(g),'بنات','g')}
+    ${tile('🟢',ar(on),'داخلين الآن تقريبًا','now')}${tile('☀️',ar(d1),'دخلوا اليوم','d1')}${tile('📅',ar(d7),'دخلوا هذا الأسبوع','d7')}
+    ${tile('🗓️',ar(d30),'دخلوا هذا الشهر','d30')}${tile('🆕',ar(nw),'جدد هذا الأسبوع','new')}${tile('🏅',ar((heroes||[]).length),'في أبطال الأسبوع','heroes')}
+    ${tile('⚔️',ar(games),'مباراة أونلاين','play')}${tile('🎮',ar(players),'لعبوا أونلاين','play')}${tile('📥',dl,'نزّلوا الكتاب','dl')}
+    ${tile('⭐',avg?ar(Math.round(avg*10)/10):'—','متوسط المستوى','lv')}${tile('👑',mx.lv?ar(mx.lv):'—',mx.lv?'أعلى مستوى: '+esc(mx.nick):'أعلى مستوى','max')}${tile('✏️',ar(ren),'غيّروا أسماءهم','names')}
+    ${tile('⚠️',ar(sus2),'مشبوهون','sus')}${tile('⛔',ar(bn),'محظورون الآن','ban')}${n-b-g>0?tile('❔',ar(n-b-g),'ولد أو بنت؟ لم يختر','nosx'):''}</div>
+    <p class="tip" style="margin:6px 0 0">👆 اضغط على أي مربع لترى أسماء أصحابه</p>`;
+  el.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{const f=b.dataset.f;
+    if(f=='max'){if(mx.id)kidCard(mx.id);return}openKids(f)})}
 window.Idara={open:openAdmin,inbox,dayNight};
 })();
