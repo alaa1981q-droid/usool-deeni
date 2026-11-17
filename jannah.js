@@ -154,7 +154,9 @@ function streetSVG(xs){const g=292;xs=xs||[10,42,74];
 let SP=null;const HL=100,HR=292;
 function mkSpread(L){if(!L||!L.wide)return null;const MQ=lookItems(L).includes('d_mosque');
   // v9.1: الأرض بجانب البيت صارت للحديقة والأشجار، فالزينة الأرضية تنتقل كلّها إلى الأطراف
-  return (x,y)=>y<175?180+(x-180)*1.6:x<HL?x-118:x>HR?(MQ?474+(x-HR)*1.7:x+118):x}
+  // v9.2: وما كان على الأرض أمام البيت (سيارة، مقعد، ورود…) يبتعد أيضًا عن الحديقة، إلا ما بجانب الباب
+  return (x,y)=>y<175?180+(x-180)*1.6:x<HL?x-118:x>HR?(MQ?474+(x-HR)*1.7:x+118)
+    :y>=297&&Math.abs(x-163)>30?(x<163?x-150:(MQ?480+(x-200)*.6:x+125)):x}
 const spX=(x,y)=>SP?SP(x,y):x;
 function towerSVG(){const c=spX(30,292),g=292,L='#f6e3b8',R='#d8b880',T='#b9851a';
   const band=y=>`<rect x="${c-11}" y="${y}" width="22" height="3" fill="url(#hGold)"/>`;

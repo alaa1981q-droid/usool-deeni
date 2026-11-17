@@ -332,6 +332,7 @@ function houseSVG(full,part,frac,withRoof,anim,look){
   if(hasGift('flowers'))s+=[[FX-14,GY+2],[FX+10,GY+4],[FX+FW-6,GY+4],[FX+FW+DX-10,GY-2],[FX+FW+24,GY+2]].map(([x,y])=>`<g><ellipse cx="${x}" cy="${y}" rx="13" ry="8" fill="#2e9c55"/>${[[-6,-3,'#e2504a'],[1,-6,'#ff8ac2'],[7,-2,'#f2b632'],[-1,1,'#fff']].map(([a,b,c])=>`<circle cx="${x+a}" cy="${y+b}" r="2.8" fill="${c}"/>`).join('')}</g>`).join('');
   if(hasGift('fountain')){const x=0,y=0;s+=`<g transform="translate(${L.wide?-62:50} ${GY+14}) scale(1.5)"><ellipse cx="${x}" cy="${y}" rx="20" ry="6" fill="#bfc9cf" stroke="#8b979e"/><ellipse cx="${x}" cy="${y-1}" rx="16" ry="4" fill="#7cc8ff"/><rect x="${x-2.5}" y="${y-22}" width="5" height="21" fill="#bfc9cf"/><ellipse cx="${x}" cy="${y-22}" rx="9" ry="3" fill="#bfc9cf"/><path d="M${x} ${y-24} q-10 -12 -14 4 M${x} ${y-24} q10 -12 14 4 M${x} ${y-24} v-10" stroke="#7cc8ff" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>`}
   if(D)s+=D.svg(L,'front',full,withRoof);
+  if(full>0&&YTOP){const HCX=FX+FW/2+DX/2,HKX=top>=5?.8:top>=4?.9:1;s+=L.wide||HK==1?YTOP:`<g transform="translate(${HCX} ${GY}) scale(${HKX} ${HK}) translate(${-HCX} ${-GY})">${YTOP}</g>`;YTOP=''}
   if(full==0&&part<0)s+=floorPart(0,0)+`<text x="${FX+FW/2}" y="${fy(0)-14}" text-anchor="middle" font-size="16" font-weight="800" fill="#3d5a4a" font-family="Tajawal,sans-serif">هنا سيُبنى بيتك</text>`;
   // معرّفات فريدة لكل رسمة: إذا تكرّرت ووقعت الأولى في شاشة مخفية تختفي الألوان من الباقي
   const k=++svgN;return (s+'</svg>').replace(/(id="|url\(#)(h[A-Z]\w*)/g,`$1$2_${k}`)}
@@ -379,7 +380,9 @@ function yTree(i,lv,ed,canPlant,ts=YTS,tk=1.65){const [x,y]=ts[i],c=YFR[i];let s
   return s+'</g></g>'}
 /* v9.1: في عرض البيت بالعرض الفناء أوسع: السور يمتدّ على الجانبين، والحديقة أطول، والأشجار أكبر وفي الجوانب، ولا يصغر مع طوابق البيت */
 const YWIDE=mq=>({xl:-30,xr:mq?318:400,cx:YCX,ts:mq?[[10,GY+7],[62,GY+9],[300,GY+8]]:[[15,GY+7],[330,GY+8],[382,GY+5]],tk:2.3});
-function yard(u,job,ed,fx,Gm){const {xl:YXL,xr:YXR,cx:YCX,ts:YTS,tk}=Gm||{xl:YXL0,xr:YXR0,cx:YCX0,ts:YTS0,tk:1.65};u=/^[0-3]{5}$/.test(u||'')?u:'00000';const w=+u[0],g=+u[1],T=[+u[2],+u[3],+u[4]];
+// v9.2: الدوائر الصفراء وشارة «استلم» تُرسم في آخر الصورة (فوق الزينة) حتى لا تغطّيها السيارة أو الورود
+let YTOP='';
+function yard(u,job,ed,fx,Gm){YTOP='';const {xl:YXL,xr:YXR,cx:YCX,ts:YTS,tk}=Gm||{xl:YXL0,xr:YXR0,cx:YCX0,ts:YTS0,tk:1.65};u=/^[0-3]{5}$/.test(u||'')?u:'00000';const w=+u[0],g=+u[1],T=[+u[2],+u[3],+u[4]];
   const busy=!!(job&&!job.ready),rdy=!!(job&&job.ready),pop=(p,html)=>fx&&fx.p==p?`<g class="bn-pop">${html}</g>`:html;
   // الحديقة
   let G=`<g data-up="g"><rect x="${YXL+4}" y="${GY+1}" width="${YCX-24-YXL-4}" height="${YFY-GY-4}" fill="#000" opacity="0"/><rect x="${YCX+24}" y="${GY+1}" width="${YXR-YCX-28}" height="${YFY-GY-4}" fill="#000" opacity="0"/>`;
@@ -411,9 +414,9 @@ function yard(u,job,ed,fx,Gm){const {xl:YXL,xr:YXR,cx:YCX,ts:YTS,tk}=Gm||{xl:YXL
     const [sx,sy]=signAt(p);s+=ySign(sx,sy,50)}
   else if(rdy){const p=job.p,n=Math.max(1,Math.min(3,job.to|0)),P=spots(p);
     s+=P.slice(0,n).map(([x,y],i)=>`<g style="animation-delay:${i*.2}s">${yWorker(x,y,1.6,'cheer')}</g>`).join('');
-    const [sx,sy]=signAt(p);s+=yReady(sx,sy+6,p)}
+    const [sx,sy]=signAt(p);YTOP+=yReady(sx,sy+6,p)}
   else if(ed){const mk=[];if(w<3)mk.push([YXL+60,YFY-26,w==0,'w']);if(w>=1&&g<3)mk.push([YCX+70,GY-2,g==0,'g']);if(g>=1)T.forEach((lv,i)=>{if(lv<3){const [x,y]=YTS[i];mk.push([x+12,y-(lv==2?50:lv==1?26:14),lv==0,'t'+i])}});
-    s+=mk.map(([x,y,pl,p])=>yMark(x,y,pl,p)).join('')}
+    YTOP+=mk.map(([x,y,pl,p])=>yMark(x,y,pl,p)).join('')}
   if(fx){const [x,y]=fx.p=='w'?[YCX-60,YFY]:fx.p=='g'?[YCX+60,GY+8]:YTS[+fx.p[1]];s+=ySpark(x,y)+ySpark(fx.p=='w'?YCX+70:x+4,y-6)}
   return s}
 
