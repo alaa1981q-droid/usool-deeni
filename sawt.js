@@ -10,7 +10,13 @@ let as={sal:0,tas:0,tilawa:0,surOk:{},pray:{},prayN:0,fiqh:{},akhlaq:0,way:'',de
 try{const s=JSON.parse(localStorage.getItem(AKEY)||'null');if(s&&typeof s.sal=='number')as=Object.assign(as,s)}catch(e){}
 const asave=()=>{try{localStorage.setItem(AKEY,JSON.stringify(as))}catch(e){}};
 const today=()=>new Date().toDateString();
-window.Aamal={get d(){return as},save:asave,add(k,n){as[k]=(as[k]||0)+n;asave();window.Alqab&&Alqab.soon()},
+const dk=(t=Date.now())=>{const d=new Date(t);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
+window.Aamal={get d(){return as},save:asave,
+  add(k,n){as[k]=(as[k]||0)+n;
+    if(k=='sal'){as.salLog=as.salLog||{};as.salLog[dk()]=(as.salLog[dk()]||0)+n;const lim=Date.now()-40*864e5;Object.keys(as.salLog).forEach(d=>{const [y,m,dd]=d.split('-');if(new Date(+y,m-1,+dd).getTime()<lim)delete as.salLog[d]})}
+    asave();window.Alqab&&Alqab.soon()},
+  // مجموع الصلوات على النبي وآله بالصوت في آخر ٣٠ يومًا
+  salWin(){const L=as.salLog||{};let s=0;for(let i=0;i<30;i++)s+=L[dk(Date.now()-i*864e5)]||0;return s},
   // عمل يومي واحد يعطي جائزة مرة في اليوم
   firstToday(k){if(as.deedDay!=today()){as.deedDay=today();as.deedDone={}}if(as.deedDone[k])return false;as.deedDone[k]=1;asave();return true},
   doneToday(k){return as.deedDay==today()&&!!as.deedDone[k]},

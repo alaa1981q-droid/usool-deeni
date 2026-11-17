@@ -16,7 +16,7 @@ function fiqhBoth(){return Object.values(A().fiqh||{}).some(f=>f.wt>=.75&&f.st>=
 function C(){const a=A(),hz=J('usul5_hifz_v1').done||{},w=state.wird||{};
   if(O()&&O().profile)a.wins=O().profile.wins||0;
   return {stars:Object.values(state.stars||{}).reduce((s,x)=>s+x,0),stages:STAGES.filter(s=>state.stars[s.id]>0).length,all:allDone(),
-    hifz:Object.keys(hz).length,tilawa:a.tilawa|0,pray:a.prayN|0,fiqh:fiqhPts(),fiqh2:fiqhBoth(),sal:a.sal|0,tas:a.tas|0,
+    hifz:Object.keys(hz).length,tilawa:a.tilawa|0,pray:a.prayN|0,fiqh:fiqhPts(),fiqh2:fiqhBoth(),sal:a.sal|0,salM:window.Aamal?Aamal.salWin():0,tas:a.tas|0,
     wins:a.wins|0,akhlaq:a.akhlaq|0,deeds:a.gN|0,wird:w.best|0,cups:window.Cups?Cups.n:0,floors:window.Bayt?Bayt.done:0}}
 
 const TIERS=[{e:'🥉',n:'برونزي',xp:10,c:'#b06a2c'},{e:'🥈',n:'فضّي',xp:25,c:'#6f7f8f'},{e:'🥇',n:'ذهبي',xp:50,c:'#c98a12'},{e:'💎',n:'ماسي',xp:100,c:'#2f8fd0'}];
@@ -60,7 +60,7 @@ const lvName=L=>{let r=LEVELS[0];LEVELS.forEach(l=>{if(L>=l[0])r=l});return r};
 function snap(){const c=C(),x=xpOf(c),L=lvOf(x),tiers={};MEDALS.forEach(m=>tiers[m.id]=tierOf(m,c));
   return {c,x,L,tiers,titles:TITLES.filter(t=>t.c(c)).map(t=>t.id)}}
 // الجوائز في البيت بحسب الأعمال
-const DEED_ITEMS=[['d_h1',c=>c.hifz>=1],['d_h3',c=>c.hifz>=3],['d_h6',c=>c.hifz>=6],['d_h12',c=>c.hifz>=12],['d_rose',c=>c.sal>=10],['d_birds',c=>c.tas>=10],['d_lamps',c=>c.pray>=5],['d_star',c=>c.tilawa>=10],['d_palms',c=>c.sal>=100],['d_fruit',c=>c.pray>=35],['d_noor',c=>c.sal>=500],
+const DEED_ITEMS=[['d_h1',c=>c.hifz>=1],['d_h3',c=>c.hifz>=3],['d_h6',c=>c.hifz>=6],['d_h12',c=>c.hifz>=12],['d_rose',c=>c.sal>=10],['d_birds',c=>c.tas>=10],['d_lamps',c=>c.pray>=5],['d_star',c=>c.tilawa>=10],['d_palms',c=>c.sal>=100],['d_fruit',c=>c.pray>=35],['d_noor',c=>c.sal>=500],['d_street',c=>c.salM>=1000],
   ['d_spring',()=>Object.values(A().fiqh||{}).some(f=>f.wt>=.75)],['d_mosque',()=>Object.values(A().fiqh||{}).some(f=>f.st>=.75&&f.sl&&f.sv)]];
 /* 💪 اللقب التلقائي: من المجال الذي يتفوّق فيه الطفل، أو لقب جامع إذا تفوّق في عدّة مجالات */
 const AREAS=[
@@ -366,8 +366,10 @@ function goTo(g,ret){const click=s=>{const e=$(s);e&&e.click()};
 /* ---------- عدّاد الصلاة على النبي والتسبيح بالصوت ---------- */
 const PHR={sal:{t:'💚 صلِّ على النبي وآله',p:'اللّٰهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ وَآلِ مُحَمَّدٍ',e:'💚',why:'«من صلّى عليّ صلاةً صلّى الله عليه بها عشرًا»'},
   tas:{t:'📿 سبّح الله',p:'سُبْحَانَ اللهِ',e:'📿',why:'التسبيح يملأ بيتك في الجنة بالخير 🌳'}};
+function streetLine(){const n=Aamal.salWin(),own=window.Deco&&Deco.owns&&Deco.owns('d_street');
+  return `<div class="cupbox" style="margin:0 0 8px">${own?'🏮 مصابيح شارع بيتك تضيء! ما شاء الله':`🏮 هذا الشهر: <b>${ar(Math.min(n,1000))} / ${ar(1000)}</b> صلاة بصوتك<br><small>أكمل ١٠٠٠ خلال ٣٠ يومًا لتضيء مصابيح الشارع أمام بيتك</small>`}</div>`}
 function count(k,ret){stopVc();show('alqab');aqBack=ret||null;const P=PHR[k];$('#aqTitle').textContent=P.t;
-  $('#aqBody').innerHTML=`<p class="bcap" style="margin:0 0 8px">${B('قلها','قوليها')} <b>١٠ مرات</b> بصوتك، والتطبيق يعدّ لك 🎤<br><small>${P.why}</small></p><div id="aqVc"></div><div id="aqCups"></div>
+  $('#aqBody').innerHTML=`<p class="bcap" style="margin:0 0 8px">${B('قلها','قوليها')} <b>١٠ مرات</b> بصوتك، والتطبيق يعدّ لك 🎤<br><small>${P.why}</small></p>${k=='sal'?streetLine():''}<div id="aqVc"></div><div id="aqCups"></div>
     <div class="nav"><button class="btn sec" id="aqDone">رجوع</button></div>`;
   vc=Voice.counter($('#aqVc'),{phrase:P.p,target:10,emoji:P.e,onDone:n=>{Aamal.add(k,n);Aamal.grow(k);const first=Aamal.firstToday(k);
     try{fanfare();confetti()}catch(e){}
