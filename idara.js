@@ -44,6 +44,10 @@ body.night .bhouse::before{content:'🌙';position:absolute;right:3%;top:1%;widt
 .idk .nm small.st1{color:#14794f;font-size:14.5px;white-space:pre}
 .idk .stt{font-size:14px;font-weight:800;color:#3d5a4b;text-align:center;white-space:pre;flex:none;background:#f1f7f3;border-radius:12px;padding:4px 8px}
 .idk .gb{flex:none;width:44px;height:44px;border-radius:14px;border:0;font-size:22px;background:linear-gradient(#f59a3c,#e0731f);box-shadow:0 3px 0 #a8551a;color:#fff}
+.idsubs{display:flex;align-items:center;gap:12px;width:100%;margin-bottom:12px;padding:10px 14px;border-radius:20px;text-align:right;color:inherit;
+ background:linear-gradient(160deg,#fff 0%,#e7f1fd 90%);border:2px solid #bcd5f3;box-shadow:0 5px 0 #bcd5f3,0 8px 14px rgba(20,60,90,.1),inset 0 1px 0 #fff}
+.idsubs:active{transform:translateY(3px);box-shadow:0 2px 0 #bcd5f3}
+.idsubs .e{font-size:38px;line-height:1}.idsubs .t{flex:1;min-width:0}.idsubs b{display:block;font-size:21px;color:#1d4e9e}.idsubs small{display:block;font-size:13.5px;font-weight:700;color:#3d5a4b}.idsubs .go{font-size:28px;color:#2f6fd0}
 .idkg{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 /* v7.3: بطاقات الأطفال صغيرة، اثنتان في كل سطر، مجسّمة بألوان خفيفة */
 .idkg .idk{--c:#e8f6ee;--d:#bfe3cc;position:relative;flex-direction:column;gap:0;margin:0;padding:6px 4px 6px;text-align:center;border-radius:14px;min-width:0;
@@ -125,7 +129,7 @@ setInterval(()=>{if(document.visibilityState=='visible')inbox()},10*60000);
 const sec=document.createElement('section');sec.className='screen';sec.id='idara';
 sec.innerHTML=`<div class="bar"><button class="back" id="idBack">›</button><div class="ttl">🛡️ الإدارة</div></div><div id="idBody" style="flex:1;display:flex;flex-direction:column"></div>`;
 document.querySelector('.app').appendChild(sec);
-$('#idBack').onclick=()=>{renderHome();show('home')};
+$('#idBack').onclick=()=>{if(view=='kids'){backMain();return}renderHome();show('home')};
 // الدخول: ٥ ضغطات على سطر الإصدار
 let taps=0,tapT=0;const vl=$('#verLine');if(vl)vl.addEventListener('click',()=>{taps++;clearTimeout(tapT);tapT=setTimeout(()=>taps=0,2500);if(taps>=5){taps=0;openAdmin()}});
 const body=()=>$('#idBody');
@@ -139,7 +143,7 @@ async function openAdmin(){show('idara');body().innerHTML=`<div class="handoff">
     $('#idCp').onclick=()=>{try{navigator.clipboard.writeText(API.me).then(()=>API.toast('نُسخ ✓'))}catch(e){API.toast(API.me)}};return}
   panel()}
 const JOPT=[0,10,25,50,100,200].map(n=>`<option value="${n}">${n?`💎 ${ar(n)} جوهرة`:'بلا جواهر'}</option>`).join('');
-let all=null,heroes=null,tab='heroes',q='';
+let all=null,heroes=null,tab='all',q='';
 const key=r=>Math.max(r.xp|0,(r.wins|0)*10);
 async function loadKids(API){
   if(!heroes){try{const s=(await API.db.ref('leader/'+API.week()).get()).val()||{};heroes=Object.entries(s).map(([id,v])=>({id,...v})).sort((a,b)=>key(b)-key(a)).slice(0,15)}catch(e){heroes=[]}}
@@ -242,8 +246,10 @@ function drawKids(){const el=$('#idKids');if(!el)return;let rows=[],num=false;
   else if(tab=='gone'){rows=(all||[]).filter(gone).sort((a,b)=>a.seen-b.seen)}
   else if(tab=='names'){rows=(all||[]).filter(p=>p.hist).sort((a,b)=>b.nts-a.nts)}
   else if(tab=='recent'){rows=(all||[]).filter(p=>p.seen).sort((a,b)=>b.seen-a.seen).slice(0,30)}
-  else{const t=q.trim().replace(/[أإآ]/g,'ا');rows=(all||[]).filter(r=>!t||String(r.nick).replace(/[أإآ]/g,'ا').includes(t)||String(r.code).toUpperCase()==t.toUpperCase()).slice(0,40)}
-  el.innerHTML=rows.length?'<div class="idkg">'+rows.map((r,i)=>kidRow(r,num?i:null)).join('')+'</div>':`<p class="tip">${tab=='all'?(q?'لا يوجد طفل بهذا الاسم':`عدد الأطفال: ${ar((all||[]).length)} — اكتب اسمًا للبحث`):tab=='sus'?'لا أحد مشبوه 👍':tab=='gone'?'لا أحد غائب أكثر من شهر 👍':tab=='names'?'لم يغيّر أحد اسمه بعد':'لا أحد بعد'}</p>`;
+  else{const t=q.trim().replace(/[أإآ]/g,'ا');rows=(all||[]).filter(r=>!t||String(r.nick).replace(/[أإآ]/g,'ا').includes(t)||String(r.code).toUpperCase()==t.toUpperCase()).sort((a,b)=>(b.seen||0)-(a.seen||0))}
+  const total=rows.length;rows=rows.slice(0,lim);
+  el.innerHTML=rows.length?'<div class="idkg">'+rows.map((r,i)=>kidRow(r,num?i:null)).join('')+'</div>'+(total>rows.length?`<button class="btn sec" id="kMore" style="flex:none;width:100%;margin-top:8px">⬇️ عرض المزيد (باقي ${ar(total-rows.length)})</button>`:'')+(tab=='all'?`<p class="tip" style="margin:4px 0">${q.trim()?`النتائج: ${ar(total)}`:`كل المشتركين: ${ar(total)} · الأحدث دخولًا أولًا`}</p>`:''):`<p class="tip">${tab=='all'?(q?'لا يوجد طفل بهذا الاسم':`عدد الأطفال: ${ar((all||[]).length)} — اكتب اسمًا للبحث`):tab=='sus'?'لا أحد مشبوه 👍':tab=='gone'?'لا أحد غائب أكثر من شهر 👍':tab=='names'?'لم يغيّر أحد اسمه بعد':'لا أحد بعد'}</p>`;
+  const mo=$('#kMore');if(mo)mo.onclick=()=>{lim+=40;drawKids()};
   el.querySelectorAll('[data-k]').forEach(b=>b.onclick=e=>{if(e.target.closest('[data-g]'))return;kidCard(b.dataset.k)});
   el.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{const id=b.dataset.g,r=rows.find(x=>x.id==id)||{},p=(all||[]).find(x=>x.id==id)||{};giftTo(id,r.nick||p.nick,r.av||p.av)})}
 function giftTo(uid,nick,av){const API=O();
@@ -253,35 +259,44 @@ function giftTo(uid,nick,av){const API=O();
     <div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn gold" id="gSend">🎁 أرسل</button></div>`,()=>{
     $('#gSend').onclick=async()=>{const msg=$('#gMsg').value.trim(),j=+$('#gJ').value;$('#gSend').disabled=true;
       try{await API.db.ref('prizes/'+uid).push({msg,j,ts:firebase.database.ServerValue.TIMESTAMP});closeModal();API.toast(`أُرسلت الجائزة إلى ${nick||''} ✓`)}catch(e){$('#gSend').disabled=false;API.toast('تعذّر الإرسال')}}})}
-async function panel(){const API=O();heroes=null;all=null;
+async function panel(){const API=O();heroes=null;all=null;view='main';
   body().innerHTML=`<div class="idban"><span class="sh">🛡️</span><span><b>لوحة الإدارة</b><small id="idCnt">جارٍ التحميل…</small></span></div>
     <div class="idbox"><h3>📊 إحصائيات التطبيق</h3><div id="idStats"><p class="tip">⏳</p></div></div>
-    <div class="idbox"><h3>👥 الأطفال <small style="font-weight:500;color:var(--muted);font-size:13px">اضغط على أي طفل لترى ملفّه</small></h3>
-      <div class="jrooms" style="margin-bottom:6px;flex-wrap:wrap"><button data-tab="heroes">🏅 الأبطال</button><button data-tab="top">⭐ المميّزون</button><button data-tab="recent">🕒 دخلوا مؤخرًا</button><button data-tab="names">✏️ غيّروا أسماءهم</button><button data-tab="gone">💤 غائبون</button><button data-tab="sus">⚠️ المشبوهون</button><button data-tab="all">🔎 ابحث</button></div>
-      <input class="inp" id="kQ" placeholder="🔎 اكتب اسم الطفل أو رمزه" style="text-align:right;display:none">
-      <div id="idKids"><p class="tip">⏳ جارٍ التحميل…</p></div>
-      <p class="tip">بطل الأسبوع يأخذ تلقائيًا 💎١٠٠ (والثاني ٦٠ والثالث ٣٠) عند بداية الأسبوع الجديد.</p></div>
+    <button class="idsubs" id="idSubs"><span class="e">👥</span><span class="t"><b>المشتركون</b><small id="idSubsN">⏳ جارٍ التحميل…</small></span><span class="go">‹</span></button>
     <div class="idbox"><h3>📢 رسالة لكل الأطفال</h3>
       <input class="inp" id="nTitle" maxlength="60" placeholder="العنوان، مثل: عيد مبارك 🌙" style="text-align:right">
       <textarea class="inp" id="nMsg" maxlength="600" placeholder="نص الرسالة"></textarea>
       <select class="inp" id="nJ">${JOPT}</select>
       <button class="btn gold" id="nSend" style="flex:none;width:100%">📢 أرسل للجميع</button></div>
     <div class="idbox"><h3>📜 آخر الرسائل المرسلة</h3><div id="idNews"><p class="tip">⏳</p></div></div>`;
-  const tabs=()=>{body().querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab==tab));$('#kQ').style.display=tab=='all'?'':'none';drawKids()};
-  body().querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;tabs();if(tab=='all')$('#kQ').focus()});
-  $('#kQ').oninput=e=>{q=e.target.value;drawKids()};
+  $('#idSubs').onclick=()=>{if(all)openKids()};
   $('#nSend').onclick=()=>{const title=$('#nTitle').value.trim(),msg=$('#nMsg').value.trim(),j=+$('#nJ').value;
     if(!title&&!msg){API.toast('اكتب العنوان أو الرسالة');return}
     modal(`<h3 style="margin:4px 0">إرسال لكل الأطفال؟</h3><p><b>${esc(title)}</b><br>${esc(msg).slice(0,140)}${j?`<br>💎 ${ar(j)} لكل طفل`:''}</p><div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn gold" id="nYes">نعم، أرسل</button></div>`,()=>{
       $('#nYes').onclick=async()=>{closeModal();try{await API.db.ref('news').push({title,msg,j,ts:firebase.database.ServerValue.TIMESTAMP});API.toast('أُرسلت ✓');panel()}catch(e){API.toast('تعذّر الإرسال')}}})};
   await loadKids(API);{const c=$('#idCnt'),n=(all||[]).length,g=(all||[]).filter(gone).length,u=(all||[]).filter(x=>!x.seen).length;
-    if(c)c.innerHTML=`المشتركون: <b style="display:inline;font-size:22px">${ar(n)}</b> طفل<br>💤 غائبون شهرًا أو أكثر: ${ar(g)}${u?` · ❔ بلا تسجيل دخول: ${ar(u)}`:''}`}tabs();
+    if(c)c.innerHTML=`المشتركون: <b style="display:inline;font-size:22px">${ar(n)}</b> طفل<br>💤 غائبون شهرًا أو أكثر: ${ar(g)}${u?` · ❔ بلا تسجيل دخول: ${ar(u)}`:''}`;
+    const sn=$('#idSubsN');if(sn)sn.textContent=`${ar(n)} مشترك · ☀️ ${ar((all||[]).filter(p=>p.seen&&Date.now()-p.seen<864e5).length)} دخلوا اليوم · اضغط لترى الأسماء`}
   stats(API);
   // الرسائل
   try{const s=(await API.db.ref('news').orderByChild('ts').limitToLast(10).get()).val()||{};const rows=Object.entries(s).sort((a,b)=>(b[1].ts||0)-(a[1].ts||0));
     $('#idNews').innerHTML=rows.length?rows.map(([id,v])=>`<div class="idrow"><b>📢 ${esc(v.title||v.msg||'').slice(0,40)}</b><small>${v.j?'💎'+ar(v.j):''} ${v.ts?new Date(v.ts).toLocaleDateString('ar-IQ'):''}</small><button class="mini" style="background:#e2504a" data-del="${esc(id)}">🗑️</button></div>`).join(''):'<p class="tip">لم تُرسل رسائل بعد</p>';
     $('#idNews').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>modal(`<h3 style="margin:4px 0">حذف هذه الرسالة؟</h3><p>لن يراها الأطفال الذين لم يفتحوها بعد.</p><div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn" id="dYes" style="background:var(--bad)">حذف</button></div>`,()=>{
       $('#dYes').onclick=async()=>{closeModal();try{await API.db.ref('news/'+b.dataset.del).remove();panel()}catch(e){API.toast('تعذّر الحذف')}}}))}catch(e){$('#idNews').innerHTML='<p class="tip">تعذّر التحميل</p>'}}
+/* 👥 صفحة المشتركين: كل الأطفال (حتى لو صاروا ألفًا) بصفحات من ٤٠، مع بحث وتبويبات */
+let view='main',lim=40;
+function openKids(){view='kids';tab='all';q='';lim=40;window.scrollTo(0,0);
+  body().innerHTML=`<div class="idban"><span class="sh">👥</span><span><b>المشتركون</b><small>${ar((all||[]).length)} طفل · اضغط على أي طفل لترى ملفّه</small></span></div>
+    <input class="inp" id="kQ" placeholder="🔎 ابحث باسم الطفل أو رمزه" style="text-align:right;margin-bottom:6px">
+    <div class="jrooms" style="margin-bottom:8px;flex-wrap:wrap"><button data-tab="all">👥 الكل</button><button data-tab="heroes">🏅 الأبطال</button><button data-tab="top">⭐ المميّزون</button><button data-tab="names">✏️ غيّروا أسماءهم</button><button data-tab="gone">💤 غائبون</button><button data-tab="sus">⚠️ المشبوهون</button></div>
+    <div id="idKids"></div>
+    <p class="tip">بطل الأسبوع يأخذ تلقائيًا 💎١٠٠ (والثاني ٦٠ والثالث ٣٠) عند بداية الأسبوع الجديد.</p>
+    <button class="btn sec" id="idKBack" style="flex:none;width:100%">‹ رجوع إلى لوحة الإدارة</button>`;
+  const tabs=()=>{body().querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab==tab));lim=40;drawKids()};
+  body().querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;tabs()});
+  $('#kQ').oninput=e=>{q=e.target.value;if(q.trim())tab='all';tabs()};
+  $('#idKBack').onclick=backMain;tabs()}
+function backMain(){view='main';window.scrollTo(0,0);panel()}
 /* 📊 الإحصائيات */
 async function stats(API){const el=$('#idStats');if(!el)return;const L=all||[],t=Date.now(),D1=864e5;
   const n=L.length,b=L.filter(p=>p.sx=='b').length,g=L.filter(p=>p.sx=='g').length;
