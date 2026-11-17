@@ -93,6 +93,7 @@ css.textContent=`
 .xpbar{height:9px;background:#efe3c0;border-radius:8px;overflow:hidden;margin-top:3px}.xpbar i{display:block;height:100%;background:linear-gradient(90deg,#f2b632,#e57c1f);border-radius:8px;transition:width .6s}
 .hpro .md{font-size:18px;letter-spacing:1px;flex:none;max-width:80px;text-align:center;line-height:1.3}
 .hfbtn{display:flex;align-items:center;gap:12px;width:100%;margin-top:10px;background:#fff;border:2px solid #2f6fd0;border-radius:20px;padding:10px 12px;text-align:right;color:inherit;box-shadow:0 5px 0 #b9cff2}
+.hhbtn{border-color:#e0a21b;box-shadow:0 5px 0 #f1dba3}.hfbtn.hhbtn b{color:#8a5a00}.hhbtn:active{box-shadow:0 2px 0 #f1dba3}
 .hfbtn:active{transform:translateY(3px);box-shadow:0 2px 0 #b9cff2}
 .hfbtn .e{font-size:40px;width:58px;text-align:center;flex:none}.hfbtn .nm{flex:1;min-width:0}.hfbtn b{display:block;font-size:19px;color:#1d4e9e}.hfbtn small{display:block;font-size:14px;color:var(--muted);line-height:1.5}
 .hfbtn .go{font-size:26px;color:#2f6fd0;flex:none}
@@ -181,8 +182,7 @@ document.head.appendChild(css);
 const home=document.createElement('div');home.id='homeSocial';
 const stats=document.querySelector('#home .stats');(stats||$('#map')).after(home);
 // أبطال الأسبوع: في أسفل الواجهة
-const heroes=document.createElement('div');heroes.id='homeHeroes';heroes.className='hbox';
-const foot=document.querySelector('#home .footer-links');if(foot)foot.before(heroes);else $('#home').appendChild(heroes);
+
 let fcache=null,hcache=null,loading=false,lastLoad=0,frOpen=false;
 try{const c=J('usul5_social_v1');fcache=c.f||null;hcache=c.h||null}catch(e){}
 function drawHome(){const s=snap(),ln=lvName(s.L),t=shownTitle(s),f=(s.x-need(s.L))/(need(s.L+1)-need(s.L));
@@ -190,12 +190,17 @@ function drawHome(){const s=snap(),ln=lvName(s.L),t=shownTitle(s),f=(s.x-need(s.
   home.innerHTML=`<button class="hpro" id="hProf"><span class="av">${esc(myAv())}<span class="lv">${ar(s.L)}</span></span>
     <span class="nm"><b>${esc(myName())}</b><small>${ln[1]} ${ln[2]} · المستوى ${ar(s.L)}${t?` · ${t.e} ${t.n}`:''}</small><div class="xpbar"><i style="width:${Math.round(f*100)}%"></i></div></span>
     <span class="md">${meds||'🏅'}</span></button>
-   <button class="hfbtn" id="hFrBtn"><span class="e">👥</span><span class="nm"><b>أصدقائي</b><small id="hFrSum">${frSum()}</small></span><span class="go">‹</span></button>`;
+   <button class="hfbtn" id="hFrBtn"><span class="e">👥</span><span class="nm"><b>أصدقائي</b><small id="hFrSum">${frSum()}</small></span><span class="go">‹</span></button>
+   <button class="hfbtn hhbtn" id="hHeBtn"><span class="e">🏅</span><span class="nm"><b>أبطال هذا الأسبوع</b><small id="hHeSum">اضغط لترى الأبطال</small></span><span class="go">‹</span></button>`;
   $('#hProf').onclick=()=>{tone(880,.05,'sine',.08);openProfile()};
   $('#hFrBtn').onclick=()=>{tone(880,.05,'sine',.08);openFriends()};
+  $('#hHeBtn').onclick=()=>{tone(880,.05,'sine',.08);openHeroes()};
   drawHeroes();loadSocial()}
-function drawHeroes(){heroes.innerHTML=`<h4><span>🏅 أبطال هذا الأسبوع</span><button class="sec" id="hAll">الكل</button></h4><div id="hHe">${heroesHTML()}</div>`;
-  $('#hAll').onclick=()=>{if(O()&&O().openBoard){window.onlineReturn=goHome;O().openBoard()}}}
+function drawHeroes(){const a=$('#hHeSum');if(!a)return;
+  a.textContent=hcache&&hcache.length?`🥇 الأول الآن: ${hcache[0].nick}`:'اضغط لترى الأبطال'}
+function openHeroes(){stopVc();aqBack=null;show('alqab');$('#aqTitle').textContent='🏅 أبطال هذا الأسبوع';drawHeroesPage();loadSocial(true)}
+function drawHeroesPage(){$('#aqBody').innerHTML=`<div class="hbox" style="margin-top:0">${heroesHTML()}</div><button class="btn gold" id="hAll" style="flex:none;width:100%;margin-top:10px">🏆 لوحة المتصدّرين الكاملة</button>`;
+  $('#hAll').onclick=()=>{if(O()&&O().openBoard){window.onlineReturn=openHeroes;O().openBoard()}}}
 function frSum(){const prof=O()&&O().profile;
   if(!state.online&&!prof)return B('اصنع لقبك وأضف أصدقاءك 🌐','اصنعي لقبك وأضيفي أصدقاءك 🌐');
   if(!fcache)return 'اضغط لترى أصدقاءك وتضيف صديقًا';
@@ -233,7 +238,8 @@ async function loadSocial(force){if(loading||!navigator.onLine||!O()||!state.onl
     hcache=Object.entries(s).map(([id,v])=>({id,nick:v.nick||'؟',av:v.av||'❔',xp:v.xp|0,wins:v.wins|0,lv:v.lv|0,tt:typeof v.tt=='string'?v.tt.slice(0,30):''})).sort((a,b)=>(Math.max(b.xp,b.wins*10)-Math.max(a.xp,a.wins*10))).slice(0,10);
     try{localStorage.setItem('usul5_social_v1',JSON.stringify({f:fcache,h:hcache}))}catch(e){}
     if($('#home').classList.contains('on')){const a=$('#hFrSum');if(a)a.textContent=frSum();drawHeroes()}
-    if(frOpen&&$('#alqab').classList.contains('on')&&$('#aqTitle').textContent=='👥 أصدقائي')drawFriends()}
+    if(frOpen&&$('#alqab').classList.contains('on')&&$('#aqTitle').textContent=='👥 أصدقائي')drawFriends();
+    if($('#alqab').classList.contains('on')&&$('#aqTitle').textContent=='🏅 أبطال هذا الأسبوع')drawHeroesPage()}
   catch(e){}finally{loading=false}}
 async function friendCard(id){const r=(fcache||[]).find(x=>x.id==id);if(!r)return;const API=O();
   let p={};try{p=(await API.db.ref('profiles/'+id).get()).val()||{}}catch(e){}
