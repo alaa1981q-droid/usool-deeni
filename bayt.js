@@ -214,7 +214,7 @@ function defs(){return `<defs>
 <pattern id="hStone" width="34" height="15" patternUnits="userSpaceOnUse"><rect width="34" height="15" fill="url(#hFront)"/><path d="M0 14.5H34M17 0V7.5M0 7.5H34M0 7.5V15M34 7.5V15" stroke="#dcae6a" stroke-width="1"/></pattern>
 <pattern id="hStoneS" width="23" height="15" patternUnits="userSpaceOnUse"><rect width="23" height="15" fill="#c9924f"/><path d="M0 14.5H23M11.5 0V7.5M0 7.5H23" stroke="#a87436" stroke-width="1"/></pattern>
 </defs>`}
-function scene(){let s=`<rect width="${VW}" height="${VH}" fill="url(#hSky)"/>
+function scene(){let s=`<rect width="${VW+200}" height="${VH}" fill="url(#hSky)"/>
 <g opacity=".35" fill="#fff8c8">${[0,1,2,3,4].map(k=>`<polygon points="318,30 ${80+k*48},${GY} ${104+k*48},${GY}"/>`).join('')}</g>
 <circle cx="318" cy="30" r="40" fill="url(#hSun)"/><circle cx="318" cy="30" r="16" fill="#ffd54a"/>
 <g fill="#fff" opacity=".95" class="hcl"><ellipse cx="54" cy="44" rx="30" ry="11"/><ellipse cx="76" cy="36" rx="18" ry="12"/><ellipse cx="200" cy="26" rx="22" ry="8"/><ellipse cx="214" cy="21" rx="12" ry="8"/></g>
@@ -287,7 +287,15 @@ function roof(n,cls=''){const y=fy(n-1),L=FX-12,R=FX+FW+12,M=FX+FW/2,H=66;
 let HK=1;
 function houseSVG(full,part,frac,withRoof,anim,look){
   const L=look||(window.Deco?Deco.myLook():{c:cs.n}),D=window.Deco,hasGift=g=>RANKS.some(r=>r.gift==g&&(L.c||0)>=r.at);
-  let s=`<svg viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">${defs()}${scene()}`;
+  // 🕌 من ربح المسجد: الصورة تتّسع لليمين ويقف المسجد الكبير بجانب البيت
+  const MQ=String(L.i||'').split(',').includes('d_mosque'),MW=MQ?100:0,W=VW+MW,MM=VW+20;
+  let s=`<svg viewBox="0 0 ${W} ${VH}" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">${defs()}${scene()}`;
+  if(MQ)s+=`
+    <path d="M${VW-2} ${GY-22} Q${VW+60} ${GY-36} ${VW+110} ${GY-22} T${W} ${GY-20} V${VH} H${VW-2}Z" fill="#a6e6ae"/>
+    <rect x="${VW-3}" y="${GY-6}" width="${MW+3}" height="${VH-GY+6}" fill="url(#hGrass)"/>
+    <path d="M${VW-4} ${GY+20} Q${VW+40} ${GY+14} ${VW+70} ${GY+21} T${W} ${GY+20} V${GY+34} Q${VW+60} ${GY+28} ${VW-4} ${GY+34}Z" fill="url(#hRiver)"/>
+    <path d="M200 ${GY+8} H${MM-20} L${MM-14} ${GY} H${MM+14} L${MM+20} ${GY+8} V${GY+17} H200Z" fill="#f3dfb5" opacity=".95"/>
+    <g transform="translate(${MM} ${GY}) scale(.8) translate(${-MM} ${-GY})">${mosqueParts(MM,GY)}</g>`;
   if(D)s+=D.svg(L,'back');
   if(hasGift('rainbow'))s+=`<g fill="none" stroke-width="7" opacity=".55">${['#e2504a','#f2b632','#ffe066','#3fbf6f','#2f8fd0','#7c4dc4'].map((c,k)=>`<path d="M-10 ${GY-10} A190 170 0 0 1 370 ${GY-10}" stroke="${c}" transform="translate(0 ${k*7}) scale(1 ${1-k*.03})"/>`).join('')}</g>`;
   const top=Math.max(full,part+1);
@@ -308,6 +316,7 @@ function houseSVG(full,part,frac,withRoof,anim,look){
   if(hasGift('crown')&&withRoof&&full>0){const y=fy(full-1)-66-40,M=FX+FW/2;s+=`<g><circle cx="${M}" cy="${y+6}" r="22" fill="#ffe066" opacity=".35"/><path d="M${M-16} ${y+14} L${M-18} ${y-2} L${M-8} ${y+6} L${M} ${y-8} L${M+8} ${y+6} L${M+18} ${y-2} L${M+16} ${y+14}Z" fill="url(#hGold)" stroke="#9a6a00" stroke-width="1.5"/><circle cx="${M}" cy="${y+8}" r="2.6" fill="#e2504a"/><circle cx="${M-9}" cy="${y+10}" r="2" fill="#2f8fd0"/><circle cx="${M+9}" cy="${y+10}" r="2" fill="#3fbf6f"/></g>`}
   if(HK<1)s+='</g>';
   if(dt)s+=trashSVG(dt);
+  if(MQ)s+=walkers(196,GY+15-192*.75,(MM-215)/.75,.75,'msq-walk');
   if(hasGift('flowers'))s+=[[FX-14,GY+2],[FX+10,GY+4],[FX+FW-6,GY+4],[FX+FW+DX-10,GY-2],[FX+FW+24,GY+2]].map(([x,y])=>`<g><ellipse cx="${x}" cy="${y}" rx="13" ry="8" fill="#2e9c55"/>${[[-6,-3,'#e2504a'],[1,-6,'#ff8ac2'],[7,-2,'#f2b632'],[-1,1,'#fff']].map(([a,b,c])=>`<circle cx="${x+a}" cy="${y+b}" r="2.8" fill="${c}"/>`).join('')}</g>`).join('');
   if(hasGift('fountain')){const x=0,y=0;s+=`<g transform="translate(50 ${GY+14}) scale(1.5)"><ellipse cx="${x}" cy="${y}" rx="20" ry="6" fill="#bfc9cf" stroke="#8b979e"/><ellipse cx="${x}" cy="${y-1}" rx="16" ry="4" fill="#7cc8ff"/><rect x="${x-2.5}" y="${y-22}" width="5" height="21" fill="#bfc9cf"/><ellipse cx="${x}" cy="${y-22}" rx="9" ry="3" fill="#bfc9cf"/><path d="M${x} ${y-24} q-10 -12 -14 4 M${x} ${y-24} q10 -12 14 4 M${x} ${y-24} v-10" stroke="#7cc8ff" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>`}
   if(D)s+=D.svg(L,'front',full,withRoof);
@@ -315,6 +324,70 @@ function houseSVG(full,part,frac,withRoof,anim,look){
   // معرّفات فريدة لكل رسمة: إذا تكرّرت ووقعت الأولى في شاشة مخفية تختفي الألوان من الباقي
   const k=++svgN;return (s+'</svg>').replace(/(id="|url\(#)(h[A-Z]\w*)/g,`$1$2_${k}`)}
 let svgN=0;
+/* 🕌 المسجد الكبير (v7.9): يُرسم بجانب البيت إذا ربحه الطفل (d_mosque)، فيراه الأصدقاء أيضًا. وأهل الحيّ يمشون إليه بلا ملامح وجه. */
+const SKIN='#f1c7a0';
+// شخص بلا ملامح: x,y = موضع القدمين، h = الطول، o = الشكل
+function person(x,y,h,o){const k=h/34,hd=4.6*k,top=y-h,lg=`<g class="msq-lg"><rect x="${x-3.2*k}" y="${y-6*k}" width="${2.4*k}" height="${6*k}" rx="${k}" fill="${o.leg||'#5b4636'}"/><rect x="${x+0.8*k}" y="${y-6*k}" width="${2.4*k}" height="${6*k}" rx="${k}" fill="${o.leg||'#5b4636'}"/></g>`;
+  const robe=`<path d="M${x-4.5*k} ${top+2*hd+1} Q${x} ${top+2*hd-1} ${x+4.5*k} ${top+2*hd+1} L${x+(o.w||7)*k} ${y-5*k} Q${x} ${y-3.5*k} ${x-(o.w||7)*k} ${y-5*k}Z" fill="${o.c}" stroke="${o.s||'rgba(0,0,0,.18)'}" stroke-width="${.8*k}"/>`;
+  let head=`<circle cx="${x}" cy="${top+hd}" r="${hd}" fill="${SKIN}"/>`;
+  if(o.hat=='cap')head+=`<path d="M${x-hd} ${top+hd-.6} a${hd} ${hd*.9} 0 0 1 ${2*hd} 0z" fill="#fff" stroke="#ddd" stroke-width=".6"/>`;
+  if(o.hat=='turban')head+=`<path d="M${x-hd-.6} ${top+hd-.2} a${hd+.6} ${hd*1.05} 0 0 1 ${2*hd+1.2} 0z" fill="${o.t||'#fff'}"/><rect x="${x-hd-.6}" y="${top+hd-1.2}" width="${2*hd+1.2}" height="1.6" rx=".8" fill="${o.t2||'#e8e1d0'}"/>`;
+  if(o.hat=='hijab')head=`<path d="M${x-hd-1.4} ${top+2*hd+2} Q${x-hd-1.8} ${top-1} ${x} ${top-.8} Q${x+hd+1.8} ${top-1} ${x+hd+1.4} ${top+2*hd+2}Z" fill="${o.t}"/><ellipse cx="${x}" cy="${top+hd+.6}" rx="${hd*.62}" ry="${hd*.78}" fill="${SKIN}"/>`;
+  const cane=o.cane?`<line x1="${x+6*k}" y1="${top+2*hd+5*k}" x2="${x+9*k}" y2="${y}" stroke="#7a4f22" stroke-width="${1.3*k}" stroke-linecap="round"/>`:'';
+  return `<g>${lg}${robe}${head}${cane}</g>`}
+// مجموعات تمشي من اليسار إلى باب المسجد، كل واحدة بتأخير مختلف حتى لا ينقطع الطريق
+const MGROUPS=[
+  // أبٌ يمسك يد ابنه
+  ()=>person(14,192,36,{c:'#fbfbf6',hat:'cap'})+`<line x1="20" y1="174" x2="27" y2="178" stroke="${SKIN}" stroke-width="2" stroke-linecap="round"/>`+person(31,193,22,{c:'#3f8fd8',hat:'cap'}),
+  // جدٌّ بعصاه وحفيده
+  ()=>person(14,191,34,{c:'#d9cfb8',hat:'turban',t:'#fff',cane:1})+person(36,193,20,{c:'#2fae5f',hat:'cap'}),
+  // أمٌّ وابنتها
+  ()=>person(14,192,33,{c:'#2b2b38',hat:'hijab',t:'#2b2b38',w:8,leg:'#2b2b38'})+person(32,193,21,{c:'#f08ab6',hat:'hijab',t:'#fff',leg:'#c25b8a'}),
+  // صديقان مسرعان
+  ()=>person(14,193,23,{c:'#f2a33a',hat:'cap'})+person(32,193,22,{c:'#7c5ac8',hat:'cap'}),
+  // شابّ وحده
+  ()=>person(14,192,35,{c:'#e9eef2',hat:'turban',t:'#fff'})];
+function mosqueParts(M,g){return `<defs>
+  <linearGradient id="hMbWall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffaf0"/><stop offset="1" stop-color="#ecd7ae"/></linearGradient>
+  <linearGradient id="hMbSide" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f6e6c4"/><stop offset="1" stop-color="#e2c48e"/></linearGradient>
+  <radialGradient id="hMbDome" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#7fe0b0"/><stop offset=".5" stop-color="#1fa463"/><stop offset="1" stop-color="#0b5a32"/></radialGradient>
+  <linearGradient id="hMbGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff1a8"/><stop offset=".5" stop-color="#f2b632"/><stop offset="1" stop-color="#b9851a"/></linearGradient>
+  <linearGradient id="hMbWin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6fc3f0"/><stop offset="1" stop-color="#2c6f9e"/></linearGradient>
+</defs>
+  <!-- ظل -->
+  <ellipse cx="${M}" cy="${g+2}" rx="100" ry="7" fill="#2f7a45" opacity=".28"/>
+  <!-- المنارتان -->
+  ${[M-98,M+82].map(x=>`<g><rect x="${x}" y="${g-150}" width="16" height="150" fill="url(#hMbWall)" stroke="#d9a85e" stroke-width="1.2"/><rect x="${x+11}" y="${g-150}" width="5" height="150" fill="#000" opacity=".06"/>
+    <rect x="${x-3}" y="${g-112}" width="22" height="6" rx="2" fill="url(#hMbGold)"/><rect x="${x-3}" y="${g-62}" width="22" height="5" rx="2" fill="url(#hMbGold)"/>
+    <path d="M${x+4} ${g-96} a4 6 0 0 1 8 0v10h-8z" fill="url(#hMbWin)"/><path d="M${x+4} ${g-44} a4 6 0 0 1 8 0v10h-8z" fill="url(#hMbWin)"/>
+    <path d="M${x-1} ${g-150} Q${x+8} ${g-178} ${x+17} ${g-150}Z" fill="url(#hMbDome)" stroke="#0b5a32" stroke-width="1"/>
+    <line x1="${x+8}" y1="${g-170}" x2="${x+8}" y2="${g-180}" stroke="#b9851a" stroke-width="1.8"/><path d="M${x+8} ${g-190} a5 5 0 1 0 4 7 a3.8 3.8 0 1 1 -4 -7z" fill="url(#hMbGold)"/></g>`).join('')}
+  <!-- البناء الأساسي -->
+  <rect x="${M-80}" y="${g-72}" width="160" height="72" fill="url(#hMbWall)" stroke="#d9a85e" stroke-width="1.4"/>
+  <polygon points="${M+80},${g-72} ${M+82},${g-72} ${M+82},${g} ${M+80},${g}" fill="url(#hMbSide)"/>
+  <rect x="${M-82}" y="${g-76}" width="164" height="7" rx="2" fill="url(#hMbGold)"/>
+  <g fill="url(#hMbGold)">${Array.from({length:16},(_,k)=>`<path d="M${M-78+k*10} ${g-76} l5 -6 l5 6z"/>`).join('')}</g>
+  <!-- الأسطوانة والقبّة الكبيرة -->
+  <rect x="${M-40}" y="${g-96}" width="80" height="22" fill="url(#hMbWall)" stroke="#d9a85e" stroke-width="1.2"/>
+  <g fill="url(#hMbWin)">${[-28,-12,4,20].map(d=>`<path d="M${M+d} ${g-78} v-9 a4 4 0 0 1 8 0 v9z"/>`).join('')}</g>
+  <path d="M${M-46} ${g-95} C${M-52} ${g-140} ${M-12} ${g-150} ${M} ${g-172} C${M+12} ${g-150} ${M+52} ${g-140} ${M+46} ${g-95}Z" fill="url(#hMbDome)" stroke="#0b5a32" stroke-width="1.4"/>
+  <path d="M${M-30} ${g-110} Q${M-28} ${g-138} ${M-8} ${g-150}" stroke="#fff" stroke-width="3" fill="none" opacity=".45" stroke-linecap="round"/>
+  <rect x="${M-48}" y="${g-98}" width="96" height="5" rx="2" fill="url(#hMbGold)"/>
+  <line x1="${M}" y1="${g-172}" x2="${M}" y2="${g-184}" stroke="#b9851a" stroke-width="2.4"/><circle cx="${M}" cy="${g-178}" r="3" fill="url(#hMbGold)"/>
+  <path d="M${M} ${g-200} a9 9 0 1 0 7 12 a7 7 0 1 1 -7 -12z" fill="url(#hMbGold)" class="msq-tw"/>
+  <!-- الشبابيك -->
+  ${[M-62,M-42,M+30,M+50].map(x=>`<path d="M${x} ${g-22} v-22 a6 7 0 0 1 12 0 v22z" fill="url(#hMbWin)" stroke="url(#hMbGold)" stroke-width="1.4"/><line x1="${x+6}" y1="${g-50}" x2="${x+6}" y2="${g-22}" stroke="#fff" stroke-width="1" opacity=".7"/>`).join('')}
+  <!-- الباب الكبير -->
+  <path d="M${M-20} ${g} V${g-38} Q${M} ${g-64} ${M+20} ${g-38} V${g}Z" fill="#fff4d6" stroke="url(#hMbGold)" stroke-width="2.4"/>
+  <path d="M${M-14} ${g} V${g-34} Q${M} ${g-54} ${M+14} ${g-34} V${g}Z" fill="#8a4f22"/>
+  <line x1="${M}" y1="${g-48}" x2="${M}" y2="${g}" stroke="#5e3414" stroke-width="1.6"/><circle cx="${M-4}" cy="${g-18}" r="1.8" fill="#ffd54a"/><circle cx="${M+4}" cy="${g-18}" r="1.8" fill="#ffd54a"/>
+  <rect x="${M-24}" y="${g}" width="48" height="4" fill="#f4ede0"/><rect x="${M-28}" y="${g+4}" width="56" height="4" fill="#e3d8c4"/>
+  <!-- فوانيس -->
+  ${[M-30,M+26].map(x=>`<g class="msq-tw"><line x1="${x+2}" y1="${g-58}" x2="${x+2}" y2="${g-52}" stroke="#8a5a00" stroke-width="1"/><circle cx="${x+2}" cy="${g-45}" r="8" fill="#ffe066" opacity=".45"/><rect x="${x-1.5}" y="${g-52}" width="7" height="10" rx="2" fill="#ffd54a" stroke="#b9851a" stroke-width=".8"/></g>`).join('')}
+`}
+// المشاة: x0,y0 إزاحة، dist مسافة المشي، k الحجم، cls اسم الحركة
+function walkers(x0,y0,dist,k,cls){return MGROUPS.map((f,i)=>`<g transform="translate(${x0} ${y0}) scale(${k})"><g class="${cls}" style="--wd:${dist}px;animation-delay:${-i*4.4}s"><g class="msq-bob">${f()}</g></g></g>`).join('')}
+
 /* 🧹 الوسخ على الجدران: غبار (١)، بقع وسيلان (٢)، شقوق وخيوط عنكبوت (٣)، والبيت يصير قديمًا (٣–٤) */
 function dirtWalls(full,dt){let s=`<g pointer-events="none">`;
   for(let i=0;i<full;i++){const y=fy(i);
@@ -496,5 +569,5 @@ function finish(){if(G.net){stop();G.net.finish(G);return}
 document.addEventListener('visibilitychange',()=>{if(!G)return;if(document.hidden&&G.run){G.run=false;cancelAnimationFrame(G.raf);G.paused=true}
   else if(!document.hidden&&G.paused){G.paused=false;G.run=true;G.last=performance.now();G.raf=requestAnimationFrame(loop)}});
 window.__bayt={get G(){return G},need:()=>G&&need()};
-window.Bayt={get hk(){return HK},houseSVG,menu,LEVELS,begin:()=>begin(),stop:()=>{stop();G=null},play:(i,net)=>{show('bayt');play(i,0,false,net)},get G(){return G},get done(){return bs.done},get cups(){return cs.n},rankOf,RANKS,sTap,sStar,sLine,VW,VH,GY,FX,FW,DX,fy};
+window.Bayt={get hk(){return HK},houseSVG,mosqueParts,walkers,menu,LEVELS,begin:()=>begin(),stop:()=>{stop();G=null},play:(i,net)=>{show('bayt');play(i,0,false,net)},get G(){return G},get done(){return bs.done},get cups(){return cs.n},rankOf,RANKS,sTap,sStar,sLine,VW,VH,GY,FX,FW,DX,fy};
 })();
