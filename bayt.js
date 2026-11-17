@@ -304,14 +304,19 @@ function houseSVG(full,part,frac,withRoof,anim,look){
   if(D)s+=D.svg(L,'back');
   if(hasGift('rainbow'))s+=`<g fill="none" stroke-width="7" opacity=".55">${['#e2504a','#f2b632','#ffe066','#3fbf6f','#2f8fd0','#7c4dc4'].map((c,k)=>`<path d="M-10 ${GY-10} A190 170 0 0 1 370 ${GY-10}" stroke="${c}" transform="translate(0 ${k*7}) scale(1 ${1-k*.03})"/>`).join('')}</g>`;
   const top=Math.max(full,part+1);
-  HK=top>=5?.66:top>=4?.8:1;const HCX=FX+FW/2+DX/2;if(HK<1)s+=`<g transform="translate(${HCX} ${GY}) scale(${HK}) translate(${-HCX} ${-GY})">`;
+  // v8.7: البيت العالي كان نحيفًا جدًّا؛ نصغّر الطول كما كان لكن العرض أقل، فيصير البيت أعرض وأوضح (HKX)
+  HK=top>=5?.66:top>=4?.8:1;const HKX=top>=5?.8:top>=4?.9:1,HCX=FX+FW/2+DX/2;if(HK<1)s+=`<g transform="translate(${HCX} ${GY}) scale(${HKX} ${HK}) translate(${-HCX} ${-GY})">`;
+  // تجسيم: ظلّ ناعم خلف البيت كلّه يفصله عن الخلفية
+  if(top>0)s+=`<defs><filter id="hDrop" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="5" dy="3" stdDeviation="3.5" flood-color="#1b3a2a" flood-opacity=".38"/></filter></defs>`;
   if(top>0)s+=`<ellipse cx="${FX+FW/2+DX/2}" cy="${fy(top-1)+FH*top/2-10}" rx="${FW/2+DX+40}" ry="${FH*top/2+60}" fill="url(#hHalo)"/>`;
   if(top>0)s+=`<ellipse cx="${FX+FW/2+DX/2}" cy="${GY+3}" rx="${FW/2+DX}" ry="9" fill="#2f7a45" opacity=".35"/><polygon points="${FX-4},${GY+1} ${FX-62},${GY+14} ${FX+FW-30},${GY+15} ${FX+FW+DX},${GY+4} ${FX+FW},${GY}" fill="#1d5a30" opacity=".22"/>`;
   const paint=D?D.paintFilter(L):'';const dt=Math.max(0,Math.min(4,L.dt|0))*(full>0?1:0);
   if(dt>=3)s+=`<defs><filter id="hOldF" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="${dt>=4?'.48 .4 .14 0 0 .4 .42 .14 0 0 .3 .32 .18 0 0 0 0 0 1 0':'.62 .3 .1 0 0 .3 .58 .1 0 0 .22 .26 .4 0 0 0 0 0 1 0'}"/></filter></defs><g filter="url(#hOldF)">`;
+  if(full>0)s+=`<g filter="url(#hDrop)">`;
   if(paint)s+=`<g filter="${paint}">`;
   for(let i=0;i<full;i++)s+=floorFull(i,anim&&i==full-1?'fl-new':'');
   if(paint)s+='</g>';
+  if(full>0)s+='</g>';
   if(dt)s+=dirtWalls(full,dt);
   if(dt>=3)s+='</g>';
   if(part>=0){s+=topSlab(part);s+=floorPart(part,frac)}

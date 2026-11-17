@@ -89,7 +89,7 @@ const ITEMS=[
  {id:'d_fruit', cat:'deeds',name:'بستان المصلّي',e:'🍊',deed:'سجّل ٣٥ صلاة صلّيتها',layer:'front',at:[[38,270,16],[326,264,15],[52,258,14]]},
  {id:'d_h1',    cat:'deeds',name:'حمامات الحافظ',e:'🕊️',deed:'احفظ سورة واحدة',layer:'back',at:[[200,70,18],[226,58,15],[178,84,14]],anim:'fly'},
  {id:'d_h3',    cat:'deeds',name:'قوس قزح الحافظ',e:'🌈',deed:'احفظ ٣ سور',layer:'back',at:[[90,118,54]]},
- {id:'d_h6',    cat:'deeds',name:'برج الحافظ الذهبي',e:'🏯',deed:'احفظ ٦ سور',layer:'back',at:[[34,250,38]]},
+ {id:'d_h6',    cat:'deeds',name:'برج الحافظ الذهبي',e:'🏯',deed:'احفظ ٦ سور',layer:'back',svg:'tower',at:[[34,250,38]]},
  {id:'d_h12',   cat:'deeds',name:'تاج حافظ القرآن',e:'👑',deed:'احفظ السور الاثنتي عشرة كلّها',layer:'back',at:[[260,46,30]],anim:'bob'},
  {id:'d_noor',  cat:'deeds',name:'نورٌ على بيتك',e:'✨',deed:'صلِّ على محمد وآل محمد ٥٠٠ مرة',layer:'back',at:[[110,130,18],[250,120,16],[180,58,22],[60,92,14]],anim:'twinkle'},
  // هدايا الأصدقاء فقط
@@ -148,10 +148,29 @@ function streetSVG(xs){const g=292;xs=xs||[10,42,74];
     <circle cx="${x+7}" cy="${g-33}" r="17" fill="#ffe27a" opacity=".28" class="dk-tw" style="animation-delay:${k*.25}s"/><circle cx="${x+7}" cy="${g-33}" r="9" fill="#ffe27a" opacity=".38"/>
     <path d="M${x+2} ${g-39} h10 l-1.5 9 h-7z" fill="url(#hGold)" stroke="#9a6a00" stroke-width=".8"/><rect x="${x+3.6}" y="${g-31}" width="6.8" height="6" rx="2" fill="#fff6b8"/><circle cx="${x+7}" cy="${g-28}" r="2.4" fill="#fffbe0"/>
     <path d="M${x+1} ${g-40} h12 l-6 -5z" fill="#37515a"/></g>`).join('')}
+/* 🏯 v8.7: برج الحافظ الذهبي مرسوم بوضوح (كان رمزًا صغيرًا يضيع خلف النخلة): قاعدة، جذع بوجهين للتجسيم، شرفة، قبّة ذهبية وهلال، ونور حوله */
+function towerSVG(){const c=30,g=292,L='#f6e3b8',R='#d8b880',T='#b9851a';
+  const band=y=>`<rect x="${c-11}" y="${y}" width="22" height="3" fill="url(#hGold)"/>`;
+  const win=y=>`<path d="M${c-4} ${y} V${y-7} a4 4 0 0 1 8 0 V${y}Z" fill="#7cc8ff" stroke="${T}" stroke-width="1"/>`;
+  return `<g class="dk-tower"><ellipse cx="${c}" cy="${g-90}" rx="34" ry="78" fill="#ffe066" opacity=".22" class="dk-tw"/>
+  <ellipse cx="${c+4}" cy="${g+2}" rx="22" ry="4" fill="#1d5a30" opacity=".3"/>
+  <rect x="${c-16}" y="${g-26}" width="16" height="26" fill="${L}" stroke="${T}" stroke-width=".8"/><rect x="${c}" y="${g-26}" width="16" height="26" fill="${R}" stroke="${T}" stroke-width=".8"/>
+  <path d="M${c-5} ${g} V${g-12} a5 5 0 0 1 10 0 V${g}Z" fill="#8a4f22" stroke="url(#hGold)" stroke-width="1.4"/>
+  <rect x="${c-18}" y="${g-30}" width="36" height="5" rx="1.5" fill="url(#hGold)"/>
+  <rect x="${c-11}" y="${g-112}" width="11" height="82" fill="${L}"/><rect x="${c}" y="${g-112}" width="11" height="82" fill="${R}"/>
+  ${band(g-56)}${band(g-84)}${win(g-38)}${win(g-64)}${win(g-92)}
+  <rect x="${c-17}" y="${g-118}" width="34" height="6" rx="2" fill="url(#hGold)" stroke="${T}" stroke-width=".6"/>
+  ${[-13,-7,-1,5,11].map(d=>`<rect x="${c+d}" y="${g-126}" width="2" height="8" fill="${T}"/>`).join('')}<rect x="${c-15}" y="${g-127}" width="30" height="2" fill="url(#hGold)"/>
+  <rect x="${c-8}" y="${g-142}" width="8" height="24" fill="${L}"/><rect x="${c}" y="${g-142}" width="8" height="24" fill="${R}"/>${win(g-124)}
+  <path d="M${c-11} ${g-142} Q${c-11} ${g-162} ${c} ${g-172} Q${c+11} ${g-162} ${c+11} ${g-142}Z" fill="url(#hGold)" stroke="${T}" stroke-width="1"/>
+  <path d="M${c-4} ${g-146} Q${c-5} ${g-160} ${c} ${g-167}" stroke="#fff6c8" stroke-width="2" fill="none" opacity=".7"/>
+  <line x1="${c}" y1="${g-172}" x2="${c}" y2="${g-180}" stroke="${T}" stroke-width="1.6"/><path d="M${c} ${g-191} a5.5 5.5 0 1 0 4.6 7.6 a4.2 4.2 0 1 1 -4.6 -7.6z" fill="url(#hGold)"/>
+  ${[[-24,-150],[22,-120],[-20,-70],[24,-40]].map(([a,b],k)=>`<text x="${c+a}" y="${g+b}" font-size="9" text-anchor="middle" class="dk-tw" style="animation-delay:${k*.35}s">✨</text>`).join('')}</g>`}
 function itemSVG(it,full,withRoof){
   if(it.svg=='street')return streetSVG();
   if(it.svg=='street2')return streetSVG([266,288]);
   if(it.svg=='mosque')return mosqueSVG();
+  if(it.svg=='tower')return towerSVG();
   if(['fbox','curt','door','ivy'].includes(it.svg))return houseItem(it.svg,full);
   const cls=it.anim?` class="dk-${it.anim}"`:'';
   if(it.svg=='lights'){if(!(full>0&&withRoof))return '';const B=Bayt,y=B.fy(full-1),L=B.FX-12,R=B.FX+B.FW+12,M=B.FX+B.FW/2,H=66,C=['#e2504a','#f2b632','#3fbf6f','#2f8fd0','#c45bd1'];
