@@ -13,10 +13,10 @@ const SAL={k:'sal',p:'اللّٰهُمَّ صَلِّ عَلَىٰ مُحَمَ�
 // [اسم المستوى، الجواهر، العمل الصالح، عدد المرات، الوقت بالدقائق]
 const PARTS={
   w:{n:'سور البيت',e:'🧱',lv:[['سور خشبي',40,TAS,10,1],['سور من الحجر',120,SAL,10,15],['سور رخام بزخارف ذهبية',300,SAL,30,60]]},
-  g:{n:'حديقة البيت',e:'🌷',need:()=>st.w>=1?'':'ابنِ السور أولًا 🧱',lv:[['حديقة خضراء',40,TAS,10,2],['ورود وممرّ حجري',120,SAL,10,20],['نافورة وفوانيس',300,SAL,30,60]]},
-  t0:{n:'شجرة التفّاح',e:'🍎',need:()=>st.g>=1?'':'ازرع الحديقة أولًا 🌷',lv:[['شتلة صغيرة',20,TAS,10,1],['شجرة خضراء',60,SAL,10,10],['شجرة تفّاح مثمرة',150,TAS,30,40]]},
-  t1:{n:'شجرة الرمّان',e:'🍒',need:()=>st.g>=1?'':'ازرع الحديقة أولًا 🌷',lv:[['شتلة صغيرة',20,TAS,10,1],['شجرة خضراء',60,SAL,10,10],['شجرة رمّان مثمرة',150,TAS,30,40]]},
-  t2:{n:'شجرة البرتقال',e:'🍊',need:()=>st.g>=1?'':'ازرع الحديقة أولًا 🌷',lv:[['شتلة صغيرة',20,TAS,10,1],['شجرة خضراء',60,SAL,10,10],['شجرة برتقال مثمرة',150,TAS,30,40]]}};
+  g:{n:'بستان البيت',e:'🌳',need:()=>st.w>=1?'':'ابنِ السور أولًا 🧱',lv:[['بستان أخضر بسياج من الشجيرات',40,TAS,10,2],['ورود وممرّ حجري',120,SAL,10,20],['نافورة وفوانيس',300,SAL,30,60]]},
+  t0:{n:'شجرة التفّاح',e:'🍎',need:()=>st.g>=1?'':'ازرع البستان أولًا 🌳',lv:[['شتلة صغيرة',20,TAS,10,1],['شجرة خضراء',60,SAL,10,10],['شجرة تفّاح مثمرة',150,TAS,30,40]]},
+  t1:{n:'شجرة الرمّان',e:'🍒',need:()=>st.g>=1?'':'ازرع البستان أولًا 🌳',lv:[['شتلة صغيرة',20,TAS,10,1],['شجرة خضراء',60,SAL,10,10],['شجرة رمّان مثمرة',150,TAS,30,40]]},
+  t2:{n:'شجرة البرتقال',e:'🍊',need:()=>st.g>=1?'':'ازرع البستان أولًا 🌳',lv:[['شتلة صغيرة',20,TAS,10,1],['شجرة خضراء',60,SAL,10,10],['شجرة برتقال مثمرة',150,TAS,30,40]]}};
 const lvOf=p=>p=='w'?st.w:p=='g'?st.g:st.t[+p[1]];
 const setLv=(p,v)=>{if(p=='w')st.w=v;else if(p=='g')st.g=v;else st.t[+p[1]]=v};
 const code=()=>`${st.w}${st.g}${st.t.join('')}`;
@@ -121,7 +121,7 @@ document.addEventListener('click',e=>{const t=e.target&&e.target.closest&&e.targ
 if(window.Deco&&Deco.menuHook){const orig=Deco.menuHook;Deco.menuHook=function(B0){orig.apply(this,arguments);
   const hb=B0.querySelector('.bhouse');if(!hb)return;const j=st.job;
   hb.insertAdjacentHTML('afterend',j?`<div class="bnhint job" id="bnJob"><span class="e">${j.ready?'🎉':'👷'}</span><span id="bnJobLine">…</span></div>`
-    :`<div class="bnhint"><span class="e">👆</span><span>${B('المس','المسي')} أجزاء بيتك لتبنيها وتطوّرها: السور، الحديقة، الأشجار<br><small style="font-weight:700">🔍 ${B('المس','المسي')} البيت نفسه لتراه بالعرض وتكبّره</small></span></div>`);
+    :`<div class="bnhint"><span class="e">👆</span><span>${B('المس','المسي')} أجزاء بيتك لتبنيها وتطوّرها: السور، البستان وأشجاره<br><small style="font-weight:700">🔍 ${B('المس','المسي')} البيت نفسه لتراه بالعرض وتكبّره</small></span></div>`);
   const jb=$('#bnJob');if(jb)jb.onclick=jobModal;tick()}}
 
 window.Binaa={code,get job(){return st.job},get fx(){return fx&&fx.until>Date.now()?fx:null},open,tick,lv:lvOf,get st(){return st}};

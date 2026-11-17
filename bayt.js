@@ -294,7 +294,9 @@ function houseSVG(full,part,frac,withRoof,anim,look){
   // 🕌 من ربح المسجد: الصورة تتّسع لليمين ويقف المسجد الكبير بجانب البيت
   const MQ=String(L.i||'').split(',').includes('d_mosque'),MW=MQ?100:0,W=VW+MW,MM=VW+20;
   // الخلفية تمتدّ خارج حدود الصورة: إذا كان الإطار أعرض من الصورة لا تظهر حواف فارغة (ولا «نصّ ليل ونصّ نهار»)
-  let s=`<svg viewBox="0 0 ${W} ${VH}" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">${defs()}<g><rect x="-500" y="-200" width="${W+1000}" height="201" fill="#8fd4ff"/><rect x="-500" width="${W+1000}" height="${VH}" fill="url(#hSky)"/><rect x="-500" y="${GY-20}" width="${W+1000}" height="20" fill="#a6e6ae"/><rect x="-500" y="${GY-6}" width="${W+1000}" height="${VH-GY+6}" fill="url(#hGrass)"/><rect x="-500" y="${GY+21}" width="${W+1000}" height="12" fill="#5fb3ee"/></g>${scene()}`;
+  // 🌳 v9.3: البستان يوسّع الصورة لليسار (كما يوسّعها المسجد لليمين)
+  const OW=full>0?orchW(L.u,L.ed):0;
+  let s=`<svg viewBox="${-OW} 0 ${W+OW} ${VH}" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">${defs()}<g><rect x="-500" y="-200" width="${W+1000}" height="201" fill="#8fd4ff"/><rect x="-500" width="${W+1000}" height="${VH}" fill="url(#hSky)"/><rect x="-500" y="${GY-20}" width="${W+1000}" height="20" fill="#a6e6ae"/><rect x="-500" y="${GY-6}" width="${W+1000}" height="${VH-GY+6}" fill="url(#hGrass)"/><rect x="-500" y="${GY+21}" width="${W+1000}" height="12" fill="#5fb3ee"/></g>${scene()}`;
   if(MQ)s+=`
     <path d="M${VW-2} ${GY-22} Q${VW+60} ${GY-36} ${VW+110} ${GY-22} T${W} ${GY-20} V${VH} H${VW-2}Z" fill="#a6e6ae"/>
     <rect x="${VW-3}" y="${GY-6}" width="${MW+3}" height="${VH-GY+6}" fill="url(#hGrass)"/>
@@ -324,15 +326,16 @@ function houseSVG(full,part,frac,withRoof,anim,look){
   if(full>0)s+=[[FX+2,14],[FX+38,0],[FX+FW-38,0],[FX+FW-2,14]].filter(([x,w])=>true).map(([x])=>`<g><ellipse cx="${x}" cy="${GY+1}" rx="13" ry="8" fill="#2a8a4a"/><ellipse cx="${x-3}" cy="${GY-2}" rx="8" ry="5" fill="#3fbf6f"/><circle cx="${x+5}" cy="${GY-3}" r="1.6" fill="#fff"/></g>`).join('');
   if(hasGift('lanterns')&&full>0){const dx=FX+FW/2;s+=[dx-34,dx+34].map(x=>`<g><line x1="${x}" y1="${GY-56}" x2="${x}" y2="${GY-48}" stroke="#8a5a00" stroke-width="1.5"/><circle cx="${x}" cy="${GY-40}" r="11" fill="#ffe066" opacity=".45"/><rect x="${x-5}" y="${GY-48}" width="10" height="14" rx="3" fill="url(#hGold)" stroke="#8a5a00"/><rect x="${x-3}" y="${GY-45}" width="6" height="8" rx="2" fill="#fff6b0"/></g>`).join('')}
   if(hasGift('crown')&&withRoof&&full>0){const y=fy(full-1)-66-40,M=FX+FW/2;s+=`<g><circle cx="${M}" cy="${y+6}" r="22" fill="#ffe066" opacity=".35"/><path d="M${M-16} ${y+14} L${M-18} ${y-2} L${M-8} ${y+6} L${M} ${y-8} L${M+8} ${y+6} L${M+18} ${y-2} L${M+16} ${y+14}Z" fill="url(#hGold)" stroke="#9a6a00" stroke-width="1.5"/><circle cx="${M}" cy="${y+8}" r="2.6" fill="#e2504a"/><circle cx="${M-9}" cy="${y+10}" r="2" fill="#2f8fd0"/><circle cx="${M+9}" cy="${y+10}" r="2" fill="#3fbf6f"/></g>`}
-  if(full>0&&!L.wide)s+=`<g class="hyard">${yard(L.u,L.job,L.ed,L.fx)}</g>`;
+  if(full>0)s+=`<g class="hyard">${yard(L.u,L.job,L.ed,L.fx)}</g>`;
   if(HK<1)s+='</g>';
-  if(full>0&&L.wide)s+=`<g class="hyard">${yard(L.u,L.job,L.ed,L.fx,YWIDE(MQ))}</g>`;
+  const OTOP2=OTOP;if(full>0&&ORCH)s+=`<g class="hyard horch" transform="${OTR}">${ORCH}</g>`;ORCH='';
   if(dt)s+=trashSVG(dt);
   if(MQ)s+=walkers(196,GY+15-192*.75,(MM-215)/.75,.75,'msq-walk');
   if(hasGift('flowers'))s+=[[FX-14,GY+2],[FX+10,GY+4],[FX+FW-6,GY+4],[FX+FW+DX-10,GY-2],[FX+FW+24,GY+2]].map(([x,y])=>`<g><ellipse cx="${x}" cy="${y}" rx="13" ry="8" fill="#2e9c55"/>${[[-6,-3,'#e2504a'],[1,-6,'#ff8ac2'],[7,-2,'#f2b632'],[-1,1,'#fff']].map(([a,b,c])=>`<circle cx="${x+a}" cy="${y+b}" r="2.8" fill="${c}"/>`).join('')}</g>`).join('');
-  if(hasGift('fountain')){const x=0,y=0;s+=`<g transform="translate(${L.wide?-62:50} ${GY+14}) scale(1.5)"><ellipse cx="${x}" cy="${y}" rx="20" ry="6" fill="#bfc9cf" stroke="#8b979e"/><ellipse cx="${x}" cy="${y-1}" rx="16" ry="4" fill="#7cc8ff"/><rect x="${x-2.5}" y="${y-22}" width="5" height="21" fill="#bfc9cf"/><ellipse cx="${x}" cy="${y-22}" rx="9" ry="3" fill="#bfc9cf"/><path d="M${x} ${y-24} q-10 -12 -14 4 M${x} ${y-24} q10 -12 14 4 M${x} ${y-24} v-10" stroke="#7cc8ff" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>`}
+  if(hasGift('fountain')){const x=0,y=0;s+=`<g transform="translate(${L.wide?-226:50} ${GY+14}) scale(1.5)"><ellipse cx="${x}" cy="${y}" rx="20" ry="6" fill="#bfc9cf" stroke="#8b979e"/><ellipse cx="${x}" cy="${y-1}" rx="16" ry="4" fill="#7cc8ff"/><rect x="${x-2.5}" y="${y-22}" width="5" height="21" fill="#bfc9cf"/><ellipse cx="${x}" cy="${y-22}" rx="9" ry="3" fill="#bfc9cf"/><path d="M${x} ${y-24} q-10 -12 -14 4 M${x} ${y-24} q10 -12 14 4 M${x} ${y-24} v-10" stroke="#7cc8ff" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>`}
   if(D)s+=D.svg(L,'front',full,withRoof);
-  if(full>0&&YTOP){const HCX=FX+FW/2+DX/2,HKX=top>=5?.8:top>=4?.9:1;s+=L.wide||HK==1?YTOP:`<g transform="translate(${HCX} ${GY}) scale(${HKX} ${HK}) translate(${-HCX} ${-GY})">${YTOP}</g>`;YTOP=''}
+  if(full>0&&YTOP){const HCX=FX+FW/2+DX/2,HKX=top>=5?.8:top>=4?.9:1;s+=HK==1?YTOP:`<g transform="translate(${HCX} ${GY}) scale(${HKX} ${HK}) translate(${-HCX} ${-GY})">${YTOP}</g>`;YTOP=''}
+  if(full>0&&OTOP2)s+=`<g transform="${OTR}">${OTOP2}</g>`;OTOP='';
   if(full==0&&part<0)s+=floorPart(0,0)+`<text x="${FX+FW/2}" y="${fy(0)-14}" text-anchor="middle" font-size="16" font-weight="800" fill="#3d5a4a" font-family="Tajawal,sans-serif">هنا سيُبنى بيتك</text>`;
   // معرّفات فريدة لكل رسمة: إذا تكرّرت ووقعت الأولى في شاشة مخفية تختفي الألوان من الباقي
   const k=++svgN;return (s+'</svg>').replace(/(id="|url\(#)(h[A-Z]\w*)/g,`$1$2_${k}`)}
@@ -378,47 +381,64 @@ function yTree(i,lv,ed,canPlant,ts=YTS,tk=1.65){const [x,y]=ts[i],c=YFR[i];let s
   if(lv>=3)s+=`<ellipse cx="${x}" cy="${y+.5}" rx="13" ry="3.4" fill="#2f7a45" opacity=".35"/><rect x="${x-2.2}" y="${y-17}" width="4.4" height="17" rx="1.4" fill="#7a4f22"/><circle cx="${x-7}" cy="${y-22}" r="8" fill="#239a52"/><circle cx="${x+7}" cy="${y-22}" r="8" fill="#239a52"/><circle cx="${x}" cy="${y-29}" r="10" fill="#2fae5f"/><circle cx="${x-4}" cy="${y-32}" r="4.5" fill="#5fd48a" opacity=".6"/>
     ${[[-8,-20],[6,-18],[-2,-27],[8,-27],[-9,-29],[2,-21]].map(([a,b])=>`<circle cx="${x+a}" cy="${y+b}" r="2.1" fill="${c}" stroke="#fff" stroke-width=".4"/>`).join('')}`;
   return s+'</g></g>'}
-/* v9.1: في عرض البيت بالعرض الفناء أوسع: السور يمتدّ على الجانبين، والحديقة أطول، والأشجار أكبر وفي الجوانب، ولا يصغر مع طوابق البيت */
-const YWIDE=mq=>({xl:-30,xr:mq?318:400,cx:YCX,ts:mq?[[10,GY+7],[62,GY+9],[300,GY+8]]:[[15,GY+7],[330,GY+8],[382,GY+5]],tk:2.3});
-// v9.2: الدوائر الصفراء وشارة «استلم» تُرسم في آخر الصورة (فوق الزينة) حتى لا تغطّيها السيارة أو الورود
-let YTOP='';
-function yard(u,job,ed,fx,Gm){YTOP='';const {xl:YXL,xr:YXR,cx:YCX,ts:YTS,tk}=Gm||{xl:YXL0,xr:YXR0,cx:YCX0,ts:YTS0,tk:1.65};u=/^[0-3]{5}$/.test(u||'')?u:'00000';const w=+u[0],g=+u[1],T=[+u[2],+u[3],+u[4]];
+/* 🌳 v9.3: البستان — الحديقة والأشجار صارت بستانًا واضحًا على يسار البيت (مثل المسجد على يمينه)، لا يصغر مع طوابق البيت.
+   السور يبقى أمام البيت. يظهر البستان في بيت الطفل دائمًا (أرض فارغة ودائرة +) وعند الأصدقاء إذا زرعه. */
+const OX0=-114,OX1=-8,OCX=(OX0+OX1)/2,OTS=[[-95,GY-5],[-61,GY-9],[-27,GY-5]],OTK=1.8;
+// البستان يُكبَّر ١٫٤ مرة حول طرفه الأيمن السفلي حتى يكون واضحًا مثل المسجد
+const OK=1.4,OTR=`translate(-6 ${GY+13}) scale(${OK}) translate(6 ${-GY-13})`;
+const orchW=(u,ed)=>{u=/^[0-3]{5}$/.test(u||'')?u:'00000';return (+u[1]>=1||ed)?185:0};
+// الدوائر الصفراء وشارة «استلم» تُرسم في آخر الصورة (فوق الزينة): YTOP للسور (داخل مقياس البيت) و OTOP للبستان
+let YTOP='',OTOP='',ORCH='';
+function yard(u,job,ed,fx){YTOP='';OTOP='';ORCH='';const YXL=YXL0,YXR=YXR0,YCX=YCX0;
+  u=/^[0-3]{5}$/.test(u||'')?u:'00000';const w=+u[0],g=+u[1],T=[+u[2],+u[3],+u[4]];
   const busy=!!(job&&!job.ready),rdy=!!(job&&job.ready),pop=(p,html)=>fx&&fx.p==p?`<g class="bn-pop">${html}</g>`:html;
-  // الحديقة
-  let G=`<g data-up="g"><rect x="${YXL+4}" y="${GY+1}" width="${YCX-24-YXL-4}" height="${YFY-GY-4}" fill="#000" opacity="0"/><rect x="${YCX+24}" y="${GY+1}" width="${YXR-YCX-28}" height="${YFY-GY-4}" fill="#000" opacity="0"/>`;
-  const beds=[[YXL+6,YCX-26],[YCX+26,YXR-6]];
-  if(g==0&&ed&&w>=1)G+=beds.map(([a,b])=>`<rect x="${a}" y="${GY+2}" width="${b-a}" height="7" rx="3.5" fill="#9a6a3a" opacity=".55"/>`).join('');
-  if(g>=1)G+=beds.map(([a,b])=>`<rect x="${a}" y="${GY+1.5}" width="${b-a}" height="8" rx="4" fill="#4fbf68"/><rect x="${a+2}" y="${GY+2}" width="${b-a-4}" height="2.5" rx="1.2" fill="#8ee09a" opacity=".7"/><ellipse cx="${a+5}" cy="${GY+4}" rx="5" ry="4" fill="#2e9c55"/><ellipse cx="${b-5}" cy="${GY+4}" rx="5" ry="4" fill="#2e9c55"/>`).join('');
-  if(g>=2){G+=beds.map(([a,b])=>{let f='';for(let x=a+11;x<b-9;x+=7){const k=(x*7)%4;f+=`<circle cx="${x}" cy="${GY+5+(k%2)}" r="1.9" fill="${['#e2504a','#ff8ac2','#f2b632','#fff'][k]}"/>`}return f}).join('');
-    G+=[-1,1].map(d=>Array.from({length:4},(_,k)=>`<ellipse cx="${YCX+d*(16+k*2.2)}" cy="${GY+3+k*3}" rx="2.6" ry="1.4" fill="#d8d2c4" stroke="#b5ad9c" stroke-width=".5"/>`).join('')).join('')}
-  if(g>=3){const fx0=YXL+40;G+=`<g><ellipse cx="${fx0}" cy="${GY+7}" rx="11" ry="3.6" fill="#cfd8dc" stroke="#90a4ae" stroke-width=".8"/><ellipse cx="${fx0}" cy="${GY+6.5}" rx="8.5" ry="2.4" fill="#7cc8ff"/><rect x="${fx0-1.2}" y="${GY-4}" width="2.4" height="10" fill="#cfd8dc"/>
-      <path d="M${fx0} ${GY-4} q-5 -6 -9 2 M${fx0} ${GY-4} q5 -6 9 2" stroke="#9fdcff" stroke-width="1.4" fill="none" class="hwv"/></g>`;
-    G+=[YCX-30,YCX+30,YXR-14].map(x=>`<g><rect x="${x-.8}" y="${GY-9}" width="1.6" height="12" fill="#6b5a3a"/><circle cx="${x}" cy="${GY-11}" r="5" fill="#ffe066" opacity=".35"/><rect x="${x-2}" y="${GY-13}" width="4" height="4" rx="1" fill="#ffd54a" stroke="#b9851a" stroke-width=".5"/></g>`).join('')}
-  G+='</g>';
-  let s=pop('g',G);
-  // الأشجار
-  T.forEach((lv,i)=>{s+=pop('t'+i,yTree(i,lv,ed,g>=1,YTS,tk))});
-  // السور: أمامي بفتحة الباب + جانبان
+  // ---------- البستان ----------
+  let O='';const GF=GY+13,GB=GY-9;
+  if(g>=1||ed){
+    const poly=`${OX0},${GF} ${OX1},${GF} ${OX1-7},${GB} ${OX0+7},${GB}`;
+    let G=`<g data-up="g"><polygon points="${poly}" fill="#000" opacity="0"/>`;
+    if(g==0)G+=`<polygon points="${poly}" fill="#a8742a" opacity=".45"/><polygon points="${poly}" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="5 3"/>`
+      +[0,1,2].map(k=>`<line x1="${OX0+10}" y1="${GB+5+k*6}" x2="${OX1-10}" y2="${GB+5+k*6}" stroke="#8a5a2b" stroke-width="1" opacity=".45"/>`).join('');
+    if(g>=1){G+=`<polygon points="${poly}" fill="#4fbf68"/><polygon points="${OX0+4},${GF-3} ${OX1-4},${GF-3} ${OX1-9},${GB+3} ${OX0+9},${GB+3}" fill="#6fd47f" opacity=".55"/>`;
+      // سياج شجيرات حول البستان
+      for(let x=OX0+3;x<=OX1-3;x+=9)G+=`<ellipse cx="${x}" cy="${GF}" rx="5.5" ry="4" fill="#2e9c55"/><circle cx="${x-1.5}" cy="${GF-1.5}" r="1.6" fill="#5fd48a" opacity=".8"/>`;
+      for(let k=0;k<4;k++){const t=k/3;G+=`<ellipse cx="${OX0+t*7}" cy="${GF-t*(GF-GB)}" rx="4" ry="3.4" fill="#2a8a4a"/><ellipse cx="${OX1-t*7}" cy="${GF-t*(GF-GB)}" rx="4" ry="3.4" fill="#2a8a4a"/>`}}
+    if(g>=2){// ورود ملوّنة وممرّ حجري في الوسط
+      G+=Array.from({length:7},(_,k)=>`<ellipse cx="${OCX}" cy="${GF-2-k*3}" rx="${4.2-k*.25}" ry="1.5" fill="#e7e1d3" stroke="#b5ad9c" stroke-width=".5"/>`).join('');
+      for(let x=OX0+9;x<OX1-8;x+=6){if(Math.abs(x-OCX)<7)continue;const k=Math.abs(Math.round(x*7))%4;G+=`<circle cx="${x}" cy="${GF-5}" r="2" fill="${['#e2504a','#ff8ac2','#f2b632','#fff'][k]}"/><circle cx="${x+3}" cy="${GB+4}" r="1.6" fill="${['#ff8ac2','#f2b632','#e2504a','#c45bd1'][k]}"/>`}}
+    if(g>=3){// نافورة وفوانيس
+      const fy0=GF-4;G+=`<g><ellipse cx="${OCX}" cy="${fy0}" rx="12" ry="4" fill="#cfd8dc" stroke="#90a4ae" stroke-width=".8"/><ellipse cx="${OCX}" cy="${fy0-.5}" rx="9.5" ry="2.7" fill="#7cc8ff"/><rect x="${OCX-1.3}" y="${fy0-12}" width="2.6" height="11" fill="#cfd8dc"/>
+        <path d="M${OCX} ${fy0-12} q-6 -7 -10 2 M${OCX} ${fy0-12} q6 -7 10 2" stroke="#9fdcff" stroke-width="1.5" fill="none" class="hwv"/></g>`;
+      G+=[[OX0+3,GF-2],[OX1-3,GF-2],[OX0+9,GB+1],[OX1-9,GB+1]].map(([x,y])=>`<g><rect x="${x-.8}" y="${y-13}" width="1.6" height="13" fill="#6b5a3a"/><circle cx="${x}" cy="${y-15}" r="5.5" fill="#ffe066" opacity=".4" class="dk-tw"/><rect x="${x-2.2}" y="${y-17}" width="4.4" height="4.4" rx="1" fill="#ffd54a" stroke="#b9851a" stroke-width=".5"/></g>`).join('')}
+    // لوحة «بستاني»
+    const SIGN=`<g><line x1="${OX0+6}" y1="${GF+4}" x2="${OX0+6}" y2="${GF-10}" stroke="#7a4f22" stroke-width="1.6"/><rect x="${OX0-11}" y="${GF-22}" width="34" height="13" rx="3" fill="#fffbe9" stroke="#8a5a2b" stroke-width="1"/><text x="${OX0+6}" y="${GF-12.5}" text-anchor="middle" font-size="8" font-weight="900" fill="#2a6a3a" font-family="Tajawal,sans-serif">🌳 بستاني</text></g>`;
+    G+='</g>';O+=pop('g',G);
+    // الأشجار
+    T.forEach((lv,i)=>{O+=pop('t'+i,yTree(i,lv,ed,g>=1,OTS,OTK))});O+=SIGN}
+  // ---------- السور: أمامي بفتحة الباب + جانبان ----------
+  let s='';
   let Wl=`<g data-up="w" transform="translate(0 ${YFY}) scale(1 1.55) translate(0 ${-YFY})"><rect x="${YXL-4}" y="${YFY-16}" width="${YXR-YXL+8}" height="19" fill="#000" opacity="0"/>`;
   const segs=[[YXL+20,YFY-14,YXL,YFY],[YXL,YFY,YCX-23,YFY],[YCX+23,YFY,YXR,YFY],[YXR,YFY,YXR+24,YFY-14]];
   if(w==0&&ed)Wl+=`<polyline points="${YXL+20},${YFY-14} ${YXL},${YFY} ${YCX-23},${YFY}" fill="none" stroke="#fff" stroke-width="2.4" stroke-dasharray="5 3"/><polyline points="${YCX+23},${YFY} ${YXR},${YFY} ${YXR+24},${YFY-14}" fill="none" stroke="#fff" stroke-width="2.4" stroke-dasharray="5 3"/>`;
   if(w>=1){Wl+=segs.map(([a,b,c,d])=>ySeg(a,b,c,d,w)).join('');
     const ph=w==1?14:w==2?13:17,pc=w==1?'#8a5a2b':w==2?'#857d6f':'#fffaf0';Wl+=[YCX-24,YCX+21].map(x=>`<rect x="${x}" y="${YFY-ph}" width="3.4" height="${ph}" fill="${pc}" stroke="${w>=3?'#d8cdb8':'none'}" stroke-width=".6"/>${w>=3?`<circle cx="${x+1.7}" cy="${YFY-ph-2}" r="2.6" fill="url(#hGold)"/><circle cx="${x+1.7}" cy="${YFY-ph-8}" r="4" fill="#ffe066" opacity=".35"/>`:''}`).join('')}
   Wl+='</g>';s+=pop('w',Wl);
-  // مكان العمّال لكل جزء
-  const spots=p=>{if(p=='w')return [[YXL+16,YFY+4],[YCX-52,YFY+4],[YCX+44,YFY+4]];if(p=='g')return [[YXL+30,GY+12],[YCX+36,GY+12],[YXR-30,GY+12]];const [x,y]=YTS[+p[1]];return [[x-14,y+3],[x+8,y+5],[x+16,y+2]]};
-  const signAt=p=>p=='w'?[YXL+44,YFY-44]:p=='g'?[YCX+60,GY-26]:[YTS[+p[1]][0],YTS[+p[1]][1]-62];
+  // ---------- العمّال واللوحات والدوائر ----------
+  const inO=p=>p!='w';
+  const spots=p=>{if(p=='w')return [[YXL+16,YFY+4],[YCX-52,YFY+4],[YCX+44,YFY+4]];if(p=='g')return [[OX0+8,GY+17],[OCX+4,GY+18],[OX1-6,GY+17]];const [x,y]=OTS[+p[1]];return [[x-15,y+5],[x+9,y+7],[x+17,y+4]]};
+  const signAt=p=>p=='w'?[YXL+44,YFY-44]:p=='g'?[OCX,GY-58]:[OTS[+p[1]][0],OTS[+p[1]][1]-70];
+  const put=(p,html)=>{if(inO(p))O+=html;else s+=html},putTop=(p,html)=>{if(inO(p))OTOP+=html;else YTOP+=html};
   if(busy){const p=job.p,n=Math.max(1,Math.min(3,job.to|0)),P=spots(p);
-    s+=yBricks(P[0][0]-16,P[0][1]);
-    s+=P.slice(0,n).map(([x,y],i)=>(i==1?'':yDust(x+10,y-4))+yWorker(x,y,1.6,i==1?'walk':'hammer')).join('');
-    const [sx,sy]=signAt(p);s+=ySign(sx,sy,50)}
+    put(p,yBricks(P[0][0]-16,P[0][1])+P.slice(0,n).map(([x,y],i)=>(i==1?'':yDust(x+10,y-4))+yWorker(x,y,1.6,i==1?'walk':'hammer')).join(''));
+    const [sx,sy]=signAt(p);put(p,ySign(sx,sy,50))}
   else if(rdy){const p=job.p,n=Math.max(1,Math.min(3,job.to|0)),P=spots(p);
-    s+=P.slice(0,n).map(([x,y],i)=>`<g style="animation-delay:${i*.2}s">${yWorker(x,y,1.6,'cheer')}</g>`).join('');
-    const [sx,sy]=signAt(p);YTOP+=yReady(sx,sy+6,p)}
-  else if(ed){const mk=[];if(w<3)mk.push([YXL+60,YFY-26,w==0,'w']);if(w>=1&&g<3)mk.push([YCX+70,GY-2,g==0,'g']);if(g>=1)T.forEach((lv,i)=>{if(lv<3){const [x,y]=YTS[i];mk.push([x+12,y-(lv==2?50:lv==1?26:14),lv==0,'t'+i])}});
-    YTOP+=mk.map(([x,y,pl,p])=>yMark(x,y,pl,p)).join('')}
-  if(fx){const [x,y]=fx.p=='w'?[YCX-60,YFY]:fx.p=='g'?[YCX+60,GY+8]:YTS[+fx.p[1]];s+=ySpark(x,y)+ySpark(fx.p=='w'?YCX+70:x+4,y-6)}
-  return s}
+    put(p,P.slice(0,n).map(([x,y],i)=>`<g style="animation-delay:${i*.2}s">${yWorker(x,y,1.6,'cheer')}</g>`).join(''));
+    const [sx,sy]=signAt(p);putTop(p,yReady(sx,sy+6,p))}
+  else if(ed){if(w<3)YTOP+=yMark(YXL+60,YFY-26,w==0,'w');
+    if(g<3)OTOP+=yMark(OCX-20,GF+6,g==0,'g');
+    if(g>=1)T.forEach((lv,i)=>{if(lv<3){const [x,y]=OTS[i];OTOP+=yMark(x+13,y-(lv==2?54:lv==1?30:16),lv==0,'t'+i)}})}
+  if(fx){if(fx.p=='w')s+=ySpark(YCX-60,YFY)+ySpark(YCX+70,YFY-6);else{const [x,y]=fx.p=='g'?[OCX,GY+6]:OTS[+fx.p[1]];O+=ySpark(x,y)+ySpark(x+4,y-6)}}
+  ORCH=O;return s}
 
 /* 🕌 المسجد الكبير (v7.9): يُرسم بجانب البيت إذا ربحه الطفل (d_mosque)، فيراه الأصدقاء أيضًا. وأهل الحيّ يمشون إليه بلا ملامح وجه. */
 const SKIN='#f1c7a0';
@@ -683,7 +703,7 @@ document.head.appendChild(wvCss);
 function wideView(){const look=window.Deco?Object.assign(Deco.myLook(),{wide:1,ed:1}):undefined;
   const raw=houseSVG(bs.done,-1,0,true,false,look);
   // v9.0: الزينة تتفرّق يمينًا ويسارًا (jannah.js mkSpread)، فنوسّع الإطار ليشملها كلّها (الخلفية مرسومة أصلًا خارج الحدود)
-  const svg=raw.replace(/viewBox="0 0 (\d+) (\d+)"/,(m,w,h)=>{w=+w;h=+h;let a=-128,b=w>VW?615:490;const need=Math.round(h*1.9);
+  const svg=raw.replace(/viewBox="(-?\d+) 0 (\d+) (\d+)"/,(m,x0,w,h)=>{w=+x0+ +w;h=+h;let a=-298,b=w>VW?615:490;const need=Math.round(h*1.9);
     if(b-a<need){const e=(need-(b-a))/2;a-=e;b+=e}return `viewBox="${Math.round(a)} 0 ${Math.round(b-a)} ${h}"`}).replace('preserveAspectRatio="xMidYMax meet"','preserveAspectRatio="xMidYMid meet"');
   const ov=document.createElement('div');ov.className='wv';
   ov.innerHTML=`<div class="wvr"><div class="wvs" id="wvS"><div class="bhouse wvh">${svg}</div>
