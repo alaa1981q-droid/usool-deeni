@@ -8,11 +8,11 @@ const sv=()=>{try{localStorage.setItem(CK,JSON.stringify(st))}catch(e){}};
 const css=document.createElement('style');
 css.textContent=`.dlcard{border-color:#1fa463!important;box-shadow:0 5px 0 #bfe8cf!important}.dlcard .cup{font-size:40px;width:62px;text-align:center;flex:none}
 /* v6.8: عدد التحميلات كبير وواضح تحت «حمّل الكتاب» */
-.dlcnt{display:inline-flex;align-items:baseline;justify-content:center;gap:6px;background:linear-gradient(135deg,#e6f7ec,#fff);border:2px solid #1fa463;border-radius:16px;padding:2px 14px;margin:4px auto 2px;box-shadow:0 3px 0 #bfe8cf}
-.dlcnt .nn{font-size:30px;font-weight:900;color:#0e6b3f;line-height:1.2}.dlcnt .ll{font-size:17px;font-weight:800;color:#14794f}`;
+.dlcnt{display:inline-flex;align-items:baseline;justify-content:center;gap:6px;background:linear-gradient(135deg,#e6f7ec,#fff);border:2px solid #1fa463;border-radius:12px;padding:0 10px;margin:2px auto 0;box-shadow:0 2px 0 #bfe8cf}
+.dlcnt .nn{font-size:22px;font-weight:900;color:#0e6b3f;line-height:1.25}.dlcnt .ll{font-size:14px;font-weight:800;color:#14794f}`;
 document.head.appendChild(css);
 const card=document.createElement('button');card.className='bookcard dlcard';card.id='dlBook';
-function line(){const n=st.n;return n>0?'حمّلوه حتى الآن 🌟 حمّله أنت أيضًا':'ملف PDF تحفظه في هاتفك وتقرأه بلا إنترنت'}
+function line(){const n=st.n;return n>0?'حمّله أنت أيضًا 🌟':'ملف PDF تحفظه في هاتفك وتقرأه بلا إنترنت'}
 function draw(){card.innerHTML=`<span class="cup" style="line-height:0"><svg viewBox="0 0 50 70" width="50" height="70" aria-hidden="true" style="border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.18)"><defs><linearGradient id="dlg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3fbf6f"/><stop offset="1" stop-color="#14794f"/></linearGradient></defs><rect width="50" height="70" rx="8" fill="url(#dlg)"/><path d="M25 12v26M14 28l11 12 11-12" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="11" y="48" width="28" height="4" rx="2" fill="#fff"/><text x="25" y="63" font-size="9" font-weight="800" text-anchor="middle" fill="#fff">PDF</text></svg></span><span><b>حمّل الكتاب</b>${st.n>0?`<span class="dlcnt"><span class="nn">${ar(st.n)}</span><span class="ll">${st.n==1?'تحميل':st.n==2?'تحميلان':st.n<=10?'تحميلات':'تحميلًا'}</span></span>`:''}<small id="dlLine">${line()}</small></span><span class="go">‹</span>`}
 draw();$('#openBook').after(card);
 async function sync(add){
