@@ -653,5 +653,61 @@ function finish(){if(G.net){stop();G.net.finish(G);return}
 document.addEventListener('visibilitychange',()=>{if(!G)return;if(document.hidden&&G.run){G.run=false;cancelAnimationFrame(G.raf);G.paused=true}
   else if(!document.hidden&&G.paused){G.paused=false;G.run=true;G.last=performance.now();G.raf=requestAnimationFrame(loop)}});
 window.__bayt={get G(){return G},need:()=>G&&need()};
-window.Bayt={get hk(){return HK},houseSVG,mosqueParts,walkers,menu,LEVELS,begin:()=>begin(),stop:()=>{stop();G=null},play:(i,net)=>{show('bayt');play(i,0,false,net)},get G(){return G},get done(){return bs.done},get cups(){return cs.n},rankOf,RANKS,sTap,sStar,sLine,VW,VH,GY,FX,FW,DX,fy};
+/* 🔍 v8.6: البيت بالعرض. لمس صورة البيت (خارج السور/الحديقة/الأشجار) يفتحه على كامل الشاشة بالعرض،
+   مع تكبير (أزرار + و −، أو إصبعين، أو لمستين) وسحب بالإصبع حتى تظهر الزينة والهدايا بوضوح.
+   يحاول قفل الشاشة بالعرض، وإن لم يقدر الجهاز (آيفون مثلًا) يدير الصورة نفسها ٩٠ درجة. */
+const wvCss=document.createElement('style');wvCss.textContent=`
+.wv{position:fixed;inset:0;z-index:9000;background:#0d1a2e;touch-action:none;overflow:hidden}
+.wv .wvr{position:absolute;left:0;top:0;width:100vw;height:100vh;display:flex;flex-direction:column}
+.wv.rot .wvr{width:100vh;height:100vw;transform-origin:0 0;transform:translateX(100vw) rotate(90deg)}
+.wv .wvs{flex:1;position:relative;overflow:hidden}
+.wv .wvh{position:absolute;inset:0;border:0;border-radius:0}
+.wv .wvh svg{width:100%;height:100%;transform-origin:0 0;will-change:transform}
+.wv .wvbar{position:absolute;top:8px;left:8px;right:8px;display:flex;gap:8px;align-items:center;z-index:2;pointer-events:none}
+.wv .wvbar b{flex:1;text-align:center;color:#fff;font-size:16px;text-shadow:0 2px 4px #000a}
+.wv .wvb{pointer-events:auto;width:46px;height:46px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.45);color:#fff;font:inherit;font-size:22px;font-weight:900;display:grid;place-items:center}
+.wv .wvhint{position:absolute;bottom:8px;left:0;right:0;text-align:center;color:#fff;font-size:13px;font-weight:700;text-shadow:0 2px 4px #000;pointer-events:none;transition:opacity 1s}`;
+document.head.appendChild(wvCss);
+function wideView(){const look=window.Deco?Deco.myLook():undefined;
+  const raw=houseSVG(bs.done,-1,0,true,false,look);
+  // نوسّع إطار الصورة يمينًا ويسارًا حتى تملأ الشاشة العريضة (الخلفية مرسومة أصلًا خارج الحدود)
+  const svg=raw.replace(/viewBox="0 0 (\d+) (\d+)"/,(m,w,h)=>{w=+w;h=+h;const W2=Math.round(h*1.9);return `viewBox="${Math.round((w-Math.max(w,W2))/2)} 0 ${Math.max(w,W2)} ${h}"`}).replace('preserveAspectRatio="xMidYMax meet"','preserveAspectRatio="xMidYMid meet"');
+  const ov=document.createElement('div');ov.className='wv';
+  ov.innerHTML=`<div class="wvr"><div class="wvs" id="wvS"><div class="bhouse wvh">${svg}</div>
+    <div class="wvbar"><button class="wvb" id="wvX" aria-label="إغلاق">✖</button><b>🏡 بيتي في الجنة</b><button class="wvb" id="wvM" aria-label="تصغير">−</button><button class="wvb" id="wvP" aria-label="تكبير">+</button></div>
+    <div class="wvhint" id="wvH">🔍 كبّر بالإصبعين أو بزر + · اسحب لترى كل زاوية</div></div></div>`;
+  document.body.appendChild(ov);document.body.style.overflow='hidden';
+  const sv=ov.querySelector('.wvh svg'),S=$('#wvS');let k=1,tx=0,ty=0;
+  const fitSv=()=>{sv.style.width=S.clientWidth+'px';sv.style.height=S.clientHeight+'px'};fitSv();
+  const box=()=>({w:S.clientWidth,h:S.clientHeight});
+  const clamp=()=>{const {w,h}=box();k=Math.max(1,Math.min(4,k));tx=Math.min(0,Math.max(w-w*k,tx));ty=Math.min(0,Math.max(h-h*k,ty))};
+  const apply=()=>{clamp();sv.style.transform=`translate(${tx}px,${ty}px) scale(${k})`};
+  const zoomAt=(nk,cx,cy)=>{nk=Math.max(1,Math.min(4,nk));tx=cx-(cx-tx)*nk/k;ty=cy-(cy-ty)*nk/k;k=nk;apply()};
+  const mid=()=>{const {w,h}=box();return [w/2,h/2]};
+  $('#wvP').onclick=()=>{sTap();zoomAt(k*1.5,...mid())};$('#wvM').onclick=()=>{sTap();zoomAt(k/1.5,...mid())};
+  // تحويل حركة الإصبع إلى اتجاه الصورة إذا كانت مُدارة
+  const rot=()=>ov.classList.contains('rot');
+  const loc=e=>{const r=S.getBoundingClientRect();return rot()?[e.clientY-r.top,r.right-e.clientX]:[e.clientX-r.left,e.clientY-r.top]};
+  const pts=new Map();let last=null,pinch=null,tapT=0;
+  S.onpointerdown=e=>{if(e.target.closest('.wvb'))return;try{S.setPointerCapture(e.pointerId)}catch(x){}pts.set(e.pointerId,loc(e));$('#wvH').style.opacity=0;
+    if(pts.size==2){const [a,b]=[...pts.values()];pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1]),k}}else{last=loc(e);
+      const now=Date.now();if(now-tapT<300){zoomAt(k>1.5?1:2.2,...last)}tapT=now}};
+  S.onpointermove=e=>{if(!pts.has(e.pointerId))return;const p=loc(e);pts.set(e.pointerId,p);
+    if(pinch&&pts.size==2){const [a,b]=[...pts.values()];zoomAt(pinch.k*Math.hypot(a[0]-b[0],a[1]-b[1])/pinch.d,(a[0]+b[0])/2,(a[1]+b[1])/2)}
+    else if(last){tx+=p[0]-last[0];ty+=p[1]-last[1];last=p;apply()}};
+  S.onpointerup=S.onpointercancel=e=>{pts.delete(e.pointerId);if(pts.size<2)pinch=null;if(!pts.size)last=null;else last=[...pts.values()][0]};
+  const fit=()=>{const portrait=innerHeight>innerWidth;ov.classList.toggle('rot',portrait);fitSv();k=1;tx=ty=0;apply()};
+  addEventListener('resize',fit);
+  const close=()=>{removeEventListener('resize',fit);ov.remove();document.body.style.overflow='';
+    try{screen.orientation&&screen.orientation.unlock&&screen.orientation.unlock()}catch(e){}
+    try{document.fullscreenElement&&document.exitFullscreen()}catch(e){}};
+  $('#wvX').onclick=()=>{sTap();close()};
+  fit();
+  // ملء الشاشة + قفلها بالعرض (يعمل في أندرويد)، وإن فشل تبقى الصورة مُدارة
+  try{const fs=document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen({navigationUI:'hide'});
+    Promise.resolve(fs).then(()=>screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape')).then(()=>setTimeout(fit,250)).catch(()=>{})}catch(e){}
+  setTimeout(()=>{const h=$('#wvH');if(h)h.style.opacity=0},4000)}
+document.addEventListener('click',e=>{const h=e.target&&e.target.closest&&e.target.closest('#byBody .bhouse');if(!h||G||e.target.closest('[data-up]'))return;sTap();wideView()});
+
+window.Bayt={get hk(){return HK},houseSVG,wideView,mosqueParts,walkers,menu,LEVELS,begin:()=>begin(),stop:()=>{stop();G=null},play:(i,net)=>{show('bayt');play(i,0,false,net)},get G(){return G},get done(){return bs.done},get cups(){return cs.n},rankOf,RANKS,sTap,sStar,sLine,VW,VH,GY,FX,FW,DX,fy};
 })();

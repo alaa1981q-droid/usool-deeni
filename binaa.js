@@ -117,7 +117,7 @@ document.addEventListener('click',e=>{const t=e.target&&e.target.closest&&e.targ
 if(window.Deco&&Deco.menuHook){const orig=Deco.menuHook;Deco.menuHook=function(B0){orig.apply(this,arguments);
   const hb=B0.querySelector('.bhouse');if(!hb)return;const j=st.job;
   hb.insertAdjacentHTML('afterend',j?`<div class="bnhint job" id="bnJob"><span class="e">${j.ready?'🎉':'👷'}</span><span id="bnJobLine">…</span></div>`
-    :`<div class="bnhint"><span class="e">👆</span><span>${B('المس','المسي')} أجزاء بيتك لتبنيها وتطوّرها: السور، الحديقة، الأشجار</span></div>`);
+    :`<div class="bnhint"><span class="e">👆</span><span>${B('المس','المسي')} أجزاء بيتك لتبنيها وتطوّرها: السور، الحديقة، الأشجار<br><small style="font-weight:700">🔍 ${B('المس','المسي')} البيت نفسه لتراه بالعرض وتكبّره</small></span></div>`);
   const jb=$('#bnJob');if(jb)jb.onclick=jobModal;tick()}}
 
 window.Binaa={code,get job(){return st.job},get fx(){return fx&&fx.until>Date.now()?fx:null},open,tick,lv:lvOf,get st(){return st}};

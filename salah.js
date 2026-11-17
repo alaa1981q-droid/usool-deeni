@@ -161,25 +161,29 @@ function learn(kind,k){stopV();back=hub;const w=way(),list=w[kind],s=list[k],las
   window.scrollTo(0,0)}
 
 /* ---------- تدرّب: رتّب الخطوات ---------- */
-function order(kind){stopV();back=hub;const w=way();let steps=w[kind].filter(s=>!s.opt),label;
+function order(kind){stopV();back=hub;const w=way();let steps=w[kind].filter(s=>!s.opt),label,next2=null;
   if(kind=='salah'){ // ترتيب الشيخ: صلاة الصبح ركعتان، كل ركعة بخطواتها كاملة (أسماء كل جزء فريدة حتى لا يلتبس الضغط)
     const A=[['🤲','النيّة'],['🙌','تكبيرة الإحرام'],['📖','قراءة سورة الحمد'],['📖','قراءة سورة التوحيد'],['🙇','الركوع'],['🧍','القيام بعد الركوع'],['🧎','السجدة الأولى'],['🪑','الجلوس بين السجدتين'],['🧎','السجدة الثانية']],
       Bq=[['🧍','القيام للركعة الثانية'],['📖','قراءة سورة الحمد'],['📖','قراءة سورة بعدها'],['🙇','الركوع'],['🧍','القيام بعد الركوع'],['🧎','السجدة الأولى'],['🪑','الجلوس بين السجدتين'],['🧎','السجدة الثانية'],['🪑','التشهّد'],['👋','التسليم']];
-    const half=Math.random()<.5;steps=(half?A:Bq).map(x=>({e:x[0],t:x[1]}));label=half?'الركعة الأولى':'الركعة الثانية'}
+    // v8.6: كانت تختار ركعة واحدة عشوائيًا، فإذا جاءت الثانية غابت النيّة وتكبيرة الإحرام. الآن دائمًا: الركعة الأولى ثم الثانية
+    steps=A.map(x=>({e:x[0],t:x[1]}));label='الركعة الأولى';
+    next2=()=>{steps=Bq.map(x=>({e:x[0],t:x[1]}));label='الركعة الثانية';pos=0;sh=shuffle(steps.map((s,i)=>({s,i})));
+      try{fanfare()}catch(e){}toast2('👏 أحسنت! الآن الركعة الثانية');draw()}}
   else label='كل خطوات الوضوء';
   title(kind=='wudu'?'🧩 رتّب الوضوء':'🧩 رتّب الصلاة');
-  let pos=0,miss=0;const sh=shuffle(steps.map((s,i)=>({s,i})));
+  let pos=0,miss=0,sh=shuffle(steps.map((s,i)=>({s,i}))),all=[];
+  const toast2=t=>{const d=document.createElement('div');d.className='ctbanner b3';d.style.cssText='font-size:18px;top:16%;white-space:normal;max-width:90vw;text-align:center';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2200)};
   const draw=()=>{body().innerHTML=`<div class="slhead" style="padding:8px"><h2 style="font-size:18px">${B('اضغط','اضغطي')} الخطوات بالترتيب الصحيح</h2><p>${label} · ${B('أخطأتَ','أخطأتِ')} ${ar(miss)}</p></div>
      <div class="slslots">${steps.slice(0,pos).map((s,i)=>`<span>${ar(i+1)}. ${s.e} ${s.t}</span>`).join('')||'<span style="background:none;border-style:dashed;border-color:var(--line);color:var(--muted)">الخطوات هنا ⬇️</span>'}</div>
      <div class="slord">${sh.map(x=>`<button data-i="${x.i}" class="${x.i<pos?'done':''}" ${x.i<pos?'disabled':''}><span class="e">${x.s.e}</span>${x.s.t}</button>`).join('')}</div>`;
     body().querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;
-      if(i==pos){pos++;tone(523+pos*70,.1,'triangle',.14);if(pos==steps.length)return finish();draw()}
+      if(i==pos){pos++;tone(523+pos*70,.1,'triangle',.14);if(pos==steps.length){if(next2){all=all.concat(steps);const f=next2;next2=null;return setTimeout(f,350)}return finish()}draw()}
       else{miss++;b.classList.remove('no');void b.offsetWidth;b.classList.add('no');tone(220,.15,'square',.08);try{navigator.vibrate&&navigator.vibrate(80)}catch(e){}
         const t=body().querySelector('.slhead p');if(t)t.textContent=`${label} · ${B('أخطأتَ','أخطأتِ')} ${ar(miss)}`}})};
   const finish=()=>{const stars=miss==0?3:miss<=2?2:1,f=fq(),key=kind=='wudu'?'wo':'so';f[key]=Math.max(f[key]||0,stars);Aamal.save();
     try{fanfare();if(stars==3)confetti()}catch(e){}
     body().innerHTML=`<div class="result"><div class="big">${'⭐'.repeat(stars)}</div><h2 style="color:var(--ok)">${miss?`رتّبتها مع ${ar(miss)} ${miss==1?'خطأ':'أخطاء'}`:B('رتّبتها كلّها بلا خطأ!','رتّبتِها كلّها بلا خطأ!')}</h2>
-      <div class="slslots">${steps.map((s,i)=>`<span>${ar(i+1)}. ${s.e} ${s.t}</span>`).join('')}</div><div id="slCups"></div>
+      <div class="slslots">${all.concat(steps).map((s,i)=>`<span>${ar(i+1)}. ${s.e} ${s.t}</span>`).join('')}</div><div id="slCups"></div>
       <div class="nav"><button class="btn gold" id="slTest">📝 إلى الاختبار</button></div><div class="nav"><button class="btn sec" id="slAgain">🔁 مرة أخرى</button></div></div>`;
     if(stars>=2&&window.cupsAward)cupsAward(1,'fiqh',$('#slCups'));if(stars>=2)Aamal.grow('fiqh');
     $('#slTest').onclick=()=>test(kind);$('#slAgain').onclick=()=>order(kind);window.Alqab&&Alqab.soon()};

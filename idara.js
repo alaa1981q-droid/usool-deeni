@@ -119,7 +119,7 @@ const WKJ=[100,60,30];
 async function weekPrize(API){const d=D(),last=API.week()-1;if(d.wkPrize===last)return;
   const s=(await API.db.ref('leader/'+last).get()).val()||{};
   const key=r=>Math.max(r.xp|0,(r.wins|0)*10);
-  const rows=Object.entries(s).map(([id,v])=>({id,...v})).filter(r=>key(r)>0).sort((a,b)=>key(b)-key(a));
+  const rows=Object.entries(s).map(([id,v])=>({id,...v})).filter(r=>key(r)>0&&!r.adm).sort((a,b)=>key(b)-key(a));
   d.wkPrize=last;Aamal.save();
   const i=rows.findIndex(r=>r.id==API.me);if(i<0||i>2)return;
   queue.unshift({em:['🥇','🥈','🥉'][i],title:i==0?B('🏆 أنت بطل الأسبوع!','🏆 أنتِ بطلة الأسبوع!'):`${B('أنت','أنتِ')} ${i==1?'الثاني':'الثالث'} بين أبطال الأسبوع!`,
@@ -148,7 +148,7 @@ const JOPT=[0,10,25,50,100,200,500,1000].map(n=>`<option value="${n}">${n?`💎 
 let all=null,heroes=null,tab='all',q='';
 const key=r=>Math.max(r.xp|0,(r.wins|0)*10);
 async function loadKids(API){
-  if(!heroes){try{const s=(await API.db.ref('leader/'+API.week()).get()).val()||{};heroes=Object.entries(s).map(([id,v])=>({id,...v})).sort((a,b)=>key(b)-key(a)).slice(0,15)}catch(e){heroes=[]}}
+  if(!heroes){try{const s=(await API.db.ref('leader/'+API.week()).get()).val()||{};heroes=Object.entries(s).map(([id,v])=>({id,...v})).filter(r=>!r.adm&&r.id!=API.me).sort((a,b)=>key(b)-key(a)).slice(0,15)}catch(e){heroes=[]}}
   if(!all){try{const s=(await API.db.ref('profiles').get()).val()||{};all=Object.entries(s).map(([id,v])=>({id,nick:v.nick||'؟',av:v.av||'❔',lv:v.lv|0,tt:v.tt||'',wins:v.wins|0,games:v.games|0,code:v.code||'',seen:+v.seen||0,acc:v.acc||{},md:v.md||'',hist:typeof v.hist=='string'?v.hist:'',nts:+v.nts||0,sx:v.sx||sexOf(v.av),since:+v.since||0}))}catch(e){all=[]}}
   try{bans=(await API.db.ref('bans').get()).val()||{}}catch(e){bans={}}}
 let bans={};

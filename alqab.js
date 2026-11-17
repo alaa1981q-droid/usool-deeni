@@ -241,7 +241,7 @@ async function loadSocial(force){if(loading||!navigator.onLine||!O()||!state.onl
       const v=p.val()||{};return {id,nick:v.nick||'؟',av:v.av||'❔',lv:v.lv|0,tt:v.tt?String(v.tt).slice(0,30):'',on:!!pr.val(),adm:v.adm===true}}catch(e){return null}}));
     fcache=rows.filter(Boolean).sort((a,b)=>(b.on-a.on)||(b.lv-a.lv));
     const s=(await API.db.ref('leader/'+API.week()).get()).val()||{};
-    hcache=Object.entries(s).map(([id,v])=>({id,adm:v.adm===true,nick:v.nick||'؟',av:v.av||'❔',xp:v.xp|0,wins:v.wins|0,lv:v.lv|0,tt:typeof v.tt=='string'?v.tt.slice(0,30):''})).sort((a,b)=>(Math.max(b.xp,b.wins*10)-Math.max(a.xp,a.wins*10))).slice(0,30);
+    hcache=Object.entries(s).map(([id,v])=>({id,adm:v.adm===true,nick:v.nick||'؟',av:v.av||'❔',xp:v.xp|0,wins:v.wins|0,lv:v.lv|0,tt:typeof v.tt=='string'?v.tt.slice(0,30):''})).filter(r=>!r.adm&&!(isAdm()&&r.id==API.me)).sort((a,b)=>(Math.max(b.xp,b.wins*10)-Math.max(a.xp,a.wins*10))).slice(0,30);
     try{localStorage.setItem('usul5_social_v1',JSON.stringify({f:fcache,h:hcache}))}catch(e){}
     if($('#home').classList.contains('on')){const a=$('#hFrSum');if(a)a.textContent=frSum();drawHeroes()}
     if(frOpen&&$('#alqab').classList.contains('on')&&$('#aqTitle').textContent=='👥 أصدقائي')drawFriends();
@@ -270,7 +270,9 @@ function publish(){const API=O();if(!API||!API.profile||!API.db)return;const s=s
   const key=[s.L,t&&t.id,md,wx,API.profile.nick,API.profile.av,JSON.stringify(sm)].join('|');if(key==pubKey)return;pubKey=key;
   const tt=isAdm()?'👑 مدير جنّتي الصغيرة':t?`${t.e} ${t.n}`:'';Object.assign(API.profile,{lv:s.L,tt,md,sm});
   API.db.ref('profiles/'+API.me).update({lv:s.L,tt,md,sm}).catch(()=>{});
-  if(wx>0)API.db.ref(`leader/${w}/${API.me}`).update(Object.assign({nick:API.profile.nick,av:API.profile.av,xp:wx,lv:s.L,tt},isAdm()?{adm:true}:{})).catch(()=>{})}
+  // v8.6: المدير لا يدخل أبطال الأسبوع (طلب صاحب التطبيق)، ويُشال اسمه إذا كان موجودًا
+  if(isAdm()){API.db.ref(`leader/${w}/${API.me}`).remove().catch(()=>{});return}
+  if(wx>0)API.db.ref(`leader/${w}/${API.me}`).update({nick:API.profile.nick,av:API.profile.av,xp:wx,lv:s.L,tt}).catch(()=>{})}
 
 /* ---------- الاحتفال: ارتفعت درجتك / وسام جديد / لقب جديد / جائزة للبيت ---------- */
 let soonT=0,pending=false;

@@ -431,7 +431,7 @@
     // دقّة الإجابات: تساعد الإدارة على معرفة من يتعمّد الإجابات الخاطئة
     const acc = profile.acc || {}; profile.acc = { r: (acc.r | 0) + a.right, q: (acc.q | 0) + N_Q, z: (acc.z | 0) + (a.right === 0 ? 1 : 0) };
     db.ref('profiles/' + me).update({ wins: profile.wins, games: profile.games, acc: profile.acc, seen: firebase.database.ServerValue.TIMESTAMP });
-    db.ref(`leader/${w}/${me}`).transaction(v => { v = v || { wins: 0, pts: 0 }; return Object.assign({}, v, { nick: profile.nick, av: profile.av, wins: (v.wins || 0) + winInc, pts: (v.pts || 0) + a.sc }); });
+    if (!isAdm()) db.ref(`leader/${w}/${me}`).transaction(v => { v = v || { wins: 0, pts: 0 }; return Object.assign({}, v, { nick: profile.nick, av: profile.av, wins: (v.wins || 0) + winInc, pts: (v.pts || 0) + a.sc }); });
     if (winInc && window.Aamal) Aamal.grow('win');
     if (window.Alqab) Alqab.soon();
   }
@@ -440,7 +440,7 @@
     setHead('🏅 لوحة الأبطال');
     body().innerHTML = `<div class="handoff"><div class="big spin">🏅</div></div>`;
     const s = await db.ref('leader/' + week()).get();
-    const rows = []; s.forEach(c => { rows.push({ id: c.key, ...c.val() }); });
+    const rows = []; s.forEach(c => { const v = c.val() || {}; if (!v.adm && !(isAdm() && c.key === me)) rows.push({ id: c.key, ...v }); });
     const key = r => Math.max(r.xp || 0, (r.wins || 0) * 10);
     rows.sort((x, y) => (key(y) - key(x)) || ((y.wins || 0) - (x.wins || 0)) || ((y.pts || 0) - (x.pts || 0))); rows.splice(30);
     const medal = i => ['🥇', '🥈', '🥉'][i] || ar(i + 1);
