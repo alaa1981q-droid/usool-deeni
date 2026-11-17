@@ -34,77 +34,91 @@ css.textContent=`
 .bnm .nx b{display:block;font-size:17px;color:#7a5200}.bnm .nx small{font-size:13.5px;font-weight:700;color:#5e4a33}
 .bnm .pay{display:flex;flex-direction:column;gap:8px;margin-top:8px}
 .bnm .pay button{border:0;border-radius:16px;padding:10px;font:inherit;font-weight:800;font-size:16px;color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.25)}
-.bnm .pay .pj{background:linear-gradient(160deg,#4fb3f0,#2f6fd0)}.bnm .pay .pd{background:linear-gradient(160deg,#3fbf6f,#14794f)}.bnm .pay .pf{background:linear-gradient(160deg,#f6b33d,#e0731f)}
+.bnm .pay .pw{background:linear-gradient(160deg,#a7b4ad,#6f8078)}.bnm .pay .pj{background:linear-gradient(160deg,#4fb3f0,#2f6fd0)}.bnm .pay .pd{background:linear-gradient(160deg,#3fbf6f,#14794f)}.bnm .pay .pf{background:linear-gradient(160deg,#f6b33d,#e0731f)}
 .bnm .pay button[disabled]{opacity:.45}
 .bnm .clock{font-size:30px;font-weight:900;color:#1d4e9e;margin:4px 0}.bnm .pbar{height:12px;border-radius:8px;background:#e3ecf7;overflow:hidden}.bnm .pbar i{display:block;height:100%;background:linear-gradient(90deg,#4fb3f0,#2f6fd0);border-radius:8px}
 .bhouse [data-up]{cursor:pointer}
 .bhouse .bn-mk{animation:bnmk 1.3s ease-in-out infinite;transform-box:fill-box;transform-origin:center}@keyframes bnmk{50%{transform:translateY(-3px) scale(1.12)}}
 .bhouse .bn-hm{animation:bnhm .45s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:0% 100%}@keyframes bnhm{from{transform:rotate(-35deg)}to{transform:rotate(25deg)}}
 .bhouse .bn-dust{animation:bndu 1.1s ease-out infinite;transform-box:fill-box;transform-origin:center}@keyframes bndu{0%{opacity:.8;transform:scale(.4)}100%{opacity:0;transform:scale(1.6) translateY(-6px)}}
-.bhouse .bn-wk{animation:bnwk 2.4s ease-in-out infinite alternate}@keyframes bnwk{to{transform:translateX(6px)}}
+.bhouse .bn-bob{animation:bnbob .38s ease-in-out infinite alternate}@keyframes bnbob{to{transform:translateY(-1.4px)}}
+.bhouse .bn-walk{animation:bnwalk 5s linear infinite;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes bnwalk{0%{transform:translateX(0) scaleX(1)}44%{transform:translateX(24px) scaleX(1)}50%{transform:translateX(24px) scaleX(-1)}94%{transform:translateX(0) scaleX(-1)}100%{transform:translateX(0) scaleX(1)}}
+.bhouse .bn-jump{animation:bnjump .6s ease-in-out infinite alternate}@keyframes bnjump{to{transform:translateY(-6px)}}
+.bhouse .bn-pop{animation:bnpop 1.1s cubic-bezier(.2,1.6,.4,1) both;transform-box:fill-box;transform-origin:50% 100%}@keyframes bnpop{0%{transform:scale(.3);opacity:0}100%{transform:scale(1);opacity:1}}
+.bhouse .bn-spk{animation:bnspk 1s ease-in-out infinite;transform-box:fill-box;transform-origin:center}@keyframes bnspk{0%,100%{opacity:0;transform:scale(.3) rotate(0)}50%{opacity:1;transform:scale(1.2) rotate(45deg)}}
+.bhouse .bn-rdy{animation:bnrdy 1s ease-in-out infinite;transform-box:fill-box;transform-origin:center}@keyframes bnrdy{50%{transform:scale(1.15)}}
 `;
 document.head.appendChild(css);
 
 /* ---------- نافذة الترقية ---------- */
 let vc=null;const stopVc=()=>{if(vc){vc.stop();vc=null}};
+const FAST=12/60; // البناء السريع (بعد عمل صالح أو جواهر): ١٢ ثانية حتى يرى الطفل عمّاله يعملون
 function open(p){const P=PARTS[p];if(!P)return;stopVc();const L=lvOf(p),job=st.job;
   const lvs=`<div class="lvs">${P.lv.map((x,i)=>`<span class="${L>i?'on':''}">${ar(i+1)}. ${x[0]}</span>`).join('')}</div>`;
-  if(job&&job.p==p)return jobModal();
+  if(job&&job.p==p)return job.ready?collect():jobModal();
   if(L>=3)return modal(`<div class="bnm"><div style="font-size:48px">${P.e}</div><h3 style="margin:2px 0">${P.n}</h3>${lvs}<p>🌟 وصل إلى أعلى مستوى! ما شاء الله</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div></div>`);
   const why=P.need?P.need():'';
   if(why)return modal(`<div class="bnm"><div style="font-size:48px">🔒</div><h3 style="margin:2px 0">${P.n}</h3><p>${why}</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div></div>`);
-  const [nm,j,D,n,mins]=P.lv[L],busy=job&&job.end>Date.now(),have=window.Deco?Deco.j:0;
+  const [nm,j,D,n,mins]=P.lv[L],busy=!!job,have=window.Deco?Deco.j:0;
   modal(`<div class="bnm"><div style="font-size:48px">${P.e}</div><h3 style="margin:2px 0">${L?'طوّر':'ابنِ'} ${P.n}</h3>${lvs}
-    <div class="nx"><b>⬆️ المستوى ${ar(L+1)}: ${nm}</b><small>⏳ يستغرق البناء ${tm(mins)} · 👷 ${ar(L+1)} ${L?'عمّال':'عامل'}</small></div>
-    ${busy?`<p style="font-weight:800;color:#b06a2c">👷 عمّالك يبنون الآن ${PARTS[job.p].n}. انتظر حتى ينتهوا، أو عجّل البناء.</p>`:''}
+    <div class="nx"><b>⬆️ المستوى ${ar(L+1)}: ${nm}</b><small>👷 ${ar(L+1)} ${L?'عمّال':'عامل'} · ${B('اختر','اختاري')} طريقة البناء 👇</small></div>
+    ${busy?`<p style="font-weight:800;color:#b06a2c">👷 عمّالك يبنون الآن ${PARTS[job.p].n}. ${job.ready?'استلمه أولًا ✔':'انتظر حتى ينتهوا، أو عجّل البناء.'}</p>`:''}
     <div id="bnVc"></div>
-    <div class="pay" id="bnPay"><button class="pd" id="bnD" ${busy?'disabled':''}>🤲 ${D.n} ${ar(n)} مرة بصوتك</button>
-      <button class="pj" id="bnJ" ${busy||have<j?'disabled':''}>💎 ${ar(j)} جوهرة ${have<j?`(عندك ${ar(have)})`:''}</button></div>
+    <div class="pay" id="bnPay">
+      <button class="pd" id="bnD" ${busy?'disabled':''}>🤲 ${D.n} ${ar(n)} مرة بصوتك ← يُبنى بسرعة</button>
+      <button class="pj" id="bnJ" ${busy||have<j?'disabled':''}>💎 ${ar(j)} جوهرة ← يُبنى بسرعة ${have<j?`(عندك ${ar(have)})`:''}</button>
+      <button class="pw" id="bnW" ${busy?'disabled':''}>⏳ مجانًا: ${B('انتظر','انتظري')} ${tm(mins)}</button></div>
     <div class="nav"><button class="btn sec" id="bnX">إلغاء</button></div></div>`,()=>{
     $('#bnX').onclick=()=>{stopVc();closeModal()};
-    $('#bnJ').onclick=()=>{if(!window.Deco||Deco.j<j)return;Deco.takeJ(j);start(p,L+1,mins)};
+    $('#bnW').onclick=()=>start(p,L+1,mins);
+    $('#bnJ').onclick=()=>{if(!window.Deco||Deco.j<j)return;Deco.takeJ(j);start(p,L+1,FAST)};
     $('#bnD').onclick=()=>{$('#bnPay').style.display='none';
-      vc=Voice.counter($('#bnVc'),{phrase:D.p,target:n,emoji:D.e,onDone:k=>{vc=null;try{Aamal.add(D.k,k);Aamal.grow(D.k)}catch(e){}setTimeout(()=>start(p,L+1,mins),700)}})}})}
+      vc=Voice.counter($('#bnVc'),{phrase:D.p,target:n,emoji:D.e,onDone:k=>{vc=null;try{Aamal.add(D.k,k);Aamal.grow(D.k)}catch(e){}setTimeout(()=>start(p,L+1,FAST),700)}})}})}
 function start(p,to,mins){stopVc();st.job={p,to,start:Date.now(),end:Date.now()+mins*MIN};sv();pub();closeModal();
   try{tone(660,.08,'triangle',.1);setTimeout(()=>tone(880,.1,'triangle',.1),120)}catch(e){}
-  redraw();toast(`👷 بدأ البناء! ${PARTS[p].n} يكتمل بعد ${tm(mins)}`)}
-function jobModal(){const j=st.job;if(!j)return;const P=PARTS[j.p];stopVc();
+  redraw();toast(mins<1?`👷 هيّا يا عمّال! ${PARTS[p].n} يُبنى الآن 🔨`:`👷 بدأ البناء! ${PARTS[p].n} يكتمل بعد ${tm(mins)}`)}
+function jobModal(){const j=st.job;if(!j)return;if(j.ready)return collect();const P=PARTS[j.p],[,price]=P.lv[j.to-1],have=window.Deco?Deco.j:0;stopVc();
   modal(`<div class="bnm"><div style="font-size:48px">👷</div><h3 style="margin:2px 0">${B('عمّالك','عمّالكِ')} يبنون ${P.n}</h3>
     <div class="nx"><b>⬆️ المستوى ${ar(j.to)}: ${P.lv[j.to-1][0]}</b></div>
     <div class="clock" id="bnClock">${mmss(j.end-Date.now())}</div><div class="pbar"><i id="bnBar" style="width:0"></i></div>
     <div id="bnVc"></div>
-    <div class="pay" id="bnPay"><button class="pf" id="bnF">⚡ عجّل: ${SAL.n} ١٠ مرات وينتهي الآن</button></div>
-    <div class="nav"><button class="btn gold" id="bnOk">حسنًا</button></div></div>`,()=>{
+    <div class="pay" id="bnPay"><button class="pf" id="bnF">⚡ عجّل: ${SAL.n} ١٠ مرات بصوتك</button>
+      <button class="pj" id="bnFJ" ${have<price?'disabled':''}>⚡ عجّل بـ 💎 ${ar(price)} جوهرة</button></div>
+    <div class="nav"><button class="btn gold" id="bnOk">${B('سأنتظر','سأنتظر')} ⏳</button></div></div>`,()=>{
     $('#bnOk').onclick=()=>{stopVc();closeModal()};
+    const hurry=()=>{if(st.job){st.job.end=Math.min(st.job.end,Date.now()+8000);sv()}closeModal();redraw();tick()};
+    $('#bnFJ').onclick=()=>{if(!window.Deco||Deco.j<price)return;Deco.takeJ(price);hurry()};
     $('#bnF').onclick=()=>{$('#bnPay').style.display='none';
-      vc=Voice.counter($('#bnVc'),{phrase:SAL.p,target:10,emoji:SAL.e,onDone:k=>{vc=null;try{Aamal.add('sal',k);Aamal.grow('sal')}catch(e){}if(st.job)st.job.end=Date.now();sv();setTimeout(()=>{closeModal();tick()},700)}})};
+      vc=Voice.counter($('#bnVc'),{phrase:SAL.p,target:10,emoji:SAL.e,onDone:k=>{vc=null;try{Aamal.add('sal',k);Aamal.grow('sal')}catch(e){}setTimeout(hurry,700)}})};
     tick()})}
 function toast(t){const d=document.createElement('div');d.className='ctbanner b3';d.style.cssText='font-size:17px;top:16%;white-space:normal;max-width:90vw;text-align:center';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
 const pub=()=>{try{Deco.pub&&Deco.pub()}catch(e){}};
 const onBayt=()=>$('#bayt')&&$('#bayt').classList.contains('on')&&$('#byBody .bnhint');
 function redraw(){if(onBayt()&&window.Bayt&&!Bayt.G)Bayt.menu()}
 
-/* ---------- الساعة: تحديث العدّادات، وإكمال البناء ---------- */
+/* ---------- الساعة: العدّادات، ثم «جاهز للاستلام» ثم الفعالية ---------- */
 function tick(){const j=st.job;if(!j)return;const now=Date.now(),left=j.end-now,fr=Math.min(1,(now-j.start)/(j.end-j.start||1));
   document.querySelectorAll('.bhouse [data-timer]').forEach(t=>{t.textContent=mmss(left)});
   document.querySelectorAll('.bhouse [data-tbar]').forEach(r=>r.setAttribute('width',(+r.dataset.tbar*fr).toFixed(1)));
   const c=$('#bnClock');if(c){c.textContent=mmss(left);$('#bnBar').style.width=(fr*100)+'%'}
-  const h=$('#bnJobLine');if(h)h.textContent=`👷 ${PARTS[j.p].n}: باقي ${mmss(left)}`;
-  if(left<=0)finish()}
-function finish(){const j=st.job;if(!j)return;st.job=null;setLv(j.p,Math.max(lvOf(j.p),j.to));sv();pub();try{Alqab.soon()}catch(e){}const P=PARTS[j.p];
-  if($('#modal').classList.contains('on')&&$('#bnClock'))closeModal();
+  const h=$('#bnJobLine');if(h)h.textContent=j.ready?`🎉 انتهى العمّال! ${B('المس','المسي')} ${PARTS[j.p].n} لتستلمه ✔`:`👷 ${PARTS[j.p].n}: باقي ${mmss(left)}`;
+  if(left<=0&&!j.ready){j.ready=1;sv();if($('#bnClock'))closeModal();redraw();try{tone(784,.12,'triangle',.12);setTimeout(()=>tone(1046,.16,'triangle',.12),150)}catch(e){}
+    toast(`🎉 انتهى العمّال من ${PARTS[j.p].n}! ${B('افتح بيتك واستلمه','افتحي بيتكِ واستلميه')} ✔`)}}
+let fx=null;
+function collect(){const j=st.job;if(!j||!j.ready)return;st.job=null;setLv(j.p,Math.max(lvOf(j.p),j.to));sv();pub();try{Alqab.soon()}catch(e){}const P=PARTS[j.p];
+  closeModal();fx={p:j.p,until:Date.now()+3800};redraw();
   try{fanfare();confetti()}catch(e){}
-  redraw();
-  setTimeout(()=>modal(`<div class="bnm"><div style="font-size:54px">🎉</div><h3 style="margin:2px 0">اكتمل البناء!</h3><p style="font-size:17px">${P.e} ${P.n}: <b>${P.lv[j.to-1][0]}</b></p><p style="font-size:14px;color:var(--muted)">${B('المس','المسي')} أجزاء بيتك لتطوّر غيرها 👆</p><div class="nav"><button class="btn gold" data-close>الحمد لله 🤍</button></div></div>`),400)}
+  setTimeout(()=>{fx=null;redraw();modal(`<div class="bnm"><div style="font-size:54px">🎉</div><h3 style="margin:2px 0">اكتمل البناء!</h3><p style="font-size:17px">${P.e} ${P.n}: <b>${P.lv[j.to-1][0]}</b></p><p style="font-size:14px;color:var(--muted)">${B('المس','المسي')} أجزاء بيتك لتطوّر غيرها 👆</p><div class="nav"><button class="btn gold" data-close>الحمد لله 🤍</button></div></div>`)},3900)}
 setInterval(tick,1000);
 
 /* ---------- تحت البيت: سطر الورشة أو التلميح ---------- */
 document.addEventListener('click',e=>{const t=e.target&&e.target.closest&&e.target.closest('#byBody .bhouse [data-up]');if(!t)return;e.stopPropagation();try{window.Bayt&&Bayt.sTap()}catch(x){}open(t.dataset.up)},true);
 if(window.Deco&&Deco.menuHook){const orig=Deco.menuHook;Deco.menuHook=function(B0){orig.apply(this,arguments);
   const hb=B0.querySelector('.bhouse');if(!hb)return;const j=st.job;
-  hb.insertAdjacentHTML('afterend',j?`<div class="bnhint job" id="bnJob"><span class="e">👷</span><span id="bnJobLine">👷 ${PARTS[j.p].n}: باقي ${mmss(j.end-Date.now())}</span></div>`
+  hb.insertAdjacentHTML('afterend',j?`<div class="bnhint job" id="bnJob"><span class="e">${j.ready?'🎉':'👷'}</span><span id="bnJobLine">…</span></div>`
     :`<div class="bnhint"><span class="e">👆</span><span>${B('المس','المسي')} أجزاء بيتك لتبنيها وتطوّرها: السور، الحديقة، الأشجار</span></div>`);
   const jb=$('#bnJob');if(jb)jb.onclick=jobModal;tick()}}
 
-window.Binaa={code,get job(){return st.job},open,tick,lv:lvOf,get st(){return st}};
+window.Binaa={code,get job(){return st.job},get fx(){return fx&&fx.until>Date.now()?fx:null},open,tick,lv:lvOf,get st(){return st}};
 })();

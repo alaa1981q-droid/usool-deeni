@@ -318,7 +318,7 @@ function houseSVG(full,part,frac,withRoof,anim,look){
   if(full>0)s+=[[FX+2,14],[FX+38,0],[FX+FW-38,0],[FX+FW-2,14]].filter(([x,w])=>true).map(([x])=>`<g><ellipse cx="${x}" cy="${GY+1}" rx="13" ry="8" fill="#2a8a4a"/><ellipse cx="${x-3}" cy="${GY-2}" rx="8" ry="5" fill="#3fbf6f"/><circle cx="${x+5}" cy="${GY-3}" r="1.6" fill="#fff"/></g>`).join('');
   if(hasGift('lanterns')&&full>0){const dx=FX+FW/2;s+=[dx-34,dx+34].map(x=>`<g><line x1="${x}" y1="${GY-56}" x2="${x}" y2="${GY-48}" stroke="#8a5a00" stroke-width="1.5"/><circle cx="${x}" cy="${GY-40}" r="11" fill="#ffe066" opacity=".45"/><rect x="${x-5}" y="${GY-48}" width="10" height="14" rx="3" fill="url(#hGold)" stroke="#8a5a00"/><rect x="${x-3}" y="${GY-45}" width="6" height="8" rx="2" fill="#fff6b0"/></g>`).join('')}
   if(hasGift('crown')&&withRoof&&full>0){const y=fy(full-1)-66-40,M=FX+FW/2;s+=`<g><circle cx="${M}" cy="${y+6}" r="22" fill="#ffe066" opacity=".35"/><path d="M${M-16} ${y+14} L${M-18} ${y-2} L${M-8} ${y+6} L${M} ${y-8} L${M+8} ${y+6} L${M+18} ${y-2} L${M+16} ${y+14}Z" fill="url(#hGold)" stroke="#9a6a00" stroke-width="1.5"/><circle cx="${M}" cy="${y+8}" r="2.6" fill="#e2504a"/><circle cx="${M-9}" cy="${y+10}" r="2" fill="#2f8fd0"/><circle cx="${M+9}" cy="${y+10}" r="2" fill="#3fbf6f"/></g>`}
-  if(full>0)s+=`<g class="hyard">${yard(L.u,L.job,L.ed)}</g>`;
+  if(full>0)s+=`<g class="hyard">${yard(L.u,L.job,L.ed,L.fx)}</g>`;
   if(HK<1)s+='</g>';
   if(dt)s+=trashSVG(dt);
   if(MQ)s+=walkers(196,GY+15-192*.75,(MM-215)/.75,.75,'msq-walk');
@@ -342,10 +342,21 @@ function ySeg(x1,y1,x2,y2,lv){const d=Math.hypot(x2-x1,y2-y1);let s='';
     s+=`<path d="M${x1} ${y1-5} L${x2} ${y2-5}" stroke="#e9dcc0" stroke-width=".8" stroke-dasharray="3 3"/>`}
   return s}
 function yMark(x,y,plus){return `<g class="bn-mk"><circle cx="${x}" cy="${y}" r="8.5" fill="#ffd54a" stroke="#fff" stroke-width="1.6"/><text x="${x}" y="${y+4}" text-anchor="middle" font-size="11.5" font-weight="900" fill="#7a4f00" font-family="Tajawal,sans-serif">${plus?'+':'⬆'}</text></g>`}
-function yWorker(x,y,k=1){return `<g transform="translate(${x} ${y}) scale(${k})"><g class="bn-wk"><rect x="-3" y="-6" width="2.2" height="6" rx="1" fill="#3d4a5a"/><rect x=".8" y="-6" width="2.2" height="6" rx="1" fill="#3d4a5a"/>
-  <path d="M-4.5 -6 L-4 -14 Q0 -16 4 -14 L4.5 -6Z" fill="#f28c28"/><rect x="-4" y="-12" width="8" height="1.6" fill="#ffe066"/><circle cx="0" cy="-18" r="3.6" fill="#f1c7a0"/>
-  <path d="M-4.2 -18.4 a4.2 4 0 0 1 8.4 0 z" fill="#ffd21f" stroke="#c9a000" stroke-width=".5"/><rect x="-5" y="-18.8" width="10" height="1.2" rx=".6" fill="#ffd21f"/>
-  <g class="bn-hm"><line x1="3.5" y1="-12" x2="9" y2="-17" stroke="#f1c7a0" stroke-width="1.8" stroke-linecap="round"/><line x1="9" y1="-17" x2="9" y2="-23" stroke="#7a4f22" stroke-width="1.3"/><rect x="6.5" y="-25" width="5" height="3" rx=".6" fill="#6b7680"/></g></g></g>`}
+// عامل بلا ملامح: role = hammer (يطرق) | walk (يمشي رايح جاي شايل طابوقة) | cheer (يقفز فرحًا بعد الانتهاء)
+function yWorker(x,y,k=1,role='hammer'){
+  const legs=`<rect x="-3" y="-6" width="2.2" height="6" rx="1" fill="#3d4a5a"/><rect x=".8" y="-6" width="2.2" height="6" rx="1" fill="#3d4a5a"/>`;
+  const body=`<path d="M-4.5 -6 L-4 -14 Q0 -16 4 -14 L4.5 -6Z" fill="#f28c28"/><rect x="-4" y="-12" width="8" height="1.6" fill="#ffe066"/><circle cx="0" cy="-18" r="3.6" fill="#f1c7a0"/>
+    <path d="M-4.2 -18.4 a4.2 4 0 0 1 8.4 0 z" fill="#ffd21f" stroke="#c9a000" stroke-width=".5"/><rect x="-5" y="-18.8" width="10" height="1.2" rx=".6" fill="#ffd21f"/>`;
+  let arms='';
+  if(role=='hammer')arms=`<g class="bn-hm"><line x1="3.5" y1="-12" x2="9" y2="-17" stroke="#f1c7a0" stroke-width="1.8" stroke-linecap="round"/><line x1="9" y1="-17" x2="9" y2="-23" stroke="#7a4f22" stroke-width="1.3"/><rect x="6.5" y="-25" width="5" height="3" rx=".6" fill="#6b7680"/></g>`;
+  if(role=='walk')arms=`<line x1="-3" y1="-13" x2="-5" y2="-20" stroke="#f1c7a0" stroke-width="1.8" stroke-linecap="round"/><line x1="3" y1="-13" x2="5" y2="-20" stroke="#f1c7a0" stroke-width="1.8" stroke-linecap="round"/><rect x="-6.5" y="-25" width="13" height="5" rx="1" fill="#c0563b" stroke="#8a3a26" stroke-width=".6"/><line x1="0" y1="-25" x2="0" y2="-20" stroke="#8a3a26" stroke-width=".5"/>`;
+  if(role=='cheer')arms=`<line x1="-3.5" y1="-13" x2="-7" y2="-22" stroke="#f1c7a0" stroke-width="1.8" stroke-linecap="round"/><line x1="3.5" y1="-13" x2="7" y2="-22" stroke="#f1c7a0" stroke-width="1.8" stroke-linecap="round"/>`;
+  const inner=`<g class="${role=='cheer'?'bn-jump':'bn-bob'}">${legs}${body}${arms}</g>`;
+  return `<g transform="translate(${x} ${y}) scale(${k})">${role=='walk'?`<g class="bn-walk">${inner}</g>`:inner}</g>`}
+function yBricks(x,y){return `<g>${[[0,0],[7,0],[3.5,-4]].map(([a,b])=>`<rect x="${x+a}" y="${y+b-4}" width="7" height="4" rx=".6" fill="#c0563b" stroke="#8a3a26" stroke-width=".6"/>`).join('')}</g>`}
+function ySpark(x,y){return [[-14,-10],[12,-16],[-6,-24],[16,-4],[0,-32],[-18,-20]].map(([a,b],i)=>`<g class="bn-spk" style="animation-delay:${i*.15}s"><path d="M${x+a} ${y+b-4} l1.2 2.8 l2.8 1.2 l-2.8 1.2 l-1.2 2.8 l-1.2 -2.8 l-2.8 -1.2 l2.8 -1.2z" fill="#ffd54a"/></g>`).join('')}
+function yReady(x,y,p){return `<g data-up="${p}" class="bn-rdy"><circle cx="${x}" cy="${y}" r="13" fill="#000" opacity="0"/><circle cx="${x}" cy="${y}" r="10" fill="#1fa463" stroke="#fff" stroke-width="2"/><path d="M${x-4.5} ${y} l3 3.2 l6 -6.4" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="${x-17}" y="${y+11}" width="34" height="11" rx="5.5" fill="#fffbe9" stroke="#1fa463" stroke-width="1"/><text x="${x}" y="${y+19}" text-anchor="middle" font-size="7.5" font-weight="900" fill="#0b5a32" font-family="Tajawal,sans-serif">استلم ✔</text></g>`}
 function yDust(x,y){return `<g class="bn-dust"><circle cx="${x}" cy="${y}" r="3" fill="#e7d9bf" opacity=".8"/><circle cx="${x+3}" cy="${y-2}" r="2.2" fill="#efe4cf" opacity=".8"/></g>`}
 function ySign(x,y,w=44){return `<g><line x1="${x}" y1="${y+7}" x2="${x}" y2="${y+16}" stroke="#7a4f22" stroke-width="1.4"/><rect x="${x-w/2}" y="${y-8}" width="${w}" height="16" rx="4" fill="#fffbe9" stroke="#e0a21b" stroke-width="1.2"/>
   <text data-timer="1" x="${x}" y="${y+2.4}" text-anchor="middle" font-size="8.5" font-weight="900" fill="#7a4f00" font-family="Tajawal,sans-serif">⏳</text>
@@ -357,36 +368,42 @@ function yTree(i,lv,ed,canPlant){const [x,y]=YTS[i],c=YFR[i];let s=`<g data-up="
   if(lv>=3)s+=`<ellipse cx="${x}" cy="${y+.5}" rx="13" ry="3.4" fill="#2f7a45" opacity=".35"/><rect x="${x-2.2}" y="${y-17}" width="4.4" height="17" rx="1.4" fill="#7a4f22"/><circle cx="${x-7}" cy="${y-22}" r="8" fill="#239a52"/><circle cx="${x+7}" cy="${y-22}" r="8" fill="#239a52"/><circle cx="${x}" cy="${y-29}" r="10" fill="#2fae5f"/><circle cx="${x-4}" cy="${y-32}" r="4.5" fill="#5fd48a" opacity=".6"/>
     ${[[-8,-20],[6,-18],[-2,-27],[8,-27],[-9,-29],[2,-21]].map(([a,b])=>`<circle cx="${x+a}" cy="${y+b}" r="2.1" fill="${c}" stroke="#fff" stroke-width=".4"/>`).join('')}`;
   return s+'</g></g>'}
-function yard(u,job,ed){u=/^[0-3]{5}$/.test(u||'')?u:'00000';const w=+u[0],g=+u[1],T=[+u[2],+u[3],+u[4]];let s='';const now=Date.now(),busy=!!(job&&job.end>now-2000);
+function yard(u,job,ed,fx){u=/^[0-3]{5}$/.test(u||'')?u:'00000';const w=+u[0],g=+u[1],T=[+u[2],+u[3],+u[4]];
+  const busy=!!(job&&!job.ready),rdy=!!(job&&job.ready),pop=(p,html)=>fx&&fx.p==p?`<g class="bn-pop">${html}</g>`:html;
   // الحديقة
-  s+=`<g data-up="g"><rect x="${YXL+4}" y="${GY+1}" width="${YCX-24-YXL-4}" height="${YFY-GY-4}" fill="#000" opacity="0"/><rect x="${YCX+24}" y="${GY+1}" width="${YXR-YCX-28}" height="${YFY-GY-4}" fill="#000" opacity="0"/>`;
+  let G=`<g data-up="g"><rect x="${YXL+4}" y="${GY+1}" width="${YCX-24-YXL-4}" height="${YFY-GY-4}" fill="#000" opacity="0"/><rect x="${YCX+24}" y="${GY+1}" width="${YXR-YCX-28}" height="${YFY-GY-4}" fill="#000" opacity="0"/>`;
   const beds=[[YXL+6,YCX-26],[YCX+26,YXR-6]];
-  if(g==0&&ed&&w>=1)s+=beds.map(([a,b])=>`<rect x="${a}" y="${GY+2}" width="${b-a}" height="7" rx="3.5" fill="#9a6a3a" opacity=".55"/>`).join('');
-  if(g>=1)s+=beds.map(([a,b])=>`<rect x="${a}" y="${GY+1.5}" width="${b-a}" height="8" rx="4" fill="#4fbf68"/><rect x="${a+2}" y="${GY+2}" width="${b-a-4}" height="2.5" rx="1.2" fill="#8ee09a" opacity=".7"/><ellipse cx="${a+5}" cy="${GY+4}" rx="5" ry="4" fill="#2e9c55"/><ellipse cx="${b-5}" cy="${GY+4}" rx="5" ry="4" fill="#2e9c55"/>`).join('');
-  if(g>=2){s+=beds.map(([a,b])=>{let f='';for(let x=a+11;x<b-9;x+=7){const k=(x*7)%4;f+=`<circle cx="${x}" cy="${GY+5+(k%2)}" r="1.9" fill="${['#e2504a','#ff8ac2','#f2b632','#fff'][k]}"/>`}return f}).join('');
-    s+=[-1,1].map(d=>Array.from({length:4},(_,k)=>`<ellipse cx="${YCX+d*(16+k*2.2)}" cy="${GY+3+k*3}" rx="2.6" ry="1.4" fill="#d8d2c4" stroke="#b5ad9c" stroke-width=".5"/>`).join('')).join('')}
-  if(g>=3){const fx=YXL+40;s+=`<g><ellipse cx="${fx}" cy="${GY+7}" rx="11" ry="3.6" fill="#cfd8dc" stroke="#90a4ae" stroke-width=".8"/><ellipse cx="${fx}" cy="${GY+6.5}" rx="8.5" ry="2.4" fill="#7cc8ff"/><rect x="${fx-1.2}" y="${GY-4}" width="2.4" height="10" fill="#cfd8dc"/>
-      <path d="M${fx} ${GY-4} q-5 -6 -9 2 M${fx} ${GY-4} q5 -6 9 2" stroke="#9fdcff" stroke-width="1.4" fill="none" class="hwv"/></g>`;
-    s+=[YCX-30,YCX+30,YXR-14].map(x=>`<g><rect x="${x-.8}" y="${GY-9}" width="1.6" height="12" fill="#6b5a3a"/><circle cx="${x}" cy="${GY-11}" r="5" fill="#ffe066" opacity=".35"/><rect x="${x-2}" y="${GY-13}" width="4" height="4" rx="1" fill="#ffd54a" stroke="#b9851a" stroke-width=".5"/></g>`).join('')}
-  s+='</g>';
+  if(g==0&&ed&&w>=1)G+=beds.map(([a,b])=>`<rect x="${a}" y="${GY+2}" width="${b-a}" height="7" rx="3.5" fill="#9a6a3a" opacity=".55"/>`).join('');
+  if(g>=1)G+=beds.map(([a,b])=>`<rect x="${a}" y="${GY+1.5}" width="${b-a}" height="8" rx="4" fill="#4fbf68"/><rect x="${a+2}" y="${GY+2}" width="${b-a-4}" height="2.5" rx="1.2" fill="#8ee09a" opacity=".7"/><ellipse cx="${a+5}" cy="${GY+4}" rx="5" ry="4" fill="#2e9c55"/><ellipse cx="${b-5}" cy="${GY+4}" rx="5" ry="4" fill="#2e9c55"/>`).join('');
+  if(g>=2){G+=beds.map(([a,b])=>{let f='';for(let x=a+11;x<b-9;x+=7){const k=(x*7)%4;f+=`<circle cx="${x}" cy="${GY+5+(k%2)}" r="1.9" fill="${['#e2504a','#ff8ac2','#f2b632','#fff'][k]}"/>`}return f}).join('');
+    G+=[-1,1].map(d=>Array.from({length:4},(_,k)=>`<ellipse cx="${YCX+d*(16+k*2.2)}" cy="${GY+3+k*3}" rx="2.6" ry="1.4" fill="#d8d2c4" stroke="#b5ad9c" stroke-width=".5"/>`).join('')).join('')}
+  if(g>=3){const fx0=YXL+40;G+=`<g><ellipse cx="${fx0}" cy="${GY+7}" rx="11" ry="3.6" fill="#cfd8dc" stroke="#90a4ae" stroke-width=".8"/><ellipse cx="${fx0}" cy="${GY+6.5}" rx="8.5" ry="2.4" fill="#7cc8ff"/><rect x="${fx0-1.2}" y="${GY-4}" width="2.4" height="10" fill="#cfd8dc"/>
+      <path d="M${fx0} ${GY-4} q-5 -6 -9 2 M${fx0} ${GY-4} q5 -6 9 2" stroke="#9fdcff" stroke-width="1.4" fill="none" class="hwv"/></g>`;
+    G+=[YCX-30,YCX+30,YXR-14].map(x=>`<g><rect x="${x-.8}" y="${GY-9}" width="1.6" height="12" fill="#6b5a3a"/><circle cx="${x}" cy="${GY-11}" r="5" fill="#ffe066" opacity=".35"/><rect x="${x-2}" y="${GY-13}" width="4" height="4" rx="1" fill="#ffd54a" stroke="#b9851a" stroke-width=".5"/></g>`).join('')}
+  G+='</g>';
+  let s=pop('g',G);
   // الأشجار
-  T.forEach((lv,i)=>{s+=yTree(i,lv,ed,g>=1)});
+  T.forEach((lv,i)=>{s+=pop('t'+i,yTree(i,lv,ed,g>=1))});
   // السور: أمامي بفتحة الباب + جانبان
-  s+=`<g data-up="w" transform="translate(0 ${YFY}) scale(1 1.55) translate(0 ${-YFY})"><rect x="${YXL-4}" y="${YFY-16}" width="${YXR-YXL+8}" height="19" fill="#000" opacity="0"/>`;
+  let Wl=`<g data-up="w" transform="translate(0 ${YFY}) scale(1 1.55) translate(0 ${-YFY})"><rect x="${YXL-4}" y="${YFY-16}" width="${YXR-YXL+8}" height="19" fill="#000" opacity="0"/>`;
   const segs=[[YXL+20,YFY-14,YXL,YFY],[YXL,YFY,YCX-23,YFY],[YCX+23,YFY,YXR,YFY],[YXR,YFY,YXR+24,YFY-14]];
-  if(w==0&&ed)s+=`<polyline points="${YXL+20},${YFY-14} ${YXL},${YFY} ${YCX-23},${YFY}" fill="none" stroke="#fff" stroke-width="2.4" stroke-dasharray="5 3"/><polyline points="${YCX+23},${YFY} ${YXR},${YFY} ${YXR+24},${YFY-14}" fill="none" stroke="#fff" stroke-width="2.4" stroke-dasharray="5 3"/>`;
-  if(w>=1){s+=segs.map(([a,b,c,d])=>ySeg(a,b,c,d,w)).join('');
-    const ph=w==1?14:w==2?13:17,pc=w==1?'#8a5a2b':w==2?'#857d6f':'#fffaf0';s+=[YCX-24,YCX+21].map(x=>`<rect x="${x}" y="${YFY-ph}" width="3.4" height="${ph}" fill="${pc}" stroke="${w>=3?'#d8cdb8':'none'}" stroke-width=".6"/>${w>=3?`<circle cx="${x+1.7}" cy="${YFY-ph-2}" r="2.6" fill="url(#hGold)"/><circle cx="${x+1.7}" cy="${YFY-ph-8}" r="4" fill="#ffe066" opacity=".35"/>`:''}`).join('')}
-  s+='</g>';
-  // ورشة البناء
-  if(busy){const p=job.p,n=Math.max(1,Math.min(3,job.to|0));let pts=[];
-    if(p=='w')pts=[[YXL+16,YFY+4],[YCX-46,YFY+4],[YCX+48,YFY+4]];else if(p=='g')pts=[[YXL+30,GY+12],[YCX+40,GY+12],[YXR-26,GY+12]];
-    else{const [x,y]=YTS[+p[1]];pts=[[x-12,y+3],[x+12,y+3],[x+2,y+6]]}
-    s+=pts.slice(0,n).map(([x,y])=>yDust(x+10,y-4)+yWorker(x,y,1.6)).join('');
-    const [sx,sy]=p=='w'?[YXL+44,YFY-44]:p=='g'?[YCX+60,GY-26]:[YTS[+p[1]][0],YTS[+p[1]][1]-62];s+=ySign(sx,sy,50)}
-  // علامات «المسني لأطوّرك»
+  if(w==0&&ed)Wl+=`<polyline points="${YXL+20},${YFY-14} ${YXL},${YFY} ${YCX-23},${YFY}" fill="none" stroke="#fff" stroke-width="2.4" stroke-dasharray="5 3"/><polyline points="${YCX+23},${YFY} ${YXR},${YFY} ${YXR+24},${YFY-14}" fill="none" stroke="#fff" stroke-width="2.4" stroke-dasharray="5 3"/>`;
+  if(w>=1){Wl+=segs.map(([a,b,c,d])=>ySeg(a,b,c,d,w)).join('');
+    const ph=w==1?14:w==2?13:17,pc=w==1?'#8a5a2b':w==2?'#857d6f':'#fffaf0';Wl+=[YCX-24,YCX+21].map(x=>`<rect x="${x}" y="${YFY-ph}" width="3.4" height="${ph}" fill="${pc}" stroke="${w>=3?'#d8cdb8':'none'}" stroke-width=".6"/>${w>=3?`<circle cx="${x+1.7}" cy="${YFY-ph-2}" r="2.6" fill="url(#hGold)"/><circle cx="${x+1.7}" cy="${YFY-ph-8}" r="4" fill="#ffe066" opacity=".35"/>`:''}`).join('')}
+  Wl+='</g>';s+=pop('w',Wl);
+  // مكان العمّال لكل جزء
+  const spots=p=>{if(p=='w')return [[YXL+16,YFY+4],[YCX-52,YFY+4],[YCX+44,YFY+4]];if(p=='g')return [[YXL+30,GY+12],[YCX+36,GY+12],[YXR-30,GY+12]];const [x,y]=YTS[+p[1]];return [[x-14,y+3],[x+8,y+5],[x+16,y+2]]};
+  const signAt=p=>p=='w'?[YXL+44,YFY-44]:p=='g'?[YCX+60,GY-26]:[YTS[+p[1]][0],YTS[+p[1]][1]-62];
+  if(busy){const p=job.p,n=Math.max(1,Math.min(3,job.to|0)),P=spots(p);
+    s+=yBricks(P[0][0]-16,P[0][1]);
+    s+=P.slice(0,n).map(([x,y],i)=>(i==1?'':yDust(x+10,y-4))+yWorker(x,y,1.6,i==1?'walk':'hammer')).join('');
+    const [sx,sy]=signAt(p);s+=ySign(sx,sy,50)}
+  else if(rdy){const p=job.p,n=Math.max(1,Math.min(3,job.to|0)),P=spots(p);
+    s+=P.slice(0,n).map(([x,y],i)=>`<g style="animation-delay:${i*.2}s">${yWorker(x,y,1.6,'cheer')}</g>`).join('');
+    const [sx,sy]=signAt(p);s+=yReady(sx,sy+6,p)}
   else if(ed){const mk=[];if(w<3)mk.push([YXL+60,YFY-26,w==0]);if(w>=1&&g<3)mk.push([YCX+70,GY-2,g==0]);if(g>=1)T.forEach((lv,i)=>{if(lv<3){const [x,y]=YTS[i];mk.push([x+12,y-(lv==2?50:lv==1?26:14),lv==0])}});
     s+=mk.map(([x,y,pl])=>yMark(x,y,pl)).join('')}
+  if(fx){const [x,y]=fx.p=='w'?[YCX-60,YFY]:fx.p=='g'?[YCX+60,GY+8]:YTS[+fx.p[1]];s+=ySpark(x,y)+ySpark(fx.p=='w'?YCX+70:x+4,y-6)}
   return s}
 
 /* 🕌 المسجد الكبير (v7.9): يُرسم بجانب البيت إذا ربحه الطفل (d_mosque)، فيراه الأصدقاء أيضًا. وأهل الحيّ يمشون إليه بلا ملامح وجه. */
