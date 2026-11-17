@@ -6,6 +6,8 @@
 const JKEY='usul5_jannah_v1';
 let js={j:0,own:{},on:{},paint:'sand',chest:'',likesSeen:-1,gave:{},liked:{},seeded:false};
 try{const s=JSON.parse(localStorage.getItem(JKEY)||'null');if(s&&typeof s.j=='number')js=Object.assign(js,s)}catch(e){}
+// من اختار لونًا قبل v6.5 يبقى لونه كما هو
+if(js.pick==null&&js.paint&&js.paint!='sand')js.pick=1;if(js.wpick==null&&js.wall&&js.wall!='cream')js.wpick=1;
 const jsave=()=>{try{localStorage.setItem(JKEY,JSON.stringify(js))}catch(e){}};
 const today=()=>new Date().toDateString();
 const O=()=>window.OnlineAPI;
@@ -102,6 +104,9 @@ const PAINTS=[
 ];
 const WALLS=[{id:'cream',name:'كريمي',col:'#fbefd6',price:0},{id:'mint',name:'نعناعي',col:'#d6f3e4',price:25},{id:'peach',name:'خوخي',col:'#fde1cf',price:25},{id:'lav',name:'ليلكي',col:'#e7defa',price:25},{id:'skyw',name:'سماوي',col:'#d8ecfb',price:25}];
 const ROOMS=[['غرفة الجلوس','🛋️'],['المكتبة','📚'],['غرفة النوم','🛏️'],['غرفة الصلاة','🤲']];
+// لون البيت الأوّل حسب الطفل: البنت وردي وجدران ليلكية، والولد سماوي وجدران سماوية — مجانًا، حتى يختار هو لونًا آخر (js.pick / js.wpick)
+const SEXP=()=>window.Cups&&Cups.sex=='g'?'rose':window.Cups&&Cups.sex=='b'?'sky':'sand',SEXW=()=>window.Cups&&Cups.sex=='g'?'lav':window.Cups&&Cups.sex=='b'?'skyw':'cream';
+const myPaint=()=>js.pick?js.paint:SEXP(),myWall=()=>js.wpick?(js.wall||'cream'):SEXW();
 const IT=Object.fromEntries(ITEMS.map(i=>[i.id,i])),PT=Object.fromEntries(PAINTS.map(p=>[p.id,p]));
 const GIFTS=ITEMS.filter(i=>i.gift);
 
@@ -163,7 +168,7 @@ function gardenSVG(g,layer){g=cleanG(g);let gi=0,si=0;const out=[];
   return out.sort((a,b)=>a[0]-b[0]).map(x=>x[1]).join('')}
 function lookItems(L){return String(L.i||'').split(',').filter(id=>IT[id])}
 const Deco={
-  myLook(){return {c:Bayt.cups,p:js.paint,w:js.wall||'cream',f:Bayt.done,i:Object.keys(js.on).filter(id=>js.on[id]&&js.own[id]).join(','),g:window.Aamal?cleanG(Aamal.d.gl):''}},
+  myLook(){return {c:Bayt.cups,p:myPaint(),w:myWall(),f:Bayt.done,i:Object.keys(js.on).filter(id=>js.on[id]&&js.own[id]).join(','),g:window.Aamal?cleanG(Aamal.d.gl):''}},
   svg(L,layer,full,withRoof){const ids=lookItems(L);let s='';
     if(layer=='back')s+='<style>.dk-bob,.dk-fly,.dk-flut,.dk-swim,.dk-drift,.dk-twinkle,.dk-tw{transform-box:fill-box;transform-origin:center}.dk-bob{animation:dkbob 2.2s ease-in-out infinite}.dk-fly{animation:dkfly 3s ease-in-out infinite}.dk-flut{animation:dkflut 1.6s ease-in-out infinite}.dk-swim{animation:dkswim 4s ease-in-out infinite}.dk-drift{animation:dkdrift 7s ease-in-out infinite}.dk-twinkle,.dk-tw{animation:dktw 1.4s ease-in-out infinite}@keyframes dkbob{50%{transform:translateY(-4px)}}@keyframes dkfly{50%{transform:translate(8px,-6px)}}@keyframes dkflut{50%{transform:translate(4px,-5px) rotate(-12deg)}}@keyframes dkswim{50%{transform:translateX(-14px)}}@keyframes dkdrift{50%{transform:translateX(16px)}}@keyframes dktw{50%{opacity:.35}}</style>';
     ids.forEach(id=>{const it=IT[id];if(it.layer==layer&&it.layer!='room'&&(!it.need||ids.includes(it.need)))s+=itemSVG(it,full,withRoof)});
@@ -324,9 +329,9 @@ let tab='deeds';
 function shop(keepBack){show('jannah');if(!keepBack)backTo=null;$('#jTitle').textContent='🎨 زيّن بيتك';updJ();drawShop();window.scrollTo(0,0)}
 function drawShop(){const B=$('#jBody');const L=Deco.myLook();
   let grid='';
-  if(tab=='paint')grid=PAINTS.map(p=>{const own=p.price==0||js.own['p_'+p.id],on=js.paint==p.id;
+  if(tab=='paint')grid=PAINTS.map(p=>{const own=p.price==0||p.id==SEXP()||js.own['p_'+p.id],on=myPaint()==p.id;
     return `<button class="jit ${own?'own':''} ${on?'on':''} ${!own&&js.j<p.price?'poor':''}" data-p="${p.id}"><span class="e"><span style="display:inline-block;width:34px;height:34px;border-radius:10px;background:${p.col};border:2px solid #0002;vertical-align:middle"></span></span><b>${p.name}</b><span class="pr">${on?'✓ الآن':own?'اختر':'💎 '+ar(p.price)}</span></button>`}).join('');
-  else if(tab=='inside')grid=WALLS.map(w=>{const own=w.price==0||js.own['w_'+w.id],on=(js.wall||'cream')==w.id;
+  else if(tab=='inside')grid=WALLS.map(w=>{const own=w.price==0||w.id==SEXW()||js.own['w_'+w.id],on=myWall()==w.id;
     return `<button class="jit ${own?'own':''} ${on?'on':''} ${!own&&js.j<w.price?'poor':''}" data-w="${w.id}"><span class="e"><span style="display:inline-block;width:34px;height:34px;border-radius:8px;background:${w.col};border:2px solid #0002;vertical-align:middle"></span></span><b>جدران ${w.name}</b><span class="pr">${on?'✓ الآن':own?'اختر':'💎 '+ar(w.price)}</span></button>`}).join('')+gridOf(ITEMS.filter(i=>i.cat=='inside'&&i.r==room));
   else grid=gridOf(ITEMS.filter(i=>i.cat==tab));
   function gridOf(list){return list.map(i=>{const own=js.own[i.id],on=own&&js.on[i.id],nd=i.need&&!js.own[i.need];
@@ -348,10 +353,10 @@ function drawShop(){const B=$('#jBody');const L=Deco.myLook();
   B.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>tapWall(WALLS.find(w=>w.id==b.dataset.w)));
 }
 function tapWall(w){const k='w_'+w.id;
-  if(w.price==0||js.own[k]){js.wall=w.id;jsave();Bayt.sTap();drawShop();publishSoon();return}
+  if(w.price==0||w.id==SEXW()||js.own[k]){js.wall=w.id;js.wpick=1;jsave();Bayt.sTap();drawShop();publishSoon();return}
   if(js.j<w.price){tone(200,.15,'square',.08);modal(`<h3 style="margin:4px 0">جدران ${w.name}</h3><p>تحتاج ${ar(w.price-js.j)} 💎 أخرى.</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`);return}
   modal(`<div style="width:70px;height:70px;border-radius:18px;margin:0 auto;background:${w.col};border:3px solid #0002"></div><h3 style="margin:6px 0">لوّن جدران غرفك ${w.name}</h3><p>السعر: <b>💎 ${ar(w.price)}</b></p><div class="nav"><button class="btn sec" data-close>لا</button><button class="btn gold" id="jBuy">لوّن 🎨</button></div>`,()=>{
-    $('#jBuy').onclick=()=>{closeModal();js.j-=w.price;js.own[k]=1;js.wall=w.id;jsave();updJ();sparkle();drawShop();publishSoon()}})}
+    $('#jBuy').onclick=()=>{closeModal();js.j-=w.price;js.own[k]=1;js.wall=w.id;js.wpick=1;jsave();updJ();sparkle();drawShop();publishSoon()}})}
 function popAfter(sel){const e=$(sel);if(e){e.classList.remove('pop');void e.offsetWidth;e.classList.add('pop')}}
 function tapItem(i){
   if(js.own[i.id]){js.on[i.id]=js.on[i.id]?0:1;jsave();Bayt.sTap();drawShop();popAfter(`[data-i="${i.id}"]`);publishSoon();return}
@@ -363,10 +368,10 @@ function tapItem(i){
   modal(`<div style="font-size:64px">${i.e}</div><h3 style="margin:4px 0">${i.name}</h3><p>السعر: <b>💎 ${ar(i.price)}</b> · عندك ${ar(js.j)}</p><div class="nav"><button class="btn sec" data-close>لا</button><button class="btn gold" id="jBuy">اشترِ وزيّن 🏡</button></div>`,()=>{
     $('#jBuy').onclick=()=>{closeModal();js.j-=i.price;js.own[i.id]=1;js.on[i.id]=1;jsave();updJ();sparkle();if(typeof confetti=='function')confetti();drawShop();popAfter(`[data-i="${i.id}"]`);publishSoon()}})}
 function tapPaint(p){const k='p_'+p.id;
-  if(p.price==0||js.own[k]){js.paint=p.id;jsave();Bayt.sTap();drawShop();publishSoon();return}
+  if(p.price==0||p.id==SEXP()||js.own[k]){js.paint=p.id;js.pick=1;jsave();Bayt.sTap();drawShop();publishSoon();return}
   if(js.j<p.price){tone(200,.15,'square',.08);modal(`<h3 style="margin:4px 0">لون ${p.name}</h3><p>تحتاج ${ar(p.price-js.j)} 💎 أخرى.</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`);return}
   modal(`<div style="width:70px;height:70px;border-radius:18px;margin:0 auto;background:${p.col};border:3px solid #0002"></div><h3 style="margin:6px 0">لوّن بيتك ${p.name}</h3><p>السعر: <b>💎 ${ar(p.price)}</b></p><div class="nav"><button class="btn sec" data-close>لا</button><button class="btn gold" id="jBuy">لوّن 🎨</button></div>`,()=>{
-    $('#jBuy').onclick=()=>{closeModal();js.j-=p.price;js.own[k]=1;js.paint=p.id;jsave();updJ();sparkle();drawShop();publishSoon()}})}
+    $('#jBuy').onclick=()=>{closeModal();js.j-=p.price;js.own[k]=1;js.paint=p.id;js.pick=1;jsave();updJ();sparkle();drawShop();publishSoon()}})}
 
 /* ---------- أونلاين ---------- */
 const ready=()=>O()&&O().db&&O().me&&O().profile;
