@@ -199,8 +199,7 @@ function drawHome(){const s=snap(),ln=lvName(s.L),t=shownTitle(s),f=(s.x-need(s.
 function drawHeroes(){const a=$('#hHeSum');if(!a)return;
   a.textContent=hcache&&hcache.length?`🥇 الأول الآن: ${hcache[0].nick}`:'اضغط لترى الأبطال'}
 function openHeroes(){stopVc();aqBack=null;show('alqab');$('#aqTitle').textContent='🏅 أبطال هذا الأسبوع';drawHeroesPage();loadSocial(true)}
-function drawHeroesPage(){$('#aqBody').innerHTML=`<div class="hbox" style="margin-top:0">${heroesHTML()}</div><button class="btn gold" id="hAll" style="flex:none;width:100%;margin-top:10px">🏆 لوحة المتصدّرين الكاملة</button>`;
-  $('#hAll').onclick=()=>{if(O()&&O().openBoard){window.onlineReturn=openHeroes;O().openBoard()}}}
+function drawHeroesPage(){$('#aqBody').innerHTML=`<div class="hbox" style="margin-top:0">${heroesHTML()}</div>`}
 function frSum(){const prof=O()&&O().profile;
   if(!state.online&&!prof)return B('اصنع لقبك وأضف أصدقاءك 🌐','اصنعي لقبك وأضيفي أصدقاءك 🌐');
   if(!fcache)return 'اضغط لترى أصدقاءك وتضيف صديقًا';
@@ -225,7 +224,7 @@ const medal=i=>['🥇','🥈','🥉'][i]||ar(i+1);
 function heroesHTML(){if(!hcache)return `<p class="hnote">${state.online?'⏳':'العب وتعلّم واعمل الخير لتصير من أبطال الأسبوع! 🌟'}</p>`;
   if(!hcache.length)return `<p class="hnote">لا أبطال بعد هذا الأسبوع. ${B('كن','كوني')} الأول! 🌟</p>`;
   const me=O()&&O().me;
-  return `<div class="hher">${hcache.slice(0,10).map((r,i)=>`<div class="${r.id==me?'me':''}"><span class="rk">${medal(i)}</span><span class="av">${esc(r.av)}</span><b>${esc(r.nick)}${r.lv||r.tt?`<small style="display:block;color:#8a5a00;font-size:11.5px">${r.lv?`⭐${ar(r.lv)} `:''}${esc(r.tt||'')}</small>`:''}</b><small>${r.xp?`✨ ${ar(r.xp)}`:''}${r.wins?` 🏆 ${ar(r.wins)}`:''}</small></div>`).join('')}</div>
+  return `<div class="hher">${hcache.slice(0,30).map((r,i)=>`<div class="${r.id==me?'me':''}"><span class="rk">${medal(i)}</span><span class="av">${esc(r.av)}</span><b>${esc(r.nick)}${r.lv||r.tt?`<small style="display:block;color:#8a5a00;font-size:11.5px">${r.lv?`⭐${ar(r.lv)} `:''}${esc(r.tt||'')}</small>`:''}</b><small>${r.xp?`✨ ${ar(r.xp)}`:''}${r.wins?` 🏆 ${ar(r.wins)}`:''}</small></div>`).join('')}</div>
    <p class="hnote">الترتيب بالأعمال الصالحة والتعلّم والانتصارات هذا الأسبوع · يبدأ من جديد كل جمعة</p>`}
 async function loadSocial(force){if(loading||!navigator.onLine||!O()||!state.online)return;if(!force&&Date.now()-lastLoad<60000&&fcache)return;
   loading=true;lastLoad=Date.now();
@@ -235,7 +234,7 @@ async function loadSocial(force){if(loading||!navigator.onLine||!O()||!state.onl
       const v=p.val()||{};return {id,nick:v.nick||'؟',av:v.av||'❔',lv:v.lv|0,tt:v.tt?String(v.tt).slice(0,30):'',on:!!pr.val()}}catch(e){return null}}));
     fcache=rows.filter(Boolean).sort((a,b)=>(b.on-a.on)||(b.lv-a.lv));
     const s=(await API.db.ref('leader/'+API.week()).get()).val()||{};
-    hcache=Object.entries(s).map(([id,v])=>({id,nick:v.nick||'؟',av:v.av||'❔',xp:v.xp|0,wins:v.wins|0,lv:v.lv|0,tt:typeof v.tt=='string'?v.tt.slice(0,30):''})).sort((a,b)=>(Math.max(b.xp,b.wins*10)-Math.max(a.xp,a.wins*10))).slice(0,10);
+    hcache=Object.entries(s).map(([id,v])=>({id,nick:v.nick||'؟',av:v.av||'❔',xp:v.xp|0,wins:v.wins|0,lv:v.lv|0,tt:typeof v.tt=='string'?v.tt.slice(0,30):''})).sort((a,b)=>(Math.max(b.xp,b.wins*10)-Math.max(a.xp,a.wins*10))).slice(0,30);
     try{localStorage.setItem('usul5_social_v1',JSON.stringify({f:fcache,h:hcache}))}catch(e){}
     if($('#home').classList.contains('on')){const a=$('#hFrSum');if(a)a.textContent=frSum();drawHeroes()}
     if(frOpen&&$('#alqab').classList.contains('on')&&$('#aqTitle').textContent=='👥 أصدقائي')drawFriends();
