@@ -75,7 +75,8 @@ const ITEMS=[
  {id:'d_star',  cat:'deeds',name:'نجوم القرآن',e:'🌠',deed:'سمّع ١٠ آيات بصوتك في «أنا حافظ صغير»',layer:'back',at:[[44,62,18],[300,96,16]],anim:'twinkle'},
  {id:'d_spring',cat:'deeds',name:'عين ماء جارية',e:'💧',deed:'انجح في اختبار الوضوء',layer:'front',at:[[98,300,20],[88,306,12]],anim:'bob'},
  {id:'d_mosque',cat:'deeds',name:'مسجد جميل بجانب بيتك',e:'🕌',deed:'تعلّم الصلاة، وقلها بصوتك، وانجح في اختبارها',layer:'back',svg:'mosque',at:[[320,254,40]]},
- {id:'d_street',cat:'deeds',name:'مصابيح شارع بيتك',e:'🏮',deed:'صلِّ على محمد وآل محمد ١٠٠٠ مرة بصوتك خلال شهر واحد',layer:'front',svg:'street',at:[[20,300,16]]},
+ {id:'d_street',cat:'deeds',name:'مصابيح شارع بيتك',e:'🏮',deed:'صلِّ على محمد وآل محمد ٥٠٠ مرة بصوتك خلال شهر واحد',layer:'front',svg:'street',at:[[20,300,16]]},
+ {id:'d_street2',cat:'deeds',name:'مصابيح الشارع الكاملة',e:'🏮',deed:'صلِّ على محمد وآل محمد ١٠٠٠ مرة بصوتك خلال شهر واحد',layer:'front',svg:'street2',need:'d_street',at:[[280,300,16]]},
  {id:'d_palms', cat:'deeds',name:'نخيل الجنة',e:'🌴',deed:'صلِّ على محمد وآل محمد ١٠٠ مرة',layer:'back',at:[[8,288,34],[352,290,30]]},
  {id:'d_fruit', cat:'deeds',name:'بستان المصلّي',e:'🍊',deed:'سجّل ٣٥ صلاة صلّيتها',layer:'front',at:[[38,270,16],[326,264,15],[52,258,14]]},
  {id:'d_h1',    cat:'deeds',name:'حمامات الحافظ',e:'🕊️',deed:'احفظ سورة واحدة',layer:'back',at:[[200,70,18],[226,58,15],[178,84,14]],anim:'fly'},
@@ -129,7 +130,7 @@ function mosqueSVG(){const g=292;
   <path d="M310 ${g} V${g-14} a7 7 0 0 1 14 0 V${g}Z" fill="#8a4f22" stroke="url(#hGold)" stroke-width="1.6"/>
   ${[296,330].map(x=>`<path d="M${x} ${g-8} V${g-17} a4 4 0 0 1 8 0 V${g-8}Z" fill="#9fdcff" stroke="#e6c07a" stroke-width="1.4"/>`).join('')}
   <circle cx="317" cy="${g-26}" r="3" fill="#ffd54a" opacity=".9" class="dk-tw"/></g>`}
-function streetSVG(){const g=292,xs=[10,42,74,266,288];
+function streetSVG(xs){const g=292;xs=xs||[10,42,74];
   return xs.map((x,k)=>`<g class="dk-st"><ellipse cx="${x}" cy="${g+12}" rx="7" ry="2.6" fill="#2f4a52" opacity=".5"/>
     <rect x="${x-1.6}" y="${g-38}" width="3.2" height="50" rx="1.2" fill="#37515a"/><rect x="${x-4}" y="${g+6}" width="8" height="6" rx="2" fill="#2d434a"/>
     <path d="M${x} ${g-34} q0 -8 7 -8" stroke="#37515a" stroke-width="2.4" fill="none" stroke-linecap="round"/>
@@ -138,6 +139,7 @@ function streetSVG(){const g=292,xs=[10,42,74,266,288];
     <path d="M${x+1} ${g-40} h12 l-6 -5z" fill="#37515a"/></g>`).join('')}
 function itemSVG(it,full,withRoof){
   if(it.svg=='street')return streetSVG();
+  if(it.svg=='street2')return streetSVG([266,288]);
   if(it.svg=='mosque')return mosqueSVG();
   if(['fbox','curt','door','ivy'].includes(it.svg))return houseItem(it.svg,full);
   const cls=it.anim?` class="dk-${it.anim}"`:'';
