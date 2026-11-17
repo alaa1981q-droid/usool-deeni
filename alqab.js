@@ -53,7 +53,9 @@ const TITLES=[
 const LEVELS=[[1,'🌱','برعم الإيمان'],[3,'⭐','نجم صغير'],[5,'🌟','نجم ساطع'],[7,'🌙','قمر منير'],[10,'🏇','فارس الإيمان'],[13,'🦅','صقر الهدى'],[16,'👑','بطل الجنة']];
 const tierOf=(m,c)=>m.at.filter(x=>c[m.k]>=x).length; // 0..4
 function xpOf(c){let x=c.deeds*3+c.stars*5+c.stages*10+c.hifz*15+c.tilawa*2+c.pray*3+c.fiqh*10+Math.floor(c.sal/10)*4+Math.floor(c.tas/10)*3+c.wins*10+c.akhlaq*8+c.wird*4+c.cups*3;
-  MEDALS.forEach(m=>{for(let t=0;t<tierOf(m,c);t++)x+=TIERS[t].xp});TITLES.forEach(t=>{if(t.c(c))x+=30});return x}
+  MEDALS.forEach(m=>{for(let t=0;t<tierOf(m,c);t++)x+=TIERS[t].xp});TITLES.forEach(t=>{if(t.c(c))x+=30});
+  x+=(A().xpAdj|0); // نقاط تضيفها أو تخصمها الإدارة (idara.js)
+  return Math.max(0,x)}
 const need=L=>15*L*(L-1); // XP لبداية المستوى L
 const lvOf=x=>{let L=1;while(x>=need(L+1))L++;return L};
 const lvName=L=>{let r=LEVELS[0];LEVELS.forEach(l=>{if(L>=l[0])r=l});return r};

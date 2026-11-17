@@ -175,6 +175,7 @@ const Deco={
     if(layer=='back'||layer=='front')s+=gardenSVG(L.g,layer);return s},
   paintFilter(L){const p=PT[L.p];if(!p||!p.f)return '';return `url(#pf_${p.id})`},
   addJ(n){js.j+=Math.max(0,Math.round(n));jsave();updJ()},
+  takeJ(n){js.j=Math.max(0,js.j-Math.max(0,Math.round(n)));jsave();updJ()},get jewels(){return js.j},
   floorJewels(score){const n=Math.max(5,Math.round(score/10));Deco.addJ(n);return `<div class="cupbox win" style="border-color:#9fd3f0;background:linear-gradient(160deg,#eaf6ff,#fff);color:#1d4e9e"><b>💎 +${ar(n)}</b>جواهر لتزيين بيتك! عندك الآن ${ar(js.j)} 💎</div>`},
   // ماسات لكل سباق أو تحدٍّ (contest / online / nafsak)، بحدّ يومي حتى لا تُجمع بلا تعلّم
   challenge(n,src){const d=today();if(js.cday!=d){js.cday=d;js.cnt={}}js.cnt=js.cnt||{};const c=js.cnt[src]||0;

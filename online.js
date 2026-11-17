@@ -122,6 +122,9 @@
         <input class="inp" id="ownNick" maxlength="16" placeholder="${sx === 'g' ? 'مثل: زهراء، فاطمة، مريم' : 'مثل: حيدر، علي، أبو علي الصغير'}" value="${esc(own)}" autocomplete="off">
         <div class="fb" id="nickMsg" style="font-size:14px">اسمك الأول أو اسم تحبّه، بلا اسم العائلة 🤍 حروف عربية فقط (٣ إلى ١٦ حرفًا)</div>
         <div class="nav"><button class="btn gold" id="saveProf">هذا اسمي ✓</button></div>` : `<p style="text-align:center;color:var(--muted)">اختر: ولد أو بنت 👆</p>`}</div>`;
+      const lk = locked();
+      if (lk && sx) { own = profile.nick; const i = $('#ownNick'); i.value = own; i.disabled = true; $('#nickPrev').textContent = own;
+        $('#nickMsg').className = 'fb'; $('#nickMsg').textContent = `🔒 الإدارة ثبّتت اسمك حتى ${new Date(lk).toLocaleDateString('ar-IQ', { weekday: 'long', day: 'numeric', month: 'long' })}، وتقدر تغيّر صورتك 🤍`; }
       body().querySelectorAll('[data-sx]').forEach(b => b.onclick = () => { sx = b.dataset.sx; draw(); });
       if (!sx) return;
       body().querySelectorAll('[data-av]').forEach(b => b.onclick = () => { av = b.dataset.av; draw(); });
@@ -129,20 +132,28 @@
       $('#saveProf').onclick = async () => {
         $('#saveProf').disabled = true;
         try {
-          const why = badNick(own); if (why) { $('#nickMsg').className = 'fb bad'; $('#nickMsg').textContent = why; $('#saveProf').disabled = false; $('#ownNick').focus(); return; }
+          const why = locked() ? '' : badNick(own); if (why) { $('#nickMsg').className = 'fb bad'; $('#nickMsg').textContent = why; $('#saveProf').disabled = false; $('#ownNick').focus(); return; }
           const nick = own.trim().replace(/\s+/g, ' '), isOwn = true;
           const code = (profile && profile.code) || await claimCode();
-          profile = Object.assign({ wins: 0, games: 0 }, profile || {}, { nick, av, sx, code, own: isOwn });
+          // سجلّ الأسماء السابقة (تراه الإدارة): آخر ٥ أسماء ووقت آخر تغيير
+          const old = profile && profile.nick, extra = {};
+          if (old && old !== nick) { extra.hist = [old].concat(String(profile.hist || '').split('|').filter(Boolean)).filter(x => x !== nick).slice(0, 5).join('|'); extra.nts = now(); }
+          if (!profile || !profile.since) extra.since = now();
+          profile = Object.assign({ wins: 0, games: 0 }, profile || {}, { nick, av, sx, code, own: isOwn }, extra);
           if (window.Cups && Cups.setSex) Cups.setSex(sx);
           await db.ref('profiles/' + me).set(profile);
           state.online = true; state.nick = nick; state.av = av; save();
-          startPresence();
+          startPresence(); refreshLeader();
           if (afterProf) { const f = afterProf; afterProf = null; window.onlineReturn = null; toast('حُفظ اسمك وصورتك ✓'); f(); } else hub();
         } catch (e) { $('#saveProf').disabled = false; toast('تعذّر الحفظ، حاول مرة أخرى'); }
       };
     };
     draw();
   }
+  // الإدارة تستطيع تثبيت اسم الطفل أسبوعًا بعد أن تغيّره (idara.js)
+  const locked = () => { const t = window.Aamal && Aamal.d && Aamal.d.nickLock; return profile && profile.nick && t && t > Date.now() ? t : 0; };
+  // الاسم والصورة الجديدان يظهران فورًا في أبطال الأسبوع (إن كان الطفل فيهم)
+  function refreshLeader() { const lr = db.ref(`leader/${week()}/${me}`); lr.once('value').then(s => { if (s.exists()) return lr.update({ nick: profile.nick, av: profile.av }); }).catch(() => {}); }
   // لقب يكتبه الطفل: حروف عربية ومسافات فقط (بلا أرقام هواتف ولا روابط)، وبلا كلمات غير لائقة
   const BAD = ['غبي', 'حمار', 'كلب', 'زبال', 'قذر', 'حقير', 'تافه', 'لعن', 'منيوك', 'طيز', 'شرموط', 'عاهر', 'قحب', 'خنزير', 'وسخ', 'سافل', 'جحش', 'زمال'];
   function badNick(t) {
@@ -463,6 +474,7 @@
     editProfile: async (back) => { afterProf = back || null; window.onlineReturn = back || null; show('online'); setHead('✏️ اسمي وصورتي');
       body().innerHTML = `<div class="handoff"><div class="big spin">🌐</div><p>جارٍ الاتصال…</p></div>`;
       try { await init(); } catch (e) { afterProf = null; return openOnline(); } setupProfile(); },
+    refreshLeader: () => { if (db && profile) refreshLeader(); },
     openAdd: async () => { show('online'); try { await init(); } catch (e) { return openOnline(); } if (banned()) return bannedScreen(); if (!profile) return setupProfile(); addFriend(); }
   };
   window.onlineBack = () => { if (room && room.data && room.data.state === 'play' && !room.done) {
