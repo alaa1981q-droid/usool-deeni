@@ -31,11 +31,12 @@ App name (chosen by the owner, v2.8): «جنّتي الصغيرة». Children's 
 - House (v5.8+): 5 floors (5th = «ترتيب الصلاة», prayer steps in the owner's order, needs 35 cups); house scales 0.66 at 5 floors; mosque `d_mosque` (needs prayer learn + voice + test ≥ 75%) and street lamps `d_street` (500 voice salawat in 30 days) / `d_street2` (1000) via `Aamal.salWin()` rolling log; `houseSVG` has ledges/light/shadows and `tilt3d`.
 - Prayer content (salah.js): learn steps = 16 (2nd rak'a explained in one step), order drill uses its own two lists (rak'a 1 / rak'a 2) in the owner's order. Owner reviews prayer content.
 - Home layout (v4.8+; v7.0 owner wants a SHORT compact home page: card titles 15.5px, subtitles 12.5px bold dark 2 lines, icons 28px, padding 6px, gap 8px, stats labels 13px — keep it compact): CSS grid, two cards per row (`#home.on`), stages map two per row; footer shows only «كيف ألعب؟» and «للأهل» (reset button removed on purpose). Back buttons are big green (`.back`). «أبطال هذا الأسبوع» is a button after «أصدقائي» opening its own screen (top 30). Admin (idara.js): banner with total subscribers, kids absent 30+ days marked 💤 + tab «غائبون».
-- Every change: bump `APP_VER` AND the `?v=` on all script tags in index.html AND `CACHE` in sw.js, otherwise phones keep old files. New .js files go in the `cp` line of android.yml and in sw.js `FILES`. Current version: 7.5.
+- Every change: bump `APP_VER` AND the `?v=` on all script tags in index.html AND `CACHE` in sw.js, otherwise phones keep old files. New .js files go in the `cp` line of android.yml and in sw.js `FILES`. Current version: 7.6.
 - `sw.js` — offline cache; must never intercept Firebase/other-origin requests. Bump `CACHE` when caching logic changes.
 - `vendor/` — Firebase compat SDK 10.14.1. `android/` — WebView wrapper.
 
 ## Working rules
 - Design rule from the owner (v7.2): boxes/tiles are ALWAYS 3D (bottom shadow `0 3-4px 0` in a darker tint + soft drop shadow + inner top highlight) with light pastel colours (alternate green/blue/pink/yellow/lilac/teal via `--c`/`--d`), compact, and the page must stay short.
+- Modals (v7.6): `.modal .in` is capped at the screen height and scrolls; its last `.nav` (buttons) is sticky at the bottom so a child is never stuck (owner hit this on a laptop). Keep action buttons in a final `.nav`.
 - Commit and push to `main` directly; Pages and the APK rebuild automatically.
 - Test in Playwright before pushing (a Firebase mock is needed; this sandbox cannot reach Firebase).
