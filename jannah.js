@@ -169,7 +169,7 @@ function gardenSVG(g,layer){g=cleanG(g);let gi=0,si=0;const out=[];
   return out.sort((a,b)=>a[0]-b[0]).map(x=>x[1]).join('')}
 function lookItems(L){return String(L.i||'').split(',').filter(id=>IT[id])}
 const Deco={
-  myLook(){return {c:Bayt.cups,p:myPaint(),w:myWall(),f:Bayt.done,i:Object.keys(js.on).filter(id=>js.on[id]&&js.own[id]).join(','),g:window.Aamal?cleanG(Aamal.d.gl):''}},
+  myLook(){return {c:Bayt.cups,p:myPaint(),w:myWall(),f:Bayt.done,i:Object.keys(js.on).filter(id=>js.on[id]&&js.own[id]).join(','),g:window.Aamal?cleanG(Aamal.d.gl):'',dt:window.Aamal&&Aamal.dirt?Aamal.dirt():0}},
   svg(L,layer,full,withRoof){const ids=lookItems(L);let s='';
     if(layer=='back')s+='<style>.dk-bob,.dk-fly,.dk-flut,.dk-swim,.dk-drift,.dk-twinkle,.dk-tw{transform-box:fill-box;transform-origin:center}.dk-bob{animation:dkbob 2.2s ease-in-out infinite}.dk-fly{animation:dkfly 3s ease-in-out infinite}.dk-flut{animation:dkflut 1.6s ease-in-out infinite}.dk-swim{animation:dkswim 4s ease-in-out infinite}.dk-drift{animation:dkdrift 7s ease-in-out infinite}.dk-twinkle,.dk-tw{animation:dktw 1.4s ease-in-out infinite}@keyframes dkbob{50%{transform:translateY(-4px)}}@keyframes dkfly{50%{transform:translate(8px,-6px)}}@keyframes dkflut{50%{transform:translate(4px,-5px) rotate(-12deg)}}@keyframes dkswim{50%{transform:translateX(-14px)}}@keyframes dkdrift{50%{transform:translateX(16px)}}@keyframes dktw{50%{opacity:.35}}</style>';
     ids.forEach(id=>{const it=IT[id];if(it.layer==layer&&it.layer!='room'&&(!it.need||ids.includes(it.need)))s+=itemSVG(it,full,withRoof)});
@@ -198,6 +198,10 @@ if(!js.seeded){js.seeded=true;js.j+=30+Bayt.done*40+Bayt.cups*5;jsave()}
 /* ---------- styles ---------- */
 const css=document.createElement('style');
 css.textContent=`
+.dirtb{display:flex;align-items:center;gap:10px;width:100%;margin-top:10px;padding:8px 12px;border-radius:18px;text-align:right;color:inherit;
+ background:linear-gradient(160deg,#fff 0%,#f3e7d3 90%);border:2px solid #d9b98a;box-shadow:0 4px 0 #d9b98a,0 6px 12px rgba(90,60,20,.12),inset 0 1px 0 #fff;animation:dirtp 2.2s ease-in-out infinite}
+.dirtb:active{transform:translateY(3px);box-shadow:0 1px 0 #d9b98a}@keyframes dirtp{50%{box-shadow:0 4px 0 #d9b98a,0 0 0 5px rgba(217,185,138,.35)}}
+.dirtb .e{font-size:34px;line-height:1}.dirtb .t{flex:1;min-width:0}.dirtb b{display:block;font-size:17px;color:#7a4f22}.dirtb small{display:block;font-size:13px;font-weight:700;color:#5e4a33;line-height:1.4}.dirtb .go{font-size:24px;color:#b07a3e}
 .msqb{position:relative;margin-top:10px;border-radius:22px;overflow:hidden;border:2px solid #bfe3cc;background:#cfeeff;cursor:pointer;
  box-shadow:0 5px 0 #bfe3cc,0 8px 16px rgba(20,60,40,.12)}
 .msqb svg{display:block;width:100%;height:auto}
@@ -401,10 +405,14 @@ function menuHook(B){
     <button class="jbtn ch ${chestReady?'ready':''}" id="jCh">${chestReady?'<i class="dot">!</i>':''}<span>🎁</span>صندوق اليوم</button></div>
     <div style="text-align:center;margin-top:8px"><span class="jj" id="jMenuJ">💎 ${ar(js.j)}</span></div>${goal()}<div id="jVis"></div>`;
   if(rk)rk.insertAdjacentHTML('afterend',html);else B.insertAdjacentHTML('afterbegin',html);
+  // 🧹 بيت متّسخ: رسالة تشجّع الطفل على تنظيفه بالأعمال الصالحة
+  const bh=B.querySelector('.bhouse');const dt=window.Aamal&&Aamal.dirt?Aamal.dirt():0;
   // 🕌 لوحة المسجد الكبيرة تحت البيت
-  const bh=B.querySelector('.bhouse');if(bh){bh.insertAdjacentHTML('afterend',mosqueBoard());const mb=$('#msqB');
+  if(bh){bh.insertAdjacentHTML('afterend',mosqueBoard());const mb=$('#msqB');
     mb.onclick=()=>{Bayt.sTap();if(Deco.owns('d_mosque'))modal(`<div style="font-size:54px">🕌</div><h3 style="margin:4px 0">مسجد حيّك</h3><p>${B_('بنيتَه','بنيتِه')} لأنك تعلّمت الصلاة 🤍<br>وكلّما صلّيت يزدان بيتك في الجنة.</p><div class="nav"><button class="btn gold" data-close>حسنًا 🌷</button></div>`);
       else if(window.Alqab)Alqab.deedFor('d_mosque')}}
+  if(bh&&dt>0){bh.insertAdjacentHTML('afterend',`<button class="dirtb" id="dirtB"><span class="e">🧹</span><span class="t"><b>${['','بيتك صار عليه غبار!','بيتك اتّسخ!','بيتك اتّسخ كثيرًا!','بيتك صار قديمًا ومتّسخًا!'][dt]}</b><small>نظّف بيتك بأعمالك الصالحة: كلّ عمل صالح ينظّف جزءًا 🤲 (باقي ${ar(dt)})</small></span><span class="go">‹</span></button>`);
+    $('#dirtB').onclick=()=>{Bayt.sTap();window.Alqab&&Alqab.openProfile()}}
   $('#jShop').onclick=()=>{Bayt.sTap();shop()};
   $('#jIn').onclick=()=>{Bayt.sTap();inside(Deco.myLook())};
   const hb=B.querySelector('.bhouse');if(hb){hb.style.cursor='pointer';hb.onclick=()=>{Bayt.sTap();inside(Deco.myLook())}}

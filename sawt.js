@@ -11,7 +11,15 @@ try{const s=JSON.parse(localStorage.getItem(AKEY)||'null');if(s&&typeof s.sal=='
 const asave=()=>{try{localStorage.setItem(AKEY,JSON.stringify(as))}catch(e){}};
 const today=()=>new Date().toDateString();
 const dk=(t=Date.now())=>{const d=new Date(t);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
-window.Aamal={get d(){return as},save:asave,
+/* 🧹 البيت يتّسخ إذا ترك الطفل الأعمال الصالحة (v7.8):
+   يومٌ بلا عمل لا يضرّ، بعدها كل يوم يزيد الوسخ درجة (حتى ٤). وكل عملٍ صالح ينظّف درجة. dirt = الدرجة، lastDeed = آخر يوم فيه عمل. */
+const dayN=(t=Date.now())=>{const d=new Date(t);return Math.floor(new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime()/864e5)};
+if(!as.lastDeed){as.lastDeed=dayN();asave()}
+function dirtNow(){const idle=dayN()-(as.lastDeed||dayN()),want=Math.max(0,Math.min(4,idle-1));if(want>(as.dirt|0)){as.dirt=want;asave()}return as.dirt|0}
+function cleanOne(){const before=dirtNow();as.lastDeed=dayN();if(before>0){as.dirt=before-1;asave();setTimeout(()=>cleanBanner(as.dirt),900)}else asave()}
+function cleanBanner(left){const d=document.createElement('div');d.className='ctbanner b3';d.style.cssText='font-size:18px;top:24%;white-space:normal;max-width:90vw;text-align:center';
+  d.textContent=left?`🧹 نظّفتَ جزءًا من بيتك! باقي ${ar(left)} حتى يلمع ✨`:'✨ بيتك صار نظيفًا ويلمع! أحسنت 🤍';document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
+window.Aamal={get d(){return as},save:asave,dirt:dirtNow,cleanOne,
   add(k,n){as[k]=(as[k]||0)+n;
     if(k=='sal'){as.salLog=as.salLog||{};as.salLog[dk()]=(as.salLog[dk()]||0)+n;const lim=Date.now()-40*864e5;Object.keys(as.salLog).forEach(d=>{const [y,m,dd]=d.split('-');if(new Date(+y,m-1,+dd).getTime()<lim)delete as.salLog[d]})}
     asave();window.Alqab&&Alqab.soon()},
@@ -22,7 +30,7 @@ window.Aamal={get d(){return as},save:asave,
   doneToday(k){return as.deedDay==today()&&!!as.deedDone[k]},
   /* 🌱 حديقة الأعمال: كل عملٍ صالح يضيف شيئًا جميلًا إلى البيت (يظهر للأصدقاء أيضًا).
      الحرف يُحفظ في gl (آخر ٨٠ عملًا تظهر في البيت)، وgN = مجموع الأعمال، وgc = عدد كل نوع. */
-  get GROW(){return GROW},grow(k,n=1){const g=GROW[k];if(!g)return 0;const d=today();if(as.gDay!=d){as.gDay=d;as.gToday={}}as.gToday=as.gToday||{};
+  get GROW(){return GROW},grow(k,n=1){const g=GROW[k];if(!g)return 0;cleanOne();const d=today();if(as.gDay!=d){as.gDay=d;as.gToday={}}as.gToday=as.gToday||{};
     const room=Math.max(0,(g[3]||5)-(as.gToday[k]||0)),m=Math.min(n,room);
     if(m>0){as.gToday[k]=(as.gToday[k]||0)+m;as.gl=((as.gl||'')+g[2].repeat(m)).slice(-80);as.gN=(as.gN||0)+m;as.gc=as.gc||{};as.gc[k]=(as.gc[k]||0)+m;asave();
       setTimeout(()=>{grownBanner(g,m);window.Alqab&&Alqab.soon()},350)}

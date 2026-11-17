@@ -294,15 +294,20 @@ function houseSVG(full,part,frac,withRoof,anim,look){
   HK=top>=5?.66:top>=4?.8:1;const HCX=FX+FW/2+DX/2;if(HK<1)s+=`<g transform="translate(${HCX} ${GY}) scale(${HK}) translate(${-HCX} ${-GY})">`;
   if(top>0)s+=`<ellipse cx="${FX+FW/2+DX/2}" cy="${fy(top-1)+FH*top/2-10}" rx="${FW/2+DX+40}" ry="${FH*top/2+60}" fill="url(#hHalo)"/>`;
   if(top>0)s+=`<ellipse cx="${FX+FW/2+DX/2}" cy="${GY+3}" rx="${FW/2+DX}" ry="9" fill="#2f7a45" opacity=".35"/><polygon points="${FX-4},${GY+1} ${FX-62},${GY+14} ${FX+FW-30},${GY+15} ${FX+FW+DX},${GY+4} ${FX+FW},${GY}" fill="#1d5a30" opacity=".22"/>`;
-  const paint=D?D.paintFilter(L):'';if(paint)s+=`<g filter="${paint}">`;
+  const paint=D?D.paintFilter(L):'';const dt=Math.max(0,Math.min(4,L.dt|0))*(full>0?1:0);
+  if(dt>=3)s+=`<defs><filter id="hOldF" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="${dt>=4?'.48 .4 .14 0 0 .4 .42 .14 0 0 .3 .32 .18 0 0 0 0 0 1 0':'.62 .3 .1 0 0 .3 .58 .1 0 0 .22 .26 .4 0 0 0 0 0 1 0'}"/></filter></defs><g filter="url(#hOldF)">`;
+  if(paint)s+=`<g filter="${paint}">`;
   for(let i=0;i<full;i++)s+=floorFull(i,anim&&i==full-1?'fl-new':'');
   if(paint)s+='</g>';
+  if(dt)s+=dirtWalls(full,dt);
+  if(dt>=3)s+='</g>';
   if(part>=0){s+=topSlab(part);s+=floorPart(part,frac)}
   if(withRoof&&full>0)s+=roof(full,anim?'fl-new':'');
   if(full>0)s+=[[FX+2,14],[FX+38,0],[FX+FW-38,0],[FX+FW-2,14]].filter(([x,w])=>true).map(([x])=>`<g><ellipse cx="${x}" cy="${GY+1}" rx="13" ry="8" fill="#2a8a4a"/><ellipse cx="${x-3}" cy="${GY-2}" rx="8" ry="5" fill="#3fbf6f"/><circle cx="${x+5}" cy="${GY-3}" r="1.6" fill="#fff"/></g>`).join('');
   if(hasGift('lanterns')&&full>0){const dx=FX+FW/2;s+=[dx-34,dx+34].map(x=>`<g><line x1="${x}" y1="${GY-56}" x2="${x}" y2="${GY-48}" stroke="#8a5a00" stroke-width="1.5"/><circle cx="${x}" cy="${GY-40}" r="11" fill="#ffe066" opacity=".45"/><rect x="${x-5}" y="${GY-48}" width="10" height="14" rx="3" fill="url(#hGold)" stroke="#8a5a00"/><rect x="${x-3}" y="${GY-45}" width="6" height="8" rx="2" fill="#fff6b0"/></g>`).join('')}
   if(hasGift('crown')&&withRoof&&full>0){const y=fy(full-1)-66-40,M=FX+FW/2;s+=`<g><circle cx="${M}" cy="${y+6}" r="22" fill="#ffe066" opacity=".35"/><path d="M${M-16} ${y+14} L${M-18} ${y-2} L${M-8} ${y+6} L${M} ${y-8} L${M+8} ${y+6} L${M+18} ${y-2} L${M+16} ${y+14}Z" fill="url(#hGold)" stroke="#9a6a00" stroke-width="1.5"/><circle cx="${M}" cy="${y+8}" r="2.6" fill="#e2504a"/><circle cx="${M-9}" cy="${y+10}" r="2" fill="#2f8fd0"/><circle cx="${M+9}" cy="${y+10}" r="2" fill="#3fbf6f"/></g>`}
   if(HK<1)s+='</g>';
+  if(dt)s+=trashSVG(dt);
   if(hasGift('flowers'))s+=[[FX-14,GY+2],[FX+10,GY+4],[FX+FW-6,GY+4],[FX+FW+DX-10,GY-2],[FX+FW+24,GY+2]].map(([x,y])=>`<g><ellipse cx="${x}" cy="${y}" rx="13" ry="8" fill="#2e9c55"/>${[[-6,-3,'#e2504a'],[1,-6,'#ff8ac2'],[7,-2,'#f2b632'],[-1,1,'#fff']].map(([a,b,c])=>`<circle cx="${x+a}" cy="${y+b}" r="2.8" fill="${c}"/>`).join('')}</g>`).join('');
   if(hasGift('fountain')){const x=0,y=0;s+=`<g transform="translate(50 ${GY+14}) scale(1.5)"><ellipse cx="${x}" cy="${y}" rx="20" ry="6" fill="#bfc9cf" stroke="#8b979e"/><ellipse cx="${x}" cy="${y-1}" rx="16" ry="4" fill="#7cc8ff"/><rect x="${x-2.5}" y="${y-22}" width="5" height="21" fill="#bfc9cf"/><ellipse cx="${x}" cy="${y-22}" rx="9" ry="3" fill="#bfc9cf"/><path d="M${x} ${y-24} q-10 -12 -14 4 M${x} ${y-24} q10 -12 14 4 M${x} ${y-24} v-10" stroke="#7cc8ff" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>`}
   if(D)s+=D.svg(L,'front',full,withRoof);
@@ -310,6 +315,27 @@ function houseSVG(full,part,frac,withRoof,anim,look){
   // معرّفات فريدة لكل رسمة: إذا تكرّرت ووقعت الأولى في شاشة مخفية تختفي الألوان من الباقي
   const k=++svgN;return (s+'</svg>').replace(/(id="|url\(#)(h[A-Z]\w*)/g,`$1$2_${k}`)}
 let svgN=0;
+/* 🧹 الوسخ على الجدران: غبار (١)، بقع وسيلان (٢)، شقوق وخيوط عنكبوت (٣)، والبيت يصير قديمًا (٣–٤) */
+function dirtWalls(full,dt){let s=`<g pointer-events="none">`;
+  for(let i=0;i<full;i++){const y=fy(i);
+    s+=`<rect x="${FX}" y="${y}" width="${FW}" height="${FH}" fill="#7a5a30" opacity="${.06+.06*dt}"/><polygon points="${FX+FW},${y} ${FX+FW+DX},${y+DY} ${FX+FW+DX},${y+FH+DY} ${FX+FW},${y+FH}" fill="#5e4220" opacity="${.08*dt}"/>`;
+    if(dt>=2){s+=[[.18,.35,16,9],[.7,.6,20,10],[.45,.8,14,7],[.86,.25,10,8]].slice(0,dt).map(([a,b,rx,ry])=>`<ellipse cx="${FX+FW*a}" cy="${y+FH*b}" rx="${rx}" ry="${ry}" fill="#6b4a22" opacity=".22"/>`).join('');
+      s+=[.22,.5,.78].map(a=>`<path d="M${FX+FW*a-3} ${y+44} q2 8 0 ${12+dt*2} q2 -6 4 0 q-1 -8 0 -${10+dt}" fill="#5e4220" opacity=".25"/>`).join('')}
+    if(dt>=3)s+=`<polyline points="${FX+20+i*13},${y+8} ${FX+26+i*13},${y+18} ${FX+21+i*13},${y+27} ${FX+29+i*13},${y+38}" fill="none" stroke="#3d2a12" stroke-width="1.2" opacity=".6"/><polyline points="${FX+FW-30},${y+FH-6} ${FX+FW-36},${y+FH-16} ${FX+FW-31},${y+FH-24}" fill="none" stroke="#3d2a12" stroke-width="1.1" opacity=".55"/>`}
+  if(dt>=3){const y=fy(full-1);s+=[[FX+2,y+2,1],[FX+FW-2,y+2,-1]].map(([x,yy,d])=>`<g stroke="#f4f4f4" stroke-width=".8" fill="none" opacity=".9">${[0,25,50,75].map(a=>{const r=a*Math.PI/180;return `<line x1="${x}" y1="${yy}" x2="${x+d*22*Math.cos(r)}" y2="${yy+22*Math.sin(r)}"/>`}).join('')}${[7,13,19].map(r=>`<path d="M${x+d*r} ${yy} Q${x+d*r*.8} ${yy+r*.5} ${x+d*r*.7} ${yy+r*.7} Q${x+d*r*.45} ${yy+r*.85} ${x} ${yy+r}"/>`).join('')}</g>`).join('')}
+  return s+'</g>'}
+/* 🗑️ النفايات أمام البيت: تكثر كلما زاد الوسخ */
+function trashSVG(dt){const G0=GY;
+  const bag=(x,y,c='#3a3f44')=>`<g><path d="M${x-9} ${y} Q${x-12} ${y-14} ${x-3} ${y-17} L${x+3} ${y-17} Q${x+12} ${y-14} ${x+9} ${y}Z" fill="${c}"/><path d="M${x-3} ${y-17} l-3 -5 M${x+3} ${y-17} l3 -5" stroke="${c}" stroke-width="2"/><path d="M${x-5} ${y-12} q3 2 1 7" stroke="#fff" stroke-width="1" fill="none" opacity=".3"/></g>`;
+  const can=(x,y,c)=>`<g transform="rotate(${x%2?80:-70} ${x} ${y-3})"><rect x="${x-3}" y="${y-9}" width="6" height="9" rx="1.5" fill="${c}"/><rect x="${x-3}" y="${y-9}" width="6" height="1.6" fill="#ccc"/></g>`;
+  const paper=(x,y)=>`<path d="M${x-5} ${y} l2 -6 l4 1 l3 -3 l2 5 l-3 3z" fill="#f5f5f0" stroke="#bbb" stroke-width=".7"/>`;
+  const leaf=(x,y,r)=>`<path d="M${x} ${y} q5 -6 10 0 q-5 4 -10 0z" fill="#a8742a" transform="rotate(${r} ${x} ${y})" opacity=".9"/>`;
+  const bottle=(x,y)=>`<g transform="rotate(-80 ${x} ${y})"><rect x="${x-2.5}" y="${y-12}" width="5" height="12" rx="2" fill="#4fae7a" opacity=".85"/><rect x="${x-1.2}" y="${y-15}" width="2.4" height="4" fill="#4fae7a"/></g>`;
+  const items=[bag(FX-36,G0+14),paper(FX+40,G0+12),leaf(FX+FW+10,G0+6,-30),leaf(FX-20,G0+8,20),can(FX+60,G0+16,'#e2504a'),paper(FX+FW+30,G0+14),
+    bag(FX+FW+44,G0+16,'#4a4f55'),can(FX-6,G0+18,'#2f8fd0'),bottle(FX+FW+18,G0+20),leaf(FX+52,G0+6,60),paper(FX-50,G0+20),bag(FX+FW+20,G0+10,'#2f3338')];
+  let s=`<g pointer-events="none">${items.slice(0,dt*3).join('')}`;
+  if(dt>=2)s+=`<g fill="#222">${[[FX-38,G0-6],[FX-30,G0-12],[FX+FW+46,G0-4]].slice(0,dt-1).map(([x,y],k)=>`<circle cx="${x}" cy="${y}" r="1.3"><animateTransform attributeName="transform" type="translate" values="0 0;${4-k*3} -3;-3 2;0 0" dur="${1.2+k*.3}s" repeatCount="indefinite"/></circle>`).join('')}</g>`;
+  return s+'</g>'}
 
 /* ---------- screen ---------- */
 const sec=document.createElement('section');sec.className='screen';sec.id='bayt';
@@ -318,7 +344,7 @@ document.querySelector('.app').appendChild(sec);
 const card=document.createElement('button');card.className='bookcard baytcard';card.id='openBayt';
 card.innerHTML=`<span class="cup">🏡</span><span><b>بيتي في الجنة</b><small id="baytLine"></small></span><span class="go">‹</span>`;
 $('#openContest').after(card);
-const updCard=()=>{$('#baytLine').textContent=bs.done>=LEVELS.length?`قصرك خمسة طوابق! أفضل نتيجة: ${ar(bs.best)} نقطة 👑`:bs.done?`بيتك الآن ${['','طابق واحد','طابقان','ثلاثة طوابق','أربعة طوابق'][bs.done]}، أكمل البناء!`:'ابنِ بيتك في الجنة وزيّنه، وسابق أصدقاءك 🏁'};
+const updCard=()=>{const dtc=window.Aamal&&Aamal.dirt?Aamal.dirt():0;if(dtc&&bs.done){$('#baytLine').textContent='🧹 بيتك اتّسخ! نظّفه بأعمالك الصالحة';return}$('#baytLine').textContent=bs.done>=LEVELS.length?`قصرك خمسة طوابق! أفضل نتيجة: ${ar(bs.best)} نقطة 👑`:bs.done?`بيتك الآن ${['','طابق واحد','طابقان','ثلاثة طوابق','أربعة طوابق'][bs.done]}، أكمل البناء!`:'ابنِ بيتك في الجنة وزيّنه، وسابق أصدقاءك 🏁'};
 updCard();updHome();
 card.onclick=()=>{sTap();menu();show('bayt')};
 $('#byBack').onclick=()=>{clearTimeout(autoT);if(G&&G.net){G.net.quit(G);return}if(G){stop();menu()}else{updCard();renderHome&&renderHome();show('home')}};
