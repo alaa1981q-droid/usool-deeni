@@ -25,6 +25,11 @@
   let room = null, roomRef = null, roomOff = null, loop = null, invOff = null, pinTimer = null;
 
   const now = () => Date.now() + off;
+  // 👑 حساب المدير (v8.4): اسمه مزخرف ويُعرف أنه المدير، وجواهره بلا حدود. admins/$uid يُضبط من لوحة Firebase فقط، والقواعد تمنع غيره من وضع adm.
+  window.isAdm = () => { try { return localStorage.getItem('usul5_adm') === '1'; } catch (e) { return false; } };
+  window.nameTag = (nick, adm) => adm ? `<span class="admn">👑 ${esc(nick)}</span> <span class="admb">مدير التطبيق</span>` : esc(nick);
+  { const st = document.createElement('style'); st.textContent = `.admn{font-weight:900;background:linear-gradient(90deg,#b9851a,#f2b632 40%,#e0731f 70%,#b9851a);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none}
+.admb{display:inline-block;font-size:11px;font-weight:800;color:#fff;background:linear-gradient(160deg,#1fa463,#0b5a32);border-radius:10px;padding:0 7px;line-height:1.7;vertical-align:middle;box-shadow:0 2px 0 #0a3d27;white-space:nowrap}`; document.head.appendChild(st); }
   const esc = (v) => String(v == null ? '' : v).replace(/[<>&"]/g, '');
   const week = () => Math.floor((now() - Date.UTC(2024, 0, 5)) / (7 * 864e5)); // يبدأ كل جمعة
   const body = () => $('#onBody');
@@ -59,6 +64,9 @@
       if (profile && profile.sx && window.Cups && !Cups.sex) Cups.setSex(profile.sx);
       if (profile) { startPresence(); db.ref('profiles/' + me).update({ seen: firebase.database.ServerValue.TIMESTAMP }).catch(() => {}); }
       try { ban = (await db.ref('bans/' + me).get()).val(); } catch (e) { ban = null; }
+      try { const a = (await db.ref('admins/' + me).get()).val() === true; localStorage.setItem('usul5_adm', a ? '1' : '');
+        if (profile && a && !profile.adm) { profile.adm = true; db.ref('profiles/' + me).update({ adm: true }).catch(() => {}); }
+        if (profile && !a && profile.adm) { delete profile.adm; db.ref('profiles/' + me + '/adm').remove().catch(() => {}); } } catch (e) {}
       return true;
     })();
     ready.catch(e => { lastErr = (e && (e.code || e.message)) || String(e); ready = null; try { if (db) db.goOffline(); } catch (x) {} });
@@ -175,7 +183,7 @@
 
   function hub() {
     leaveRoom(); setHead('🌐 العب أونلاين');
-    body().innerHTML = `<div class="me-card"><span class="av">${profile.av}</span><span class="who-n"><b>${esc(profile.nick)}</b><small>${profile.tt ? esc(profile.tt) + ' · ' : ''}🏆 ${ar(profile.wins || 0)} فوز · ${ar(profile.games || 0)} مباراة</small></span></div>
+    body().innerHTML = `<div class="me-card"><span class="av">${profile.av}</span><span class="who-n"><b>${nameTag(profile.nick, profile.adm)}</b><small>${profile.tt ? esc(profile.tt) + ' · ' : ''}🏆 ${ar(profile.wins || 0)} فوز · ${ar(profile.games || 0)} مباراة</small></span></div>
       <div class="modes">
         <button class="mode" id="oQuick"><span class="e">🔢</span><span><b>غرفة سريعة</b><small>لصديق بجانبك: رمز من ٤ أرقام.</small></span></button>
       </div>
@@ -196,7 +204,7 @@
       return { id, p: p.val() || { nick: '؟', av: '❔' }, on: !!pr.val() };
     }));
     rows.sort((a, b) => b.on - a.on);
-    body().innerHTML = `<div class="flist">${rows.map(r => `<div class="frow"><span class="av">${r.p.av}</span><span class="who-n"><b>${esc(r.p.nick)}</b><small>${r.on ? '🟢 متصل الآن' : '⚪ غير متصل'}</small></span>
+    body().innerHTML = `<div class="flist">${rows.map(r => `<div class="frow"><span class="av">${r.p.av}</span><span class="who-n"><b>${nameTag(r.p.nick, r.p.adm)}</b><small>${r.on ? '🟢 متصل الآن' : '⚪ غير متصل'}</small></span>
       <button class="mini go" data-ch="${r.id}" ${r.on ? '' : 'disabled'}>⚔️ تحدَّ</button></div>`).join('')}</div>
       <button class="btn sec" id="backHub" style="margin-top:12px">رجوع</button>`;
     body().querySelectorAll('[data-ch]').forEach(b => b.onclick = () => challenge(b.dataset.ch));
@@ -436,7 +444,7 @@
     const key = r => Math.max(r.xp || 0, (r.wins || 0) * 10);
     rows.sort((x, y) => (key(y) - key(x)) || ((y.wins || 0) - (x.wins || 0)) || ((y.pts || 0) - (x.pts || 0))); rows.splice(30);
     const medal = i => ['🥇', '🥈', '🥉'][i] || ar(i + 1);
-    body().innerHTML = rows.length ? `<p class="tip">أبطال هذا الأسبوع: بالأعمال الصالحة والتعلّم ✨ والانتصارات 🏆 · يبدأ من جديد كل جمعة</p><div class="flist">${rows.map((r, i) => `<div class="frow ${r.id === me ? 'mine' : ''}"><span class="rk">${medal(i)}</span><span class="av">${esc(r.av)}</span><span class="who-n"><b>${esc(r.nick)}</b><small>✨ ${ar(r.xp || 0)} · ${ar(r.pts || 0)} نقطة</small></span><span class="wn">🏆 ${ar(r.wins || 0)}</span></div>`).join('')}</div>
+    body().innerHTML = rows.length ? `<p class="tip">أبطال هذا الأسبوع: بالأعمال الصالحة والتعلّم ✨ والانتصارات 🏆 · يبدأ من جديد كل جمعة</p><div class="flist">${rows.map((r, i) => `<div class="frow ${r.id === me ? 'mine' : ''}"><span class="rk">${medal(i)}</span><span class="av">${esc(r.av)}</span><span class="who-n"><b>${nameTag(r.nick, r.adm)}</b><small>✨ ${ar(r.xp || 0)} · ${ar(r.pts || 0)} نقطة</small></span><span class="wn">🏆 ${ar(r.wins || 0)}</span></div>`).join('')}</div>
       <button class="btn sec" id="backHub" style="margin-top:12px">رجوع</button>`
       : `<div class="handoff"><div class="big">🏅</div><h2>اللوحة فارغة هذا الأسبوع</h2><p>كن أول بطل! العب تحدّيًا واربح.</p><button class="btn sec" id="backHub" style="flex:none;min-width:200px">رجوع</button></div>`;
     $('#backHub').onclick = hub;

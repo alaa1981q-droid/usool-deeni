@@ -8,7 +8,12 @@ let js={j:0,own:{},on:{},paint:'sand',chest:'',likesSeen:-1,gave:{},liked:{},see
 try{const s=JSON.parse(localStorage.getItem(JKEY)||'null');if(s&&typeof s.j=='number')js=Object.assign(js,s)}catch(e){}
 // من اختار لونًا قبل v6.5 يبقى لونه كما هو
 if(js.pick==null&&js.paint&&js.paint!='sand')js.pick=1;if(js.wpick==null&&js.wall&&js.wall!='cream')js.wpick=1;
-const jsave=()=>{try{localStorage.setItem(JKEY,JSON.stringify(js))}catch(e){}};
+// 👑 المدير: جواهر بلا حدود (يُحفظ رصيده الحقيقي في jReal ويُعاد إذا لم يعد مديرًا)
+const ADM=()=>!!(window.isAdm&&isAdm());
+function topUp(){if(ADM()){if(js.jReal==null)js.jReal=js.j;if(js.j<900000)js.j=999999}else if(js.jReal!=null){js.j=js.jReal;delete js.jReal}}
+const JV=()=>ADM()?'∞':ar(js.j);
+setTimeout(()=>{topUp();try{localStorage.setItem(JKEY,JSON.stringify(js))}catch(e){}try{updJ()}catch(e){}},0);
+const jsave=()=>{topUp();try{localStorage.setItem(JKEY,JSON.stringify(js))}catch(e){}};
 const today=()=>new Date().toDateString();
 const O=()=>window.OnlineAPI;
 const boy=()=>!window.Cups||Cups.sex!='g';
@@ -176,17 +181,17 @@ const Deco={
     if(layer=='back'||layer=='front')s+=gardenSVG(L.g,layer);return s},
   paintFilter(L){const p=PT[L.p];if(!p||!p.f)return '';return `url(#pf_${p.id})`},
   addJ(n){js.j+=Math.max(0,Math.round(n));jsave();updJ()},
-  takeJ(n){js.j=Math.max(0,js.j-Math.max(0,Math.round(n)));jsave();updJ()},get jewels(){return js.j},
-  floorJewels(score){const n=Math.max(5,Math.round(score/10));Deco.addJ(n);return `<div class="cupbox win" style="border-color:#9fd3f0;background:linear-gradient(160deg,#eaf6ff,#fff);color:#1d4e9e"><b>💎 +${ar(n)}</b>جواهر لتزيين بيتك! عندك الآن ${ar(js.j)} 💎</div>`},
+  takeJ(n){if(ADM()){updJ();return}js.j=Math.max(0,js.j-Math.max(0,Math.round(n)));jsave();updJ()},get jewels(){return js.j},
+  floorJewels(score){const n=Math.max(5,Math.round(score/10));Deco.addJ(n);return `<div class="cupbox win" style="border-color:#9fd3f0;background:linear-gradient(160deg,#eaf6ff,#fff);color:#1d4e9e"><b>💎 +${ar(n)}</b>جواهر لتزيين بيتك! عندك الآن ${JV()} 💎</div>`},
   // ماسات لكل سباق أو تحدٍّ (contest / online / nafsak)، بحدّ يومي حتى لا تُجمع بلا تعلّم
   challenge(n,src){const d=today();if(js.cday!=d){js.cday=d;js.cnt={}}js.cnt=js.cnt||{};const c=js.cnt[src]||0;
     if(c>=8||n<=0){jsave();return ''}js.cnt[src]=c+1;Deco.addJ(n);
-    return `<div class="cupbox win" style="border-color:#9fd3f0;background:linear-gradient(160deg,#eaf6ff,#fff);color:#1d4e9e"><b>💎 +${ar(n)}</b>ماسات لبيتك في الجنة! عندك ${ar(js.j)} 💎</div>`},
+    return `<div class="cupbox win" style="border-color:#9fd3f0;background:linear-gradient(160deg,#eaf6ff,#fff);color:#1d4e9e"><b>💎 +${ar(n)}</b>ماسات لبيتك في الجنة! عندك ${JV()} 💎</div>`},
   setBack:f=>{backTo=f},
   // جائزة عمل صالح: تُضاف للبيت وتظهر فورًا. ترجع true إذا كانت جديدة
   grant(id){if(!IT[id]||js.own[id])return false;js.own[id]=1;js.on[id]=1;jsave();publishSoon();return true},
   owns:id=>!!js.own[id],item:id=>IT[id],deeds:()=>ITEMS.filter(i=>i.deed),
-  menuHook,get j(){return js.j},pub:()=>publishSoon(),cleanLook:h=>clean(h)
+  menuHook,get j(){return ADM()?999999:js.j},pub:()=>publishSoon(),cleanLook:h=>clean(h)
 };
 window.Deco=Deco;
 // فلاتر الألوان تُضاف مرة واحدة في الصفحة
@@ -272,7 +277,7 @@ document.querySelector('.app').appendChild(sec);
 let backTo=null;
 $('#jBack').onclick=()=>{const f=backTo;if(f){backTo=null;f()}else toBayt()};
 function toBayt(){show('bayt');Bayt.menu()}
-function updJ(){const e=$('#jJ');if(e)e.textContent=`💎 ${ar(js.j)}`;const m=$('#jMenuJ');if(m)m.textContent=`💎 ${ar(js.j)}`}
+function updJ(){const e=$('#jJ');if(e)e.textContent=`💎 ${JV()}`;const m=$('#jMenuJ');if(m)m.textContent=`💎 ${JV()}`}
 function sparkle(){try{Bayt.sStar()}catch(e){}}
 function hearts(x,y,n=5){for(let k=0;k<n;k++){const d=document.createElement('div');d.className='jheart';d.textContent=['❤️','💖','💗'][k%3];
   d.style.left=(x-20+Math.random()*40)+'px';d.style.top=(y-10)+'px';d.style.animationDelay=k*.12+'s';document.body.appendChild(d);setTimeout(()=>d.remove(),1700)}}
@@ -348,7 +353,7 @@ function menuHook(B){
     <button class="jbtn in" id="jIn"><span>🛋️</span>ادخل بيتك</button>
     <button class="jbtn fr" id="jFr"><span>👥</span>بيوت أصدقائي</button>
     <button class="jbtn ch ${chestReady?'ready':''}" id="jCh">${chestReady?'<i class="dot">!</i>':''}<span>🎁</span>صندوق اليوم</button></div>
-    <div style="text-align:center;margin-top:8px"><span class="jj" id="jMenuJ">💎 ${ar(js.j)}</span></div>${goal()}<div id="jVis"></div>`;
+    <div style="text-align:center;margin-top:8px"><span class="jj" id="jMenuJ">💎 ${JV()}</span></div>${goal()}<div id="jVis"></div>`;
   if(rk)rk.insertAdjacentHTML('afterend',html);else B.insertAdjacentHTML('afterbegin',html);
   // 🧹 بيت متّسخ: رسالة تشجّع الطفل على تنظيفه بالأعمال الصالحة
   const bh=B.querySelector('.bhouse');const dt=window.Aamal&&Aamal.dirt?Aamal.dirt():0;
@@ -425,7 +430,7 @@ function tapItem(i){
   if(i.cat=='inside'&&i.r>=Bayt.done){modal(`<div style="font-size:60px">🔒</div><h3 style="margin:4px 0">${ROOMS[i.r][0]} مقفولة</h3><p>${boy()?'ابنِ':'ابني'} ${Bayt.LEVELS[i.r].floor} أولًا</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`);return}
   if(i.need&&!js.own[i.need]){modal(`<div style="font-size:60px">${i.e}</div><h3 style="margin:4px 0">${i.name}</h3><p>${boy()?'اشترِ':'اشتري'} «${IT[i.need].name}» أولًا ثم ${boy()?'علّق':'علّقي'} عليها ${i.name} 😊</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`);return}
   if(js.j<i.price){tone(200,.15,'square',.08);modal(`<div style="font-size:60px">${i.e}</div><h3 style="margin:4px 0">${i.name}</h3><p>تحتاج ${ar(i.price-js.j)} 💎 أخرى.<br>${boy()?'ابنِ':'ابني'} طابقًا في السباق لتربح جواهر كثيرة! 🏗️</p><div class="nav"><button class="btn gold" id="jGoRace">إلى السباق 🏁</button><button class="btn sec" data-close>لاحقًا</button></div>`,()=>{$('#jGoRace').onclick=()=>{closeModal();toBayt()}});return}
-  modal(`<div style="font-size:64px">${i.e}</div><h3 style="margin:4px 0">${i.name}</h3><p>السعر: <b>💎 ${ar(i.price)}</b> · عندك ${ar(js.j)}</p><div class="nav"><button class="btn sec" data-close>لا</button><button class="btn gold" id="jBuy">اشترِ وزيّن 🏡</button></div>`,()=>{
+  modal(`<div style="font-size:64px">${i.e}</div><h3 style="margin:4px 0">${i.name}</h3><p>السعر: <b>💎 ${ar(i.price)}</b> · عندك ${JV()}</p><div class="nav"><button class="btn sec" data-close>لا</button><button class="btn gold" id="jBuy">اشترِ وزيّن 🏡</button></div>`,()=>{
     $('#jBuy').onclick=()=>{closeModal();js.j-=i.price;js.own[i.id]=1;js.on[i.id]=1;jsave();updJ();sparkle();if(typeof confetti=='function')confetti();drawShop();popAfter(`[data-i="${i.id}"]`);publishSoon()}})}
 function tapPaint(p){const k='p_'+p.id;
   if(p.price==0||p.id==SEXP()||js.own[k]){js.paint=p.id;js.pick=1;jsave();Bayt.sTap();drawShop();publishSoon();return}
@@ -457,7 +462,7 @@ async function friends(){show('jannah');backTo=null;$('#jTitle').textContent='�
     return {id,h:h.val(),p:p.val()||{nick:'؟',av:'❔'}}}catch(e){return {id,h:null,p:{nick:'؟',av:'❔'}}}}));
   rows.sort((a,b)=>(b.h?1:0)-(a.h?1:0));
   B.innerHTML=`${codeBox}<div class="jfr">${rows.map(r=>{const L=clean(r.h);
-    return `<button class="jfc" data-f="${r.id}"><div class="bhouse">${Bayt.houseSVG(L.f,-1,0,true,false,L)}</div><b>${esc(r.p.av)} ${esc(r.p.nick)}</b>${lookItems(L).includes('d_mosque')?'<small class="hasmsq">🕌 عنده مسجد</small>':''}<small>${r.h?`${['لم يبنِ بعد','طابق واحد','طابقان','ثلاثة طوابق','أربعة طوابق','خمسة طوابق'][L.f]}${js.gave[r.id]==today()?' · 🎁 أهديتَه اليوم':''}`:'لم يفتح بيته بعد'}</small></button>`}).join('')}</div>
+    return `<button class="jfc" data-f="${r.id}"><div class="bhouse">${Bayt.houseSVG(L.f,-1,0,true,false,L)}</div><b>${esc(r.p.av)} ${nameTag(r.p.nick,r.p.adm===true)}</b>${lookItems(L).includes('d_mosque')?'<small class="hasmsq">🕌 عنده مسجد</small>':''}<small>${r.h?`${['لم يبنِ بعد','طابق واحد','طابقان','ثلاثة طوابق','أربعة طوابق','خمسة طوابق'][L.f]}${js.gave[r.id]==today()?' · 🎁 أهديتَه اليوم':''}`:'لم يفتح بيته بعد'}</small></button>`}).join('')}</div>
     <div class="nav" style="margin-top:12px"><button class="btn sec" id="jAdd">➕ أضف صديقًا</button></div>`;
   B.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{const r=rows.find(x=>x.id==b.dataset.f);Bayt.sTap();visit(r)});
   $('#jAdd').onclick=()=>{window.onlineReturn=friends;A.openAdd()}}
@@ -469,14 +474,16 @@ async function visit(r){const A=O(),B=$('#jBody'),L=clean(r.h),day=today();backT
   let likes=0;try{const v=(await A.db.ref('hlikes/'+r.id).get()).val()||{};likes=Object.values(v).reduce((s,x)=>s+((x&&x.n)|0),0)}catch(e){}
   const rk=Bayt.rankOf(L.c);
   B.innerHTML=`<div class="jvisit"><div class="bhouse">${Bayt.houseSVG(L.f,-1,0,true,true,L)}</div>
-    <div class="who"><span class="av">${esc(r.p.av)}</span><span style="flex:1"><b>${esc(r.p.nick)}</b><small>${lookItems(L).includes('d_mosque')?'🕌 عنده مسجد · ':''}${rk.icon} ${rk.name} · ❤️ <span id="jLk">${ar(likes)}</span> إعجاب</small></span></div>
+    <div class="who"><span class="av">${esc(r.p.av)}</span><span style="flex:1"><b>${nameTag(r.p.nick,r.p.adm===true)}</b><small>${lookItems(L).includes('d_mosque')?'🕌 عنده مسجد · ':''}${rk.icon} ${rk.name} · ❤️ <span id="jLk">${ar(likes)}</span> إعجاب</small></span></div>
     <div class="jacts"><button class="btn" id="jLike" style="background:#e2504a" ${js.liked[r.id]==day?'disabled':''}>${js.liked[r.id]==day?'❤️ أعجبك اليوم':'❤️ أعجبني!'}</button>
     <button class="btn gold" id="jGift" ${js.gave[r.id]==day?'disabled':''}>${js.gave[r.id]==day?'🎁 أهديتَه اليوم':'🎁 أهدِه هدية'}</button></div>
+    ${ADM()?`<div class="nav"><button class="btn" id="jAdmG" style="background:linear-gradient(160deg,#f6b33d,#e0731f);box-shadow:0 5px 0 #a8551a">👑 💎 أهدِه جواهر من المدير</button></div>`:''}
     <div class="nav"><button class="btn" id="jInF" style="background:linear-gradient(160deg,#ffb36b,#c96a2a)">🛋️ ادخل بيته</button></div>
     <p class="bcap">${boy()?'تستطيع':'تستطيعين'} أن ${boy()?'تعجب':'تعجبي'} ببيت كل صديق، و${boy()?'تهديه':'تهديه'} هديةً واحدة كل يوم 🤍</p>
     <div class="nav"><button class="btn sec" id="jBackFr">بيوت أصدقائي</button></div></div>`;
   $('#jBackFr').onclick=friends;
   $('#jInF').onclick=()=>{Bayt.sTap();inside(L,r.p.nick);backTo=()=>visit(r)};
+  const ag=$('#jAdmG');if(ag)ag.onclick=()=>{window.Idara&&Idara.gift(r.id,r.p.nick,r.p.av)};
   $('#jLike').onclick=async e=>{const b=e.currentTarget;b.disabled=true;
     try{const ref=A.db.ref(`hlikes/${r.id}/${A.me}`);const cur=(await ref.get()).val();await ref.set({n:((cur&&cur.n)|0)+1,d:day});
       js.liked[r.id]=day;jsave();likes++;$('#jLk').textContent=ar(likes);b.textContent='❤️ أعجبك اليوم';

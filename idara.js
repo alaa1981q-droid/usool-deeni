@@ -144,7 +144,7 @@ async function openAdmin(){show('idara');body().innerHTML=`<div class="handoff">
       <button class="btn sec" id="idCp" style="flex:none;width:100%">📋 نسخ المعرّف</button></div>`;
     $('#idCp').onclick=()=>{try{navigator.clipboard.writeText(API.me).then(()=>API.toast('نُسخ ✓'))}catch(e){API.toast(API.me)}};return}
   panel()}
-const JOPT=[0,10,25,50,100,200].map(n=>`<option value="${n}">${n?`💎 ${ar(n)} جوهرة`:'بلا جواهر'}</option>`).join('');
+const JOPT=[0,10,25,50,100,200,500,1000].map(n=>`<option value="${n}">${n?`💎 ${ar(n)} جوهرة`:'بلا جواهر'}</option>`).join('');
 let all=null,heroes=null,tab='all',q='';
 const key=r=>Math.max(r.xp|0,(r.wins|0)*10);
 async function loadKids(API){
@@ -352,5 +352,5 @@ async function stats(API){const el=$('#idStats');if(!el)return;const L=all||[],t
     <p class="tip" style="margin:6px 0 0">👆 اضغط على أي مربع لترى أسماء أصحابه</p>`;
   el.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{const f=b.dataset.f;
     if(f=='max'){if(mx.id)kidCard(mx.id);return}openKids(f)})}
-window.Idara={open:openAdmin,inbox,dayNight};
+window.Idara={gift:(id,n,a)=>giftTo(id,n,a),open:openAdmin,inbox,dayNight};
 })();

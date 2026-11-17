@@ -195,7 +195,7 @@ try{const c=J('usul5_social_v1');fcache=c.f||null;hcache=c.h||null}catch(e){}
 function drawHome(){const s=snap(),ln=lvName(s.L),t=shownTitle(s),f=(s.x-need(s.L))/(need(s.L+1)-need(s.L));
   const meds=MEDALS.filter(m=>s.tiers[m.id]).sort((a,b)=>s.tiers[b.id]-s.tiers[a.id]).slice(0,3).map(m=>TIERS[s.tiers[m.id]-1].e+m.e).join(' ');
   home.innerHTML=`<button class="hpro" id="hProf"><span class="av">${esc(myAv())}<span class="lv">${ar(s.L)}</span></span>
-    <span class="nm"><b>${esc(myName())}</b><small>${ln[1]} ${ln[2]} · المستوى ${ar(s.L)}${t?` · ${t.e} ${t.n}`:''}</small><div class="xpbar"><i style="width:${Math.round(f*100)}%"></i></div></span>
+    <span class="nm"><b>${nameTag(myName(),isAdm())}</b><small>${ln[1]} ${ln[2]} · المستوى ${ar(s.L)}${t?` · ${t.e} ${t.n}`:''}</small><div class="xpbar"><i style="width:${Math.round(f*100)}%"></i></div></span>
     <span class="md">${meds||'🏅'}</span></button>
    <button class="hfbtn" id="hFrBtn"><span class="e">👥</span><span class="nm"><b>أصدقائي</b><small id="hFrSum">${frSum()}</small></span><span class="go">‹</span></button>
    <button class="hfbtn hhbtn" id="hHeBtn"><span class="e">🏅</span><span class="nm"><b>أبطال هذا الأسبوع</b><small id="hHeSum">اضغط لترى الأبطال</small></span><span class="go">‹</span></button>`;
@@ -223,7 +223,7 @@ function drawFriends(){const prof=O()&&O().profile,el=$('#aqBody');
   el.innerHTML=`<button class="btn gold" id="frAdd" style="flex:none;width:100%">➕ أضف صديقًا</button>
     ${code?`<div class="code-card" style="margin-top:10px"><small>رمزك — ${B('أعطه','أعطيه')} لصديقك ليضيفك</small><b dir="ltr">${esc(code)}</b></div>`:''}
     <div class="flist" style="margin-top:6px">${!fcache?`<p class="hnote">${navigator.onLine?'<span class="spin">⏳</span> جارٍ تحميل أصدقائك…':'📡 لا يوجد إنترنت الآن'}</p>`
-      :fcache.length?fcache.map(r=>`<button class="frow" data-fr="${esc(r.id)}" style="width:100%;text-align:right;color:inherit"><span class="av">${esc(r.av)}</span><span class="who-n"><b>${esc(r.nick)}</b><small>${r.on?'🟢 متصل الآن':'⚪ غير متصل'}${r.lv?` · ⭐ المستوى ${ar(r.lv)}`:''}${r.tt?' · '+esc(r.tt):''}</small></span><span class="go" style="color:var(--gold);font-size:22px">‹</span></button>`).join('')
+      :fcache.length?fcache.map(r=>`<button class="frow" data-fr="${esc(r.id)}" style="width:100%;text-align:right;color:inherit"><span class="av">${esc(r.av)}</span><span class="who-n"><b>${nameTag(r.nick,r.adm)}</b><small>${r.on?'🟢 متصل الآن':'⚪ غير متصل'}${r.lv?` · ⭐ المستوى ${ar(r.lv)}`:''}${r.tt?' · '+esc(r.tt):''}</small></span><span class="go" style="color:var(--gold);font-size:22px">‹</span></button>`).join('')
       :`<p class="hnote">لا أصدقاء بعد 🤝 ${B('اضغط','اضغطي')} «أضف صديقًا» ${B('واكتب','واكتبي')} رمز صديقك.</p>`}</div>`;
   $('#frAdd').onclick=()=>{window.onlineReturn=openFriends;O().openAdd()};
   el.querySelectorAll('[data-fr]').forEach(b=>b.onclick=()=>friendCard(b.dataset.fr))}
@@ -231,17 +231,17 @@ const medal=i=>['🥇','🥈','🥉'][i]||ar(i+1);
 function heroesHTML(){if(!hcache)return `<p class="hnote">${state.online?'⏳':'العب وتعلّم واعمل الخير لتصير من أبطال الأسبوع! 🌟'}</p>`;
   if(!hcache.length)return `<p class="hnote">لا أبطال بعد هذا الأسبوع. ${B('كن','كوني')} الأول! 🌟</p>`;
   const me=O()&&O().me;
-  return `<div class="hher">${hcache.slice(0,30).map((r,i)=>`<div class="${r.id==me?'me':''}"><span class="rk">${medal(i)}</span><span class="av">${esc(r.av)}</span><b>${esc(r.nick)}${r.lv||r.tt?`<small style="display:block;color:#8a5a00;font-size:11.5px">${r.lv?`⭐${ar(r.lv)} `:''}${esc(r.tt||'')}</small>`:''}</b><small>${r.xp?`✨ ${ar(r.xp)}`:''}${r.wins?` 🏆 ${ar(r.wins)}`:''}</small></div>`).join('')}</div>
+  return `<div class="hher">${hcache.slice(0,30).map((r,i)=>`<div class="${r.id==me?'me':''}"><span class="rk">${medal(i)}</span><span class="av">${esc(r.av)}</span><b>${nameTag(r.nick,r.adm)}${r.lv||r.tt?`<small style="display:block;color:#8a5a00;font-size:11.5px">${r.lv?`⭐${ar(r.lv)} `:''}${esc(r.tt||'')}</small>`:''}</b><small>${r.xp?`✨ ${ar(r.xp)}`:''}${r.wins?` 🏆 ${ar(r.wins)}`:''}</small></div>`).join('')}</div>
    <p class="hnote">الترتيب بالأعمال الصالحة والتعلّم والانتصارات هذا الأسبوع · يبدأ من جديد كل جمعة</p>`}
 async function loadSocial(force){if(loading||!navigator.onLine||!O()||!state.online)return;if(!force&&Date.now()-lastLoad<60000&&fcache)return;
   loading=true;lastLoad=Date.now();
   try{await O().init();const API=O();if(!API.profile)return;publish();
     const ids=await API.friendIds();
     const rows=await Promise.all(ids.slice(0,30).map(async id=>{try{const [p,pr]=await Promise.all([API.db.ref('profiles/'+id).get(),API.db.ref('presence/'+id).get()]);
-      const v=p.val()||{};return {id,nick:v.nick||'؟',av:v.av||'❔',lv:v.lv|0,tt:v.tt?String(v.tt).slice(0,30):'',on:!!pr.val()}}catch(e){return null}}));
+      const v=p.val()||{};return {id,nick:v.nick||'؟',av:v.av||'❔',lv:v.lv|0,tt:v.tt?String(v.tt).slice(0,30):'',on:!!pr.val(),adm:v.adm===true}}catch(e){return null}}));
     fcache=rows.filter(Boolean).sort((a,b)=>(b.on-a.on)||(b.lv-a.lv));
     const s=(await API.db.ref('leader/'+API.week()).get()).val()||{};
-    hcache=Object.entries(s).map(([id,v])=>({id,nick:v.nick||'؟',av:v.av||'❔',xp:v.xp|0,wins:v.wins|0,lv:v.lv|0,tt:typeof v.tt=='string'?v.tt.slice(0,30):''})).sort((a,b)=>(Math.max(b.xp,b.wins*10)-Math.max(a.xp,a.wins*10))).slice(0,30);
+    hcache=Object.entries(s).map(([id,v])=>({id,adm:v.adm===true,nick:v.nick||'؟',av:v.av||'❔',xp:v.xp|0,wins:v.wins|0,lv:v.lv|0,tt:typeof v.tt=='string'?v.tt.slice(0,30):''})).sort((a,b)=>(Math.max(b.xp,b.wins*10)-Math.max(a.xp,a.wins*10))).slice(0,30);
     try{localStorage.setItem('usul5_social_v1',JSON.stringify({f:fcache,h:hcache}))}catch(e){}
     if($('#home').classList.contains('on')){const a=$('#hFrSum');if(a)a.textContent=frSum();drawHeroes()}
     if(frOpen&&$('#alqab').classList.contains('on')&&$('#aqTitle').textContent=='👥 أصدقائي')drawFriends();
@@ -250,11 +250,12 @@ async function loadSocial(force){if(loading||!navigator.onLine||!O()||!state.onl
 async function friendCard(id){const r=(fcache||[]).find(x=>x.id==id);if(!r)return;const API=O();
   let p={};try{p=(await API.db.ref('profiles/'+id).get()).val()||{}}catch(e){}
   const md=String(p.md||'').split(',').filter(Boolean).map(x=>{const [k,t]=x.split(':');const m=MEDALS.find(m=>m.id==k);return m&&t>0?`<span title="${m.n}">${TIERS[t-1].e}${m.e}</span>`:''}).join(' ');
-  modal(`<div style="font-size:60px;line-height:1.2">${esc(p.av||r.av)}</div><h3 style="margin:2px 0">${esc(p.nick||r.nick)}</h3>
+  modal(`<div style="font-size:60px;line-height:1.2">${esc(p.av||r.av)}</div><h3 style="margin:2px 0">${nameTag(p.nick||r.nick,p.adm===true)}</h3>
     <p style="margin:2px 0">${p.lv?`<span class="aqlv">⭐ المستوى ${ar(p.lv)}</span>`:''} ${p.tt?`<span class="aqtt">${esc(p.tt)}</span>`:''}</p>
     ${md?`<p style="font-size:22px;margin:6px 0">${md}</p>`:''}<p style="margin:2px 0;color:var(--muted);font-size:14px">${r.on?'🟢 متصل الآن':'⚪ غير متصل'} · 🏆 ${ar(p.wins||0)} فوز</p>
-    <div class="nav"><button class="btn gold" id="fcCh" ${r.on?'':'disabled'}>⚔️ تحدَّه</button><button class="btn" id="fcHouse" style="background:#2f6fd0;box-shadow:0 5px 0 #1d4e9e">🏡 بيته</button></div><div class="nav"><button class="btn sec" data-close>رجوع</button></div>`,()=>{
+    <div class="nav"><button class="btn gold" id="fcCh" ${r.on?'':'disabled'}>⚔️ تحدَّه</button><button class="btn" id="fcHouse" style="background:#2f6fd0;box-shadow:0 5px 0 #1d4e9e">🏡 بيته</button></div>${isAdm()?`<div class="nav"><button class="btn" id="fcGift" style="background:linear-gradient(160deg,#f6b33d,#e0731f);box-shadow:0 5px 0 #a8551a">👑 💎 أهدِه جواهر من المدير</button></div>`:''}<div class="nav"><button class="btn sec" data-close>رجوع</button></div>`,()=>{
     $('#fcCh').onclick=()=>{closeModal();API.challenge(id)};
+    const fg=$('#fcGift');if(fg)fg.onclick=()=>{closeModal();window.Idara&&Idara.gift(id,p.nick||r.nick,p.av||r.av)};
     $('#fcHouse').onclick=()=>{closeModal();$('#openBayt')&&$('#openBayt').click();setTimeout(()=>{const b=$('#jFr');b&&b.click()},150)}})}
 
 /* ---------- نشر المستوى والأوسمة للأصدقاء + نقاط الأسبوع ---------- */
@@ -267,9 +268,9 @@ function publish(){const API=O();if(!API||!API.profile||!API.db)return;const s=s
   const c=s.c,sm={st:c.stages|0,sr:c.stars|0,hz:c.hifz|0,pr:c.pray|0,sl:c.sal|0,ts:c.tas|0,wd:c.wird|0,ak:c.akhlaq|0,fq:c.fiqh|0,cu:c.cups|0,fl:c.floors|0,xp:s.x|0,
     j:window.Deco?Deco.j|0:0,dt:window.Aamal&&Aamal.dirt?Aamal.dirt():0,u:window.Binaa?Binaa.code():'',mq:window.Deco&&Deco.owns('d_mosque')?1:0,ttl:s.titles.length};
   const key=[s.L,t&&t.id,md,wx,API.profile.nick,API.profile.av,JSON.stringify(sm)].join('|');if(key==pubKey)return;pubKey=key;
-  const tt=t?`${t.e} ${t.n}`:'';Object.assign(API.profile,{lv:s.L,tt,md,sm});
+  const tt=isAdm()?'👑 مدير جنّتي الصغيرة':t?`${t.e} ${t.n}`:'';Object.assign(API.profile,{lv:s.L,tt,md,sm});
   API.db.ref('profiles/'+API.me).update({lv:s.L,tt,md,sm}).catch(()=>{});
-  if(wx>0)API.db.ref(`leader/${w}/${API.me}`).update({nick:API.profile.nick,av:API.profile.av,xp:wx,lv:s.L,tt}).catch(()=>{})}
+  if(wx>0)API.db.ref(`leader/${w}/${API.me}`).update(Object.assign({nick:API.profile.nick,av:API.profile.av,xp:wx,lv:s.L,tt},isAdm()?{adm:true}:{})).catch(()=>{})}
 
 /* ---------- الاحتفال: ارتفعت درجتك / وسام جديد / لقب جديد / جائزة للبيت ---------- */
 let soonT=0,pending=false;
@@ -321,7 +322,7 @@ const stopVc=()=>{if(vc){vc.stop();vc=null}};
 $('#aqBack').onclick=()=>{stopVc();if(aqBack){const f=aqBack;aqBack=null;f()}else goHome()};
 function openProfile(){stopVc();aqBack=null;show('alqab');$('#aqTitle').textContent='🏅 ملفّي';const s=snap(),c=s.c,ln=lvName(s.L),t=shownTitle(s),f=(s.x-need(s.L))/(need(s.L+1)-need(s.L));
   const prof=O()&&O().profile;
-  $('#aqBody').innerHTML=`<div class="aqhead"><div class="av">${esc(myAv())}</div><h2>${esc(myName())}</h2>
+  $('#aqBody').innerHTML=`<div class="aqhead"><div class="av">${esc(myAv())}</div><h2>${nameTag(myName(),isAdm())}</h2>
     <span class="aqlv">${ln[1]} المستوى ${ar(s.L)} · ${ln[2]}</span><br>${t?`<span class="aqtt">${t.e} ${t.n}</span>`:''}
     <div class="xpbar" style="margin:8px 10px 2px;height:12px"><i style="width:${Math.round(f*100)}%"></i></div>
     <small style="color:var(--muted)">✨ ${ar(s.x)} نقطة · باقي ${ar(need(s.L+1)-s.x)} للمستوى ${ar(s.L+1)}</small>
