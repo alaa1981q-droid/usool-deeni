@@ -220,7 +220,8 @@ const Deco={
   // جائزة عمل صالح: تُضاف للبيت وتظهر فورًا. ترجع true إذا كانت جديدة
   grant(id){if(!IT[id]||js.own[id])return false;js.own[id]=1;js.on[id]=1;jsave();publishSoon();return true},
   owns:id=>!!js.own[id],item:id=>IT[id],deeds:()=>ITEMS.filter(i=>i.deed),
-  menuHook,get j(){return ADM()?999999:js.j},pub:()=>publishSoon(),cleanLook:h=>clean(h)
+  menuHook,get j(){return ADM()?999999:js.j},pub:()=>publishSoon(),cleanLook:h=>clean(h),
+  visit:(r,back)=>{show('jannah');updJ();visit(r);if(back)backTo=back}
 };
 window.Deco=Deco;
 // فلاتر الألوان تُضاف مرة واحدة في الصفحة
@@ -473,7 +474,7 @@ const ready=()=>O()&&O().db&&O().me&&O().profile;
 let pubT=0;
 function publishSoon(){clearTimeout(pubT);pubT=setTimeout(publish,1200)}
 function publish(){if(!ready())return;const A=O(),L=Deco.myLook();
-  A.db.ref('houses/'+A.me).set({f:Bayt.done,c:Bayt.cups,p:L.p,w:L.w,i:L.i,g:L.g||'',u:L.u||'',n:A.profile.nick,a:A.profile.av,t:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{})}
+  A.db.ref('houses/'+A.me).set({f:Bayt.done,c:Bayt.cups,p:L.p,w:L.w,i:L.i,g:L.g||'',u:L.u||'',m:window.Madina?Madina.code():'',n:A.profile.nick,a:A.profile.av,t:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{})}
 const clean=h=>({w:WALLS.some(w=>w.id==(h&&h.w))?h.w:'cream',f:Math.max(0,Math.min(5,h&&h.f|0)),c:Math.max(0,+(h&&h.c)||0),p:PT[h&&h.p]?h.p:'sand',i:lookItems({i:h&&h.i}).join(','),g:cleanG(h&&h.g),u:/^[0-3]{5}$/.test(h&&h.u||'')?h.u:''});
 
 async function friends(){show('jannah');backTo=null;$('#jTitle').textContent='👥 بيوت أصدقائي';updJ();const B=$('#jBody');
@@ -509,10 +510,12 @@ async function visit(r){const A=O(),B=$('#jBody'),L=clean(r.h),day=today();backT
     <button class="btn gold" id="jGift" ${js.gave[r.id]==day?'disabled':''}>${js.gave[r.id]==day?'🎁 أهديتَه اليوم':'🎁 أهدِه هدية'}</button></div>
     ${ADM()?`<div class="nav"><button class="btn" id="jAdmG" style="background:linear-gradient(160deg,#f6b33d,#e0731f);box-shadow:0 5px 0 #a8551a">👑 💎 أهدِه جواهر من المدير</button></div>`:''}
     <div class="nav"><button class="btn" id="jInF" style="background:linear-gradient(160deg,#ffb36b,#c96a2a)">🛋️ ادخل بيته</button></div>
+    ${window.Madina&&/^[0-3]{5}$/.test(r.h&&r.h.m||'')?`<div class="nav"><button class="btn" id="jCity" style="background:linear-gradient(135deg,#2f6fd0,#13958c)">🏙️ شاهد مدينته</button></div>`:''}
     <p class="bcap">${boy()?'تستطيع':'تستطيعين'} أن ${boy()?'تعجب':'تعجبي'} ببيت كل صديق، و${boy()?'تهديه':'تهديه'} هديةً واحدة كل يوم 🤍</p>
     <div class="nav"><button class="btn sec" id="jBackFr">بيوت أصدقائي</button></div></div>`;
   $('#jBackFr').onclick=friends;
   $('#jInF').onclick=()=>{Bayt.sTap();inside(L,r.p.nick);backTo=()=>visit(r)};
+  const jc=$('#jCity');if(jc)jc.onclick=()=>{Bayt.sTap();const bt=backTo;Madina.view(r.h.m,r.p.nick,L.f,L.w,()=>{show('jannah');visit(r);backTo=bt})};
   const ag=$('#jAdmG');if(ag)ag.onclick=()=>{window.Idara&&Idara.gift(r.id,r.p.nick,r.p.av)};
   $('#jLike').onclick=async e=>{const b=e.currentTarget;b.disabled=true;
     try{const ref=A.db.ref(`hlikes/${r.id}/${A.me}`);const cur=(await ref.get()).val();await ref.set({n:((cur&&cur.n)|0)+1,d:day});
