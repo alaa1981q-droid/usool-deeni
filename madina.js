@@ -208,7 +208,9 @@ function draw(){const Bd=$('#mdBody');if(!Bd||!$('#madina').classList.contains('
     <div class="mdmap">${citySVG({lv:st.lv,home:myHome(),friends:curFriends})}</div>
     ${j?`<div class="mdhint job" id="mdJob"><span class="e">${j.ready?'🎉':'👷'}</span><span id="mdJobLine">…</span></div>`
       :`<div class="mdhint"><span class="e">👆</span><span>${B('المس','المسي')} الأرض الفارغة لتبني عليها، و${B('المس','المسي')} البناية لتطوّرها.<br><small style="font-weight:700">🔒 كل بناية تُفتح بعملٍ صالح: صلاتك، دروسك، حفظك، صلواتك وتسبيحك</small></span></div>`}
+    <button class="btn gold" id="md3d" style="margin:8px auto 0;display:block">🧊 شاهد مدينتك مجسّمة</button>
     <p class="bcap" style="text-align:center;margin:8px 0 14px">«من بنى مسجدًا بنى الله له بيتًا في الجنة» 🤍</p>`;
+  const b3=$('#md3d');if(b3)b3.onclick=()=>window.City3D&&City3D.open();
   const jb=$('#mdJob');if(jb)jb.onclick=jobModal;tick()}
 async function openCity(){backFn=null;show('madina');$('#mdTitle').textContent='🏙️ مدينتي';curFriends=friendsCache||null;draw();
   const f=await loadFriends();curFriends=f;draw()}
