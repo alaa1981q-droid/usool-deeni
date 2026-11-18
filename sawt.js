@@ -34,11 +34,14 @@ window.Aamal={get d(){return as},save:asave,dirt:dirtNow,cleanOne,
     const room=Math.max(0,(g[3]||5)-(as.gToday[k]||0)),m=Math.min(n,room);
     if(m>0){as.gToday[k]=(as.gToday[k]||0)+m;as.gl=((as.gl||'')+g[2].repeat(m)).slice(-80);as.gN=(as.gN||0)+m;as.gc=as.gc||{};as.gc[k]=(as.gc[k]||0)+m;asave();
       setTimeout(()=>{grownBanner(g,m);window.Alqab&&Alqab.soon()},350)}
+    // 💎 ماسات دائمة من الذكر بالصوت (حتى بعد إكمال كل شيء): ٥ لكل عشر، حتى ٨ مرات باليوم لكل نوع
+    const jw={sal:5,tas:5}[k];if(jw&&window.Deco&&Deco.challenge&&Deco.challenge(jw*n,'g_'+k))setTimeout(()=>jwBanner(jw*n),m>0?2700:350);
     return m}};
 // [الرمز، الاسم، حرف الحفظ، الحد اليومي، اسم العمل]
 const GROW={sal:['🌹','وردة','a',3,'الصلاة على النبي وآله'],tas:['🐦','عصفور','b',3,'التسبيح'],pray:['🌷','زهرة','c',5,'صلاة صلّيتها'],
   ayah:['⭐','نجمة','d',4,'آيات قرأتها بصوتك'],fiqh:['🌳','شجرة','e',3,'تعلّم الوضوء والصلاة'],hifz:['🌴','نخلة','f',2,'سورة حفظتها'],
   akhlaq:['🦋','فراشة','g',2,'خُلقٌ جميل'],wird:['🍎','تفاحة','h',1,'الورد اليومي'],dars:['🌻','دوّار شمس','i',3,'درس نجحت فيه'],win:['🏵️','وردة الأبطال','j',3,'فوز في تحدٍّ'],ctst:['🎈','بالون','k',4,'تحدٍّ لعبته']};
+function jwBanner(n){const d=document.createElement('div');d.className='ctbanner b3';d.style.cssText='font-size:18px;top:14%;white-space:normal;max-width:90vw;text-align:center';d.textContent='💎 +'+(typeof ar=='function'?ar(n):n)+' ماسات لبيتك في الجنة! بارك الله فيك';document.body.appendChild(d);setTimeout(()=>d.remove(),2400)}
 function grownBanner(g,m){const d=document.createElement('div');d.className='ctbanner b3';d.style.cssText='font-size:18px;top:14%;white-space:normal;max-width:90vw;text-align:center';
   d.textContent=`🏡 أُضيف إلى بيتك في الجنة: ${g[0]} ${g[1]}${m>1?' ×'+ar(m):''}`;document.body.appendChild(d);setTimeout(()=>d.remove(),1500);
   try{[1047,1319].forEach((f,i)=>tone(f,.12,'sine',.1,i*.08))}catch(e){}}

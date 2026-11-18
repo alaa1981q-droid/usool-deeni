@@ -41,16 +41,16 @@ function deedsHTML(){const gc=A().gc||{},G=Aamal.GROW;
     return `<button class="dl ${n?'':'z'}" data-dg="${k}"><span class="e">${g[0]}</span><span class="tx"><b>${g[4]}</b><small>${ar(n)} · ${lv?'⭐'.repeat(lv):'لم يبدأ بعد'}</small><div class="bar2"><i style="width:${Math.round(f*100)}%"></i></div></span></button>`}).join('')}
 const TITLES=[
  {id:'grad', e:'🎓',n:'خرّيج أصول الدين',     c:c=>c.all,        how:'أكمل مراحل الكتاب الست'},
- {id:'champ',e:'⚔️',n:'بطل التحديات',         c:c=>c.wins>=3,    how:'افز في ٣ تحدّيات أونلاين'},
+ {id:'champ',e:'⚔️',n:'قاهر التحديات',         c:c=>c.wins>=3,    how:'افز في ٣ تحدّيات أونلاين'},
  {id:'musal',e:'🕌',n:'المصلّي المواظب',      c:c=>c.pray>=35,   how:'سجّل ٣٥ صلاة صلّيتها'},
  {id:'faqih',e:'💧',n:'يعرف وضوءه وصلاته',    c:c=>c.fiqh2,      how:'انجح في اختبارَي الوضوء والصلاة'},
  {id:'hafiz',e:'📖',n:'حافظ القرآن الصغير',    c:c=>c.hifz>=5,    how:'احفظ ٥ سور'},
  {id:'qari', e:'🎤',n:'القارئ الصغير',         c:c=>c.tilawa>=40, how:'سمّع ٤٠ آية بصوتك'},
- {id:'muhib',e:'💚',n:'محبّ النبي وآله',       c:c=>c.sal>=100,   how:'صلِّ على النبي وآله ١٠٠ مرة'},
+ {id:'muhib',e:'💚',n:'كثير الصلوات',       c:c=>c.sal>=100,   how:'صلِّ على النبي وآله ١٠٠ مرة'},
  {id:'khuluq',e:'🌷',n:'صاحب الخُلق الجميل',   c:c=>c.akhlaq>=4,  how:'٤ جولات ممتازة في «اختبر نفسك»'},
  {id:'muwa', e:'🔥',n:'المواظب على الورد',     c:c=>c.wird>=7,    how:'سلسلة ٧ أيام في الورد اليومي'},
- {id:'jannah',e:'👑',n:'بطل الجنة',            c:c=>c.cups>=40,   how:'اجمع ٤٠ كأسًا'}];
-const LEVELS=[[1,'🌱','برعم الإيمان'],[3,'⭐','نجم صغير'],[5,'🌟','نجم ساطع'],[7,'🌙','قمر منير'],[10,'🏇','فارس الإيمان'],[13,'🦅','صقر الهدى'],[16,'👑','بطل الجنة']];
+ {id:'jannah',e:'👑',n:'جامع الكؤوس',            c:c=>c.cups>=40,   how:'اجمع ٤٠ كأسًا'}];
+const LEVELS=[[1,'🌱','برعم الخير'],[3,'🌿','غصن طيّب'],[5,'⭐','نجمة لامعة'],[7,'🌙','قمر منير'],[9,'☀️','شمس مشرقة'],[11,'🏇','فارس الإيمان'],[13,'🦅','صقر الهدى'],[15,'🦁','أسد الحق'],[17,'🏔️','جبل الثبات'],[19,'🛡️','حارس الدين'],[21,'📜','طالب العلم'],[23,'🕯️','سراج الليل'],[25,'💎','جوهرة نادرة'],[28,'🏰','قصر النور'],[31,'🌊','بحر العطاء'],[34,'🕊️','حمامة السلام'],[37,'🚩','راية النصر'],[40,'👑','تاج الجنة']]; // كل لقب مرة واحدة فقط، مرتّبة صعودًا
 const tierOf=(m,c)=>m.at.filter(x=>c[m.k]>=x).length; // 0..4
 function xpOf(c){let x=c.deeds*3+c.stars*5+c.stages*10+c.hifz*15+c.tilawa*2+c.pray*3+c.fiqh*10+Math.floor(c.sal/10)*4+Math.floor(c.tas/10)*3+c.wins*10+c.akhlaq*8+c.wird*4+c.cups*3;
   MEDALS.forEach(m=>{for(let t=0;t<tierOf(m,c);t++)x+=TIERS[t].xp});TITLES.forEach(t=>{if(t.c(c))x+=30});
@@ -67,17 +67,17 @@ const DEED_ITEMS=[['d_h1',c=>c.hifz>=1],['d_h3',c=>c.hifz>=3],['d_h6',c=>c.hifz>
 /* 💪 اللقب التلقائي: من المجال الذي يتفوّق فيه الطفل، أو لقب جامع إذا تفوّق في عدّة مجالات */
 const AREAS=[
  {id:'aq',n:'العقيدة',e:'📚',m:['usul'],t:['شاطر العقيدة','عالم الأصول'],go:'map',how:'أكمل مراحل الكتاب بنجوم كثيرة'},
- {id:'sl',n:'الصلاة',e:'🕌',m:['pray','fiqh'],t:['المصلّي الصغير','نجم الصلاة'],go:'salah',how:'تعلّم الوضوء والصلاة وسجّل صلواتك'},
- {id:'qr',n:'القرآن',e:'📖',m:['hifz','tilawa'],t:['محبّ القرآن','حافظ القرآن'],go:'hifz',how:'احفظ السور وسمّعها بصوتك'},
- {id:'ch',n:'التحديات',e:'⚔️',m:['champ'],t:['فارس التحديات','بطل التحديات'],go:'contest',how:'العب التحديات أونلاين وافز'},
+ {id:'sl',n:'الصلاة',e:'🕌',m:['pray','fiqh'],t:['المصلّي الصغير','حبيب المحراب'],go:'salah',how:'تعلّم الوضوء والصلاة وسجّل صلواتك'},
+ {id:'qr',n:'القرآن',e:'📖',m:['hifz','tilawa'],t:['صديق القرآن','حافظ القرآن'],go:'hifz',how:'احفظ السور وسمّعها بصوتك'},
+ {id:'ch',n:'التحديات',e:'⚔️',m:['champ'],t:['مقدام التحديات','سيّد الميدان'],go:'contest',how:'العب التحديات أونلاين وافز'},
  {id:'ak',n:'الأخلاق',e:'🌷',m:['akhlaq'],t:['صاحب الخُلق','زينة الأخلاق'],go:'nafsak',how:'أجب إجابات ممتازة في «اختبر نفسك»'},
  {id:'dk',n:'الذكر',e:'💚',m:['sal','tas'],t:['الذاكر الصغير','محبّ النبي وآله'],go:'sal',how:'صلِّ على النبي وآله وسبّح الله بصوتك'}];
 const areaTier=(a,s)=>Math.max(...a.m.map(id=>s.tiers[id]|0));
 function autoTitle(s){const r=AREAS.map(a=>({a,t:areaTier(a,s)})).filter(x=>x.t>0).sort((x,y)=>y.t-x.t);
   if(!r.length)return null;const strong=r.filter(x=>x.t>=2);
-  if(strong.length>=5)return {id:'all',e:'👑',n:'بطل الجنة الشامل'};
-  if(strong.length>=3)return {id:'star',e:'🌟',n:'النجم الشامل'};
-  if(strong.length==2)return {id:'two_'+strong[0].a.id+strong[1].a.id,e:strong[0].a.e,n:`شاطر ب${strong[0].a.n} و${strong[1].a.n}`};
+  if(strong.length>=5)return {id:'all',e:'💫',n:'جامع الخيرات'};
+  if(strong.length>=3)return {id:'star',e:'🌟',n:'المتألّق الشامل'};
+  if(strong.length==2)return {id:'two_'+strong[0].a.id+strong[1].a.id,e:strong[0].a.e,n:`متفوّق ب${strong[0].a.n} و${strong[1].a.n}`};
   const top=r[0];return {id:top.a.id+(top.t>=3?2:1),e:top.a.e,n:top.a.t[top.t>=3?1:0]}}
 const shownTitle=s=>autoTitle(s);
 const myName=()=>(O()&&O().profile&&O().profile.nick)||state.nick||state.name||B('بطلنا','بطلتنا');
@@ -337,7 +337,7 @@ function openProfile(){stopVc();aqBack=null;show('alqab');$('#aqTitle').textCont
    <div class="aqdo">${doBtns()}</div>
    <div class="aqsec">💪 نقاط قوّتي <small style="font-weight:500;color:var(--muted);font-size:13px">لقبك يأتي من المجال الذي ${B('تتفوّق','تتفوّقين')} فيه</small></div>
    <div class="aqm">${AREAS.map(a=>{const tr=areaTier(a,s);return `<button class="t${tr}" data-ar="${a.id}">${tr?`<span class="t">${TIERS[tr-1].e}</span>`:''}<div class="e">${a.e}</div><b>${a.n}</b><small>${tr?`${TIERS[tr-1].n} · لقبه: ${a.t[tr>=3?1:0]}`:'لم يبدأ بعد'}</small></button>`}).join('')}</div>
-   <p class="hnote">${B('تفوّق','تفوّقي')} في مجالين لتصير «شاطر بـ…»، وفي ثلاثة لتصير 🌟 النجم الشامل، وفي خمسة لتصير 👑 بطل الجنة الشامل</p>
+   <p class="hnote">${B('تفوّق','تفوّقي')} في مجالين لتصير «متفوّق بـ…»، وفي ثلاثة لتصير 🌟 المتألّق الشامل، وفي خمسة لتصير 💫 جامع الخيرات</p>
    <div class="aqsec">🏆 إنجازاتي</div>
    <div class="aqts">${TITLES.map(x=>{const own=s.titles.includes(x.id);return `<button data-t="${x.id}" class="${own?'on':'lock'}">${own?x.e:'🔒'} ${x.n}</button>`}).join('')}</div>
    <div class="aqsec">🏅 أوسمتي</div>
