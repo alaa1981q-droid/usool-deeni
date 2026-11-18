@@ -329,28 +329,44 @@
     return { sc, right, st };
   }
 
+  /* v10.2: shared schedule — when BOTH players have answered, the question ends
+     at once (after a short pause) instead of waiting for the full 15 s. Both phones
+     compute the same schedule from the answer times (at) saved in the room. */
+  const BOTH_MS = 900;
+  function sched(r) {
+    const P = r.players || {}, ids = Object.keys(P), st = [], en = [];
+    let s = 0;
+    for (let i = 0; i < N_Q; i++) {
+      st.push(s); let e = s + Q_MS;
+      const as = ids.map(u => ((P[u] || {}).ans || {})[i]);
+      if (ids.length === 2 && as.every(a => a && typeof a.at === 'number')) e = Math.min(e, Math.max(s, ...as.map(a => a.at)) + BOTH_MS);
+      en.push(e); s = e + REVEAL_MS;
+    }
+    return { st, en, total: s };
+  }
   function tick() {
     const r = room && room.data; if (!r) return;
     const t = now() - r.start;
     const opp = r.players[room.opp] || {};
-    if (opp.on === false && !room.done && t < N_Q * ROUND) { return finish(r, true); }
+    const S = sched(r);
+    if (opp.on === false && !room.done && t < S.total) { return finish(r, true); }
     if (t < 0) {
       const n = Math.ceil(-t / 1000);
       if (room.cd !== n) { room.cd = n; tone(n <= 3 ? 523 : 392, .12, 'square', .1);
         body().innerHTML = `<div class="vs"><div><span class="av">${r.players[me].av}</span><b>${esc(r.players[me].nick)}</b></div><span class="vs-x">⚔️</span><div><span class="av">${opp.av || '❔'}</span><b>${esc(opp.nick || '')}</b></div></div><div class="countdown-in">${ar(n)}</div>`; }
       return;
     }
-    const idx = Math.floor(t / ROUND);
+    let idx = 0; while (idx < N_Q && t >= S.en[idx] + REVEAL_MS) idx++;
     if (idx >= N_Q) return finish(r, false);
-    const inQ = (t % ROUND) < Q_MS;
-    const left = Math.max(0, Math.ceil((Q_MS - (t % ROUND)) / 1000));
+    const inQ = t < S.en[idx], qt = t - S.st[idx];
+    const left = Math.max(0, Math.ceil((Q_MS - qt) / 1000));
     if (room.idx !== idx) { room.idx = idx; room.phase = null; }
     if (inQ && room.phase !== 'q') { room.phase = 'q'; drawQ(r, idx); }
     if (!inQ && room.phase !== 'r') { room.phase = 'r'; drawReveal(r, idx); }
     if (inQ) {
       const tl = document.getElementById('tleft'), bar = document.getElementById('tbar');
       if (tl && tl.textContent !== ar(left)) { tl.textContent = ar(left); if (left <= 5 && left > 0) { tone(left <= 2 ? 1200 : 900, .06, 'square', .08); const tb = document.getElementById('tbox'); if (tb) tb.classList.add('hot'); } }
-      if (bar) bar.style.transform = `scaleX(${Math.max(0, (Q_MS - (t % ROUND)) / Q_MS)})`;
+      if (bar) bar.style.transform = `scaleX(${Math.max(0, (Q_MS - qt) / Q_MS)})`;
       const od = document.getElementById('oppState');
       const oa = (opp.ans || {})[idx];
       if (od) od.textContent = oa ? '✅ جاوب' : '🤔 يفكّر…';
@@ -380,9 +396,11 @@
     const btns = [...body().querySelectorAll('.opt')];
     btns.forEach((b, k) => b.onclick = () => {
       if (room.answered[idx]) return; room.answered[idx] = true;
-      const t = now() - r.start, left = Math.max(0, Math.ceil((Q_MS - (t % ROUND)) / 1000));
+      const rd = room.data || r, S = sched(rd), t = now() - rd.start, qt = Math.max(0, t - S.st[idx]);
+      if (t >= S.en[idx]) return;
+      const left = Math.max(0, Math.ceil((Q_MS - qt) / 1000)), at = Math.min(t, S.st[idx] + Q_MS);
       const ok = opts[k].ok;
-      roomRef.child(`players/${me}/ans/${idx}`).set({ ok, left, k: opts[k].t });
+      roomRef.child(`players/${me}/ans/${idx}`).set({ ok, left, k: opts[k].t, at });
       btns.forEach(x => x.disabled = true); b.classList.add('sel');
       $('#hCut').disabled = true; $('#cfb').textContent = 'تم! انتظر الخصم…';
       tone(660, .08, 'sine');
