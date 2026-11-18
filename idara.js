@@ -181,6 +181,8 @@ async function openAdmin(){show('idara');body().innerHTML=`<div class="handoff">
   try{lastV=+localStorage.getItem('usul5_admSeen')||0;localStorage.setItem('usul5_admSeen',Date.now())}catch(e){}
   panel()}
 let lastV=0;
+// v10.7: «الجديد» = سجّل خلال آخر ٢٤ ساعة فقط
+const fresh=p=>p.since>Math.max(lastV,Date.now()-864e5);
 const JOPT=[0,10,25,50,100,200,500,1000].map(n=>`<option value="${n}">${n?`💎 ${ar(n)} جوهرة`:'بلا جواهر'}</option>`).join('');
 let all=null,heroes=null,tab='all',q='';
 const key=r=>Math.max(r.xp|0,(r.wins|0)*10);
@@ -343,8 +345,8 @@ async function panel(){const API=O();heroes=null;all=null;view='main';
     modal(`<h3 style="margin:4px 0">إرسال لكل الأطفال؟</h3><p><b>${esc(title)}</b><br>${esc(msg).slice(0,140)}${j?`<br>💎 ${ar(j)} لكل طفل`:''}</p><div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn gold" id="nYes">نعم، أرسل</button></div>`,()=>{
       $('#nYes').onclick=async()=>{closeModal();try{await API.db.ref('news').push({title,msg,j,ts:firebase.database.ServerValue.TIMESTAMP});API.toast('أُرسلت ✓');panel()}catch(e){API.toast('تعذّر الإرسال')}}})};
   await loadKids(API);{const c=$('#idCnt'),n=(all||[]).length,g=(all||[]).filter(gone).length,u=(all||[]).filter(x=>!x.seen).length;
-    const k=(i,v)=>{const e=$('#idK'+i);if(e)e.textContent=ar(v)};k(1,n);k(2,(all||[]).filter(p=>p.since&&Date.now()-p.since<7*864e5).length);k(3,(all||[]).filter(p=>p.seen&&Date.now()-p.seen<180000).length);
-    const fr=lastV?(all||[]).filter(p=>p.since>lastV).length:0,nb=$('#idNew');
+    const k=(i,v)=>{const e=$('#idK'+i);if(e)e.textContent=ar(v)};k(1,n);k(2,(all||[]).filter(p=>p.since&&Date.now()-p.since<864e5).length);k(3,(all||[]).filter(p=>p.seen&&Date.now()-p.seen<180000).length);
+    const fr=lastV?(all||[]).filter(fresh).length:0,nb=$('#idNew');
     if(nb&&fr){nb.hidden=false;nb.innerHTML=`<span class="bl">🔔</span> ${fr==1?'مشترك جديد واحد':fr==2?'مشتركان جديدان':ar(fr)+(fr<=10?' مشتركين جدد':' مشتركًا جديدًا')} من آخر مرة فتحت الإدارة ‹`;nb.onclick=()=>openKids('fresh')}
     if(c)c.innerHTML=`💤 غائبون شهرًا أو أكثر: ${ar(g)}${u?` · ❔ بلا تسجيل دخول: ${ar(u)}`:''}`;
     const sn=$('#idSubsN');if(sn)sn.textContent=`${ar(n)} مشترك · ☀️ ${ar((all||[]).filter(p=>p.seen&&Date.now()-p.seen<864e5).length)} دخلوا اليوم · اضغط لترى الأسماء`}
@@ -360,7 +362,7 @@ let view='main',lim=40,dlSet=null;
 const DAY=864e5,ago_=p=>p.seen?Date.now()-p.seen:Infinity,bySeen=(a,b)=>(b.seen||0)-(a.seen||0);
 const FL={b:['👦 الأولاد',p=>p.sx=='b',bySeen],g:['👧 البنات',p=>p.sx=='g',bySeen],nosx:['❔ لم يختاروا ولد أو بنت',p=>!p.sx,bySeen],
   now:['🟢 داخلين الآن تقريبًا',p=>ago_(p)<180000,bySeen],d1:['☀️ دخلوا اليوم',p=>ago_(p)<DAY,bySeen],d7:['📅 دخلوا هذا الأسبوع',p=>ago_(p)<7*DAY,bySeen],
-  d30:['🗓️ دخلوا هذا الشهر',p=>ago_(p)<30*DAY,bySeen],fresh:['🔔 الجدد من آخر مرة فتحت الإدارة',p=>lastV&&p.since>lastV,(a,b)=>b.since-a.since],new:['🆕 الجدد هذا الأسبوع',p=>p.since&&Date.now()-p.since<7*DAY,(a,b)=>b.since-a.since],
+  d30:['🗓️ دخلوا هذا الشهر',p=>ago_(p)<30*DAY,bySeen],fresh:['🔔 الجدد اليوم من آخر مرة فتحت الإدارة',p=>lastV&&fresh(p),(a,b)=>b.since-a.since],new:['🆕 الجدد اليوم (آخر ٢٤ ساعة)',p=>p.since&&Date.now()-p.since<DAY,(a,b)=>b.since-a.since],
   play:['🎮 لعبوا أونلاين (الأكثر لعبًا أولًا)',p=>p.games>0,(a,b)=>b.games-a.games||b.wins-a.wins],
   lv:['⭐ كل الأطفال حسب المستوى',p=>true,(a,b)=>(b.lv-a.lv)||bySeen(a,b)],
   dl:['📥 نزّلوا الكتاب',p=>dlSet&&dlSet[p.id],bySeen],ban:['⛔ المحظورون الآن',p=>!!banOf(p.id),bySeen]};
@@ -381,7 +383,7 @@ function backMain(){view='main';window.scrollTo(0,0);panel()}
 async function stats(API){const el=$('#idStats');if(!el)return;const L=all||[],t=Date.now(),D1=864e5;
   const n=L.length,b=L.filter(p=>p.sx=='b').length,g=L.filter(p=>p.sx=='g').length;
   const d1=L.filter(p=>p.seen&&t-p.seen<D1).length,d7=L.filter(p=>p.seen&&t-p.seen<7*D1).length,d30=L.filter(p=>p.seen&&t-p.seen<30*D1).length;
-  const nw=L.filter(p=>p.since&&t-p.since<7*D1).length,on=L.filter(p=>p.seen&&t-p.seen<180000).length;
+  const nw=L.filter(p=>p.since&&t-p.since<D1).length,on=L.filter(p=>p.seen&&t-p.seen<180000).length;
   const games=Math.round(L.reduce((a,p)=>a+(p.games|0),0)/2),players=L.filter(p=>p.games>0).length;
   const lvs=L.filter(p=>p.lv),avg=lvs.length?lvs.reduce((a,p)=>a+p.lv,0)/lvs.length:0,mx=lvs.reduce((m,p)=>p.lv>m.lv?p:m,{lv:0});
   const ren=L.filter(p=>p.hist).length,bn=Object.values(bans).filter(x=>x&&x.until>t).length,sus2=L.filter(sus).length;
@@ -391,12 +393,18 @@ async function stats(API){const el=$('#idStats');if(!el)return;const L=all||[],t
   el.innerHTML=`<div class="idsts">
     ${tile('👥',ar(n),'كل المشتركين','all')}${tile('👦',ar(b),'أولاد','b')}${tile('👧',ar(g),'بنات','g')}
     ${tile('🟢',ar(on),'داخلين الآن','now')}${tile('☀️',ar(d1),'دخلوا اليوم','d1')}${tile('📅',ar(d7),'دخلوا الأسبوع','d7')}
-    ${tile('🗓️',ar(d30),'دخلوا الشهر','d30')}${tile('🆕',ar(nw),'جدد الأسبوع','new')}${tile('🏅',ar((heroes||[]).length),'أبطال الأسبوع','heroes')}
+    ${tile('🗓️',ar(d30),'دخلوا الشهر','d30')}${tile('🆕',ar(nw),'جدد اليوم','new')}${tile('🏅',ar((heroes||[]).length),'أبطال الأسبوع','heroes')}
     ${tile('⚔️',ar(games),'مباراة أونلاين','play')}${tile('🎮',ar(players),'لعبوا أونلاين','play')}${tile('📥',dl,'نزّلوا الكتاب','dl')}
     ${tile('⭐',avg?ar(Math.round(avg*10)/10):'—','متوسط المستوى','lv')}${tile('👑',mx.lv?ar(mx.lv):'—',mx.lv?'الأعلى: '+esc(mx.nick):'أعلى مستوى','max')}${tile('✏️',ar(ren),'غيّروا أسماءهم','names')}
     ${tile('⚠️',ar(sus2),'مشبوهون','sus')}${tile('⛔',ar(bn),'محظورون الآن','ban')}${n-b-g>0?tile('❔',ar(n-b-g),'لم يحدّد الجنس','nosx'):''}</div>
     <p class="tip" style="margin:6px 0 0">👆 اضغط على أي مربع لترى أسماء أصحابه</p>`;
   el.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{const f=b.dataset.f;
     if(f=='max'){if(mx.id)kidCard(mx.id);return}openKids(f)})}
-window.Idara={gift:(id,n,a)=>giftTo(id,n,a),open:openAdmin,inbox,dayNight};
+/* 🎉 v10.7: رسالة ترحيب باسم الطفل + ١٠ جواهر، مرة واحدة بعد أول تسجيل */
+function welcome(nick){const d=D();if(d.welcomed)return;d.welcomed=Date.now();Aamal.save();
+  queue.unshift({em:'🎉',title:`أهلًا وسهلًا يا ${String(nick||'').trim()} 🌷`,j:10,
+    msg:B('مرحبًا بك في «جنّتي الصغيرة»! سعداء بانضمامك إلينا.\nتعلّم أصول دينك، واحفظ، وصلِّ، وابنِ بيتك في الجنة بأعمالك الصالحة 🤍',
+          'مرحبًا بكِ في «جنّتي الصغيرة»! سعداء بانضمامكِ إلينا.\nتعلّمي أصول دينكِ، واحفظي، وصلّي، وابني بيتكِ في الجنة بأعمالكِ الصالحة 🤍')});
+  setTimeout(nextMsg,700)}
+window.Idara={welcome,gift:(id,n,a)=>giftTo(id,n,a),open:openAdmin,inbox,dayNight};
 })();

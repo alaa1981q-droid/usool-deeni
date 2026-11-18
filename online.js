@@ -146,12 +146,14 @@
           // سجلّ الأسماء السابقة (تراه الإدارة): آخر ٥ أسماء ووقت آخر تغيير
           const old = profile && profile.nick, extra = {};
           if (old && old !== nick) { extra.hist = [old].concat(String(profile.hist || '').split('|').filter(Boolean)).filter(x => x !== nick).slice(0, 5).join('|'); extra.nts = now(); }
+          const isNew = !profile || !profile.nick;
           if (!profile || !profile.since) extra.since = now();
           profile = Object.assign({ wins: 0, games: 0 }, profile || {}, { nick, av, sx, code, own: isOwn }, extra);
           if (window.Cups && Cups.setSex) Cups.setSex(sx);
           await db.ref('profiles/' + me).set(profile);
           state.online = true; state.nick = nick; state.av = av; save();
           startPresence(); refreshLeader();
+          if (isNew && window.Idara && Idara.welcome) Idara.welcome(nick);
           if (afterProf) { const f = afterProf; afterProf = null; window.onlineReturn = null; toast('حُفظ اسمك وصورتك ✓'); f(); } else hub();
         } catch (e) { $('#saveProf').disabled = false; toast('تعذّر الحفظ، حاول مرة أخرى'); }
       };
