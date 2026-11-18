@@ -91,12 +91,12 @@ function enter(id,isHost,friend){leave();const A=O();
   R={id,isHost,ref:A.db.ref('rooms/'+id),started:false,ended:false,lastCheer:0,seenCheer:{},lastP:-1};
   R.ref.child(`players/${A.me}/on`).onDisconnect().set(false);
   const cb=R.ref.on('value',s=>onRoom(s.val()));R.off=()=>R&&R.ref.off('value',cb)}
-function leave(){if(!R)return;try{R.off&&R.off();R.ref.child(`players/${O().me}/on`).onDisconnect().cancel()}catch(e){}clearTimeout(R.goT);clearInterval(R.watch);R=null}
+function leave(){try{O().playing&&O().playing(false)}catch(e){}if(!R)return;try{R.off&&R.off();R.ref.child(`players/${O().me}/on`).onDisconnect().cancel()}catch(e){}clearTimeout(R.goT);clearInterval(R.watch);R=null}
 
 function onRoom(r){if(!R||!r)return;const A=O(),me=A.me;R.data=r;const ids=Object.keys(r.players||{});
   if(r.state=='gone'&&!R.started){if(R.isHost)return;A.toast('أُلغي السباق');leave();show('bayt');Bayt.menu();return}
   if(r.state=='wait'&&R.isHost&&ids.length==2){R.ref.update({state:'play',start:A.now()+5000});return}
-  if(r.state=='play'&&!R.started){R.started=true;R.opp=ids.find(i=>i!=me);R.lv=r.lv|0;R.start=r.start;
+  if(r.state=='play'&&!R.started){R.started=true;try{O().playing&&O().playing(true)}catch(e){}R.opp=ids.find(i=>i!=me);R.lv=r.lv|0;R.start=r.start;
     Bayt.play(R.lv,NET);drawOpp();
     // إذا انقطع الخصم طويلًا أثناء السباق فالفوز لك
     R.watch=setInterval(()=>{if(!R||R.ended)return;const o=(R.data.players||{})[R.opp];if(o&&o.on===false){R.offFor=(R.offFor||0)+1;if(R.offFor>=4)claim(me,'gone')}else R.offFor=0},2000)}
@@ -131,7 +131,7 @@ const NET={
     $('#rcQuit').onclick=()=>{closeModal();if(R){R.ended=true;R.ref.update({state:'gone',quit:O().me});R.ref.child('winner').transaction(v=>v?undefined:R.opp+'|quit')}leave();Bayt.stop();Bayt.menu()}})}
 };
 
-function end(r){const A=O(),me=A.me;R.ended=true;clearTimeout(R.goT);clearInterval(R.watch);
+function end(r){const A=O(),me=A.me;try{A.playing&&A.playing(false)}catch(e){}R.ended=true;clearTimeout(R.goT);clearInterval(R.watch);
   const G=Bayt.G;if(G){G.over=true}Bayt.stop();
   const [wid,why]=String(r.winner).split('|'),tie=wid=='tie',win=wid==me,o=(r.players||{})[R.opp]||{},lvi=R.lv,lv=Bayt.LEVELS[lvi];
   const jw=window.Deco?Deco.challenge(win?40:tie?25:15,'brace'):'';

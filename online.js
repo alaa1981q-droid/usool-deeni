@@ -298,7 +298,15 @@
     const cb = roomRef.on('value', s => onRoom(s.val(), pin));
     roomOff = () => roomRef.off('value', cb);
   }
+  // v10.8: الإدارة ترى من «يلعب أونلاين الآن»: profiles/$me/pl = وقت بدء المباراة، ويُحذف عند انتهائها أو انقطاع الاتصال
+  function playing(on) {
+    if (!db || !me || !profile) return;
+    const r = db.ref('profiles/' + me + '/pl');
+    try { if (on) { r.set(firebase.database.ServerValue.TIMESTAMP).catch(() => {}); r.onDisconnect().remove(); }
+      else { r.remove().catch(() => {}); r.onDisconnect().cancel(); } } catch (e) {}
+  }
   function leaveRoom() {
+    playing(false);
     if (roomOff) roomOff(); roomOff = null;
     if (loop) clearInterval(loop); loop = null;
     if (roomRef && room && !room.done) { roomRef.child(`players/${me}/on`).set(false); }
@@ -317,7 +325,7 @@
       roomRef.update({ qs, start: now() + LEAD_MS, state: 'play' });
       return;
     }
-    if (r.state === 'play' && !loop) { room.opp = ids.find(i => i !== me); loop = setInterval(tick, 150); tick(); }
+    if (r.state === 'play' && !loop) { room.opp = ids.find(i => i !== me); loop = setInterval(tick, 150); tick(); playing(true); }
   }
 
   /* scoring is computed from the answers on both phones, so both see the same numbers */
@@ -430,7 +438,7 @@
   }
 
   async function finish(r, forfeit) {
-    if (room.done) return; room.done = true;
+    if (room.done) return; room.done = true; playing(false);
     if (loop) clearInterval(loop); loop = null;
     const a = scoreOf(r, me), b = scoreOf(r, room.opp), opp = r.players[room.opp] || {};
     const win = forfeit || a.sc > b.sc, tie = !forfeit && a.sc === b.sc;
@@ -492,7 +500,7 @@
 
   window.openOnline = openOnline;
   // for «بيتك في الجنة»: friends' houses, gifts and likes
-  window.OnlineAPI = {
+  window.OnlineAPI = { playing,
     init: () => init(), get db() { return db; }, get me() { return me; }, get profile() { return profile; },
     get lastErr() { return lastErr; }, now, esc, toast, get busy() { return !!(room && room.data && room.data.state === 'play'); },
     friendIds: async () => Object.keys((await db.ref('friends/' + me).get()).val() || {}),
