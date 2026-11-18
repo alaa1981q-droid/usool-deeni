@@ -184,22 +184,66 @@ function reciteBox(el,text,opts={}){const T=words(text),raw=String(text).split(/
   let vh=null;
   return {stop(){stopAll();if(vh){vh.stop();vh=null}}}}
 
-/* ---------- عدّاد صوتي: قلها ١٠ مرات ---------- */
-function counter(el,{phrase,target=10,emoji='💚',onDone}){let n=0,vh=null,doneF=false;
+/* ---------- عدّاد صوتي: قلها ١٠ مرات ----------
+   مع التعرّف على الكلام: لا يُعدّ إلا إذا قال الطفل كلمات الذكر نفسها (أغلبها وبالترتيب).
+   حيث لا يتوفّر التعرّف (APK أو بلا إنترنت): كاشف صوت فقط، مع مدة أدنى تناسب طول الذكر، ونقول ذلك بصراحة. */
+function alignWin(T,W){const n=T.length,m=W.length,dp=Array.from({length:n+1},()=>new Array(m+1).fill(0));
+  for(let i=1;i<=n;i++)for(let j=1;j<=m;j++)dp[i][j]=same(T[i-1],W[j-1])?dp[i-1][j-1]+1:Math.max(dp[i-1][j],dp[i][j-1]);
+  let i=n,j=m,last=-1;while(i>0&&j>0){if(same(T[i-1],W[j-1])&&dp[i][j]==dp[i-1][j-1]+1){if(last<0)last=j-1;i--;j--}else if(dp[i-1][j]>=dp[i][j-1])i--;else j--}
+  return {k:dp[n][m],last}}
+/* كم مرة قيلت العبارة كاملة تقريبًا في النص المسموع */
+function countPhrase(phrase,text){const T=words(phrase),H=words(text),n=T.length;if(!n)return 0;
+  const need=n<=3?n:n-1;let c=0,i=0;// يُسمح بكلمة واحدة فقط لم يلتقطها التعرّف
+  while(i<H.length){if(!T.some(t=>same(t,H[i]))){i++;continue}
+    let e=0;for(let L=need;L<=n+2&&i+L<=H.length;L++)if(alignWin(T,H.slice(i,i+L)).k>=need){e=L;break}
+    if(e){c++;i+=e}else i++}
+  return c}
+/* استماع متواصل: جلسة قصيرة بعد جلسة (أسلم من continuous في أندرويد الذي يكرّر النص) */
+function listenLoop({onText,onFail}){let stopped=false,rec=null,finals=[],quick=0;
+  const go=()=>{if(stopped)return;let fatal=null,t0=Date.now(),interim='',got=false;
+    try{rec=new SR()}catch(e){stopped=true;return onFail('nosr')}
+    rec.lang='ar-SA';rec.interimResults=true;rec.continuous=false;rec.maxAlternatives=1;
+    rec.onresult=e=>{got=true;interim='';let fin=false;for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];
+        if(r.isFinal){finals.push(r[0].transcript);fin=true}else interim+=' '+r[0].transcript}
+      onText(finals.join(' ')+' '+interim,fin)};
+    rec.onerror=e=>{const er=e.error||'err';if(/not-allowed|service-not-allowed|network|audio-capture|language-not-supported/.test(er))fatal=er};
+    rec.onend=()=>{rec=null;if(stopped)return;if(fatal){stopped=true;return onFail(fatal)}
+      quick=(!got&&Date.now()-t0<400)?quick+1:0;if(quick>=6){stopped=true;return onFail('loop')}
+      setTimeout(go,120)};
+    try{rec.start()}catch(e){stopped=true;onFail('start')}};
+  go();
+  return {stop(){stopped=true;if(rec){try{rec.abort()}catch(e){}rec=null}}}}
+function counter(el,{phrase,target=10,emoji='💚',onDone}){let n=0,vh=null,doneF=false,useSR=canCorrect(),fails=0;
+  const nw=words(phrase).length;
   el.innerHTML=`<div class="vx"><div class="tx" style="font-size:24px">${phrase}</div>
     <div class="vcount" id="vcN">${ar(0)}</div><div class="vbeads">${Array.from({length:target},(_,k)=>`<i data-b="${k}"></i>`).join('')}</div>
     <button class="vmic" aria-label="ابدأ"><span class="ring"></span>🎤</button>
-    <div class="vmsg">${B('اضغط المايك وقلها بصوتك، ثم اسكت لحظة بين كل مرة','اضغطي المايك وقوليها بصوتك، ثم اسكتي لحظة بين كل مرة')}</div></div>`;
-  const mic=el.querySelector('.vmic'),ring=el.querySelector('.ring'),msg=el.querySelector('.vmsg');
+    <div class="vmsg">${B('اضغط المايك وقلها بصوتك، ثم اسكت لحظة بين كل مرة','اضغطي المايك وقوليها بصوتك، ثم اسكتي لحظة بين كل مرة')}</div>
+    <div class="vheard" style="min-height:20px;font-size:13px;color:#6b7c72"></div></div>`;
+  const mic=el.querySelector('.vmic'),ring=el.querySelector('.ring'),msg=el.querySelector('.vmsg'),hd=el.querySelector('.vheard');
+  const say=(t,c)=>{msg.className='vmsg '+(c||'');msg.textContent=t};
+  const halt=()=>{if(vh){vh.stop();vh=null}mic.classList.remove('on');ring.style.opacity=0};
   const bump=k=>{for(let i=0;i<k&&n<target;i++){n++;const b=el.querySelector(`[data-b="${n-1}"]`);if(b){b.classList.add('on');b.textContent=emoji}}
     el.querySelector('#vcN').textContent=ar(n);tone(523+n*60,.12,'triangle',.14);if(n%5==0)fly(emoji);
-    if(n>=target&&!doneF){doneF=true;if(vh){vh.stop();vh=null}mic.classList.remove('on');msg.className='vmsg ok';msg.textContent=B('ما شاء الله! أكملتَ العدد 🌟','ما شاء الله! أكملتِ العدد 🌟');onDone&&onDone(n)}};
-  mic.onclick=async()=>{if(doneF)return;if(vh){vh.stop();vh=null;mic.classList.remove('on');msg.textContent=B('توقّف المايك. اضغط لتكمل','توقّف المايك. اضغطي لتكملي');return}
-    try{mic.classList.add('on');msg.className='vmsg mid';msg.textContent=B('أسمعك… قلها الآن 👂','أسمعكِ… قوليها الآن 👂');
-      vh=await vad({minMs:600,onLevel:(l,loud)=>{ring.style.opacity=loud?.9:0;ring.style.transform=`scale(${1+l*.35})`},
-        onUtter:d=>bump(Math.min(3,Math.max(1,Math.round(d/2600))))})}
-    catch(e){mic.classList.remove('on');vh=null;msg.className='vmsg bad';msg.textContent=micHelp(e)}};
-  return {stop(){if(vh){vh.stop();vh=null}}}}
+    if(n>=target&&!doneF){doneF=true;halt();say(B('ما شاء الله! أكملتَ العدد 🌟','ما شاء الله! أكملتِ العدد 🌟'),'ok');hd.textContent='';onDone&&onDone(n)}};
+  const startVad=async()=>{hd.textContent=B('ملاحظة: هنا نسمع صوتك فقط ولا نستطيع التأكد من الكلمات، فقلها صحيحة 🤍','ملاحظة: هنا نسمع صوتكِ فقط ولا نستطيع التأكد من الكلمات، فقوليها صحيحة 🤍');
+    vh=await vad({minMs:Math.max(650,nw*230),onLevel:(l,loud)=>{ring.style.opacity=loud?.9:0;ring.style.transform=`scale(${1+l*.35})`},onUtter:()=>bump(1)})};
+  let base=0;// ما عُدّ قبل هذه الجلسة
+  const startSR=()=>{base=n;let atFin=0;// atFin: العدد عند آخر مقطع نهائي
+    vh=listenLoop({onText:(t,fin)=>{ring.style.opacity=.9;ring.style.transform='scale(1.15)';setTimeout(()=>{ring.style.opacity=0},400);
+        const c=countPhrase(phrase,t);if(base+c>n)bump(base+c-n);
+        const tail=words(t).slice(-8).join(' ');hd.textContent=tail?'سمعتُ: «'+tail+'»':'';
+        if(fin&&!doneF){if(c>atFin)say(B('أحسنت! قلها مرة أخرى 👂','أحسنتِ! قوليها مرة أخرى 👂'),'mid');
+          else say(B('لم تُحسب 🙂 قل: ','لم تُحسب 🙂 قولي: ')+phrase,'bad');atFin=c}},
+      onFail:async er=>{vh=null;if(doneF)return;
+        if(er=='not-allowed'||er=='service-not-allowed'||er=='network'||er=='nosr'||er=='start'||er=='loop'||er=='language-not-supported'){useSR=false;
+          try{await startVad()}catch(e){halt();say(micHelp(e),'bad')}}
+        else{halt();say(micHelp({name:'NotFoundError'}),'bad')}}})};
+  mic.onclick=async()=>{if(doneF)return;if(vh){halt();say(B('توقّف المايك. اضغط لتكمل','توقّف المايك. اضغطي لتكملي'));return}
+    try{mic.classList.add('on');say(B('أسمعك… قلها الآن 👂','أسمعكِ… قوليها الآن 👂'),'mid');
+      if(useSR&&canCorrect())startSR();else await startVad()}
+    catch(e){mic.classList.remove('on');vh=null;say(micHelp(e),'bad')}};
+  return {stop(){halt()}}}
 
-window.Voice={norm,compare,hear,vad,reciteBox,counter,canCorrect,stop:stopAll,fly,chime};
+window.Voice={norm,compare,hear,vad,reciteBox,counter,canCorrect,countPhrase,stop:stopAll,fly,chime};
 })();
