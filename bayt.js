@@ -68,7 +68,7 @@ const LEVELS=[
   lines:surah('سورة الحمد'),extra:[],speed:40,accel:.35,spawn:1.05,maxOn:4,lives:5,time:170,
   tip:'أطول سورة وأسرع طوب. سابق الوقت!'},
  {name:'آياتٌ أحفظها',floor:'الطابق الرابع',icon:'👑',color:'#7c4dc4',quran:true,hard:true,
-  lines:MEMO.map(m=>m.w),extra:EXTRA,speed:46,accel:.4,spawn:.95,maxOn:4,lives:4,time:160,hints:1,
+  lines:MEMO.map(m=>m.w),extra:EXTRA,speed:46,accel:.4,spawn:.95,maxOn:4,lives:4,time:300,hints:1,
   tip:'أصعب طابق! آيات الحفظ من المراحل الخمس بالترتيب، والطوب أسرع، وكلماتٌ من آياتٍ أخرى تنزل لتخدعك. مساعدة واحدة فقط 💡'},
  // الطابق الخامس: خطوات صلاة الصبح بالترتيب (الركعتان)، وكل خطوة باسم مميّز حتى لا يلتبس الأمر
  {name:'ترتيب الصلاة',floor:'الطابق الخامس',icon:'🕌',color:'#0e7fa6',quran:false,
