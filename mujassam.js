@@ -64,7 +64,7 @@ const SPOT={home:[-6,0],m:[6,0],k:[-6,9],q:[6,9],h:[-6,-9],s:[6,-9],sc:[-7,-22]}
 const CAT=[3.4,-10.6];
 // (v12.2) المقياس: الولد أصغر (طوله أقل من نصف باب المدرسة) والناس معه، والجامع والمدرسة أكبر.
 // الجامع محصور بين طريقين (z=±4.6) فعمقه لا يتجاوز 7.2 (mScale).
-const KS=.7,PS=.7,BS={m:1.85,sc:1.45,home:1.25,k:1.3,q:1.3,s:1.25,h:1.15};
+const KS=.85,PS=.7,BS={m:1.85,sc:1.45,home:1.25,k:1.3,q:1.3,s:1.25,h:1.15};
 const mScale=l=>Math.min(BS.m,7.2/(3*(l===2?1.25:l>=3?1.5:1)));
 function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   const Md=window.Madina,lv=V?V.lv:(Md?Md.st.lv:{}),job=V?null:(Md?Md.st.job:null),need=(p,l)=>Md&&Md.need?Md.need(p,l):'';
@@ -93,20 +93,40 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   // بقع عشب بدرجات مختلفة
   const pM=[M(night?0x4aa052:0x72d460),M(night?0x37853f:0x4fb44c)];
   for(let i=0;i<26;i++){const a=i*2.4,r=8+(i*37%22),p=add(new T.CircleGeometry(2+i%3,20),pM[i%2],Math.cos(a)*r,.004,Math.sin(a)*r);p.rotation.x=-Math.PI/2;p.receiveShadow=true;p.castShadow=false}
-  // تلال خضراء حول المدينة
-  const hM=[M(night?0x3a8a45:0x6cc95c),M(night?0x46a050:0x86dc6e),M(night?0x2f7a3c:0x58b85a)];
-  for(let i=0;i<24;i++){const a=i/24*Math.PI*2,r=40+(i%3)*7,h=add(new T.SphereGeometry(9+(i%4)*2,20,12),hM[i%3],Math.cos(a)*r,-2,Math.sin(a)*r);h.scale.set(1,.45,1);h.castShadow=false;
-    if(i%2===0)tree(Math.cos(a)*(r-3),Math.sin(a)*(r-3),null,1.6)}
+  // (v12.3) سهل أخضر ممتد طويل: جبال على اليسار (غرب) وبحر على اليمين (شرق)، والطريق يمتد للأفق — مكان لتوسعات قادمة
+  {const mC=night?[0x4a5d6e,0x55697a,0x3f5262]:[0xb4c6d4,0xc2d2de,0xa6bccc],gC=night?0x2f7a3c:0x5fb85a,snow=M(night?0xc9d6e8:0xffffff,{roughness:.9});
+    // الجبال بعيدة (x<-88) حتى لا تحجب الكاميرا وهي تدور، وتلال خضراء واطئة بينها وبين المدينة
+    for(let i=0;i<20;i++){const z=-190+i*17+(i%3)*5,x=-96-(i%2)*16-(i%5)*4,r=20+(i%4)*5,h=34+(i*7%5)*6;
+      const m=add(new T.ConeGeometry(r,h,7),M(mC[i%3],{flatShading:true}),x,h/2-1,z);m.castShadow=m.receiveShadow=false;m.rotation.y=i;
+      const c=add(new T.ConeGeometry(r*.3,h*.3,7),snow,x,h-h*.15-.95,z);c.castShadow=c.receiveShadow=false;c.rotation.y=i}
+    for(let i=0;i<16;i++){const z=-170+i*16,x=-50-(i%3)*12,r=10+(i%4)*3;
+      const f=add(new T.SphereGeometry(r,18,10),M(gC),x,-1,z);f.scale.set(1.3,.4,1);f.castShadow=false}
+    for(let i=0;i<14;i++){const z=-120+i*12,x=-28-(i%3)*2;if(Math.abs(z+22)<9)continue;tree(x,z,null,1.3+(i%3)*.2)}}
+  // البحر والشاطئ
+  {const SX=22,sand=M(night?0xb8a675:0xf2dca0),sea=M(night?0x1d4e7e:0x3fa9e6,{roughness:.2,metalness:.15,emissive:night?0x0d2a4a:0x0a2a40});
+    const b=add(new T.PlaneGeometry(6,480),sand,SX-1,.012,0);b.rotation.x=-Math.PI/2;b.castShadow=false;
+    const w=add(new T.PlaneGeometry(240,480),sea,SX+122,.03,0);w.rotation.x=-Math.PI/2;w.castShadow=false;
+    const foam=new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.75});
+    for(let k=0;k<3;k++){const f=new T.Mesh(new T.PlaneGeometry(.35,480),foam);f.rotation.x=-Math.PI/2;S.add(f);anim.push(t=>{const u=(t*.25+k/3)%1;f.position.set(SX+2.2+u*5,.04,0);f.material.opacity=.75*(1-u)})}
+    // قوارب شراعية تتهادى
+    [[34,-20,0xff6b6b],[46,6,0xffd23f],[30,22,0x4fc3ff]].forEach(([x,z,c],k)=>{const B=new T.Group();B.position.set(x,0,z);S.add(B);
+      add(new T.BoxGeometry(1.2,.5,3),M(0x8b5a2b),0,.25,0,B);add(new T.CylinderGeometry(.06,.06,3,6),M(0xeeeeee),0,1.8,0,B);
+      const sl=add(new T.ConeGeometry(1,2.4,3),M(c,{side:T.DoubleSide}),0,1.9,.4,B);sl.scale.set(.1,1,1);
+      anim.push(t=>{B.position.y=Math.sin(t*1.2+k)*.15;B.rotation.z=Math.sin(t*.9+k)*.06;B.position.z=z+Math.sin(t*.05+k)*6})});
+    // نخيل على الشاطئ
+    for(let z=-60;z<=40;z+=11)if(Math.abs(z+4.6)>3)palm(SX-2.2,z,null)}
+  // أشجار متفرقة على طول السهل
+  [[-10,-36],[8,-34],[-16,-48],[12,-52],[-6,-62],[10,-72],[-14,-80],[6,-92],[-9,24],[9,28],[-15,34],[13,40]].forEach(([x,z])=>tree(x,z,null,1.3));
   // الطرق بلون دافئ وأرصفة بيضاء
   const road=M(night?0xb9ad96:0xd9c49c),curb=M(0xffffff),line=M(night?0xfff3c4:0xffffff);
-  const rd=add(new T.PlaneGeometry(4,64),road,0,.01,0);rd.rotation.x=-Math.PI/2;
-  [-2.1,2.1].forEach(x=>{const c=add(new T.BoxGeometry(.18,.08,64),curb,x,.04,0);c.castShadow=false});
+  const rd=add(new T.PlaneGeometry(4,160),road,0,.01,-30);rd.rotation.x=-Math.PI/2;
+  [-2.1,2.1].forEach(x=>{const c=add(new T.BoxGeometry(.18,.08,160),curb,x,.04,-30);c.castShadow=false});
   [-4.6,4.6].forEach(z=>{const r=add(new T.PlaneGeometry(28,1.8),road,0,.012,z);r.rotation.x=-Math.PI/2});
-  for(let z=-28;z<=28;z+=3){const l=add(new T.PlaneGeometry(.18,1.4),line,0,.02,z);l.rotation.x=-Math.PI/2}
+  for(let z=-109;z<=49;z+=3){const l=add(new T.PlaneGeometry(.18,1.4),line,0,.02,z);l.rotation.x=-Math.PI/2}
   // زهور ملوّنة كثيرة على العشب
   {const fl=[0xff5c8a,0xffd23f,0xb07cff,0xff8c42,0xffffff,0x4fc3ff,0xff4f4f],geo=new T.SphereGeometry(.24,8,6),im=new T.InstancedMesh(geo,new T.MeshStandardMaterial({roughness:.6}),240);
     const o=new T.Object3D(),col=new T.Color();let n=0,k=0;
-    const bad=(x,z)=>Math.abs(x)<2.8||x<-2.4&&x>-11.2&&z<-14.8&&z>-25||Math.abs(Math.abs(z)-4.6)<1.4&&Math.abs(x)<15||Object.values(SPOT).some(([a,b])=>Math.hypot(x-a,z-b)<3.9)||Math.hypot(x,z)>34;
+    const bad=(x,z)=>Math.abs(x)<2.8||x<-2.4&&x>-11.2&&z<-14.8&&z>-25||Math.abs(Math.abs(z)-4.6)<1.4&&Math.abs(x)<15||Object.values(SPOT).some(([a,b])=>Math.hypot(x-a,z-b)<3.9)||Math.hypot(x,z)>34||x>17;
     while(n<240&&k<4000){k++;const a=Math.random()*Math.PI*2,r=3+Math.random()*31,x=Math.cos(a)*r,z=Math.sin(a)*r;if(bad(x,z))continue;
       o.position.set(x,.14,z);o.scale.setScalar(.7+Math.random()*.6);o.updateMatrix();im.setMatrixAt(n,o.matrix);im.setColorAt(n,col.setHex(fl[n%fl.length]));n++}
     im.count=n;S.add(im)}
