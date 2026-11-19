@@ -41,6 +41,10 @@ css.textContent=`
 #wjMoreBody,#wjDurBody{flex:1;padding:4px 2px 18px;display:flex;flex-direction:column;gap:10px}
 #wjMoreBody .bookcard,#wjMoreBody .wdcard{margin:0}
 #wjMoreBody .hfbtn{margin:0}
+#wjGamesBody{flex:1;padding:4px 2px 18px;display:flex;flex-direction:column;gap:10px}#wjGamesBody .bookcard{margin:0}
+#bayt.wj-deco .bnhint,#bayt.wj-deco #msqB,#bayt.wj-deco .brank,#bayt.wj-deco #rcOpen,#bayt.wj-deco .dbuild,#bayt.wj-deco .jvis,#bayt.wj-deco #jVis,
+#bayt.wj-deco .bbest,#bayt.wj-deco #byRace,#bayt.wj-deco .blvg,#bayt.wj-deco #byHow,
+#bayt.wj-game .bnhint,#bayt.wj-game #msqB,#bayt.wj-game .jbar,#bayt.wj-game .dbuild,#bayt.wj-game .jvis,#bayt.wj-game #jVis{display:none!important}
 .wjstats{margin:10px 0 4px}
 .wjhp{display:flex;align-items:center;gap:10px;margin:10px 4px;padding:8px 12px;border-radius:16px;background:#fffaf0;border:1.5px solid #ecdcb8;text-align:right}
 .wjhp .e{font-size:34px}.wjhp b{display:block}.wjhp .hb{height:10px;border-radius:8px;background:#efe6d2;overflow:hidden;margin-top:4px}.wjhp .hb i{display:block;height:100%}`;
@@ -51,16 +55,23 @@ const app=$q('.app');
 function screen(id,title){const s=document.createElement('section');s.className='screen';s.id=id;
   s.innerHTML=`<div class="bar"><button class="back">›</button><div class="ttl">${title}</div></div><div id="${id}Body"></div>`;
   app.appendChild(s);s.querySelector('.back').onclick=()=>{snd();try{renderHome()}catch(e){}show('home')};return s}
-screen('wjMore','☰ المزيد');screen('wjDur','📚 دروس الكتاب');
+screen('wjMore','☰ المزيد');screen('wjGames','🎮 ألعابي');screen('wjDur','📚 دروس الكتاب');
 $q('#wjDur .ttl').id='wjDurT';
 const moreB=$q('#wjMoreBody'),durB=$q('#wjDurBody');
 durB.innerHTML=`<p class="bcap" style="text-align:center;margin:6px 0 2px">${B('اختر','اختاري')} المرحلة، وكل مرحلة تفتح التي بعدها 🌟</p>`;
 const map=$q('#map');if(map)durB.appendChild(map);
-// أزرار تنتقل إلى «المزيد» (بترتيب جميل)
-['#openBook','#dlBook','#openQisas','#openContest','#openNafsak','#openReview'].forEach(s=>{const e=$q(s);if(e)moreB.appendChild(e)});
-// (v11.6) صفحة البيت القديمة صارت هنا: لعبة الطوابق (أسئلة الكتاب)، الزينة، السباق، الكؤوس، صندوق اليوم
-moreB.insertAdjacentHTML('afterbegin',`<button class="bookcard baytcard" id="wjOld"><span class="cup">🏗️</span><span><b>طوابق بيتي وزينته</b><small>لعبة الطوابق (أسئلة الكتاب)، زيّن بيتك وادخله، سباق صديق، الكؤوس، صندوق اليوم</small></span><span class="go">‹</span></button>`);
-$q('#wjOld').onclick=()=>{snd();if(window.City3D&&City3D.oldHouse)City3D.oldHouse();else{try{Bayt.menu();show('bayt')}catch(e){}}};
+// (v13.0) «المزيد» أقصر: 🎮 ألعابي (كل الألعاب في شاشة واحدة)، الكتاب، تحميله، القصص، الأصدقاء، الأبطال، كيف ألعب.
+// البيت لم يعد هنا: يُفتح من بيت الطفل داخل المدينة فقط، حتى لا يتشتّت بين المدينة والبيت.
+$q('#wjGames .back').onclick=()=>{snd();show('wjMore');scrollTo(0,0)};
+const gamesB=$q('#wjGamesBody');
+gamesB.innerHTML=`<p class="bcap" style="text-align:center;margin:6px 0 2px">${B('العب','العبي')} ${B('واربح','واربحي')} الكؤوس والجواهر 🏆💎</p>`;
+['#openContest','#openNafsak'].forEach(s=>{const e=$q(s);if(e)gamesB.appendChild(e)});
+gamesB.insertAdjacentHTML('beforeend',`<button class="bookcard baytcard" id="wjOld"><span class="cup">🏗️</span><span><b>لعبة طوابق البيت</b><small>المس الكلمات بالترتيب وابنِ طوابق بيتك، أو سابق صديقك</small></span><span class="go">‹</span></button>`);
+{const e=$q('#openReview');if(e)gamesB.appendChild(e)}
+$q('#wjOld').onclick=()=>{snd();if(window.City3D&&City3D.oldHouse)City3D.oldHouse('game');else{try{Bayt.menu();show('bayt')}catch(e){}}};
+moreB.insertAdjacentHTML('beforeend',`<button class="bookcard" id="wjGm" style="border-color:#f0a020;box-shadow:0 5px 0 #f3c56a"><span class="cup">🎮</span><span><b>ألعابي ومسابقاتي</b><small>مسابقة الأبطال، اختبر نفسك، لعبة الطوابق، راجع أخطائي</small></span><span class="go">‹</span></button>`);
+$q('#wjGm').onclick=()=>{snd();show('wjGames');scrollTo(0,0)};
+['#openBook','#dlBook','#openQisas'].forEach(s=>{const e=$q(s);if(e)moreB.appendChild(e)});
 moreB.insertAdjacentHTML('beforeend',`<button class="bookcard" id="wjFr"><span class="cup">👥</span><span><b>أصدقائي</b><small>أضف صديقًا، وزُر بيوت أصدقائك ومدنهم</small></span><span class="go">‹</span></button>
   <button class="bookcard" id="wjHe"><span class="cup">🏅</span><span><b>أبطال هذا الأسبوع</b><small>من جمع أكثر النقاط هذا الأسبوع؟</small></span><span class="go">‹</span></button>
   <button class="bookcard" id="wjHow"><span class="cup">❓</span><span><b>كيف ألعب؟</b><small>شرح سريع للتطبيق</small></span><span class="go">‹</span></button>`);
@@ -73,7 +84,7 @@ const hp=document.createElement('button');hp.id='wjHappy';
 const dur=document.createElement('button');dur.className='bookcard wjtile wjdur';dur.id='wjDurBtn';
 dur.innerHTML=`<span class="cup">📚</span><span><b>دروس الكتاب</b><small id="wjDurLine"></small></span>`;
 const more=document.createElement('button');more.className='bookcard wjtile wjmore';more.id='wjMoreBtn';
-more.innerHTML=`<span class="cup">☰</span><span><b>المزيد</b><small>الكتاب، القصص، المسابقة، الأصدقاء…</small></span>`;
+more.innerHTML=`<span class="cup">☰</span><span><b>المزيد</b><small>الألعاب، الكتاب، القصص، الأصدقاء</small></span>`;
 dur.onclick=()=>{snd();try{renderHome()}catch(e){}show('wjDur');scrollTo(0,0)};
 more.onclick=()=>{snd();show('wjMore');scrollTo(0,0)};
 hp.onclick=()=>{snd();const b=$q('#hProf');b&&b.click()};

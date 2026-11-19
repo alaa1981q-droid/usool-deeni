@@ -521,7 +521,7 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
     if(u.l!=null){if(!busy&&(!path.length||wander))A.litter(u.l);return}
     if(u.cat){if(!busy&&(!path.length||wander))A.cat();return}
     if(u.p==='sc'){if(!busy&&(!path.length||wander))A.mySchool();return}
-    if(u.p==='home'){card(`🏡 هذا ${B('بيتك','بيتكِ')} في الجنة · ${B('ابنِ','ابني')} طوابقه بالأعمال الصالحة 🤍`,[['🎨 '+B('زيّن','زيّني')+' بيتك '+B('وادخله','وادخليه'),()=>closeTo(oldHouse)],['حسنًا',null,'sec']]);return}
+    if(u.p==='home'){card(`🏡 هذا ${B('بيتك','بيتكِ')} في الجنة · ${B('ابنِ','ابني')} طوابقه بالأعمال الصالحة 🤍`,[['🎨 '+B('زيّن','زيّني')+' بيتك '+B('وادخله','وادخليه'),()=>closeTo(()=>oldHouse('deco'))],['حسنًا',null,'sec']]);return}
     window.Madina&&Madina.part&&Madina.part(u.p)}
   cv.addEventListener('pointerdown',e=>{pts.set(e.pointerId,[e.clientX,e.clientY]);cv.setPointerCapture(e.pointerId);
     if(pts.size===1){drag=[e.clientX,e.clientY];down=[e.clientX,e.clientY,Date.now()]}else{drag=null;pinch=0;down=null}});
@@ -586,7 +586,12 @@ async function open(){if(document.getElementById('m3d'))return;const ov=document
     cur=run(ov,{msg,snd:ov.querySelector('.m3snd'),card:ov.querySelector('.m3card'),bar:ov.querySelector('.m3bar'),j:ov.querySelector('.m3j'),close})}catch(e){console.error(e);fail()}}
 // (v11.6) طلب الشيخ: «المدينة هي الأساس». زر «بيتي في الجنة» يفتح المدينة المجسّمة فقط، و✖ يرجع للواجهة.
 // صفحة البيت القديمة (الطوابق، الزينة، السباق…) صارت داخل «☰ المزيد» (wajiha.js). وإذا الجهاز لا يعرض المجسّمات تُفتح الصفحة القديمة.
-function oldHouse(){try{Bayt.menu();show('bayt')}catch(e){}}
+// (v13.0) صفحة البيت بوضعين بسيطين: 'deco' من بيت المدينة (زيّن وادخل فقط، والرجوع إلى المدينة)، و'game' من «ألعابي» (لعبة الطوابق فقط).
+// بلا وضع (جهاز بلا WebGL) تظهر الصفحة كاملة لأنها البيت الوحيد.
+function oldHouse(mode){try{Bayt.menu();const s=document.getElementById('bayt');s.classList.remove('wj-deco','wj-game');if(mode)s.classList.add('wj-'+mode);
+  const t=s.querySelector('.bar .ttl');if(t)t.textContent=mode==='deco'?'🎨 بيتي':mode==='game'?'🏗️ لعبة طوابق البيت':'بيتي في الجنة 🏡';show('bayt');scrollTo(0,0)}catch(e){}}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#byBack'),s=document.getElementById('bayt');
+  if(b&&s&&s.classList.contains('wj-deco')&&webgl()){e.stopImmediatePropagation();e.preventDefault();try{renderHome()}catch(x){}show('home');open()}},true);
 // (v11.3) طلب الشيخ: «بيتي في الجنة» في أعلى الشاشة الرئيسية تحت اللافتة مباشرة، كبيرًا وواضحًا.
 const css2=document.createElement('style');
 css2.textContent=`#home #openBayt.btop{grid-column:1/-1;flex-direction:row;text-align:right;gap:12px;margin-top:2px;padding:12px 14px;border-width:2.5px;background:linear-gradient(135deg,#fff8dc,#e6f9ec 55%,#dff1ff);box-shadow:0 6px 0 #a9e2bd,0 10px 22px rgba(31,164,99,.18)}
