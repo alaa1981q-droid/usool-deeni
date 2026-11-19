@@ -62,6 +62,8 @@ function markSprite(T,e,col,sc){const c=document.createElement('canvas');c.width
 /* ---------- المشهد ---------- */
 const SPOT={home:[-6,0],m:[6,0],k:[-6,9],q:[6,9],h:[-6,-9],s:[6,-9],sc:[-7,-22]};
 const CAT=[3.4,-10.6];
+// (v12.1) المقياس: الولد نصف حجمه السابق، والبنايات أكبر (المدرسة والجامع الأكبر) حتى يفهم الطفل الحجوم
+const KS=.95,BS={m:1.5,sc:1.15,home:1.25,k:1.3,q:1.3,s:1.25,h:1.15};
 function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   const Md=window.Madina,lv=V?V.lv:(Md?Md.st.lv:{}),job=V?null:(Md?Md.st.job:null),need=(p,l)=>Md&&Md.need?Md.need(p,l):'';
   const LV=p=>Math.max(0,Math.min(3,lv[p]|0));
@@ -231,7 +233,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
       else{top=plot(G);mk=need(p,0)?['🔒','#9aa8b0']:['+','#f0a020']}
       const pr=P[p]||{};lb=textSprite(T,`${pr.e||''} ${pr.n||''}`,'rgba(255,255,255,.92)','#5a4a1a');
       if(mk&&!V)mark(G,mk[0],mk[1],top+.4,1.9)}
-    lb.position.set(0,top+.7,0);G.add(lb)});
+    lb.position.set(0,top+.7,0);G.add(lb);G.scale.setScalar(BS[p]||1);if(p==='sc'){const k=BS.sc-1;G.position.x-=k*4.6;G.position.z-=k*4.4}});
   // أشجار المدينة (العطشى عليها 💧)
   const th=thirsty(),trees=[];
   TREES.forEach(([x,z],i)=>{const G=new T.Group();G.position.set(x,0,z);G.userData.t=i;S.add(G);tree(0,0,G);trees[i]=G;
@@ -270,7 +272,7 @@ function makeKid(){const T=THREE,G=new T.Group(),M=(c)=>new T.MeshStandardMateri
     add(new T.ConeGeometry(.4,.4,20,1,true),hj,0,1.05,-.02);add(new T.TorusGeometry(.31,.035,8,24),M(0xff7fb0),0,1.36,.06).rotation.x=-.3}
   else{const hair=M(0x3b2414);const hr=add(new T.SphereGeometry(.335,20,12,0,Math.PI*2,0,Math.PI*.5),hair,0,1.33,-.03);hr.rotation.x=-.35;
     add(new T.SphereGeometry(.26,16,8,0,Math.PI*2,0,Math.PI/2),M(0xffffff),0,1.5,-.04)}
-  G.scale.setScalar(1.9);G.userData={legs,arms};return G}
+  G.scale.setScalar(KS);G.userData={legs,arms};return G}
 
 /* ---------- (v11.9) حياة المدينة: طلاب في ساحة المدرسة نهارًا، حارس ليلًا، باص وسيارات صباحًا وعند الانصراف، ومصلّون وقت الصلاة ---------- */
 // الأوقات حسب ساعة الجهاز: الوصول ٦–٨ صباحًا، الانصراف ١–٢:٣٠ ظهرًا. (City3D.debugHour للتجربة فقط)
@@ -377,7 +379,7 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
   if(ui.snd){const upd=()=>{ui.snd.textContent=sounds.quiet?"🌙":sndOn()?"🔊":"🔇"};upd();ui.snd.onclick=()=>{if(sounds.quiet){card("🌙 الليل هادئ… المدينة نائمة 😴");setTimeout(()=>card(""),2200);return}try{localStorage.setItem(SKEY,sndOn()?"0":"1")}catch(e){}upd()}}
   const kid=makeKid();S.add(kid);let at={x:-3.4,z:1,via:null},path=[],onArrive=null,busy=0;kid.position.set(at.x,0,at.z);kid.rotation.y=Math.PI/2;
   const sign=v=>v<0?-1:1;
-  const door=p=>{if(p==='sc')return {x:-2.4,z:-17.6,via:null};if(p==='m')return {x:6,z:2.9,via:4.6};const [x,z]=SPOT[p];return {x:x-sign(x)*3.4,z:z+1,via:null}};
+  const door=p=>{if(p==='sc')return {x:-2.4,z:-17.6,via:null};if(p==='m')return {x:6,z:2.9,via:4.6};const [x,z]=SPOT[p];return {x:x-sign(x)*(2.2+(BS[p]||1)),z:z+1,via:null}};
   const treeSpot=i=>{const [x,z]=TREES[i];return Math.abs(x)<4?{x:x-sign(x)*1.1,z,via:null}:{x:x-sign(x)*1.2,z,via:sign(z)*4.6}};
   const litSpot=i=>{const [x,z]=LITTER[i];return {x,z,via:Math.abs(x)<4?null:z}};
   // (v11.4) الطفل يتجوّل وحده بفرح، ويلتفت إليك عندما يقف، ويقفز فرحًا عند الجوائز
@@ -424,8 +426,8 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
         [['📚 دروس الكتاب',()=>closeTo(()=>{const b=document.getElementById('wjDurBtn');b&&b.click()})],['حسنًا',null,'sec']])});return}
       card(`🎒 ${B('ذهبتَ','ذهبتِ')} إلى المدرسة اليوم ✔<br><small>${B('تعال','تعالي')} غدًا ${B('وخذ','وخذي')} 💎٥ مرة أخرى</small>`,[['📚 دروس الكتاب',()=>closeTo(()=>{const b=document.getElementById('wjDurBtn');b&&b.click()})],['حسنًا',null,'sec']])})},
     library(){go(door('k'),()=>card(`📚 المكتبة: ${B('اقرأ','اقرئي')} ${B('وِردك','وِردكِ')} اليومي (٥ أسئلة) 📖`,[['📖 وِردي اليومي',()=>closeTo(()=>{const b=document.getElementById('openWird');b&&b.click()})],['لاحقًا',null,'sec']]))}};
-  function enter(f){busy=1;let k=0;const s=setInterval(()=>{k++;kid.scale.setScalar(1.9*Math.max(0,1-k/10));if(k>=10){clearInterval(s);
-    setTimeout(()=>{kid.scale.setScalar(1.9);busy=0;f()},1500)}},40)}
+  function enter(f){busy=1;let k=0;const s=setInterval(()=>{k++;kid.scale.setScalar(KS*Math.max(0,1-k/10));if(k>=10){clearInterval(s);
+    setTimeout(()=>{kid.scale.setScalar(KS);busy=0;f()},1500)}},40)}
   let drops=[];function splash(G){if(!G)return;for(let i=0;i<14;i++){const d=new T.Mesh(new T.SphereGeometry(.07,6,4),new T.MeshStandardMaterial({color:0x5fb0e6}));
       d.position.set(G.position.x+(Math.random()-.5)*1.4,2.8+Math.random(),G.position.z+(Math.random()-.5)*1.4);S.add(d);drops.push(d)}
     G.userData.grow=1}
