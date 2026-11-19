@@ -57,6 +57,9 @@ durB.innerHTML=`<p class="bcap" style="text-align:center;margin:6px 0 2px">${B('
 const map=$q('#map');if(map)durB.appendChild(map);
 // أزرار تنتقل إلى «المزيد» (بترتيب جميل)
 ['#openBook','#dlBook','#openQisas','#openContest','#openNafsak','#openReview'].forEach(s=>{const e=$q(s);if(e)moreB.appendChild(e)});
+// (v11.6) صفحة البيت القديمة صارت هنا: لعبة الطوابق (أسئلة الكتاب)، الزينة، السباق، الكؤوس، صندوق اليوم
+moreB.insertAdjacentHTML('afterbegin',`<button class="bookcard baytcard" id="wjOld"><span class="cup">🏗️</span><span><b>طوابق بيتي وزينته</b><small>لعبة الطوابق (أسئلة الكتاب)، زيّن بيتك وادخله، سباق صديق، الكؤوس، صندوق اليوم</small></span><span class="go">‹</span></button>`);
+$q('#wjOld').onclick=()=>{snd();if(window.City3D&&City3D.oldHouse)City3D.oldHouse();else{try{Bayt.menu();show('bayt')}catch(e){}}};
 moreB.insertAdjacentHTML('beforeend',`<button class="bookcard" id="wjFr"><span class="cup">👥</span><span><b>أصدقائي</b><small>أضف صديقًا، وزُر بيوت أصدقائك ومدنهم</small></span><span class="go">‹</span></button>
   <button class="bookcard" id="wjHe"><span class="cup">🏅</span><span><b>أبطال هذا الأسبوع</b><small>من جمع أكثر النقاط هذا الأسبوع؟</small></span><span class="go">‹</span></button>
   <button class="bookcard" id="wjHow"><span class="cup">❓</span><span><b>كيف ألعب؟</b><small>شرح سريع للتطبيق</small></span><span class="go">‹</span></button>`);
