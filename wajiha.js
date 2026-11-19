@@ -37,6 +37,7 @@ css.textContent=`
 #home .wjtile .cup{font-size:34px}#home .wjmore{background:linear-gradient(160deg,#fff,#eef3ff);border-color:#a9bde8;box-shadow:0 5px 0 #a9bde8}
 #home .wjdur{background:linear-gradient(160deg,#fff,#fff4dc);border-color:#efc66a;box-shadow:0 5px 0 #efc66a}
 #home>.stats,#home #hFrBtn,#home #hHeBtn,#home>.footer-links{display:none!important}
+#bayt #mdOpen,#bayt #v3Open,#bayt #jFr,#madina #md3d{display:none!important}
 #wjMoreBody,#wjDurBody{flex:1;padding:4px 2px 18px;display:flex;flex-direction:column;gap:10px}
 #wjMoreBody .bookcard,#wjMoreBody .wdcard{margin:0}
 #wjMoreBody .hfbtn{margin:0}

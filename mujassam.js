@@ -13,9 +13,9 @@ function loadThree(){if(window.THREE)return Promise.resolve();if(loading)return 
 function webgl(){try{const c=document.createElement('canvas');return !!(window.WebGLRenderingContext&&(c.getContext('webgl')||c.getContext('experimental-webgl')))}catch(e){return false}}
 const css=document.createElement('style');
 css.textContent=`body.m3on .modal{z-index:9100}body.m3on #confetti{z-index:9150}body.m3on .ctbanner{z-index:9200}
-#m3d .m3bar{position:absolute;left:8px;right:8px;bottom:max(10px,env(safe-area-inset-bottom));z-index:2;display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
-#m3d .m3bar button{border:0;border-radius:16px;padding:7px 2px 6px;font:inherit;font-weight:800;font-size:12px;line-height:1.2;background:#fff;color:#1d4e9e;box-shadow:0 4px 0 #9fb7d8}
-#m3d .m3bar button b{display:block;font-size:24px}#m3d .m3bar button:active{transform:translateY(3px);box-shadow:0 1px 0 #9fb7d8}
+#m3d .m3bar{position:absolute;left:8px;right:8px;bottom:max(10px,env(safe-area-inset-bottom));z-index:2;display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+#m3d .m3bar button{border:0;border-radius:16px;padding:7px 2px 6px;font:inherit;font-weight:800;font-size:11px;line-height:1.2;background:#fff;color:#1d4e9e;box-shadow:0 4px 0 #9fb7d8}
+#m3d .m3bar button b{display:block;font-size:22px}#m3d .m3bar button:active{transform:translateY(3px);box-shadow:0 1px 0 #9fb7d8}
 #m3d .m3bar button.hot{background:linear-gradient(135deg,#ffe48a,#ffc53a);color:#6a4300;box-shadow:0 4px 0 #c98a12;animation:m3hot 1s ease-in-out infinite alternate}
 @keyframes m3hot{to{transform:scale(1.06)}}
 #m3d .m3card{position:absolute;left:12px;right:12px;bottom:calc(max(10px,env(safe-area-inset-bottom)) + 84px);z-index:2;background:#fffffff2;border-radius:18px;padding:10px 12px;text-align:center;font-weight:800;font-size:15px;box-shadow:0 4px 14px #0003;display:none}
@@ -59,7 +59,7 @@ function markSprite(T,e,col,sc){const c=document.createElement('canvas');c.width
   const s=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(c),depthTest:false}));s.scale.set(sc||1.2,sc||1.2,1);s.renderOrder=11;return s}
 
 /* ---------- المشهد ---------- */
-const SPOT={home:[-6,0],m:[6,0],k:[-6,9],q:[6,9],h:[-6,-9],s:[6,-9]};
+const SPOT={home:[-6,0],m:[6,0],k:[-6,9],q:[6,9],h:[-6,-9],s:[6,-9],sc:[-6,-18]};
 const CAT=[3.4,-10.6];
 function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   const Md=window.Madina,lv=V?V.lv:(Md?Md.st.lv:{}),job=V?null:(Md?Md.st.job:null),need=(p,l)=>Md&&Md.need?Md.need(p,l):'';
@@ -192,6 +192,17 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
         const rm=M(0xc0563b);[1.4,2.6].forEach(x=>{const a=box(.08,1.8,.08,rm,x,.9,1.3,G),b=box(.08,1.8,.08,rm,x,.9,1.9,G);a.rotation.x=.18;b.rotation.x=-.18});
         box(1.3,.08,.08,rm,2,1.75,1.6,G);box(.5,.06,.25,wood,2,.5,1.6,G);[1.85,2.15].forEach(x=>box(.02,1.2,.02,M(0x666666),x,1.1,1.6,G))}
       return l>=2?3.6:3}};
+  // (v11.8) 🎒 مدرستي: بناية ملوّنة بجرس وساعة وعلم وملعب صغير
+  function school(G){const wall=M(0xffd166),roofM=M(0xff6b6b),blue=M(0x4f8fe0),white=M(0xffffff);
+    box(4.6,2.4,3,wall,0,1.2,0,G);prism(5,1.2,3.3,roofM,0,2.4,0,G);
+    box(1,1.5,.08,blue,0,.75,1.54,G);[-1.5,-.8,.8,1.5].forEach(x=>box(.5,.6,.06,winM,x,1.45,1.53,G));
+    const ck=add(new T.CylinderGeometry(.32,.32,.08,20),white,0,2.85,1.5,G);ck.rotation.x=Math.PI/2;
+    box(.04,.22,.04,M(0x222222),0,2.92,1.56,G);box(.16,.04,.04,M(0x222222),.06,2.85,1.56,G);
+    box(.9,.9,.9,wall,0,3.65,-.4,G);const bt=add(new T.ConeGeometry(.75,.7,4),roofM,0,4.45,-.4,G);bt.rotation.y=Math.PI/4;add(new T.SphereGeometry(.2,10,8),M(0xffc53a,{metalness:.5}),0,3.6,.08,G);
+    add(new T.CylinderGeometry(.05,.05,3.6,8),M(0xdddddd),2.9,1.8,1.8,G);box(.9,.55,.04,M(0x1fa463),3.35,3.3,1.8,G);
+    const sl=box(.5,.06,1.8,M(0xff9f43),-3.1,.6,1.6,G);sl.rotation.x=-.5;box(.08,1.2,.08,M(0x4f8fe0),-3.3,.6,.85,G);box(.08,1.2,.08,M(0x4f8fe0),-2.9,.6,.85,G);
+    const fc=[0xff6b6b,0xffd23f,0x4fc3ff,0x7be37b];for(let i=0;i<10;i++)box(.12,.5,.12,M(fc[i%4]),-2.7+i*.6,.25,2.3,G);
+    return 4.9}
   function home(G){const fh=1.6,hw=4,hd=3.4,wallC=[0xffe08a,0xffc2d6,0xb8e6ff,0xc9f2b4];
     for(let i=0;i<floors;i++){box(hw,fh,hd,M(wallC[i]),0,fh/2+i*fh,0,G);
       for(let k=-1;k<=1;k+=2){box(.7,.6,.06,winM,k*1.1,fh/2+i*fh+.1,hd/2+.03,G);box(.06,.6,.7,winM,hw/2+.03,fh/2+i*fh+.1,k*.9,G)}}
@@ -200,7 +211,8 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
     tree(-2.8,-1.4,G,.8);palm(-2.8,1.4,G);return floors*fh+2}
   const P=Md&&Md.PARTS||{};
   Object.keys(SPOT).forEach(p=>{const G=new T.Group();G.position.set(SPOT[p][0],0,SPOT[p][1]);G.userData.p=p;S.add(G);let top,lb;
-    if(p==='home'){top=home(G);lb=textSprite(T,V?'🏡 بيت '+V.nick:'🏡 بيتي','rgba(255,255,255,.92)','#5a4a1a')}
+    if(p==='sc'){top=school(G);lb=textSprite(T,V?'🎒 المدرسة':'🎒 مدرستي','rgba(255,255,255,.92)','#5a4a1a')}
+    else if(p==='home'){top=home(G);lb=textSprite(T,V?'🏡 بيت '+V.nick:'🏡 بيتي','rgba(255,255,255,.92)','#5a4a1a')}
     else{const l=LV(p);let mk=null;
       if(job&&job.p===p){if(job.ready){top=DRAW[p](G,job.to);mk=['✔','#1fa463']}else{top=scaffold(G);mk=['👷','#2f6fd0']}}
       else if(l>0){top=DRAW[p](G,l);if(l<3&&!job&&!need(p,l))mk=['⬆','#f0a020']}
@@ -302,6 +314,11 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
     cat(){const D=day();if(D.cat)return;go(door('s'),()=>{busy=1;card(`🥛 ${B('ملأتَ','ملأتِ')} الإناء من السبيل…`);setTimeout(()=>{busy=0;go({x:CAT[0]-.2,z:CAT[1]+1.3,via:null},()=>{D.cat=1;dsv();jewels(3);
       card(`🐱 شربت القطة وقالت: مياو! شكرًا 🤍<br><small>الرحمة بالحيوان من الأخلاق الجميلة</small>`,[['حسنًا',null,'sec']]);refresh()})},1200)})},
     school(){go(door('q'),()=>card(`🏫 مدرسة القرآن: هيّا ${B('احفظ','احفظي')} سورة مع الشيخ عبد الباسط ⭐`,[['⭐ أنا حافظ صغير',()=>closeTo(()=>{const b=document.getElementById('openHifz');b&&b.click()})],['لاحقًا',null,'sec']]))},
+    // (v11.8) 🎒 مدرستي: الذهاب للمدرسة مرة في اليوم 💎5، ثم دعوة لدرس حقيقي من الكتاب
+    mySchool(){const D=day();go(door('sc'),()=>{
+      if(!D.sch){D.sch=1;dsv();enter(()=>{jewels(5);card(`🎒 ${B('وصلتَ','وصلتِ')} إلى ${B('مدرستك','مدرستكِ')}! 💎 +٥<br><small>طلب العلم من أجمل الأعمال، ${B('تعلّم','تعلّمي')} اليوم درسًا جديدًا 📚</small>`,
+        [['📚 دروس الكتاب',()=>closeTo(()=>{const b=document.getElementById('wjDurBtn');b&&b.click()})],['حسنًا',null,'sec']])});return}
+      card(`🎒 ${B('ذهبتَ','ذهبتِ')} إلى المدرسة اليوم ✔<br><small>${B('تعال','تعالي')} غدًا ${B('وخذ','وخذي')} 💎٥ مرة أخرى</small>`,[['📚 دروس الكتاب',()=>closeTo(()=>{const b=document.getElementById('wjDurBtn');b&&b.click()})],['حسنًا',null,'sec']])})},
     library(){go(door('k'),()=>card(`📚 المكتبة: ${B('اقرأ','اقرئي')} ${B('وِردك','وِردكِ')} اليومي (٥ أسئلة) 📖`,[['📖 وِردي اليومي',()=>closeTo(()=>{const b=document.getElementById('openWird');b&&b.click()})],['لاحقًا',null,'sec']]))}};
   function enter(f){busy=1;let k=0;const s=setInterval(()=>{k++;kid.scale.setScalar(1.9*Math.max(0,1-k/10));if(k>=10){clearInterval(s);
     setTimeout(()=>{kid.scale.setScalar(1.9);busy=0;f()},1500)}},40)}
@@ -345,6 +362,7 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
     if(u.t!=null){if(!busy&&(!path.length||wander))A.tree(u.t);return}
     if(u.l!=null){if(!busy&&(!path.length||wander))A.litter(u.l);return}
     if(u.cat){if(!busy&&(!path.length||wander))A.cat();return}
+    if(u.p==='sc'){if(!busy&&(!path.length||wander))A.mySchool();return}
     if(u.p==='home'){card(`🏡 هذا ${B('بيتك','بيتكِ')} في الجنة · ${B('ابنِ','ابني')} طوابقه بالأعمال الصالحة 🤍`,[['🎨 '+B('زيّن','زيّني')+' بيتك '+B('وادخله','وادخليه'),()=>closeTo(oldHouse)],['حسنًا',null,'sec']]);return}
     window.Madina&&Madina.part&&Madina.part(u.p)}
   cv.addEventListener('pointerdown',e=>{pts.set(e.pointerId,[e.clientX,e.clientY]);cv.setPointerCapture(e.pointerId);
@@ -396,7 +414,7 @@ async function open(){if(document.getElementById('m3d'))return;const ov=document
     <div class="m3hp"></div>
     <div class="m3msg" style="position:absolute;top:74px;right:12px;left:104px;z-index:2;background:#fffd;border-radius:14px;padding:6px 10px;font-weight:800;text-align:center;font-size:13px">⏳ لحظة…</div>
     <div class="m3j"></div><div class="m3card"></div>
-    <div class="m3bar" style="display:none"><button data-a="mosque"><b>🕌</b>إلى الجامع</button><button data-a="water"><b>💧</b>اسقِ الشجر</button><button data-a="school"><b>🏫</b>احفظ القرآن</button><button data-a="library"><b>📚</b>المكتبة</button><button data-a="friends"><b>👥</b>زيارة صديق</button></div>`;
+    <div class="m3bar" style="display:none"><button data-a="mosque"><b>🕌</b>إلى الجامع</button><button data-a="water"><b>💧</b>اسقِ الشجر</button><button data-a="school"><b>🏫</b>احفظ القرآن</button><button data-a="library"><b>📚</b>المكتبة</button><button data-a="mySchool"><b>🎒</b>مدرستي</button><button data-a="friends"><b>👥</b>زيارة صديق</button></div>`;
   document.body.appendChild(ov);document.body.classList.add('m3on');const msg=ov.querySelector('.m3msg');
   const close=()=>{try{cur&&cur.stop()}catch(e){}cur=null;ov.remove();document.body.classList.remove('m3on')};
   ov.querySelector('.m3x').onclick=close;
