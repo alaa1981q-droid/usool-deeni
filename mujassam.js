@@ -340,6 +340,19 @@ async function open(){if(document.getElementById('m3d'))return;const ov=document
 document.addEventListener('click',e=>{if(!e.target.closest||!e.target.closest('#openBayt'))return;
   setTimeout(()=>{const b=document.getElementById('bayt');
     if(b&&b.classList.contains('on')&&document.getElementById('mdOpen')&&!document.querySelector('#modal.on')&&!(window.Bayt&&Bayt.G)&&webgl())open()},250)});
+// (v11.3) طلب الشيخ: «بيتي في الجنة» في أعلى الشاشة الرئيسية تحت اللافتة مباشرة، كبيرًا وواضحًا.
+const css2=document.createElement('style');
+css2.textContent=`#home #openBayt.btop{grid-column:1/-1;flex-direction:row;text-align:right;gap:12px;margin-top:2px;padding:12px 14px;border-width:2.5px;background:linear-gradient(135deg,#fff8dc,#e6f9ec 55%,#dff1ff);box-shadow:0 6px 0 #a9e2bd,0 10px 22px rgba(31,164,99,.18)}
+#home #openBayt.btop .go{display:block;font-size:26px}#home #openBayt.btop .cup{font-size:54px;width:72px;animation:btopb 1.6s ease-in-out infinite}@keyframes btopb{50%{transform:translateY(-4px) scale(1.06)}}
+#home #openBayt.btop b{font-size:22px;color:#14794f}#home #openBayt.btop small{font-size:14px}
+#openBayt.btop .bt3d{display:inline-block;margin-top:5px;padding:3px 10px;border-radius:12px;background:#1fa463;color:#fff;font-size:12.5px;font-weight:800;font-style:normal}
+#openBayt.btop:active{transform:translateY(3px);box-shadow:0 2px 0 #a9e2bd}`;
+document.head.appendChild(css2);
+function moveHouse(){const c=document.getElementById('openBayt'),h=document.querySelector('#home .hero');if(!c||!h)return;
+  if(h.nextElementSibling!==c)h.after(c);
+  if(!c.classList.contains('btop')){c.classList.add('btop');
+    const s=c.querySelector('span:not(.cup):not(.go)');if(s&&!s.querySelector('.bt3d'))s.insertAdjacentHTML('beforeend','<i class="bt3d">🏙️ مدينتي المجسّمة · '+B('ادخل','ادخلي')+' الآن</i>')}}
+moveHouse();addEventListener('load',moveHouse);
 // تستدعيها madina.js بعد كل تغيير في المدينة
 function refresh(){if(cur)try{cur.refresh()}catch(e){console.error(e)}}
 window.City3D={open,refresh};
