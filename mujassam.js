@@ -91,12 +91,37 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
     const g=new T.ExtrudeGeometry(sh,{depth:d,bevelEnabled:false});g.translate(0,0,-d/2);return add(g,mat,x,y,z,p)};
   const winM=M(night?0xffd86b:0x9fd8ff,night?{emissive:0xffc940,emissiveIntensity:.9}:{roughness:.3});
   const wood=M(0x8b5a2b),stone=M(0xf4efe4),green=M(0x2fa36b),tr=M(0x7a4b25),lf=M(0x3fbf5a);
-  const LF=[M(0x3fbf5a),M(0x5fd36a),M(0x2fae62),M(0xff9ec7),M(0x7fd85a)];
   const water=M(0x5fb0e6,{roughness:.15,metalness:.1,emissive:night?0x1d4e7e:0x000000});
-  const tree=(x,z,p,s=1)=>{const h=Math.abs(Math.round(x*7+z*13))%LF.length;add(new T.CylinderGeometry(.18*s,.22*s,1.2*s,8),tr,x,.6*s,z,p);
-    add(new T.SphereGeometry(.9*s,14,10),LF[h],x,1.8*s,z,p);add(new T.SphereGeometry(.6*s,12,8),LF[h],x+.35*s,2.35*s,z+.1*s,p)};
+  // (v13.6) أشجار أكثر واقعية (طلب الشيخ): جذع متدرّج بلحاء وأغصان، وتاج من كتل أوراق متعرّجة بدرجات أخضر طبيعية.
+  // ثلاثة أنواع حسب المكان: شجرة مستديرة، شجرة طويلة (كالكالبتوس)، وشجرة برتقال بثمارها. وقليل منها مزهر بالوردي.
+  const TG=[1,2.7,4.3].map(sd=>{const g=new T.IcosahedronGeometry(1,2),p=g.attributes.position,v=new T.Vector3();
+    for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i);v.multiplyScalar(1+.13*Math.sin(v.x*5.3+sd)*Math.cos(v.y*4.1+sd*2)+.07*Math.sin(v.z*9+sd));p.setXYZ(i,v.x,v.y,v.z)}
+    g.computeVertexNormals();return g});
+  const TRK=new T.CylinderGeometry(.13,.22,1,8),BRG=new T.CylinderGeometry(.045,.085,1,6),FRG=new T.SphereGeometry(.075,8,6);
+  const bark=M(night?0x4a3626:0x6b4a2f,{roughness:1});
+  const LVm=n=>({color:n,roughness:.85,flatShading:true});
+  const LF=(night?[0x2e6b33,0x3a7a37,0x25602f,0x40833a]:[0x3f8f3a,0x4f9e3c,0x2f7d3a,0x5aa845]).map(c=>new T.MeshStandardMaterial(LVm(c)));
+  const LF2=(night?[0x3b7d3d,0x478a40,0x316f38,0x4e9444]:[0x5aa848,0x66b34a,0x449545,0x74bd52]).map(c=>new T.MeshStandardMaterial(LVm(c)));
+  const BLS=new T.MeshStandardMaterial(LVm(night?0xc0789a:0xf590b8)),FRT=M(0xff9a1f,{roughness:.5});
+  const tree=(x,z,p,s=1)=>{const h=Math.abs(Math.round(x*7+z*13)),kind=h%3,bl=h%9===0,G=new T.Group();G.position.set(x,0,z);G.scale.setScalar(s);G.rotation.y=h*.7;(p||S).add(G);
+    const tall=kind===1,th=tall?1.75:1.15,m1=LF[h%4],m2=bl?BLS:LF2[(h>>2)%4];
+    const tk=add(TRK,bark,0,th/2,0,G);tk.scale.set(1,th,1);
+    [[.55,0],[-.5,2.2],[.45,4.1]].forEach(([lean,ry])=>{const b=new T.Group();b.position.set(0,th*.82,0);b.rotation.set(0,ry,0);G.add(b);const m=add(BRG,bark,0,.3,0,b);m.scale.set(1,.65,1);b.children[0].rotation.z=lean;m.position.x=-Math.sin(lean)*.3});
+    const cl=tall?[[0,2.35,0,.72,1.35],[.32,1.85,.18,.58,1],[-.3,1.95,-.2,.58,1],[0,3.05,0,.48,.9],[.1,2.6,-.35,.45,.9]]
+      :[[0,1.95,0,.95,.78],[.55,1.75,.2,.65,.72],[-.5,1.8,-.25,.7,.72],[.1,1.72,-.55,.6,.72],[-.15,1.78,.55,.6,.72],[.05,2.45,.05,.62,.72]];
+    cl.forEach(([a,b,c,r,sy],i)=>{const m=add(TG[(h+i)%3],i%2||(bl&&i>2)?m2:m1,a,b,c,G);m.scale.set(r,r*sy,r);m.rotation.y=i*1.3});
+    if(kind===2&&!bl)for(let i=0;i<9;i++){const a=i*2.4+h,y=1.45+(i*37%10)/10*.95,r=Math.sqrt(Math.max(.05,1-((y-1.95)/.8)**2))*.98;add(FRG,FRT,Math.cos(a)*r,y,Math.sin(a)*r,G)}};
   const anim=[];S.userData.anim=anim;
-  const palm=(x,z,p)=>{add(new T.CylinderGeometry(.1,.16,2.4,8),tr,x,1.2,z,p);const c=add(new T.SphereGeometry(.9,10,8),lf,x,2.5,z,p);c.scale.set(1,.35,1)};
+  // (v13.6) نخلة واقعية: جذع منحنٍ بحلقات، وسعف متدلٍّ، وعذوق تمر
+  const PTG=new T.CylinderGeometry(.11,.14,.52,8),PRG=new T.TorusGeometry(.125,.025,5,10),FRDG=new T.SphereGeometry(1,10,6),DTG=new T.SphereGeometry(.06,6,5);
+  const ptr=M(night?0x5a4630:0x8a6a45,{roughness:1}),frd=M(night?0x2d6b30:0x3f9a3c,{roughness:.8,side:T.DoubleSide}),frd2=M(night?0x3a7a35:0x5aac45,{roughness:.8,side:T.DoubleSide}),dtm=M(0xb5651d,{roughness:.6});
+  const palm=(x,z,p)=>{const h=Math.abs(Math.round(x*11+z*5)),G=new T.Group();G.position.set(x,0,z);G.rotation.y=h*.9;(p||S).add(G);
+    let px=0,py=0;for(let i=0;i<5;i++){const lx=.018*i*i,m=add(PTG,ptr,lx,py+.26,0,G);m.rotation.z=-.035*i;const r=add(PRG,ptr,lx,py+.5,0,G);r.rotation.x=Math.PI/2;px=lx;py+=.5}
+    const C=new T.Group();C.position.set(px+.05,py,0);G.add(C);
+    for(let k=0;k<10;k++){const f=new T.Group();f.rotation.y=k/10*Math.PI*2+(k%2)*.2;f.rotation.x=k%2?.55:.25;C.add(f);
+      const l1=add(FRDG,k%2?frd:frd2,0,0,.62,f);l1.scale.set(.2,.03,.68);l1.castShadow=true;
+      const f2=new T.Group();f2.position.z=1.2;f2.rotation.x=.55;f.add(f2);const l2=add(FRDG,k%2?frd:frd2,0,0,.5,f2);l2.scale.set(.16,.025,.55)}
+    for(let i=0;i<7;i++){const a=i*.9;add(DTG,dtm,Math.cos(a)*.16,-.12-(i%3)*.06,Math.sin(a)*.16,C)}};
   // الأرض والطرق
   const g=add(new T.CircleGeometry(900,64),M(night?0x3f9149:0x5cc455),0,0,0);g.rotation.x=-Math.PI/2;
   // بقع عشب بدرجات مختلفة
@@ -119,9 +144,11 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
     const mt=new T.MeshStandardMaterial({vertexColors:true,roughness:.95,flatShading:false,fog:false,emissive:night?0x1c2a40:0x000000});
     const m=new T.Mesh(g,mt);m.receiveShadow=false;S.add(m);
     // صنوبر على سفوح الجبال وصفّ أشجار بين السهل والجبل
-    const pine=M(night?0x1f5a34:0x2e7d45),ptr=M(0x6b4423);
+    const pine=M(night?0x1f5a34:0x2e7d45,{flatShading:true}),pine2=M(night?0x24653a:0x37904f,{flatShading:true}),ptr=M(0x6b4423);
     for(let i=0;i<70;i++){const z=-420+i*9+(i*37%7),x=X0-5-(i*53%14),d=X0-x,y=Math.min(1,d/55)**2*(5+16*FBM(x*.035,z*.035,4))-.4,s=1.4+(i%4)*.35;
-      add(new T.CylinderGeometry(.18*s,.24*s,1*s,6),ptr,x,y+.5*s,z).castShadow=false;add(new T.ConeGeometry(1.1*s,3*s,8),pine,x,y+2.4*s,z).castShadow=false}
+      add(new T.CylinderGeometry(.18*s,.24*s,1*s,6),ptr,x,y+.5*s,z).castShadow=false;
+      // (v13.6) صنوبر بطبقات (ثلاث مخاريط متدرّجة) بدل مخروط واحد
+      [[1.2,1.5,1.45],[.95,1.3,2.25],[.65,1.1,3]].forEach(([r,hh,yy],k)=>{const c=add(new T.ConeGeometry(r*s,hh*s,9),k===1?pine2:pine,x,y+yy*s,z);c.castShadow=false;c.rotation.y=i+k})}
     for(let i=0;i<14;i++){const z=-120+i*12,x=-28-(i%3)*2;if(Math.abs(z+22)<9)continue;tree(x,z,null,1.3+(i%3)*.2)}}
   // البحر والشاطئ (لون متدرّج: فيروزي قرب الشاطئ ← أزرق عميق)
   {const SX=22,LL=1600,sand=M(night?0xb8a675:0xf2dca0);
@@ -162,11 +189,11 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   {const lg=new T.PlaneGeometry(.18,1.4);lg.rotateX(-Math.PI/2);const n=Math.floor(RL/3),im=new T.InstancedMesh(lg,line,n),o=new T.Object3D();
     for(let i=0;i<n;i++){o.position.set(0,.02,RZ+RL/2-1-i*3);o.updateMatrix();im.setMatrixAt(i,o.matrix)}S.add(im)}
   // زهور ملوّنة كثيرة على العشب
-  {const fl=[0xff5c8a,0xffd23f,0xb07cff,0xff8c42,0xffffff,0x4fc3ff,0xff4f4f],geo=new T.SphereGeometry(.24,8,6),im=new T.InstancedMesh(geo,new T.MeshStandardMaterial({roughness:.6}),240);
+  {const fl=[0xff5c8a,0xffd23f,0xb07cff,0xff8c42,0xffffff,0x4fc3ff,0xff4f4f],geo=new T.SphereGeometry(.13,8,6),im=new T.InstancedMesh(geo,new T.MeshStandardMaterial({roughness:.6}),240);
     const o=new T.Object3D(),col=new T.Color();let n=0,k=0;
     const bad=(x,z)=>Math.abs(x)<2.8||x<-2.4&&x>-11.2&&z<-14.8&&z>-25||Math.abs(Math.abs(z)-4.6)<1.4&&Math.abs(x)<15||Object.values(SPOT).some(([a,b])=>Math.hypot(x-a,z-b)<3.9)||Math.hypot(x,z)>34||x>17||Math.abs(x-FARM[0])<3.6&&Math.abs(z-FARM[1])<3.8;
     while(n<240&&k<4000){k++;const a=Math.random()*Math.PI*2,r=3+Math.random()*31,x=Math.cos(a)*r,z=Math.sin(a)*r;if(bad(x,z))continue;
-      o.position.set(x,.14,z);o.scale.setScalar(.7+Math.random()*.6);o.updateMatrix();im.setMatrixAt(n,o.matrix);im.setColorAt(n,col.setHex(fl[n%fl.length]));n++}
+      o.position.set(x,.09,z);o.scale.setScalar(.7+Math.random()*.6);o.updateMatrix();im.setMatrixAt(n,o.matrix);im.setColorAt(n,col.setHex(fl[n%fl.length]));n++}
     im.count=n;S.add(im)}
   // شجيرات صغيرة على أطراف الطرق
   const bush=M(0x4cc35e);[[-3,10.5],[3,-10.5],[-3,-11.5],[3,11.5],[-12,6.2],[12,-6.2],[-7,6.2],[7,-6.2],[7,6.2],[-7,-6.2]].forEach(([x,z])=>{const b=add(new T.SphereGeometry(.55,12,8),bush,x,.35,z);b.scale.set(1.3,.8,1)});
@@ -445,7 +472,31 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
   function bus(){const V=new T.Group(),y=M(0xffc21a),gl=M(0x9fd8ff);add(new T.BoxGeometry(1.8,1.55,4.6),y,0,1.15,0,V);add(new T.BoxGeometry(1.82,.12,4.62),M(0x222222),0,.95,0,V);
     [-.91,.91].forEach(x=>add(new T.BoxGeometry(.02,.5,3.4),gl,x,1.5,.2,V));add(new T.BoxGeometry(1.5,.6,.02),gl,0,1.5,-2.31,V);
     add(new T.BoxGeometry(.04,.3,.3),M(0xe2504a),-.93,1.1,-1.6,V);wheels(V,.85,1.5);g.add(V);return V}
-  function car(c){const V=new T.Group();add(new T.BoxGeometry(1.4,.6,2.6),M(c),0,.65,0,V);add(new T.BoxGeometry(1.2,.5,1.4),M(0x9fd8ff),0,1.18,.1,V);wheels(V,.68,.85);V.scale.setScalar(.95);g.add(V);return V}
+  // (v13.6) سيارات أجمل (طلب الشيخ): هيكل انسيابي بحواف ناعمة وطلاء لامع، زجاج داكن، أضواء أمامية وخلفية، صدّامات، مرايا، وعجلات بأغطية فضية.
+  // نوعان: صالون (سيدان) ودفع رباعي (SUV). الواجهة نحو +z.
+  const CW=1.36,carG={},glassM=new T.MeshStandardMaterial({color:night?0x0b1420:0x1d2b3a,roughness:.08,metalness:.6});
+  const headM=new T.MeshStandardMaterial({color:0xfffbe6,emissive:0xfff1b0,emissiveIntensity:night?2.2:.35}),tailM=new T.MeshStandardMaterial({color:0xc4161c,emissive:0xff2020,emissiveIntensity:night?1.4:.25});
+  const trimM=M(0x26282c),hubM=new T.MeshStandardMaterial({color:0xd8dde2,roughness:.25,metalness:.85}),tireM=M(0x1a1a1a);
+  function prof(pts,w,bev){const sh=new T.Shape();pts.forEach(([z,y],i)=>i?sh.lineTo(z,y):sh.moveTo(z,y));
+    const g=new T.ExtrudeGeometry(sh,{depth:w,bevelEnabled:!!bev,bevelThickness:bev||0,bevelSize:bev||0,bevelSegments:3,curveSegments:4});g.rotateY(-Math.PI/2);g.translate(w/2,0,0);return g}
+  function carGeo(suv){const k=suv?'s':'c';if(carG[k])return carG[k];const r=suv?1.42:1.22;
+    const body=suv?[[-1.3,.32],[1.3,.32],[1.36,.6],[1.28,.86],[.6,.92],[.35,r],[-1.22,r],[-1.32,.95],[-1.36,.55]]
+      :[[-1.3,.32],[1.3,.32],[1.36,.55],[1.26,.74],[.48,.82],[.12,r],[-.6,r],[-1.0,.86],[-1.32,.78],[-1.36,.5]];
+    const glass=suv?[[.64,.9],[.43,r-.02],[-1.25,r-.02],[-1.34,.95]]:[[.53,.8],[.17,r-.02],[-.66,r-.02],[-1.04,.84]];
+    const side=suv?[[.5,.94],[.33,r-.08],[-1.15,r-.08],[-1.22,.96]]:[[.38,.86],[.12,r-.07],[-.6,r-.07],[-.9,.87]];
+    return carG[k]={body:prof(body,CW-.12,.06),glass:prof(glass,CW-.2,.04),side:prof(side,CW+.02,0)}}
+  function car(c,suv){const V=new T.Group(),G=carGeo(suv),paint=new T.MeshStandardMaterial({color:c,roughness:.3,metalness:.45});
+    const tw=(o,x,y,z)=>{o.position.set(x,y,z);o.castShadow=true;V.add(o);return o};
+    tw(new T.Mesh(G.body,paint),0,0,0);tw(new T.Mesh(G.glass,glassM),0,0,0);tw(new T.Mesh(G.side,glassM),0,0,0);
+    const r=suv?1.42:1.22;add(new T.BoxGeometry(CW+.04,r-.95,.07),paint,0,(r+.95)/2-.03,suv?-.35:-.22,V); // العمود الأوسط
+    [[1.37,headM],[-1.37,tailM]].forEach(([z,m])=>[-.42,.42].forEach(x=>add(new T.BoxGeometry(.32,.12,.05),m,x,.58,z,V)));
+    [1.36,-1.37].forEach(z=>add(new T.BoxGeometry(CW+.02,.14,.1),trimM,0,.36,z,V));
+    add(new T.BoxGeometry(.5,.1,.03),trimM,0,.46,1.39,V);
+    [-1,1].forEach(k=>add(new T.BoxGeometry(.12,.08,.14),paint,k*(CW/2+.04),.9,.42,V));
+    [[-1,.86],[1,.86],[-1,-.86],[1,-.86]].forEach(([k,z])=>{const t=add(new T.CylinderGeometry(.3,.3,.22,18),tireM,k*(CW/2-.08),.3,z,V);t.rotation.z=Math.PI/2;
+      const h=add(new T.CylinderGeometry(.17,.17,.24,14),hubM,k*(CW/2-.08),.3,z,V);h.rotation.z=Math.PI/2});
+    if(night){const l=new T.SpotLight(0xfff1c0,1.2,14,.5,.6);l.position.set(0,.6,1.4);l.target.position.set(0,0,7);V.add(l,l.target)}
+    V.scale.setScalar(.95);g.add(V);return V}
   const cars=[{v:bus(),stop:-17.6,off:0},{v:car(0xe2504a),stop:-12.4,off:1.6},{v:car(0x4f8fe0),stop:-8.6,off:3.2}];
   cars.forEach(c=>{c.v.rotation.y=Math.PI;c.v.visible=false});
   // طلاب الساحة
@@ -463,12 +514,12 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
   let gT=5;
   function endGreet(i){const u=peds[i]&&peds[i].userData.u;if(!u)return;u.greet=0;unsay(u.bub);u.bub=null}
   // (v12.1) 🚗 سيارات تمرّ طول اليوم في الاتجاهين، وتقف إذا كان الطفل أمامها في الطريق
-  const CC=[0x1fa463,0xff8c42,0xb07cff,0xffffff,0xe2504a,0x4fc3ff];
-  const hlM=new T.MeshStandardMaterial({color:0xfff6c0,emissive:0xffe680,emissiveIntensity:night?2:.3});
+  // ألوان سيارات حقيقية: أبيض، فضي، أسود، كحلي، أحمر، بيج، أخضر غامق، برتقالي
+  const CC=[0xf2f2f2,0xb8bec6,0x1f2833,0x1d3f7a,0xb3262e,0xd9c9a3,0x2f6b4f,0xe07b24];
   // (v13.5) السيارات تأتي من بعيد وتذهب بعيدًا حتى تختفي في الأفق (بلا اختفاء مفاجئ): الطريق من Z0 إلى Z1
   const Z0=-240,Z1=190,TN=night?2:6;
-  const traffic=[];[1,-1].forEach(dir=>{for(let k=0;k<TN;k++){const v=car(CC[traffic.length%CC.length]),z=Z0+(k+(dir<0?.5:0))*(Z1-Z0)/TN;
-    [-.45,.45].forEach(x=>add(new T.BoxGeometry(.25,.15,.05),hlM,x,.7,1.31,v));v.rotation.y=dir>0?0:Math.PI;v.position.set(dir,0,z);traffic.push({v,dir,z,sp:7+Math.random()*2})}});
+  const traffic=[];[1,-1].forEach(dir=>{for(let k=0;k<TN;k++){const v=car(CC[(traffic.length*3)%CC.length],traffic.length%3===1),z=Z0+(k+(dir<0?.5:0))*(Z1-Z0)/TN;
+    v.rotation.y=dir>0?0:Math.PI;v.position.set(dir,0,z);traffic.push({v,dir,z,sp:7+Math.random()*2})}});
   // مشاة (طلاب ينزلون/يصعدون، ومصلّون)
   let walkers=[];
   function walk(P,pts,sp,end){P.position.set(pts[0][0],0,pts[0][1]);walkers.push({P,pts:pts.slice(1),sp,end,k:0})}
