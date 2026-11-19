@@ -76,7 +76,7 @@ more.innerHTML=`<span class="cup">☰</span><span><b>المزيد</b><small>ال
 dur.onclick=()=>{snd();try{renderHome()}catch(e){}show('wjDur');scrollTo(0,0)};
 more.onclick=()=>{snd();show('wjMore');scrollTo(0,0)};
 hp.onclick=()=>{snd();const b=$q('#hProf');b&&b.click()};
-function order(){const seq=['#openBayt','#homeSocial',hp,'#openWird',dur,'#openSalah','#openHifz',more];
+function order(){const seq=['#openBayt','#homeSocial','#openWird',dur,'#openSalah','#openHifz',more];
   const ft=$q('#home>.footer-links')||$q('#verLine');
   seq.forEach(x=>{const e=typeof x=='string'?$q(x):x;if(e&&ft)home.insertBefore(e,ft)});
   // بيتي في الجنة يبقى أول شيء تحت اللافتة
@@ -84,6 +84,7 @@ function order(){const seq=['#openBayt','#homeSocial',hp,'#openWird',dur,'#openS
 function drawHappy(){const h=happy(),m=mood(h);
   hp.innerHTML=`<span class="e">${m[0]}</span><span class="t"><b>سعادة ${B('بيتي','بيتي')}: ${arn(h)}٪</b><small>${m[1]}</small><div class="hb"><i style="width:${h}%;background:${barCol(h)}"></i></div></span>`;
   const l=$q('#wjDurLine'),d=$q('#stDone');if(l&&d)l.textContent='أكملتَ '+d.textContent+' مرحلة'.replace('أكملتَ',B('أكملتَ','أكملتِ'))}
+// (v11.7) طلب الشيخ: السعادة داخل المدينة المجسّمة فقط (mujassam.js)، لا في الواجهة ولا في ملفّي
 order();drawHappy();
 addEventListener('load',()=>{hook();order();drawHappy()});
 // بعد كل رسم للواجهة
@@ -94,7 +95,7 @@ setInterval(()=>{if(home.classList.contains('on'))drawHappy()},60e3);
 const aq=$q('#aqBody');
 if(aq)new MutationObserver(()=>{const hd=aq.querySelector('.aqhead');if(!hd||aq.querySelector('.wjstats')||$q('#aqTitle')&&!/ملف/.test($q('#aqTitle').textContent))return;
   const st=$q('#home .stats');const h=happy(),m=mood(h);
-  hd.insertAdjacentHTML('afterend',`<div class="wjhp"><span class="e">${m[0]}</span><span style="flex:1"><b>سعادة ${B('بيتي','بيتي')}: ${arn(h)}٪</b><small>${m[1]}</small><div class="hb"><i style="width:${h}%;background:${barCol(h)}"></i></div></span></div>
+  hd.insertAdjacentHTML('afterend',`
     ${st?`<div class="stats wjstats">${st.innerHTML.replace(/\sid="[^"]*"/g,'')}</div>`:''}`)}).observe(aq,{childList:true});
-window.Wajiha={happy,deed};
+window.Wajiha={happy,deed,mood,barCol};
 })();

@@ -24,7 +24,10 @@ css.textContent=`body.m3on .modal{z-index:9100}body.m3on #confetti{z-index:9150}
 #m3d .m3card .row button.sec{background:#e3ecf7;color:#1d4e9e}
 #m3d .m3j{position:absolute;top:66px;left:12px;z-index:2;background:#fffd;border-radius:14px;padding:4px 10px;font-weight:900;color:#1d4e9e}
 #m3d .m3fly{position:absolute;z-index:3;left:50%;top:45%;transform:translateX(-50%);font-size:30px;font-weight:900;color:#1d7ad0;text-shadow:0 2px 0 #fff;pointer-events:none;animation:m3fly 1.4s ease forwards}
-@keyframes m3fly{to{transform:translate(-50%,-90px);opacity:0}}`;
+@keyframes m3fly{to{transform:translate(-50%,-90px);opacity:0}}
+#m3d .m3hp{position:absolute;top:12px;right:12px;left:68px;z-index:2;display:flex;align-items:center;gap:8px;background:#fffffff2;border-radius:16px;padding:6px 10px;box-shadow:0 3px 10px #0002;min-height:46px}
+#m3d .m3hp:empty{display:none}#m3d .m3hp .e{font-size:30px;line-height:1}#m3d .m3hp .t{flex:1;min-width:0}#m3d .m3hp b{display:block;font-size:14.5px;color:#5a4a1a}#m3d .m3hp small{display:block;font-size:12px;font-weight:700;color:#7a6a3a}
+#m3d .m3hp .hb{height:9px;border-radius:6px;background:#efe6d2;overflow:hidden;margin-top:3px}#m3d .m3hp .hb i{display:block;height:100%;border-radius:6px;transition:width .6s}`;
 document.head.appendChild(css);
 const cam0={th:.35,ph:.62,dist:0};let cur=null;
 const boy=()=>!window.Cups||Cups.sex!='g',B=(m,f)=>boy()?m:f;
@@ -277,7 +280,11 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
     s.position.set(kid.position.x,2.2,kid.position.z);const a=i/16*Math.PI*2;s.userData={k:0,v:new T.Vector3(Math.cos(a)*2.2,2.5+Math.random()*1.5,Math.sin(a)*2.2)};S.add(s);sparks.push(s)}}
   function jewels(n){joyT=1.1;burst();try{Deco.addJ(n)}catch(e){}try{tone(988,.08,'triangle',.1);setTimeout(()=>tone(1318,.12,'triangle',.1),110)}catch(e){}
     const f=document.createElement('div');f.className='m3fly';f.textContent='💎 +'+arn(n);ov.appendChild(f);setTimeout(()=>f.remove(),1500);showJ()}
-  const showJ=()=>{ui.j.textContent='💎 '+arn(window.Deco?Deco.j:0)};showJ();
+  // (v11.7) «سعادة مدينتي» أعلى المدينة: ترتفع بالأعمال الصالحة اليوم وتنخفض إذا غاب الطفل (wajiha.js)
+  function drawHp(){const el=ov.querySelector(".m3hp");if(!el||!window.Wajiha)return;const h=Wajiha.happy(),c=Wajiha.barCol(h);
+    const m=h>=80?["😄","مدينتك سعيدة جدًا! ما شاء الله"]:h>=55?["🙂",`مدينتك سعيدة، ${B("زِدها","زيديها")} بعمل صالح`]:h>=30?["😐","مدينتك تنتظر أعمالك اليوم"]:["😟",`مدينتك مشتاقة لك! ${B("صلِّ","صلّي")} أو ${B("اسقِ","اسقي")} الشجر لتفرح`];
+    el.innerHTML=`<span class="e">${m[0]}</span><span class="t"><b>سعادة مدينتي: ${arn(h)}٪</b><small>${m[1]}</small><div class="hb"><i style="width:${h}%;background:${c}"></i></div></span>`}
+  const showJ=()=>{ui.j.textContent="💎 "+arn(window.Deco?Deco.j:0);drawHp()};showJ();
   const closeTo=f=>{ui.close();setTimeout(f,60)};
   // الأعمال
   const A={
@@ -386,7 +393,8 @@ function dispose(S){S.traverse(o=>{o.geometry&&o.geometry.dispose();const m=o.ma
 async function open(){if(document.getElementById('m3d'))return;const ov=document.createElement('div');ov.id='m3d';
   ov.style.cssText='position:fixed;inset:0;z-index:9000;background:#aee3ff;overflow:hidden';
   ov.innerHTML=`<button class="m3x" aria-label="إغلاق" style="position:absolute;top:12px;left:12px;z-index:2;width:46px;height:46px;border-radius:50%;border:0;background:#fff;font-size:22px;box-shadow:0 2px 8px #0004">✖</button>
-    <div class="m3msg" style="position:absolute;top:14px;right:14px;left:70px;z-index:2;background:#fffd;border-radius:14px;padding:8px 12px;font-weight:800;text-align:center;font-size:14px">⏳ لحظة…</div>
+    <div class="m3hp"></div>
+    <div class="m3msg" style="position:absolute;top:74px;right:12px;left:104px;z-index:2;background:#fffd;border-radius:14px;padding:6px 10px;font-weight:800;text-align:center;font-size:13px">⏳ لحظة…</div>
     <div class="m3j"></div><div class="m3card"></div>
     <div class="m3bar" style="display:none"><button data-a="mosque"><b>🕌</b>إلى الجامع</button><button data-a="water"><b>💧</b>اسقِ الشجر</button><button data-a="school"><b>🏫</b>احفظ القرآن</button><button data-a="library"><b>📚</b>المكتبة</button><button data-a="friends"><b>👥</b>زيارة صديق</button></div>`;
   document.body.appendChild(ov);document.body.classList.add('m3on');const msg=ov.querySelector('.m3msg');
