@@ -296,5 +296,5 @@ if(window.Deco&&Deco.menuHook){const orig=Deco.menuHook;Deco.menuHook=function(B
   at.insertAdjacentHTML('afterend',`<button class="mdbtn" id="mdOpen"><span class="e">🏙️</span><span><b>${B('مدينتي','مدينتي')}: ${stg[0]}</b><small>${j?(j.ready?'🎉 بناء جاهز للاستلام!':'👷 العمّال يبنون '+PARTS[j.p].n):'ابنِ جامعًا ومكتبةً ومدرسة قرآن وسبيلًا وحديقة 🤍'}</small></span><span class="go">‹</span></button>`);
   $('#mdOpen').onclick=()=>{try{Bayt.sTap()}catch(e){}openCity()}}}
 
-window.Madina={code,open:openCity,view,part:open,need:needFor,PARTS,get st(){return st},stageOf,fromCode};
+window.Madina={code,open:openCity,view,part:open,need:needFor,PARTS,friends:loadFriends,get st(){return st},stageOf,fromCode};
 })();
