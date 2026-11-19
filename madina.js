@@ -201,7 +201,7 @@ async function loadFriends(){const A=window.OnlineAPI;
     friendsCache=rows.filter(Boolean);friendsT=Date.now();return friendsCache}catch(e){return 'off'}}
 let curFriends=null;
 function myHome(){let w='cream';try{w=Deco.myLook().w}catch(e){}return {f:window.Bayt?Bayt.done:1,w}}
-function draw(){const Bd=$('#mdBody');if(!Bd||!$('#madina').classList.contains('on')||backFn)return;
+function draw(){try{window.City3D&&City3D.refresh()}catch(e){}const Bd=$('#mdBody');if(!Bd||!$('#madina').classList.contains('on')||backFn)return;
   const stg=stageOf(st.lv),t=total(st.lv),nx=STAGES_C.find(x=>x[2]>t),j=st.job;
   Bd.innerHTML=`<div class="mdhead"><b>${stg[1]} ${B('مدينتك','مدينتكِ')}: ${stg[0]}</b><div class="pb"><i style="width:${(t/15*100).toFixed(0)}%"></i></div>
     <small>${nx?`باقي ${ar(nx[2]-t)} ${nx[2]-t==1?'بناء':'بناءات'} لتصير ${nx[1]} ${nx[0]}`:'ما شاء الله! اكتملت مدينة الخير 🌟'} · 💎 ${ar(window.Deco?(Deco.j>99999?'∞':Deco.j):0)}</small></div>
@@ -296,5 +296,5 @@ if(window.Deco&&Deco.menuHook){const orig=Deco.menuHook;Deco.menuHook=function(B
   at.insertAdjacentHTML('afterend',`<button class="mdbtn" id="mdOpen"><span class="e">🏙️</span><span><b>${B('مدينتي','مدينتي')}: ${stg[0]}</b><small>${j?(j.ready?'🎉 بناء جاهز للاستلام!':'👷 العمّال يبنون '+PARTS[j.p].n):'ابنِ جامعًا ومكتبةً ومدرسة قرآن وسبيلًا وحديقة 🤍'}</small></span><span class="go">‹</span></button>`);
   $('#mdOpen').onclick=()=>{try{Bayt.sTap()}catch(e){}openCity()}}}
 
-window.Madina={code,open:openCity,view,get st(){return st},stageOf,fromCode};
+window.Madina={code,open:openCity,view,part:open,need:needFor,PARTS,get st(){return st},stageOf,fromCode};
 })();
