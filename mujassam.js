@@ -40,7 +40,9 @@ let ds={};try{ds=JSON.parse(localStorage.getItem(DKEY)||'{}')||{}}catch(e){}
 function day(){if(ds.d!==today())ds={d:today(),pr:{},tr:{},lt:{},cat:0};return ds}
 const dsv=()=>{try{localStorage.setItem(DKEY,JSON.stringify(ds))}catch(e){}};
 const seed=()=>{let h=0;for(const c of today())h=(h*31+c.charCodeAt(0))>>>0;return h};
-const TREES=[[-12,-3],[-12,4],[12,-3],[12,4],[-2.8,-28],[2.8,14],[-13,12],[13,-12],[-13,-12],[13,12],[-16,0],[16,0]];
+// (v12.1) ثلاث أشجار يسار البيت أُبعدت قليلًا لتتّسع المزرعة (FARM)
+const TREES=[[-21,-3],[-21,4],[12,-3],[12,4],[-2.8,-28],[2.8,14],[-13,12],[13,-12],[-13,-12],[13,12],[-22,0],[16,0]];
+const FARM=[-14.5,0],FARM_IN={x:-14.5,z:2.2,via:4.6};
 const LITTER=[[-9,4.6],[9,-4.6],[-10,-4.6],[10,4.6],[.9,-15],[-.9,15]];
 const thirsty=()=>{const s=seed(),r=[];for(let i=0;i<5;i++)r.push((s+i*7)%TREES.length);return r};
 const litter=()=>{const s=seed(),r=[];for(let i=0;i<3;i++)r.push((s+i*5)%LITTER.length);return r};
@@ -58,6 +60,13 @@ function markSprite(T,e,col,sc){const c=document.createElement('canvas');c.width
   x.fillStyle=col;x.strokeStyle='#fff';x.lineWidth=9;x.beginPath();x.arc(64,64,54,0,Math.PI*2);x.fill();x.stroke();
   x.fillStyle='#fff';x.font='900 64px system-ui,"Segoe UI",sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(e,64,70);
   const s=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(c),depthTest:false}));s.scale.set(sc||1.2,sc||1.2,1);s.renderOrder=11;return s}
+// (v12.1) فقاعة كلام (السلام عليكم…) بعرض يناسب النص
+function speech(T,t){const c=document.createElement('canvas'),x=c.getContext('2d'),f='800 44px system-ui,"Segoe UI",sans-serif';x.font=f;
+  const w=Math.ceil(x.measureText(t).width)+90,h=92,r=h/2;c.width=w;c.height=122;x.font=f;
+  x.fillStyle='rgba(255,255,255,.97)';x.strokeStyle='#1fa463';x.lineWidth=6;x.beginPath();x.moveTo(r+4,4);x.lineTo(w-r-4,4);x.arc(w-r-4,4+r,r,-Math.PI/2,Math.PI/2);
+  x.lineTo(w/2+16,4+h);x.lineTo(w/2,118);x.lineTo(w/2-16,4+h);x.lineTo(r+4,4+h);x.arc(r+4,4+r,r,Math.PI/2,Math.PI*1.5);x.closePath();x.fill();x.stroke();
+  x.fillStyle='#14794f';x.textAlign='center';x.textBaseline='middle';try{x.direction='rtl'}catch(e){}x.fillText(t,w/2,52);
+  const s=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(c),depthTest:false}));s.scale.set(w/122*.8,.8,1);s.renderOrder=12;return s}
 
 /* ---------- المشهد ---------- */
 const SPOT={home:[-6,0],m:[6,0],k:[-6,9],q:[6,9],h:[-6,-9],s:[6,-9],sc:[-7,-22]};
@@ -155,7 +164,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   // زهور ملوّنة كثيرة على العشب
   {const fl=[0xff5c8a,0xffd23f,0xb07cff,0xff8c42,0xffffff,0x4fc3ff,0xff4f4f],geo=new T.SphereGeometry(.24,8,6),im=new T.InstancedMesh(geo,new T.MeshStandardMaterial({roughness:.6}),240);
     const o=new T.Object3D(),col=new T.Color();let n=0,k=0;
-    const bad=(x,z)=>Math.abs(x)<2.8||x<-2.4&&x>-11.2&&z<-14.8&&z>-25||Math.abs(Math.abs(z)-4.6)<1.4&&Math.abs(x)<15||Object.values(SPOT).some(([a,b])=>Math.hypot(x-a,z-b)<3.9)||Math.hypot(x,z)>34||x>17;
+    const bad=(x,z)=>Math.abs(x)<2.8||x<-2.4&&x>-11.2&&z<-14.8&&z>-25||Math.abs(Math.abs(z)-4.6)<1.4&&Math.abs(x)<15||Object.values(SPOT).some(([a,b])=>Math.hypot(x-a,z-b)<3.9)||Math.hypot(x,z)>34||x>17||Math.abs(x-FARM[0])<3.6&&Math.abs(z-FARM[1])<3.8;
     while(n<240&&k<4000){k++;const a=Math.random()*Math.PI*2,r=3+Math.random()*31,x=Math.cos(a)*r,z=Math.sin(a)*r;if(bad(x,z))continue;
       o.position.set(x,.14,z);o.scale.setScalar(.7+Math.random()*.6);o.updateMatrix();im.setMatrixAt(n,o.matrix);im.setColorAt(n,col.setHex(fl[n%fl.length]));n++}
     im.count=n;S.add(im)}
@@ -299,6 +308,55 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
     [-.1,.1].forEach(x=>{add(new T.ConeGeometry(.07,.15,4),fur,x,.75,.35,cat);add(new T.SphereGeometry(.03,6,4),dk,x,.58,.53,cat)});
     const tl=add(new T.CylinderGeometry(.04,.04,.5,6),fur,0,.5,-.45,cat);tl.rotation.x=-.6;
     add(new T.CylinderGeometry(.18,.14,.08,12),M(0x9aa8b0),0,.04,.75,cat);mark(cat,'🐱','#f08a3a',1.4,0,.9)}
+  // (v12.1) 🐄 مزرعة بجانب البيت: بقرتان ودجاجات وحوض ماء وحظيرة. الطفل يطعم البقر والدجاج ويسقيها كل يوم (💎2 لكل عمل)
+  {const FM=V?{}:(D.fm||{}),F=new T.Group();F.position.set(FARM[0],0,FARM[1]);F.userData.fk='any';S.add(F);
+    const dirt=add(new T.PlaneGeometry(6,6.4),M(night?0x9c8a5c:0xd9c28a),0,.02,0,F);dirt.rotation.x=-Math.PI/2;dirt.castShadow=false;
+    const fw=M(0xf4efe4);
+    for(let x=-3;x<=3.01;x+=.6){box(.1,.75,.1,fw,x,.37,-3.2,F);if(Math.abs(x)>.75)box(.1,.75,.1,fw,x,.37,3.2,F)}
+    for(let z=-3.2;z<=3.21;z+=.64){box(.1,.75,.1,fw,-3,.37,z,F);box(.1,.75,.1,fw,3,.37,z,F)}
+    [.3,.6].forEach(y=>{box(6,.07,.07,fw,0,y,-3.2,F);box(.07,.07,6.4,fw,-3,y,0,F);box(.07,.07,6.4,fw,3,y,0,F);[-1,1].forEach(k=>box(2.25,.07,.07,fw,k*1.875,y,3.2,F))});
+    // الحظيرة الحمراء
+    const red=M(0xc0392b);box(2.4,1.7,1.6,red,1.3,.85,-2.2,F);prism(2.7,.9,1.8,M(0x8e2b22),1.3,1.7,-2.2,F);
+    box(.9,1.1,.06,fw,1.3,.55,-1.38,F);[.9,-.9].forEach(r=>{const b=box(1.3,.08,.04,red,1.3,.55,-1.34,F);b.rotation.z=r});
+    // قنّ الدجاج
+    [[-2.4,-2.6],[-1.5,-2.6],[-2.4,-2],[-1.5,-2]].forEach(([x,z])=>box(.08,.45,.08,wood,x,.22,z,F));
+    box(1.1,.6,.8,M(0xe0b070),-1.95,.75,-2.3,F);prism(1.3,.45,1,M(0xb5652b),-1.95,1.05,-2.3,F);
+    const rp=box(.3,.04,.8,wood,-1.95,.25,-1.6,F);rp.rotation.x=.6;
+    // قشّ
+    [[2.4,-.3],[2.4,.45]].forEach(([x,z])=>{const h=add(new T.CylinderGeometry(.35,.35,.7,14),M(0xe8c25a),x,.35,z,F);h.rotation.x=Math.PI/2});
+    // حوض الماء
+    const WT=new T.Group();WT.position.set(.2,0,-.9);WT.userData.fk='wat';F.add(WT);box(1.5,.32,.5,wood,0,.16,0,WT);
+    const wl=add(new T.PlaneGeometry(1.3,.32),FM.wat?water:M(0x6b4a2a),0,FM.wat?.3:.2,0,WT);wl.rotation.x=-Math.PI/2;wl.castShadow=false;
+    if(!V&&!FM.wat)mark(WT,'💧','#3b9be0',1.5,0,.85);
+    // البقرات
+    const CW=new T.Group();CW.position.set(1.4,0,.9);CW.userData.fk='cow';F.add(CW);
+    function cow(x,z,ry,brown){const C=new T.Group();C.position.set(x,0,z);C.rotation.y=ry;CW.add(C);const wb=M(brown?0x9a5b2e:0xffffff),bk=M(brown?0xf5f0e6:0x222222),pk=M(0xffb3c1);
+      box(.62,.6,1.2,wb,0,.85,0,C);box(.64,.26,.3,bk,0,.95,.15,C);box(.64,.2,.25,bk,0,.8,-.35,C);
+      [[-.22,.42],[.22,.42],[-.22,-.42],[.22,-.42]].forEach(([a,b])=>add(new T.CylinderGeometry(.08,.07,.56,8),wb,a,.28,b,C));
+      const H=new T.Group();H.position.set(0,1.05,.62);C.add(H);box(.42,.42,.45,wb,0,0,.15,H);box(.36,.22,.12,pk,0,-.1,.42,H);
+      [-.13,.13].forEach(a=>{add(new T.SphereGeometry(.045,6,4),M(0x111111),a,.08,.38,H);add(new T.ConeGeometry(.04,.16,6),fw,a,.28,.1,H)});
+      [-1,1].forEach(k=>box(.18,.06,.1,wb,k*.28,.08,.1,H));add(new T.SphereGeometry(.12,8,6),pk,0,.52,-.15,C);
+      const tl=add(new T.CylinderGeometry(.025,.025,.5,6),wb,0,.72,-.62,C);tl.rotation.x=.25;
+      anim.push(t=>{H.rotation.x=Math.sin(t*.6+x*3)*.25+.15;tl.rotation.z=Math.sin(t*1.5+z*3)*.3})}
+    cow(-.5,-.2,-.7,false);cow(.55,.75,-.25,true);
+    if(FM.cow){const hy=add(new T.SphereGeometry(.5,12,8),M(0xe8c25a),-.3,.12,.9,CW);hy.scale.set(1.3,.35,.9)}
+    if(!V&&!FM.cow)mark(CW,'🌾','#d9961e',2.5,0,.95);
+    // الدجاجات تتجوّل وتنقر
+    const HN=new T.Group();HN.position.set(-1.6,0,.4);HN.userData.fk='hen';F.add(HN);
+    [0xffffff,0xb5652b,0xd99a4e,0xffffff].forEach((c,i)=>{const Hn=new T.Group(),b=M(c);Hn.position.set(-.6+i*.45,0,-.8+(i%2)*1.1);HN.add(Hn);
+      const bd=add(new T.SphereGeometry(.2,10,8),b,0,.3,0,Hn);bd.scale.set(1,.9,1.25);const tl=add(new T.ConeGeometry(.1,.22,6),b,0,.42,-.22,Hn);tl.rotation.x=-.8;
+      const hd=new T.Group();hd.position.set(0,.48,.18);Hn.add(hd);add(new T.SphereGeometry(.11,10,8),b,0,0,0,hd);
+      add(new T.BoxGeometry(.03,.09,.1),M(0xe23b3b),0,.12,0,hd);const bk=add(new T.ConeGeometry(.035,.09,6),M(0xffb020),0,-.01,.13,hd);bk.rotation.x=Math.PI/2;
+      [-.05,.05].forEach(a=>add(new T.SphereGeometry(.02,6,4),M(0x111111),a,.03,.09,hd));
+      [-.06,.06].forEach(a=>add(new T.CylinderGeometry(.015,.015,.16,4),M(0xffb020),a,.08,0,Hn));Hn.scale.setScalar(1.3);
+      let tx=Hn.position.x,tz=Hn.position.z,w=Math.random()*2;
+      anim.push((t,dt)=>{if(w>0){w-=dt;hd.rotation.x=Math.max(0,Math.sin(t*2.5+i))*.9;return}hd.rotation.x=0;
+        const dx=tx-Hn.position.x,dz=tz-Hn.position.z,d=Math.hypot(dx,dz);
+        if(d<.05){w=1+Math.random()*2.5;tx=-1+Math.random()*1.9;tz=-1.9+Math.random()*3;return}
+        const sp=Math.min(d,dt*.7);Hn.position.x+=dx/d*sp;Hn.position.z+=dz/d*sp;Hn.rotation.y=Math.atan2(dx,dz);Hn.position.y=Math.abs(Math.sin(t*5+i))*.03})});
+    if(FM.hen)for(let i=0;i<18;i++){const s=add(new T.SphereGeometry(.04,5,4),M(0xffd23f),(Math.random()-.5)*1.6,.05,(Math.random()-.5)*2,HN);s.castShadow=false}
+    if(!V&&!FM.hen)mark(HN,'🌽','#e0a020',1.7,0,.9);
+    const fl=textSprite(T,V?'🐄 المزرعة':'🐄 مزرعتي','rgba(255,255,255,.92)','#5a4a1a');fl.scale.set(3.4,.74,1);fl.position.set(1.3,3.2,-2.2);F.add(fl)}
   // نجوم الليل
   if(night){const sg=new T.BufferGeometry(),p=[];for(let i=0;i<300;i++){const a=Math.random()*6.28,b=Math.random()*1.3+.15,r=95;p.push(r*Math.cos(a)*Math.cos(b),r*Math.sin(b),r*Math.sin(a)*Math.cos(b))}
     sg.setAttribute('position',new T.Float32BufferAttribute(p,3));S.add(new T.Points(sg,new T.PointsMaterial({color:0xffffff,size:.5})))}
@@ -361,6 +419,21 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
   const YX=[-12.6,-4.3],YZ=[-19.7,-15.2],yard=[];
   for(let i=0;i<10;i++){const p=person('kid',i);p.position.set(YX[0]+Math.random()*(YX[1]-YX[0]),0,YZ[0]+Math.random()*(YZ[1]-YZ[0]));p.userData={tx:p.position.x,tz:p.position.z,w:Math.random()*3,j:0};yard.push(p)}
   const guard=person('guard',1);guard.position.set(-2.5,0,-17);
+  // (v12.1) 💬 فقاعات الكلام تتبع صاحبها
+  const bubs=[];function say(o,txt,dur,h){const s=speech(T,txt);g.add(s);const b={s,o,k:dur,h};bubs.push(b);return b}
+  function unsay(b){if(!b)return;const i=bubs.indexOf(b);if(i>=0)bubs.splice(i,1);g.remove(b.s);b.s.material.map.dispose();b.s.material.dispose()}
+  // (v12.1) 🚶 جيران يمشون على الأرصفة، وأحيانًا يُلقي أحدهم «السلام عليكم» (الأول والثاني يبقيان بالليل)
+  // (v13.4) على الطرق الجانبية z=±4.6 (حافتها الخارجية ±5) لأن البنايات الكبيرة تملأ أرصفة الطريق الرئيسي
+  const ROUTES=[['x',5,3,13,'man'],['x',-5,-12,-3,'woman'],['x',-5,3,13,'kid'],['x',5,-12,-3,'man']];
+  const peds=ROUTES.map((r,i)=>{const P=person(r[4],i+3);P.userData.ped=i+1;
+    P.userData.u={ax:r[0],fix:r[1],a:r[2],b:r[3],kind:r[4],h:r[4]==='kid'?1.7:2.3,pos:Math.min(r[2],r[3])+Math.random()*Math.abs(r[3]-r[2]),dir:Math.random()<.5?1:-1,sp:.9+Math.random()*.4,w:0,greet:0,hold:0,bub:null};return P});
+  let gT=5;
+  function endGreet(i){const u=peds[i]&&peds[i].userData.u;if(!u)return;u.greet=0;unsay(u.bub);u.bub=null}
+  // (v12.1) 🚗 سيارات تمرّ طول اليوم في الاتجاهين، وتقف إذا كان الطفل أمامها في الطريق
+  const CC=[0x1fa463,0xff8c42,0xb07cff,0xffffff,0xe2504a,0x4fc3ff];
+  const hlM=new T.MeshStandardMaterial({color:0xfff6c0,emissive:0xffe680,emissiveIntensity:night?2:.3});
+  const traffic=(night?[[1,-20],[-1,10]]:[[1,-30],[1,-8],[1,14],[-1,20],[-1,-6]]).map(([dir,z],i)=>{const v=car(CC[i%CC.length]);
+    [-.45,.45].forEach(x=>add(new T.BoxGeometry(.25,.15,.05),hlM,x,.7,1.31,v));v.rotation.y=dir>0?0:Math.PI;v.position.set(dir,0,z);return {v,dir,z,sp:4.5+Math.random()*1.5}});
   // مشاة (طلاب ينزلون/يصعدون، ومصلّون)
   let walkers=[];
   function walk(P,pts,sp,end){P.position.set(pts[0][0],0,pts[0][1]);walkers.push({P,pts:pts.slice(1),sp,end,k:0})}
@@ -383,6 +456,23 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       c.v.position.x=-1;if(ct<t1){c.v.visible=true;c.v.position.z=34-ct*sp}else if(ct<t2){c.v.position.z=c.stop;
         const cyc=Math.floor(((t/3)+c.off)/P)+':'+c.stop;if(c.done!==cyc){c.done=cyc;dropKids(c.stop,phase==='leave')}}
       else if(ct<t3){c.v.position.z=c.stop-(ct-t2)*sp}else c.v.visible=false});
+    // السيارات العادية (المسار x=-1 يُخلى للباص وقت المدرسة)
+    const K=o.kid;traffic.forEach(c=>{if(c.dir<0&&phase){c.v.visible=false;return}c.v.visible=true;let block=false;
+      if(K&&Math.abs(K.x-c.dir)<1.2){const ah=(K.z-c.z)*c.dir;if(ah>0&&ah<3.2)block=true}
+      traffic.forEach(d=>{if(d!==c&&d.dir===c.dir&&d.v.visible){const gp=(d.z-c.z)*c.dir;if(gp>0&&gp<3.6)block=true}});
+      if(!block)c.z+=c.dir*c.sp*dt;if(c.z*c.dir>70)c.z=-70*c.dir;c.v.position.z=c.z;c.v.scale.setScalar(.95*Math.max(.01,Math.min(1,(70-Math.abs(c.z))/6)))});
+    // الجيران على الأرصفة
+    peds.forEach((P,i)=>{const u=P.userData.u,vis=day||i<2;P.visible=vis;if(!vis){if(u.bub)endGreet(i);if(u.hold)u.hold=0;return}
+      if(u.hold>0){u.hold-=dt;if(K)P.rotation.y=Math.atan2(K.x-P.position.x,K.z-P.position.z);P.position.y=0}
+      else if(u.greet>0){u.greet-=dt;P.position.y=Math.abs(Math.sin(t*2))*.04;if(u.greet<=0)endGreet(i)}
+      else if(u.w>0){u.w-=dt;P.position.y=0}
+      else{u.pos+=u.dir*u.sp*dt;if(u.pos>u.b||u.pos<u.a){u.pos=Math.max(u.a,Math.min(u.b,u.pos));u.dir*=-1;u.w=1+Math.random()*2}else if(Math.random()<dt*.05)u.w=1.5+Math.random()*2;
+        P.position.y=Math.abs(Math.sin(t*6+i))*.05}
+      if(u.ax==='z'){P.position.x=u.fix;P.position.z=u.pos;if(!(u.hold>0))P.rotation.y=u.dir>0?0:Math.PI}
+      else{P.position.z=u.fix;P.position.x=u.pos;if(!(u.hold>0))P.rotation.y=u.dir>0?Math.PI/2:-Math.PI/2}});
+    gT-=dt;if(gT<=0){gT=9+Math.random()*7;if(!peds.some(P=>P.userData.u.greet>0||P.userData.u.hold>0)){const c=peds.filter(P=>P.visible);
+      if(c.length){const P=c[Math.floor(Math.random()*c.length)],u=P.userData.u;u.greet=16;u.bub=say(P,'السلام عليكم 👋',1e9,u.h)}}}
+    bubs.slice().forEach(b=>{b.k-=dt;b.s.position.set(b.o.position.x,b.o.position.y+b.h,b.o.position.z);if(b.k<=0)unsay(b)});
     // المصلّون وقت الصلاة (إذا بُني الجامع)
     if(o.prayer&&o.mosque){prT-=dt;if(prT<=0&&prN<14){prT=2.2+Math.random()*2;worshipper()}}else{prN=0}
     // حركة المشاة
@@ -390,7 +480,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       const [tx,tz]=w.pts[0],dx=tx-P.position.x,dz=tz-P.position.z,d=Math.hypot(dx,dz),sp=w.sp*dt;
       if(d<=sp){P.position.x=tx;P.position.z=tz;w.pts.shift()}else{P.position.x+=dx/d*sp;P.position.z+=dz/d*sp;P.rotation.y=Math.atan2(dx,dz)}
       P.position.y=Math.abs(Math.sin(t*6+P.id))*.05;return true})}
-  return {g,update,count:()=>walkers.length}}
+  return {g,update,count:()=>walkers.length,peds,say,endGreet,traffic}}
 
 /* ---------- (v11.9) أصوات المدينة: نهارًا عصافير وحركة سير هادئة، وليلًا هدوء. تُصنع بالكود (بلا ملفات)، وتحترم كتم صوت التطبيق ---------- */
 const SKEY='usul5_m3snd';
@@ -477,7 +567,29 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
       if(!D.sch){D.sch=1;dsv();enter(()=>{jewels(5);card(`🎒 ${B('وصلتَ','وصلتِ')} إلى ${B('مدرستك','مدرستكِ')}! 💎 +٥<br><small>طلب العلم من أجمل الأعمال، ${B('تعلّم','تعلّمي')} اليوم درسًا جديدًا 📚</small>`,
         [['📚 دروس الكتاب',()=>closeTo(()=>{const b=document.getElementById('wjDurBtn');b&&b.click()})],['حسنًا',null,'sec']])});return}
       card(`🎒 ${B('ذهبتَ','ذهبتِ')} إلى المدرسة اليوم ✔<br><small>${B('تعال','تعالي')} غدًا ${B('وخذ','وخذي')} 💎٥ مرة أخرى</small>`,[['📚 دروس الكتاب',()=>closeTo(()=>{const b=document.getElementById('wjDurBtn');b&&b.click()})],['حسنًا',null,'sec']])})},
+    // (v12.1) 👋 السلام: الطفل يُلقي السلام على جاره، أو يردّ على من سلّم عليه ← «هذا عمل صالح» (💎1، حتى ٥ مرات يوميًا)
+    salam(i){const P=life.peds[i];if(!P||!P.visible)return;const u=P.userData.u,greeted=u.greet>0,she=u.kind==='woman';u.hold=25;
+      const px=P.position.x,pz=P.position.z,to=u.ax==='z'?{x:sign(px)*2.3,z:pz,via:null}:{x:px-sign(px)*.9,z:sign(pz)*4.6,via:sign(pz)*4.6};
+      const who=she?'جارتك':u.kind==='kid'?B('صديقك','صديقتك'):'جارك',rel=()=>{u.hold=Math.min(u.hold,2.5)};
+      const RD='وعليكم السلام ورحمة الله وبركاته';
+      const reply=()=>{life.endGreet(i);life.say(kid,RD,3.5,2.4);setTimeout(()=>{reward('rd');rel()},700)};
+      go(to,()=>{if(greeted){card(`👋 ${she?'قالت':'قال'} لك ${who}: «السلام عليكم»<br><small>بماذا ${B('تردّ','تردّين')}؟</small>`,
+          [[RD,reply],['مرحبا 🙂',()=>card(`🤍 الأجمل أن ${B('تردّ','تردّي')} بتحية الإسلام`,[[RD,reply]]),'sec']]);return}
+        card(`🙂 هذا ${who}… ${B('سلّم','سلّمي')} ${she?'عليها':'عليه'}`,[['👋 السلام عليكم',()=>{life.say(kid,'السلام عليكم 👋',3,2.4);
+          setTimeout(()=>{life.say(P,RD,3.5,u.h);reward('sl');rel()},1300)}],['لاحقًا',rel,'sec']])})},
+    // (v12.1) 🐄 المزرعة: إطعام البقر، إطعام الدجاج، سقي الحيوانات — كلٌّ مرة يوميًا 💎2
+    farm(k){const D=day(),F=D.fm=D.fm||{},ks=['cow','hen','wat'];if(!k||k==='any')k=ks.find(x=>!F[x]);
+      const FD={cow:{btn:'🌾 '+B('أطعم','أطعمي')+' البقر',doing:`🌾 ${B('تضع','تضعين')} العلف للبقرات…`,done:'🐄 أكلت البقرات وقالت: مووو! شكرًا',full:'🐄 البقرات شبعانة اليوم 💚'},
+        hen:{btn:'🌽 '+B('أطعم','أطعمي')+' الدجاج',doing:`🌽 ${B('تنثر','تنثرين')} الحَبّ للدجاج…`,done:'🐔 فرح الدجاج وقال: كو كو كو!',full:'🐔 الدجاج شبعان اليوم 💚'},
+        wat:{btn:'💧 '+B('اسقِ','اسقي')+' الحيوانات',doing:`💧 ${B('تملأ','تملئين')} حوض الماء…`,done:'💧 شربت الحيوانات الماء البارد',full:'💧 الحوض مليء بالماء اليوم 💚'}};
+      if(!k){card(`🐄 كل حيوانات ${B('مزرعتك','مزرعتكِ')} أكلت وشربت اليوم! ${B('أحسنت','أحسنتِ')} 💚<br><small>${B('تعال','تعالي')} غدًا ${B('لترعاها','لترعيها')} من جديد</small>`,[['حسنًا',null,'sec']]);return}
+      if(F[k]){card(FD[k].full);setTimeout(()=>card(''),1800);return}
+      go(FARM_IN,()=>{busy=1;card(FD[k].doing);setTimeout(()=>{busy=0;F[k]=1;dsv();jewels(2);refresh();const left=ks.filter(x=>!F[x]);
+        card(`${FD[k].done} 💎 +٢<br><b style="color:#1fa463;font-size:18px">🌟 هذا عمل صالح!</b><br><small>الرحمة بالحيوان ورعايته من أخلاق المسلم 🤍</small>`,
+          left.length?[[FD[left[0]].btn,()=>A.farm(left[0])],['حسنًا',null,'sec']]:[['الحمد لله',null]])},1300)})},
     library(){go(door('k'),()=>card(`📚 المكتبة: ${B('اقرأ','اقرئي')} ${B('وِردك','وِردكِ')} اليومي (٥ أسئلة) 📖`,[['📖 وِردي اليومي',()=>closeTo(()=>{const b=document.getElementById('openWird');b&&b.click()})],['لاحقًا',null,'sec']]))}};
+  function reward(kind){const D=day();D.sl=D.sl|0;const give=D.sl<5;D.sl++;dsv();if(give)jewels(1);else{joyT=1.1;burst()}
+    card(`<b style="color:#1fa463;font-size:19px">🌟 هذا عمل صالح!</b><br>${kind==='rd'?B('رددتَ','رددتِ'):B('ألقيتَ','ألقيتِ')} السلام${give?' 💎 +١':''}<br><small>${kind==='rd'?'ردّ السلام من آداب الإسلام الجميلة 🤍':'إفشاء السلام يزرع المحبة بين الناس 🤍'}</small>`,[['الحمد لله',null]])}
   function enter(f){busy=1;let k=0;const s=setInterval(()=>{k++;kid.scale.setScalar(KS*Math.max(0,1-k/10));if(k>=10){clearInterval(s);
     setTimeout(()=>{kid.scale.setScalar(KS);busy=0;f()},1500)}},40)}
   let drops=[];function splash(G){if(!G)return;for(let i=0;i<14;i++){const d=new T.Mesh(new T.SphereGeometry(.07,6,4),new T.MeshStandardMaterial({color:0x5fb0e6}));
@@ -513,8 +625,10 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
   // اللمس
   const cv=R.domElement,ray=new T.Raycaster();
   function pick(x,y){const r=cv.getBoundingClientRect();ray.setFromCamera(new T.Vector2((x-r.left)/r.width*2-1,-(y-r.top)/r.height*2+1),cam);
-    for(const h of ray.intersectObjects(S.children,true)){let o=h.object;while(o&&!(o.userData&&(o.userData.p||o.userData.t!=null||o.userData.l!=null||o.userData.cat)))o=o.parent;if(o)return o.userData}return null}
+    for(const h of ray.intersectObjects(S.children,true)){let o=h.object;while(o&&!(o.userData&&(o.userData.p||o.userData.t!=null||o.userData.l!=null||o.userData.cat||o.userData.ped||o.userData.fk)))o=o.parent;if(o)return o.userData}return null}
   function tap(u){if(!u)return;try{window.Bayt&&Bayt.sTap()}catch(e){}
+    if(u.ped){if(!busy&&(!path.length||wander))A.salam(u.ped-1);return}
+    if(u.fk){if(V){card(`🐄 مزرعة ${V.nick} 🤍`);setTimeout(()=>card(''),1800);return}if(!busy&&(!path.length||wander))A.farm(u.fk);return}
     if(V){if(u.p==='home')card(`🏡 بيت ${V.nick}`,[['🏡 ادخل بيته',()=>A.fhouse()],['حسنًا',null,'sec']]);
       else if(u.p&&Madina.PARTS[u.p])card(`${Madina.PARTS[u.p].e} ${Madina.PARTS[u.p].n} في مدينة ${V.nick} 🤍`);return}
     if(u.t!=null){if(!busy&&(!path.length||wander))A.tree(u.t);return}
@@ -552,7 +666,7 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
     if(path.length){still=0;L.arms.forEach(a=>a.rotation.z*=.7)}
     (S.userData.anim||[]).forEach(f=>f(t,dt));
     if(performance.now()-prAt>2000){prAt=performance.now();prC=prayerNow()}
-    life.update(t,dt,{prayer:prC,mosque:V?(V.lv.m|0):(window.Madina?Madina.st.lv.m|0:0)});sounds&&sounds.tick(dt);
+    life.update(t,dt,{prayer:prC,mosque:V?(V.lv.m|0):(window.Madina?Madina.st.lv.m|0:0),kid:kid.position});sounds&&sounds.tick(dt);
     sparks=sparks.filter(s=>{s.userData.k+=dt;const k=s.userData.k;s.position.addScaledVector(s.userData.v,dt);s.rotation.y+=dt*6;s.material.opacity=Math.max(0,1-k/1.3);
       if(k>1.3){S.remove(s);s.geometry.dispose();s.material.dispose();return false}return true});
     drops=drops.filter(d=>{d.position.y-=dt*4;if(d.position.y<.1){S.remove(d);d.geometry.dispose();d.material.dispose();return false}return true});
