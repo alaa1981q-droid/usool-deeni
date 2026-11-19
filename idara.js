@@ -102,6 +102,27 @@ body.night .bhouse::before{content:'🌙';position:absolute;right:3%;top:1%;widt
 .idroy .ft{position:relative;z-index:1;text-align:center;font-size:12.5px;color:#cfe8da;margin-top:8px}
 .idroy .on{display:inline-block;width:9px;height:9px;border-radius:50%;background:#3ee07f;box-shadow:0 0 0 0 rgba(62,224,127,.7);animation:idpul 1.6s infinite;vertical-align:middle}
 @keyframes idpul{70%{box-shadow:0 0 0 8px rgba(62,224,127,0)}100%{box-shadow:0 0 0 0 rgba(62,224,127,0)}}
+#idara.on{background:radial-gradient(120% 60% at 50% 0,#fff9e8,transparent 70%),linear-gradient(#fbf7ec,#f1ede0)}
+.idsect{text-align:center;font-weight:900;font-size:17px;color:#8a6414;letter-spacing:.5px;margin:2px 0 8px}
+.idtools{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px}
+.idtools button{font:inherit;cursor:pointer;min-width:0;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:8px;align-items:center;text-align:right;
+ padding:9px 10px;border-radius:18px;color:#fff;border:1.5px solid #d9b45a;background:linear-gradient(160deg,#17734b,#0b4d31 70%);
+ box-shadow:0 4px 0 #8a6414,0 8px 16px rgba(10,60,35,.22),inset 0 1px 0 rgba(255,240,190,.45)}
+.idtools button:active{transform:translateY(3px);box-shadow:0 1px 0 #8a6414,inset 0 1px 0 rgba(255,240,190,.45)}
+.idtools span{grid-row:1/3;font-size:30px;line-height:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}
+.idtools b{font-size:16.5px;font-weight:900;color:#ffe9a8;line-height:1.3}.idtools small{font-size:12px;font-weight:700;color:#cfe8da;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.idtools #idSubs{background:linear-gradient(160deg,#c9962c,#8a6414 75%);border-color:#ffe08a;box-shadow:0 4px 0 #5e420a,0 8px 16px rgba(80,50,10,.25),inset 0 1px 0 rgba(255,250,220,.6)}
+.idtools #idSubs b{color:#fff7d6}.idtools #idSubs small{color:#fff0c2}
+.idgrp{margin-bottom:10px}.idgrp:last-of-type{margin-bottom:4px}.idgrp .gh{font-size:14.5px;font-weight:900;color:#8a6414;margin:0 2px 5px;display:flex;align-items:center;gap:6px}
+.idgrp .gh::after{content:'';flex:1;height:1.5px;background:linear-gradient(90deg,#e3cf95,transparent)}
+.idmain .idbox{background:linear-gradient(#fffdf7,#fff)}
+.idsig{text-align:center;font-size:12.5px;color:#a08440;font-weight:700;margin:4px 0 0}
+.idlb{display:block;text-align:right;font-weight:800;font-size:14.5px;margin:6px 2px -4px;color:#0b4d31}
+.idrep{white-space:pre-wrap;text-align:right;direction:rtl;font:inherit;font-size:14px;line-height:1.8;background:#f8f5ea;border:1.5px solid #e3d3a2;border-radius:14px;padding:8px 10px;max-height:46vh;overflow:auto}
+#idPin{grid-column:1/-1;display:flex;align-items:center;gap:10px;width:100%;font:inherit;text-align:right;cursor:pointer;padding:8px 12px;border-radius:18px;color:#5a3d00;
+ border:1.5px solid #e9c14a;background:linear-gradient(160deg,#fff8dc,#ffe7a0);box-shadow:0 4px 0 #d8a52a,0 6px 12px rgba(150,100,10,.15),inset 0 1px 0 #fff;animation:idpin 2.6s ease-in-out infinite}
+#idPin .e{font-size:28px}#idPin .t{flex:1;min-width:0}#idPin b{display:block;font-size:16px}#idPin small{display:block;font-size:12.5px;font-weight:700;color:#7a5a12;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#idPin .go{font-size:24px;color:#c98a12}
+@keyframes idpin{50%{transform:translateY(-2px)}}
 .idmain .idbox{border-color:#e3d3a2;box-shadow:0 5px 0 #eadfbd,0 8px 16px rgba(80,60,10,.06)}
 .idmain .idbox h3{color:#0b4d30;border-bottom:0;padding-bottom:10px;background:linear-gradient(90deg,transparent,#d9b45a 25%,#d9b45a 75%,transparent) bottom/100% 2px no-repeat}
 .idmain .idst b{font-size:21px}.idmain .idst span{font-size:16px}
@@ -131,7 +152,8 @@ async function inbox(){const API=O();if(!API||!navigator.onLine)return;
   if(!API.db||!API.me)return;const d=D();d.newsSeen=d.newsSeen||{};if(!d.newsFrom){d.newsFrom=Date.now()-14*864e5;Aamal.save()}
   try{const s=(await API.db.ref('news').orderByChild('ts').limitToLast(10).get()).val()||{};
     Object.entries(s).sort((a,b)=>(a[1].ts||0)-(b[1].ts||0)).forEach(([id,v])=>{if(!v||d.newsSeen[id]||(v.ts||0)<d.newsFrom)return;
-      d.newsSeen[id]=1;Aamal.save();queue.push({title:v.title,msg:v.msg,j:Math.min(500,v.j|0),em:'📢'})})}catch(e){}
+      d.newsSeen[id]=1;const x=Math.max(0,Math.min(500,v.x|0));if(x){d.xpAdj=(d.xpAdj|0)+x;try{Alqab.soon()}catch(e){}}Aamal.save();queue.push({title:v.title,msg:v.msg,j:Math.min(500,v.j|0),x,em:v.x||v.j&&!v.msg?'🎁':'📢'})});
+    pinShow(Object.values(s).filter(v=>v&&+v.pin>Date.now()).sort((a,b)=>(b.ts||0)-(a.ts||0))[0])}catch(e){}
   try{const p=(await API.db.ref('prizes/'+API.me).get()).val()||{};
     Object.entries(p).forEach(([id,v])=>{if(!v||d.newsSeen['p'+id])return;d.newsSeen['p'+id]=1;Aamal.save();
       const done=()=>API.db.ref(`prizes/${API.me}/${id}`).remove().catch(()=>{});
@@ -144,6 +166,11 @@ async function inbox(){const API=O();if(!API||!navigator.onLine)return;
     queue.unshift({em:'⛔',title:'توقّف لعبك أونلاين مؤقتًا',msg:`أوقفت الإدارة اللعب أونلاين حتى ${t.toLocaleDateString('ar-IQ',{weekday:'long',day:'numeric',month:'long'})}.${b.why?`\nالسبب: ${b.why}`:''}\nتستطيع أن تتعلّم وتحفظ وتبني بيتك كالعادة 🤍`})}}catch(e){}
   try{if(API.profile)await weekPrize(API)}catch(e){}
   nextMsg()}
+// (v13.3) 📌 إعلان مثبّت من المدير: شريط ذهبي أعلى الواجهة حتى ينتهي وقته (news.pin = وقت الانتهاء)
+function pinShow(v){let el=$('#idPin');if(!v){if(el)el.remove();return}
+  if(!el){el=document.createElement('button');el.id='idPin';const h=$('#home .hero');if(!h)return;h.after(el)}
+  el.innerHTML=`<span class="e">📌</span><span class="t"><b>${esc(v.title||'إعلان من الإدارة')}</b>${v.msg?`<small>${esc(v.msg).slice(0,70)}</small>`:''}</span><span class="go">‹</span>`;
+  el.onclick=()=>modal(`<div class="idmsg"><div class="em">📌</div><h3 style="margin:2px 0">${esc(v.title||'إعلان من الإدارة')}</h3>${v.msg?`<p>${esc(v.msg)}</p>`:''}<small style="color:var(--muted)">من إدارة جنّتي الصغيرة 🤍</small></div><div class="nav"><button class="btn gold" data-close>حسنًا 🌷</button></div>`)}
 // ✏️ الإدارة غيّرت اسم الطفل: يُحفظ في ملفّه، ويُثبَّت أسبوعًا
 async function renameMe(API,n){n=String(n).trim().replace(/\s+/g,' ').slice(0,16);if(!API.profile)return;
   const old=API.profile.nick;API.profile.nick=n;state.nick=n;save();D().nickLock=Date.now()+7*864e5;Aamal.save();
@@ -328,37 +355,75 @@ function giftTo(uid,nick,av){const API=O();
       try{await API.db.ref('prizes/'+uid).push({msg,j,ts:firebase.database.ServerValue.TIMESTAMP});closeModal();API.toast(`أُرسلت الجائزة إلى ${nick||''} ✓`)}catch(e){$('#gSend').disabled=false;API.toast('تعذّر الإرسال')}}})}
 async function panel(){const API=O();heroes=null;all=null;view='main';
   const now=new Date(),day=now.toLocaleDateString('ar-IQ',{weekday:'long'}),dt=now.toLocaleDateString('ar-IQ',{day:'numeric',month:'long',year:'numeric'});
-  body().innerHTML=`<div class="idmain"><div class="idroy"><div class="hd"><span class="md"><i>👑</i>🛡️</span><span class="tt"><b>لوحة الإدارة</b><small>مدير جنّتي الصغيرة</small><em>${day} · ${dt}</em></span></div>
+  const hr=now.getHours(),greet=hr<12?'صباح الخير':'مساء الخير';
+  body().innerHTML=`<div class="idmain"><div class="idroy"><div class="hd"><span class="md"><i>👑</i>🛡️</span><span class="tt"><b>لوحة الإدارة</b><small>السلام عليكم يا شيخنا · ${greet} 🌷</small><em>${day} · ${dt}</em></span></div>
       <div class="orn"></div>
       <div class="kp"><button data-k0="all"><b id="idK1">…</b><small>👥 المشتركون</small></button><button data-k0="new"><b id="idK2">…</b><small>🆕 الجدد</small></button><button data-k0="pnow"><b id="idK3">…</b><small><span class="on"></span> أونلاين</small></button></div>
       <button class="nw" id="idNew" hidden></button>
       <div class="ft" id="idCnt">جارٍ التحميل…</div></div>
+    <div class="idsect">⚜️ صلاحيات المدير ⚜️</div>
+    <div class="idtools">
+      <button id="tMsg"><span>📢</span><b>رسالة للجميع</b><small>تصل لكل طفل مرة واحدة</small></button>
+      <button id="tGift"><span>🎁</span><b>هدية للجميع</b><small>جواهر ونقاط لكل الأطفال</small></button>
+      <button id="tPin"><span>📌</span><b>إعلان مثبّت</b><small>شريط ذهبي في واجهتهم</small></button>
+      <button id="tFind"><span>🔍</span><b>ابحث عن طفل</b><small>بالاسم أو الرمز</small></button>
+      <button id="tRep"><span>📋</span><b>تقرير التطبيق</b><small>انسخه أو شاركه</small></button>
+      <button id="idSubs"><span>👥</span><b>المشتركون</b><small id="idSubsN">⏳</small></button>
+    </div>
     <div class="idbox"><h3>📊 إحصائيات التطبيق</h3><div id="idStats"><p class="tip">⏳</p></div></div>
-    <button class="idsubs" id="idSubs"><span class="e">👥</span><span class="t"><b>المشتركون</b><small id="idSubsN">⏳ جارٍ التحميل…</small></span><span class="go">‹</span></button>
-    <div class="idbox"><h3>📢 رسالة لكل الأطفال</h3>
-      <input class="inp" id="nTitle" maxlength="60" placeholder="العنوان، مثل: عيد مبارك 🌙" style="text-align:right">
-      <textarea class="inp" id="nMsg" maxlength="600" placeholder="نص الرسالة"></textarea>
-      <select class="inp" id="nJ">${JOPT}</select>
-      <button class="btn gold" id="nSend" style="flex:none;width:100%">📢 أرسل للجميع</button></div>
-    <div class="idbox"><h3>📜 آخر الرسائل المرسلة</h3><div id="idNews"><p class="tip">⏳</p></div></div></div>`;
+    <div class="idbox"><h3>📜 آخر ما أرسلته</h3><div id="idNews"><p class="tip">⏳</p></div></div>
+    <p class="idsig">👑 جنّتي الصغيرة · بإشراف الشيخ علاء المطوري</p></div>`;
   body().querySelectorAll('[data-k0]').forEach(b=>b.onclick=()=>{if(all)openKids(b.dataset.k0)});
   $('#idSubs').onclick=()=>{if(all)openKids()};
-  $('#nSend').onclick=()=>{const title=$('#nTitle').value.trim(),msg=$('#nMsg').value.trim(),j=+$('#nJ').value;
-    if(!title&&!msg){API.toast('اكتب العنوان أو الرسالة');return}
-    modal(`<h3 style="margin:4px 0">إرسال لكل الأطفال؟</h3><p><b>${esc(title)}</b><br>${esc(msg).slice(0,140)}${j?`<br>💎 ${ar(j)} لكل طفل`:''}</p><div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn gold" id="nYes">نعم، أرسل</button></div>`,()=>{
-      $('#nYes').onclick=async()=>{closeModal();try{await API.db.ref('news').push({title,msg,j,ts:firebase.database.ServerValue.TIMESTAMP});API.toast('أُرسلت ✓');panel()}catch(e){API.toast('تعذّر الإرسال')}}})};
+  $('#tFind').onclick=()=>{if(!all)return;openKids();setTimeout(()=>{const i=$('#kQ');if(i)i.focus()},150)};
+  $('#tMsg').onclick=()=>sendNews(API,0);$('#tPin').onclick=()=>sendNews(API,1);$('#tGift').onclick=()=>giftAll(API);$('#tRep').onclick=()=>report(API);
   await loadKids(API);{const c=$('#idCnt'),n=(all||[]).length,g=(all||[]).filter(gone).length,u=(all||[]).filter(x=>!x.seen).length;
     const k=(i,v)=>{const e=$('#idK'+i);if(e)e.textContent=ar(v)};k(1,n);k(2,(all||[]).filter(p=>p.since&&Date.now()-p.since<864e5).length);k(3,(all||[]).filter(plNow).length);
     const fr=lastV?(all||[]).filter(fresh).length:0,nb=$('#idNew');
     if(nb&&fr){nb.hidden=false;nb.innerHTML=`<span class="bl">🔔</span> ${fr==1?'مشترك جديد واحد':fr==2?'مشتركان جديدان':ar(fr)+(fr<=10?' مشتركين جدد':' مشتركًا جديدًا')} من آخر مرة فتحت الإدارة ‹`;nb.onclick=()=>openKids('fresh')}
     if(c)c.innerHTML=`💤 غائبون شهرًا أو أكثر: ${ar(g)}${u?` · ❔ بلا تسجيل دخول: ${ar(u)}`:''}`;
-    const sn=$('#idSubsN');if(sn)sn.textContent=`${ar(n)} مشترك · ☀️ ${ar((all||[]).filter(p=>p.seen&&Date.now()-p.seen<864e5).length)} دخلوا اليوم · اضغط لترى الأسماء`}
+    const sn=$('#idSubsN');if(sn)sn.textContent=`${ar(n)} طفل · ☀️ ${ar((all||[]).filter(p=>p.seen&&Date.now()-p.seen<864e5).length)} اليوم`}
   stats(API);
   // الرسائل
   try{const s=(await API.db.ref('news').orderByChild('ts').limitToLast(10).get()).val()||{};const rows=Object.entries(s).sort((a,b)=>(b[1].ts||0)-(a[1].ts||0));
-    $('#idNews').innerHTML=rows.length?rows.map(([id,v])=>`<div class="idrow"><b>📢 ${esc(v.title||v.msg||'').slice(0,40)}</b><small>${v.j?'💎'+ar(v.j):''} ${v.ts?new Date(v.ts).toLocaleDateString('ar-IQ'):''}</small><button class="mini" style="background:#e2504a" data-del="${esc(id)}">🗑️</button></div>`).join(''):'<p class="tip">لم تُرسل رسائل بعد</p>';
+    $('#idNews').innerHTML=rows.length?rows.map(([id,v])=>`<div class="idrow"><b>${+v.pin>Date.now()?'📌':v.x?'🎁':'📢'} ${esc(v.title||v.msg||'').slice(0,40)}</b><small>${v.j?'💎'+ar(v.j):''}${v.x?' ✨'+ar(v.x):''} ${v.ts?new Date(v.ts).toLocaleDateString('ar-IQ'):''}</small><button class="mini" style="background:#e2504a" data-del="${esc(id)}">🗑️</button></div>`).join(''):'<p class="tip">لم تُرسل رسائل بعد</p>';
     $('#idNews').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>modal(`<h3 style="margin:4px 0">حذف هذه الرسالة؟</h3><p>لن يراها الأطفال الذين لم يفتحوها بعد.</p><div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn" id="dYes" style="background:var(--bad)">حذف</button></div>`,()=>{
       $('#dYes').onclick=async()=>{closeModal();try{await API.db.ref('news/'+b.dataset.del).remove();panel()}catch(e){API.toast('تعذّر الحذف')}}}))}catch(e){$('#idNews').innerHTML='<p class="tip">تعذّر التحميل</p>'}}
+/* (v13.3) ⚜️ صلاحيات المدير — كلها عبر news (لا تحتاج تغيير القواعد): رسالة، إعلان مثبّت (pin = وقت الانتهاء)، هدية للجميع (j جواهر + x نقاط)، تقرير */
+function sendNews(API,pin){
+  modal(`<div style="font-size:46px">${pin?'📌':'📢'}</div><h3 style="margin:2px 0">${pin?'إعلان مثبّت في واجهة الأطفال':'رسالة لكل الأطفال'}</h3>
+    <input class="inp" id="nTitle" maxlength="60" placeholder="العنوان، مثل: عيد مبارك 🌙" style="text-align:right">
+    <textarea class="inp" id="nMsg" maxlength="600" placeholder="نص الرسالة" style="min-height:90px;text-align:right"></textarea>
+    ${pin?`<select class="inp" id="nPin"><option value="1">📌 يبقى يومًا واحدًا</option><option value="3" selected>📌 يبقى ٣ أيام</option><option value="7">📌 يبقى أسبوعًا</option><option value="30">📌 يبقى شهرًا</option></select>`:''}
+    <select class="inp" id="nJ">${JOPT.replace(/<option value="1000">[^<]*<\/option>/,'')}</select>
+    <div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn gold" id="nSend">${pin?'📌 ثبّت الإعلان':'📢 أرسل للجميع'}</button></div>`,()=>{
+    $('#nSend').onclick=async()=>{const title=$('#nTitle').value.trim(),msg=$('#nMsg').value.trim(),j=+$('#nJ').value;
+      if(!title||!msg){API.toast('اكتب العنوان والرسالة');return}
+      const o={title,msg,j,ts:firebase.database.ServerValue.TIMESTAMP};if(pin)o.pin=Date.now()+(+$('#nPin').value)*864e5;
+      try{await API.db.ref('news').push(o);closeModal();API.toast(pin?'ثُبّت الإعلان ✓':'أُرسلت ✓');panel()}catch(e){API.toast('تعذّر الإرسال')}}})}
+function giftAll(API){const n=(all||[]).length,opt=(a,u)=>a.map(v=>`<option value="${v}">${v?`${u} ${ar(v)}`:'بلا'}</option>`).join('');
+  modal(`<div style="font-size:50px">🎁</div><h3 style="margin:2px 0">هدية لكل الأطفال</h3><p style="font-size:14.5px;margin:2px 0">تصل لكل طفل مرة واحدة حين يفتح التطبيق${n?` (${ar(n)} مشترك)`:''}</p>
+    <label class="idlb">💎 جواهر</label><select class="inp" id="gJ">${opt([10,25,50,100,200,500],'💎')}</select>
+    <label class="idlb">✨ نقاط (ترفع مستواه)</label><select class="inp" id="gX">${opt([0,20,50,100,200,500],'✨')}</select>
+    <input class="inp" id="gT" maxlength="60" value="🎁 هدية من المدير" style="text-align:right">
+    <textarea class="inp" id="gM" maxlength="600" style="min-height:70px;text-align:right">بارك الله فيكم يا أحبّتي، استمرّوا في التعلّم وعمل الخير 🤍</textarea>
+    <div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn gold" id="gGo">🎁 أرسل الهدية</button></div>`,()=>{
+    $('#gGo').onclick=async()=>{const j=+$('#gJ').value,x=+$('#gX').value,title=$('#gT').value.trim()||'🎁 هدية من المدير',msg=$('#gM').value.trim()||'هدية من الإدارة 🤍';
+      try{await API.db.ref('news').push({title,msg,j,x,ts:firebase.database.ServerValue.TIMESTAMP});closeModal();API.toast('أُرسلت الهدية ✓');panel()}catch(e){API.toast('تعذّر الإرسال')}}})}
+async function report(API){const L=all||[],t=Date.now(),D1=864e5,c=f=>ar(L.filter(f).length);
+  let dl='—';try{dl=ar((await API.db.ref('stats/bookDl').get()).val()|0)}catch(e){}
+  const txt=`📊 تقرير «جنّتي الصغيرة» — ${new Date().toLocaleDateString('ar-IQ',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}
+👥 المشتركون: ${ar(L.length)} (👦 ${c(p=>p.sx=='b')} · 👧 ${c(p=>p.sx=='g')})
+🆕 الجدد آخر ٢٤ ساعة: ${c(p=>p.since&&t-p.since<D1)}
+☀️ دخلوا اليوم: ${c(p=>p.seen&&t-p.seen<D1)} · 📅 هذا الأسبوع: ${c(p=>p.seen&&t-p.seen<7*D1)} · 🗓️ هذا الشهر: ${c(p=>p.seen&&t-p.seen<30*D1)}
+📖 حفظوا سورًا: ${c(p=>p.hz>0)} · 🕌 سجّلوا صلواتهم: ${c(p=>p.pr>0)}
+📥 نزّلوا الكتاب: ${dl}
+🎮 لعبوا أونلاين: ${c(p=>p.games>0)}
+🔗 https://alaa1981q-droid.github.io/usool-deeni/`;
+  modal(`<div style="font-size:46px">📋</div><h3 style="margin:2px 0">تقرير التطبيق</h3><pre class="idrep">${esc(txt)}</pre>
+    <div class="nav"><button class="btn sec" id="rCp">📋 نسخ</button><button class="btn gold" id="rSh">📤 مشاركة</button></div>`,()=>{
+    $('#rCp').onclick=()=>{try{navigator.clipboard.writeText(txt).then(()=>API.toast('نُسخ ✓'))}catch(e){API.toast('تعذّر النسخ')}};
+    $('#rSh').onclick=()=>{if(navigator.share)navigator.share({text:txt}).catch(()=>{});else $('#rCp').click()}})}
 /* 👥 صفحة المشتركين: كل الأطفال (حتى لو صاروا ألفًا) بصفحات من ٤٠، مع بحث وتبويبات */
 let view='main',lim=40,dlSet=null;
 // الفلاتر التي تفتحها مربعات الإحصائيات
@@ -394,14 +459,12 @@ async function stats(API){const el=$('#idStats');if(!el)return;const L=all||[],t
   let dl='—';try{dl=ar((await API.db.ref('stats/bookDl').get()).val()|0)}catch(e){}
   // v7.1: مربعات صغيرة (الأيقونة والرقم في سطر واحد) وكتابة أوضح، حتى لا تطول الصفحة
   const tile=(e,v,l,f)=>`<button class="idst" data-f="${f}"><div><span>${e}</span><b>${v}</b></div><small>${l}</small></button>`;
-  el.innerHTML=`<div class="idsts">
-    ${tile('📖',ar(L.filter(p=>p.hz>0).length),'حفظوا سورًا','hz')}${tile('👦',ar(b),'أولاد','b')}${tile('👧',ar(g),'بنات','g')}
-    ${tile('🟢',ar(on),'داخلين الآن','now')}${tile('☀️',ar(d1),'دخلوا اليوم','d1')}${tile('📅',ar(d7),'دخلوا الأسبوع','d7')}
-    ${tile('🗓️',ar(d30),'دخلوا الشهر','d30')}${tile('🕌',ar(L.filter(p=>p.pr>0).length),'سجّلوا صلواتهم','pr')}${tile('🏅',ar((heroes||[]).length),'أبطال الأسبوع','heroes')}
-    ${tile('⚔️',ar(games),'مباراة أونلاين','play')}${tile('🎮',ar(players),'لعبوا أونلاين','play')}${tile('📥',dl,'نزّلوا الكتاب','dl')}
-    ${tile('⭐',avg?ar(Math.round(avg*10)/10):'—','متوسط المستوى','lv')}${tile('👑',mx.lv?ar(mx.lv):'—',mx.lv?'الأعلى: '+esc(mx.nick):'أعلى مستوى','max')}${tile('✏️',ar(ren),'غيّروا أسماءهم','names')}
-    ${tile('⚠️',ar(sus2),'مشبوهون','sus')}${tile('⛔',ar(bn),'محظورون الآن','ban')}${n-b-g>0?tile('❔',ar(n-b-g),'لم يحدّد الجنس','nosx'):''}</div>
-    <p class="tip" style="margin:6px 0 0">👆 اضغط على أي مربع لترى أسماء أصحابه</p>`;
+  const grp=(h,tiles)=>`<div class="idgrp"><div class="gh">${h}</div><div class="idsts">${tiles}</div></div>`;
+  el.innerHTML=grp('👥 المشتركون',`${tile('👦',ar(b),'أولاد','b')}${tile('👧',ar(g),'بنات','g')}${n-b-g>0?tile('❔',ar(n-b-g),'لم يحدّد','nosx'):tile('✏️',ar(ren),'غيّروا أسماءهم','names')}`)
+    +grp('📅 الحضور',`${tile('🟢',ar(on),'داخلين الآن','now')}${tile('☀️',ar(d1),'دخلوا اليوم','d1')}${tile('📅',ar(d7),'هذا الأسبوع','d7')}${tile('🗓️',ar(d30),'هذا الشهر','d30')}${tile('🏅',ar((heroes||[]).length),'أبطال الأسبوع','heroes')}${tile('📥',dl,'نزّلوا الكتاب','dl')}`)
+    +grp('🌟 التعلّم والأعمال',`${tile('📖',ar(L.filter(p=>p.hz>0).length),'حفظوا سورًا','hz')}${tile('🕌',ar(L.filter(p=>p.pr>0).length),'سجّلوا صلواتهم','pr')}${tile('⭐',avg?ar(Math.round(avg*10)/10):'—','متوسط المستوى','lv')}`)
+    +grp('🎮 أونلاين والأمان',`${tile('⚔️',ar(games),'مباراة','play')}${tile('🎮',ar(players),'لعبوا أونلاين','play')}${tile('👑',mx.lv?ar(mx.lv):'—',mx.lv?esc(mx.nick):'أعلى مستوى','max')}${n-b-g>0?tile('✏️',ar(ren),'غيّروا أسماءهم','names'):''}${tile('⚠️',ar(sus2),'مشبوهون','sus')}${tile('⛔',ar(bn),'محظورون','ban')}`)
+    +`<p class="tip" style="margin:6px 0 0">👆 اضغط على أي مربع لترى أسماء أصحابه</p>`;
   el.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{const f=b.dataset.f;
     if(f=='max'){if(mx.id)kidCard(mx.id);return}openKids(f)})}
 /* 🎉 v10.7: رسالة ترحيب باسم الطفل + ١٠ جواهر، مرة واحدة بعد أول تسجيل */
