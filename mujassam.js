@@ -62,8 +62,10 @@ function markSprite(T,e,col,sc){const c=document.createElement('canvas');c.width
 /* ---------- المشهد ---------- */
 const SPOT={home:[-6,0],m:[6,0],k:[-6,9],q:[6,9],h:[-6,-9],s:[6,-9],sc:[-7,-22]};
 const CAT=[3.4,-10.6];
-// (v12.1) المقياس: الولد نصف حجمه السابق، والبنايات أكبر (المدرسة والجامع الأكبر) حتى يفهم الطفل الحجوم
-const KS=.95,BS={m:1.5,sc:1.15,home:1.25,k:1.3,q:1.3,s:1.25,h:1.15};
+// (v12.2) المقياس: الولد أصغر (طوله أقل من نصف باب المدرسة) والناس معه، والجامع والمدرسة أكبر.
+// الجامع محصور بين طريقين (z=±4.6) فعمقه لا يتجاوز 7.2 (mScale).
+const KS=.7,PS=.7,BS={m:1.85,sc:1.45,home:1.25,k:1.3,q:1.3,s:1.25,h:1.15};
+const mScale=l=>Math.min(BS.m,7.2/(3*(l===2?1.25:l>=3?1.5:1)));
 function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   const Md=window.Madina,lv=V?V.lv:(Md?Md.st.lv:{}),job=V?null:(Md?Md.st.job:null),need=(p,l)=>Md&&Md.need?Md.need(p,l):'';
   const LV=p=>Math.max(0,Math.min(3,lv[p]|0));
@@ -233,7 +235,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
       else{top=plot(G);mk=need(p,0)?['🔒','#9aa8b0']:['+','#f0a020']}
       const pr=P[p]||{};lb=textSprite(T,`${pr.e||''} ${pr.n||''}`,'rgba(255,255,255,.92)','#5a4a1a');
       if(mk&&!V)mark(G,mk[0],mk[1],top+.4,1.9)}
-    lb.position.set(0,top+.7,0);G.add(lb);G.scale.setScalar(BS[p]||1);if(p==='sc'){const k=BS.sc-1;G.position.x-=k*4.6;G.position.z-=k*4.4}});
+    lb.position.set(0,top+.7,0);G.add(lb);G.scale.setScalar(p==='m'?mScale(LV('m')||1):(BS[p]||1));if(p==='sc'){const k=BS.sc-1;G.position.x-=k*4.6;G.position.z-=k*4.4}});
   // أشجار المدينة (العطشى عليها 💧)
   const th=thirsty(),trees=[];
   TREES.forEach(([x,z],i)=>{const G=new T.Group();G.position.set(x,0,z);G.userData.t=i;S.add(G);tree(0,0,G);trees[i]=G;
@@ -296,7 +298,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       if(kind==='guard'){add(new T.CylinderGeometry(.22,.22,.14,12),M(0x152a4f),0,1.62,0,P);add(new T.BoxGeometry(.3,.03,.18),M(0x101010),0,1.56,.17,P);
         const ln=add(new T.SphereGeometry(.11,10,8),new T.MeshStandardMaterial({color:0xfff1b0,emissive:0xffd860,emissiveIntensity:1.6}),.32,.8,.15,P);
         const pl=new T.PointLight(0xffd27a,1.2,9,1.4);pl.position.set(.32,1,.3);P.add(pl)}}
-    P.scale.setScalar(s*1.35);g.add(P);return P}
+    P.scale.setScalar(s*1.35*PS);g.add(P);return P}
   // مركبات: باص مدرسة أصفر وسيارات
   function wheels(V,w,l){const wm=M(0x222222);[[-w,l],[w,l],[-w,-l],[w,-l]].forEach(([x,z])=>{const c=add(new T.CylinderGeometry(.34,.34,.25,14),wm,x,.34,z,V);c.rotation.z=Math.PI/2})}
   function bus(){const V=new T.Group(),y=M(0xffc21a),gl=M(0x9fd8ff);add(new T.BoxGeometry(1.8,1.55,4.6),y,0,1.15,0,V);add(new T.BoxGeometry(1.82,.12,4.62),M(0x222222),0,.95,0,V);
@@ -306,7 +308,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
   const cars=[{v:bus(),stop:-17.6,off:0},{v:car(0xe2504a),stop:-12.4,off:1.6},{v:car(0x4f8fe0),stop:-8.6,off:3.2}];
   cars.forEach(c=>{c.v.rotation.y=Math.PI;c.v.visible=false});
   // طلاب الساحة
-  const YX=[-10.2,-4],YZ=[-19.2,-15.7],yard=[];
+  const YX=[-12.6,-4.3],YZ=[-19.7,-15.2],yard=[];
   for(let i=0;i<10;i++){const p=person('kid',i);p.position.set(YX[0]+Math.random()*(YX[1]-YX[0]),0,YZ[0]+Math.random()*(YZ[1]-YZ[0]));p.userData={tx:p.position.x,tz:p.position.z,w:Math.random()*3,j:0};yard.push(p)}
   const guard=person('guard',1);guard.position.set(-2.5,0,-17);
   // مشاة (طلاب ينزلون/يصعدون، ومصلّون)
@@ -316,7 +318,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
     p.visible=false;setTimeout(()=>{p.visible=true;walk(p,leave?[c,b,a]:[a,b,c],1.6,'gone')},i*450)}}
   const PR=[[.6,30],[.6,-30],[-14,4.6],[14,4.6],[-14,-4.6]];let prT=0,prN=0;
   function worshipper(){const s=PR[Math.floor(Math.random()*PR.length)],p=person(Math.random()<.6?'man':'woman',Math.floor(Math.random()*9));
-    const pts=[s];if(s[1]!==4.6){if(s[1]===-4.6)pts.push([.6,-4.6]);pts.push([.6,4.6])}pts.push([6+(Math.random()-.5)*.8,4.6],[6,2.7]);walk(p,pts,1.5+Math.random()*.4,'enter');prN++}
+    const pts=[s];if(s[1]!==4.6){if(s[1]===-4.6)pts.push([.6,-4.6]);pts.push([.6,4.6])}pts.push([6+(Math.random()-.5)*.8,4.6],[6,3.75]);walk(p,pts,1.5+Math.random()*.4,'enter');prN++}
   let lastCycle=-1;
   function update(t,dt,o){const h=hourNow(),day=!night;
     // الساحة والحارس
@@ -379,7 +381,7 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
   if(ui.snd){const upd=()=>{ui.snd.textContent=sounds.quiet?"🌙":sndOn()?"🔊":"🔇"};upd();ui.snd.onclick=()=>{if(sounds.quiet){card("🌙 الليل هادئ… المدينة نائمة 😴");setTimeout(()=>card(""),2200);return}try{localStorage.setItem(SKEY,sndOn()?"0":"1")}catch(e){}upd()}}
   const kid=makeKid();S.add(kid);let at={x:-3.4,z:1,via:null},path=[],onArrive=null,busy=0;kid.position.set(at.x,0,at.z);kid.rotation.y=Math.PI/2;
   const sign=v=>v<0?-1:1;
-  const door=p=>{if(p==='sc')return {x:-2.4,z:-17.6,via:null};if(p==='m')return {x:6,z:2.9,via:4.6};const [x,z]=SPOT[p];return {x:x-sign(x)*(2.2+(BS[p]||1)),z:z+1,via:null}};
+  const door=p=>{if(p==='sc')return {x:-2.4,z:-17.6,via:null};if(p==='m')return {x:6,z:3.95,via:4.6};const [x,z]=SPOT[p];return {x:x-sign(x)*(2.2+(BS[p]||1)),z:z+1,via:null}};
   const treeSpot=i=>{const [x,z]=TREES[i];return Math.abs(x)<4?{x:x-sign(x)*1.1,z,via:null}:{x:x-sign(x)*1.2,z,via:sign(z)*4.6}};
   const litSpot=i=>{const [x,z]=LITTER[i];return {x,z,via:Math.abs(x)<4?null:z}};
   // (v11.4) الطفل يتجوّل وحده بفرح، ويلتفت إليك عندما يقف، ويقفز فرحًا عند الجوائز
@@ -395,7 +397,7 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
     c.classList.add('on');c.querySelectorAll('button').forEach(b=>b.onclick=()=>{const f=btns[+b.dataset.i][1];card('');f&&f()})}
   // نجوم وقلوب تتطاير حول الطفل عند الفرح
   function burst(){const C=[0xffd23f,0xff6fb5,0x4fc3ff,0x7be37b,0xffffff];for(let i=0;i<16;i++){const s=new T.Mesh(new T.OctahedronGeometry(.16),new T.MeshBasicMaterial({color:C[i%5],transparent:true}));
-    s.position.set(kid.position.x,2.2,kid.position.z);const a=i/16*Math.PI*2;s.userData={k:0,v:new T.Vector3(Math.cos(a)*2.2,2.5+Math.random()*1.5,Math.sin(a)*2.2)};S.add(s);sparks.push(s)}}
+    s.position.set(kid.position.x,1.4,kid.position.z);const a=i/16*Math.PI*2;s.userData={k:0,v:new T.Vector3(Math.cos(a)*2.2,2.5+Math.random()*1.5,Math.sin(a)*2.2)};S.add(s);sparks.push(s)}}
   function jewels(n){joyT=1.1;burst();try{Deco.addJ(n)}catch(e){}try{tone(988,.08,'triangle',.1);setTimeout(()=>tone(1318,.12,'triangle',.1),110)}catch(e){}
     const f=document.createElement('div');f.className='m3fly';f.textContent='💎 +'+arn(n);ov.appendChild(f);setTimeout(()=>f.remove(),1500);showJ()}
   // (v11.7) «سعادة مدينتي» أعلى المدينة: ترتفع بالأعمال الصالحة اليوم وتنخفض إذا غاب الطفل (wajiha.js)
@@ -493,7 +495,7 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
     else{L.legs.forEach(l=>l.rotation.x*=.8);L.arms.forEach(a=>a.rotation.x*=.8);still+=dt;waveT+=dt;
       // يلتفت نحوك ليظهر وجهه
       const ta=Math.atan2(cam.position.x-kid.position.x,cam.position.z-kid.position.z);let da=ta-kid.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));kid.rotation.y+=da*Math.min(1,dt*4);
-      if(joyT>0){joyT-=dt;const k=1.1-joyT;kid.position.y=Math.abs(Math.sin(k*Math.PI*2.7))*.7;L.arms[0].rotation.z=-2.6;L.arms[1].rotation.z=2.6}
+      if(joyT>0){joyT-=dt;const k=1.1-joyT;kid.position.y=Math.abs(Math.sin(k*Math.PI*2.7))*.45;L.arms[0].rotation.z=-2.6;L.arms[1].rotation.z=2.6}
       else{kid.position.y=0;const w=waveT%6;L.arms[0].rotation.z*=.85;L.arms[1].rotation.z=w<1.4?2.5+Math.sin(w*12)*.35:L.arms[1].rotation.z*.85}
       // يتجوّل وحده إذا تُرك قليلًا
       if(still>8&&!busy&&!ui.card.classList.contains('on')&&!document.querySelector('#modal.on')){still=0;const p=WP[Math.floor(Math.random()*WP.length)];go({x:p[0],z:p[1],via:Math.abs(p[0])>2?p[1]:null},null,true)}}
