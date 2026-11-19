@@ -140,6 +140,30 @@ css.textContent=`
 .aqm .bar2{height:7px;background:#eef3ef;border-radius:7px;overflow:hidden;margin-top:3px}.aqm .bar2 i{display:block;height:100%;border-radius:7px}
 .aqm button.t0{opacity:.75}.aqm button.t0 .e{filter:grayscale(.7)}
 .aqdo{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+/* (v13.2) ملفّي: أزرار مجسّمة بألوان فاتحة */
+.aqhead{background:linear-gradient(160deg,#fff8e0,#fff 70%);border:0;box-shadow:0 5px 0 #efd27a,0 10px 20px rgba(200,150,30,.15),inset 0 2px 0 #fff}
+.aqhead .av{display:inline-grid;place-items:center;width:86px;height:86px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#ffeec0);box-shadow:0 0 0 4px #f2b632,0 5px 0 4px #d8961e;font-size:56px;margin:4px 0 6px}
+.aqlv{box-shadow:0 3px 0 #0b4d31}.aqtt{box-shadow:0 3px 0 #e3b54a}
+.aqhead #aqOn{flex:none;margin:0 auto;font-size:15px;padding:6px 14px!important;border-radius:14px;box-shadow:0 3px 0 #b9cfc2}
+.aqsec{text-align:center;font-size:18px}
+.aqdo{gap:10px}
+.aqdo button,.aqm button,.aqts button,.aqtabs button{background:var(--c,#fff);border:0;box-shadow:0 4px 0 var(--d,#c9d6e3),0 6px 12px rgba(0,0,0,.06),inset 0 2px 0 rgba(255,255,255,.85);transition:transform .1s,box-shadow .1s}
+.aqdo button:active,.aqm button:active,.aqts button:active,.aqtabs button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--d,#c9d6e3),inset 0 2px 0 rgba(255,255,255,.85)}
+.aqdo button{padding:8px 2px 7px;font-size:13.5px;font-weight:800;border-radius:18px}.aqdo button span{font-size:30px}
+.aqtabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0 10px}
+.aqtabs button{--c:#fff;--d:#c9d6e3;border-radius:16px;padding:6px 2px;font:inherit;font-weight:800;font-size:15px;color:#3d5a4b}
+.aqtabs button span{display:block;font-size:24px;line-height:1.2}
+.aqtabs button.on{--c:#fff4d6;--d:#e0a526;color:#7a4b00;outline:2.5px solid #f2b632}
+.aqm3{grid-template-columns:repeat(3,1fr)}
+.aqm3 button{border-radius:16px;padding:8px 4px 7px}.aqm3 .e{font-size:28px}.aqm3 b{font-size:13px;line-height:1.35}.aqm3 small{font-size:11.5px;font-weight:700}
+.aqm3 .t{font-size:17px;top:2px;left:4px}.aqm3 .bar2{background:rgba(255,255,255,.8)}
+.aqm button.t0{opacity:1}.aqm button.t0 .e{filter:grayscale(.6);opacity:.75}
+.aqts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.aqts button{border-radius:14px;padding:7px 6px;font-size:13.5px;font-weight:800;display:flex;align-items:center;gap:6px;text-align:right}
+.aqts button span{font-size:22px;flex:none}
+.aqts button.on{outline:2.5px solid #f2b632}.aqts button.lock{opacity:.6;filter:grayscale(.5)}
+.aqpane[hidden]{display:none}
+
 .aqdo button{background:#fff;border:2px solid var(--line);border-radius:16px;padding:6px 2px;font-size:13px;font-weight:700;color:var(--ink);position:relative}
 .aqdo button span{display:block;font-size:28px;line-height:1.3}.aqdo button i{position:absolute;top:-6px;left:-4px;font-style:normal}
 .lvup .big{font-size:70px;line-height:1.1;animation:swing 1.2s ease-in-out infinite}
@@ -322,6 +346,9 @@ document.querySelector('.app').appendChild(sec);
 let aqBack=null,vc=null;
 const stopVc=()=>{if(vc){vc.stop();vc=null}};
 $('#aqBack').onclick=()=>{stopVc();if(aqBack){const f=aqBack;aqBack=null;f()}else goHome()};
+// (v13.2) ملفّي أقصر وأجمل: رأس مجسّم، أعمال اليوم بأزرار ملوّنة مجسّمة، ثم ٣ تبويبات (أوسمتي/قوّتي/إنجازاتي) بدل صفحة طويلة. صورة البيت وقائمة حديقة الأعمال حُذفتا (البيت في المدينة، والأرقام في الأوسمة).
+let aqTab='m';
+const PAL=i=>['--c:#e6f8ec;--d:#a9e2bd','--c:#e5f1ff;--d:#a9c7ee','--c:#ffe9f2;--d:#f2b3cb','--c:#fff6d6;--d:#efd27a','--c:#f0eaff;--d:#c6b5ee','--c:#e2f7f5;--d:#9fd9d2'][i%6];
 function openProfile(){stopVc();aqBack=null;show('alqab');$('#aqTitle').textContent='🏅 ملفّي';const s=snap(),c=s.c,ln=lvName(s.L),t=shownTitle(s),f=(s.x-need(s.L))/(need(s.L+1)-need(s.L));
   const prof=O()&&O().profile;
   $('#aqBody').innerHTML=`<div class="aqhead"><div class="av">${esc(myAv())}</div><h2>${nameTag(myName(),isAdm())}</h2>
@@ -329,22 +356,16 @@ function openProfile(){stopVc();aqBack=null;show('alqab');$('#aqTitle').textCont
     <div class="xpbar" style="margin:8px 10px 2px;height:12px"><i style="width:${Math.round(f*100)}%"></i></div>
     <small style="color:var(--muted)">✨ ${ar(s.x)} نقطة · باقي ${ar(need(s.L+1)-s.x)} للمستوى ${ar(s.L+1)}</small>
     <div class="nav" style="margin-top:6px"><button class="btn sec" id="aqOn" style="padding:8px">${prof||state.nick?'✏️ غيّر اسمي وصورتي':'✏️ اكتب اسمك واختر صورتك'}</button></div></div>
-   <div class="aqsec">🏡 بيتي في الجنة يكبر بأعمالي <small style="font-weight:500;color:var(--muted);font-size:13px">${ar(c.deeds)} عملًا صالحًا</small></div>
-   ${window.Bayt?`<div class="bhouse" id="aqHouse" style="height:210px">${Bayt.houseSVG(Bayt.done,-1,0,true)}</div>`:''}
-   <p class="hnote">كل عملٍ صالح يضيف إلى بيتك شيئًا جميلًا: 🌹 🐦 🌷 ⭐ 🌳 🌴 🦋 🍎 🌻 🏵️</p>
-   <div class="dls">${deedsHTML()}</div>
-   <div class="aqsec">🤲 أعمالٌ ترفع درجتك اليوم</div>
+   <div class="aqsec">🤲 ${B('أعمالك','أعمالكِ')} اليوم</div>
    <div class="aqdo">${doBtns()}</div>
-   <div class="aqsec">💪 نقاط قوّتي <small style="font-weight:500;color:var(--muted);font-size:13px">لقبك يأتي من المجال الذي ${B('تتفوّق','تتفوّقين')} فيه</small></div>
-   <div class="aqm">${AREAS.map(a=>{const tr=areaTier(a,s);return `<button class="t${tr}" data-ar="${a.id}">${tr?`<span class="t">${TIERS[tr-1].e}</span>`:''}<div class="e">${a.e}</div><b>${a.n}</b><small>${tr?`${TIERS[tr-1].n} · لقبه: ${a.t[tr>=3?1:0]}`:'لم يبدأ بعد'}</small></button>`}).join('')}</div>
-   <p class="hnote">${B('تفوّق','تفوّقي')} في مجالين لتصير «متفوّق بـ…»، وفي ثلاثة لتصير 🌟 المتألّق الشامل، وفي خمسة لتصير 💫 جامع الخيرات</p>
-   <div class="aqsec">🏆 إنجازاتي</div>
-   <div class="aqts">${TITLES.map(x=>{const own=s.titles.includes(x.id);return `<button data-t="${x.id}" class="${own?'on':'lock'}">${own?x.e:'🔒'} ${x.n}</button>`}).join('')}</div>
-   <div class="aqsec">🏅 أوسمتي</div>
-   <div class="aqm">${MEDALS.map(m=>{const tr=s.tiers[m.id],nx=m.at[tr],prev=tr?m.at[tr-1]:0,v=c[m.k],fr=nx?Math.min(1,(v-prev)/(nx-prev)):1,col=tr?TIERS[tr-1].c:'#b9cfc2';
-     return `<button class="t${tr}" data-m="${m.id}">${tr?`<span class="t">${TIERS[tr-1].e}</span>`:''}<div class="e">${m.e}</div><b>${m.n}</b><small>${tr?TIERS[tr-1].n:'لم يبدأ بعد'} · ${ar(v)} ${m.u}</small><div class="bar2"><i style="width:${fr*100}%;background:${col}"></i></div><small>${nx?`التالي ${TIERS[tr].e} عند ${ar(nx)}`:'أعلى درجة! 🌟'}</small></button>`}).join('')}</div>
-   <p class="tip">كل عملٍ صالح، وكل درسٍ ${B('تتعلّمه','تتعلّمينه')}، وكل تحدٍّ ${B('تفوز','تفوزين')} به، يرفع درجتك ✨<br>والأعمال تزيّن بيتك في الجنة أيضًا 🏡</p>`;
-  bindDo($('#aqBody'),openProfile);tilt($('#aqHouse'));
+   <div class="aqtabs">${[['m','🏅','أوسمتي'],['a','💪','قوّتي'],['t','🏆','إنجازاتي']].map(([k,e,n])=>`<button data-tab="${k}" class="${aqTab==k?'on':''}"><span>${e}</span>${n}</button>`).join('')}</div>
+   <div class="aqpane" data-pane="m" ${aqTab=='m'?'':'hidden'}><div class="aqm aqm3">${MEDALS.map((m,i)=>{const tr=s.tiers[m.id],nx=m.at[tr],prev=tr?m.at[tr-1]:0,v=c[m.k],fr=nx?Math.min(1,(v-prev)/(nx-prev)):1,col=tr?TIERS[tr-1].c:'#9fd2b4';
+     return `<button class="t${tr}" style="${PAL(i)}" data-m="${m.id}">${tr?`<span class="t">${TIERS[tr-1].e}</span>`:''}<div class="e">${m.e}</div><b>${m.n}</b><small>${ar(v)} ${m.u}</small><div class="bar2"><i style="width:${fr*100}%;background:${col}"></i></div></button>`}).join('')}</div></div>
+   <div class="aqpane" data-pane="a" ${aqTab=='a'?'':'hidden'}><p class="hnote">لقبك يأتي من المجال الذي ${B('تتفوّق','تتفوّقين')} فيه 🌟</p><div class="aqm aqm3">${AREAS.map((a,i)=>{const tr=areaTier(a,s);return `<button class="t${tr}" style="${PAL(i+2)}" data-ar="${a.id}">${tr?`<span class="t">${TIERS[tr-1].e}</span>`:''}<div class="e">${a.e}</div><b>${a.n}</b><small>${tr?a.t[tr>=3?1:0]:'لم يبدأ بعد'}</small></button>`}).join('')}</div></div>
+   <div class="aqpane" data-pane="t" ${aqTab=='t'?'':'hidden'}><div class="aqts">${TITLES.map((x,i)=>{const own=s.titles.includes(x.id);return `<button data-t="${x.id}" style="${PAL(i)}" class="${own?'on':'lock'}"><span>${own?x.e:'🔒'}</span>${x.n}</button>`}).join('')}</div></div>`;
+  $('#aqBody').querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tone(880,.05,'sine',.08);aqTab=b.dataset.tab;
+    $('#aqBody').querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('on',x===b));$('#aqBody').querySelectorAll('[data-pane]').forEach(x=>x.hidden=x.dataset.pane!==aqTab)});
+  bindDo($('#aqBody'),openProfile);
   $('#aqBody').querySelectorAll('[data-dg]').forEach(b=>b.onclick=()=>{tone(880,.05,'sine',.08);goTo(DGO[b.dataset.dg],openProfile)});
   const hh=$('#aqHouse');if(hh){hh.style.cursor='pointer';hh.onclick=()=>view3D()};
   $('#aqBody').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{const x=TITLES.find(t=>t.id==b.dataset.t);
@@ -359,12 +380,13 @@ function openProfile(){stopVc();aqBack=null;show('alqab');$('#aqTitle').textCont
   const on=$('#aqOn');if(on)on.onclick=()=>{stopVc();if(O()&&O().editProfile)O().editProfile(openProfile);else{window.onlineReturn=openProfile;openOnline()}};
   window.scrollTo(0,0)}
 function doBtns(){const a=Aamal,tp=window.Salah?Salah.todayPray().filter(Boolean).length:0;
-  return `<button data-do="sal">${a.doneToday('sal')?'<i>✅</i>':''}<span>💚</span>صلِّ على النبي ١٠</button>
-   <button data-do="tas">${a.doneToday('tas')?'<i>✅</i>':''}<span>📿</span>سبّح الله ١٠</button>
-   <button data-do="pray">${tp==5?'<i>✅</i>':''}<span>🤲</span>صلّيتُ ${ar(tp)}/٥</button>
-   <button data-do="salah"><span>🕌</span>وضوئي وصلاتي</button>
-   <button data-do="hifz"><span>🎤</span>سمّعني آية</button>
-   <button data-do="nafsak"><span>🌷</span>اختبر أخلاقي</button>`}
+  let k=0;const P=()=>` style="${PAL(k++)}"`;
+  return `<button data-do="sal"${P()}>${a.doneToday('sal')?'<i>✅</i>':''}<span>💚</span>صلِّ على النبي ١٠</button>
+   <button data-do="tas"${P()}>${a.doneToday('tas')?'<i>✅</i>':''}<span>📿</span>سبّح الله ١٠</button>
+   <button data-do="pray"${P()}>${tp==5?'<i>✅</i>':''}<span>🤲</span>صلّيتُ ${ar(tp)}/٥</button>
+   <button data-do="salah"${P()}><span>🕌</span>وضوئي وصلاتي</button>
+   <button data-do="hifz"${P()}><span>🎤</span>سمّعني آية</button>
+   <button data-do="nafsak"${P()}><span>🌷</span>اختبر أخلاقي</button>`}
 function bindDo(el,ret){el.querySelectorAll('[data-do]').forEach(b=>b.onclick=()=>{tone(880,.05,'sine',.08);goTo(b.dataset.do,ret)})}
 function goTo(g,ret){const click=s=>{const e=$(s);e&&e.click()};
   ({sal:()=>count('sal',ret),tas:()=>count('tas',ret),pray:()=>window.Salah&&Salah.openPray(),salah:()=>window.Salah&&Salah.open(),
