@@ -22,10 +22,10 @@ css.textContent=`body.m3on .modal{z-index:9100}body.m3on #confetti{z-index:9150}
 #m3d .m3card.on{display:block;animation:m3in .3s ease}@keyframes m3in{from{transform:translateY(20px);opacity:0}}
 #m3d .m3card .row{display:flex;gap:8px;justify-content:center;margin-top:8px}#m3d .m3card .row button{border:0;border-radius:14px;padding:8px 14px;font:inherit;font-weight:800;background:#1fa463;color:#fff}
 #m3d .m3card .row button.sec{background:#e3ecf7;color:#1d4e9e}
-#m3d .m3j{position:absolute;top:66px;left:12px;z-index:2;background:#fffd;border-radius:14px;padding:4px 10px;font-weight:900;color:#1d4e9e}
+#m3d .m3j{position:absolute;top:66px;left:12px;z-index:2;background:#fff;border-radius:14px;padding:4px 10px;font-weight:900;color:#1d4e9e;box-shadow:0 3px 0 #c9d6e3,0 3px 10px #0002}
 #m3d .m3fly{position:absolute;z-index:3;left:50%;top:45%;transform:translateX(-50%);font-size:30px;font-weight:900;color:#1d7ad0;text-shadow:0 2px 0 #fff;pointer-events:none;animation:m3fly 1.4s ease forwards}
 @keyframes m3fly{to{transform:translate(-50%,-90px);opacity:0}}
-#m3d .m3hp{position:absolute;top:12px;right:12px;left:68px;z-index:2;display:flex;align-items:center;gap:8px;background:#fffffff2;border-radius:16px;padding:6px 10px;box-shadow:0 3px 10px #0002;min-height:46px}
+#m3d .m3hp{position:absolute;top:12px;right:12px;z-index:2;display:flex;align-items:center;gap:6px;background:#fffffff2;border-radius:22px;padding:4px 12px 4px 8px;box-shadow:0 3px 0 #c9d6e3,0 3px 10px #0002;min-height:40px}#m3d .m3hp>b{font-size:18px!important;color:#1d4e9e!important}#m3d .m3hp>.e{font-size:24px!important}
 #m3d .m3snd{position:absolute;top:108px;left:12px;z-index:2;width:42px;height:42px;border-radius:50%;border:0;background:#fffd;font-size:20px;box-shadow:0 2px 6px #0003}
 #m3d .m3msg:empty{display:none}#m3d .m3hp:empty{display:none}#m3d .m3hp .e{font-size:30px;line-height:1}#m3d .m3hp .t{flex:1;min-width:0}#m3d .m3hp b{display:block;font-size:14.5px;color:#5a4a1a}#m3d .m3hp small{display:block;font-size:12px;font-weight:700;color:#7a6a3a}
 #m3d .m3hp .hb{height:9px;border-radius:6px;background:#efe6d2;overflow:hidden;margin-top:3px}#m3d .m3hp .hb i{display:block;height:100%;border-radius:6px;transition:width .6s}`;
@@ -71,7 +71,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   const LV=p=>Math.max(0,Math.min(3,lv[p]|0));
   const floors=Math.max(1,Math.min(4,(V?V.f:(window.Bayt&&Bayt.done))|0||1));
   // (v11.4) ألوان أزهى: أرض خضراء حتى الأفق، تلال، زهور، فراشات وطيور بالنهار، يراعات بالليل
-  S.background=new T.Color(night?0x1a2a5e:0x9fdcff);S.fog=new T.Fog(night?0x1f3a3a:0xc8ecff,90,230);
+  const WN=winter();S.background=new T.Color(night?0x1a2a5e:WN?0xb7c4d0:0x9fdcff);S.fog=new T.Fog(night?0x1a2a5e:WN?0xc9d3dc:0xc8ecff,night?110:130,night?480:560);
   S.add(new T.HemisphereLight(night?0x9aa8e0:0xffffff,night?0x335533:0x6fb04a,night?.8:.62));
   const sun=new T.DirectionalLight(night?0xb8c6ff:0xfff2d6,night?.5:.95);sun.position.set(14,24,12);sun.castShadow=true;
   sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-20,right:20,top:20,bottom:-20});S.add(sun);
@@ -89,40 +89,69 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   const anim=[];S.userData.anim=anim;
   const palm=(x,z,p)=>{add(new T.CylinderGeometry(.1,.16,2.4,8),tr,x,1.2,z,p);const c=add(new T.SphereGeometry(.9,10,8),lf,x,2.5,z,p);c.scale.set(1,.35,1)};
   // الأرض والطرق
-  const g=add(new T.CircleGeometry(240,64),M(night?0x3f9149:0x5cc455),0,0,0);g.rotation.x=-Math.PI/2;
+  const g=add(new T.CircleGeometry(900,64),M(night?0x3f9149:0x5cc455),0,0,0);g.rotation.x=-Math.PI/2;
   // بقع عشب بدرجات مختلفة
   const pM=[M(night?0x4aa052:0x72d460),M(night?0x37853f:0x4fb44c)];
   for(let i=0;i<26;i++){const a=i*2.4,r=8+(i*37%22),p=add(new T.CircleGeometry(2+i%3,20),pM[i%2],Math.cos(a)*r,.004,Math.sin(a)*r);p.rotation.x=-Math.PI/2;p.receiveShadow=true;p.castShadow=false}
-  // (v12.3) سهل أخضر ممتد طويل: جبال على اليسار (غرب) وبحر على اليمين (شرق)، والطريق يمتد للأفق — مكان لتوسعات قادمة
-  {const mC=night?[0x4a5d6e,0x55697a,0x3f5262]:[0xb4c6d4,0xc2d2de,0xa6bccc],gC=night?0x2f7a3c:0x5fb85a,snow=M(night?0xc9d6e8:0xffffff,{roughness:.9});
-    // الجبال بعيدة (x<-88) حتى لا تحجب الكاميرا وهي تدور، وتلال خضراء واطئة بينها وبين المدينة
-    for(let i=0;i<20;i++){const z=-190+i*17+(i%3)*5,x=-96-(i%2)*16-(i%5)*4,r=20+(i%4)*5,h=34+(i*7%5)*6;
-      const m=add(new T.ConeGeometry(r,h,7),M(mC[i%3],{flatShading:true}),x,h/2-1,z);m.castShadow=m.receiveShadow=false;m.rotation.y=i;
-      const c=add(new T.ConeGeometry(r*.3,h*.3,7),snow,x,h-h*.15-.95,z);c.castShadow=c.receiveShadow=false;c.rotation.y=i}
-    for(let i=0;i<16;i++){const z=-170+i*16,x=-50-(i%3)*12,r=10+(i%4)*3;
-      const f=add(new T.SphereGeometry(r,18,10),M(gC),x,-1,z);f.scale.set(1.3,.4,1);f.castShadow=false}
+  // (v12.4) سهل أخضر ممتد بلا نهاية: سلسلة جبال واقعية غربًا (عشب ← صخر ← ثلج)، وبحر متدرّج شرقًا، والطريق يغيب في الأفق
+  const WIN=winter();
+  const NS=(x,z)=>{const h=(i,j)=>{const t=Math.sin(i*127.1+j*311.7)*43758.5453;return t-Math.floor(t)},xi=Math.floor(x),zi=Math.floor(z),fx=x-xi,fz=z-zi,
+    u=fx*fx*(3-2*fx),v=fz*fz*(3-2*fz),a=h(xi,zi),b=h(xi+1,zi),c=h(xi,zi+1),d=h(xi+1,zi+1);return a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v};
+  const FBM=(x,z,o)=>{let s=0,a=.5,f=1;for(let i=0;i<o;i++){s+=a*NS(x*f,z*f);a*=.5;f*=2.03}return s};
+  {const X0=-46,W=260,L=1200,g=new T.PlaneGeometry(W,L,92,240);g.rotateX(-Math.PI/2);g.translate(X0-W/2,0,-200);
+    const P=g.attributes.position,col=[],C=new T.Color(),cG=new T.Color(night?0x2f6a3a:0x5f9e4c),cG2=new T.Color(night?0x3a5a3a:0x8a9a5a),
+      cR=new T.Color(night?0x55606e:0x8d8478),cR2=new T.Color(night?0x6a7280:0xa9a196),cS=new T.Color(night?0xdfe8f5:0xffffff),cH=new T.Color(night?0x2a3a6e:0xb8d8f0);
+    for(let i=0;i<P.count;i++){const x=P.getX(i),z=P.getZ(i),d=X0-x,rise=Math.min(1,Math.max(0,d/55));
+      const r=1-Math.abs(2*FBM(x*.012+7,z*.012,4)-1),n=FBM(x*.035,z*.035,4),far=Math.min(1,Math.max(0,(d-18)/90));
+      const y=d<=0?0:rise*rise*(5+far*(26+66*r*r)+14*n)-.4;P.setY(i,y);
+      const SL=WIN?14:0,sn=y>46-SL+12*n?1:y>36-SL+12*n?(y-36+SL-12*n)/10:0,rk=Math.min(1,Math.max(0,(y-7-6*n)/14));
+      C.copy(cG).lerp(cG2,n);C.lerp(n>.5?cR2:cR,rk);C.lerp(cS,sn);C.lerp(cH,Math.min(.5,Math.max(0,(d-30)/260)));col.push(C.r,C.g,C.b)}
+    g.setAttribute('color',new T.Float32BufferAttribute(col,3));g.computeVertexNormals();
+    const mt=new T.MeshStandardMaterial({vertexColors:true,roughness:.95,flatShading:false,fog:false,emissive:night?0x1c2a40:0x000000});
+    const m=new T.Mesh(g,mt);m.receiveShadow=false;S.add(m);
+    // صنوبر على سفوح الجبال وصفّ أشجار بين السهل والجبل
+    const pine=M(night?0x1f5a34:0x2e7d45),ptr=M(0x6b4423);
+    for(let i=0;i<70;i++){const z=-420+i*9+(i*37%7),x=X0-5-(i*53%14),d=X0-x,y=Math.min(1,d/55)**2*(5+16*FBM(x*.035,z*.035,4))-.4,s=1.4+(i%4)*.35;
+      add(new T.CylinderGeometry(.18*s,.24*s,1*s,6),ptr,x,y+.5*s,z).castShadow=false;add(new T.ConeGeometry(1.1*s,3*s,8),pine,x,y+2.4*s,z).castShadow=false}
     for(let i=0;i<14;i++){const z=-120+i*12,x=-28-(i%3)*2;if(Math.abs(z+22)<9)continue;tree(x,z,null,1.3+(i%3)*.2)}}
-  // البحر والشاطئ
-  {const SX=22,sand=M(night?0xb8a675:0xf2dca0),sea=M(night?0x1d4e7e:0x3fa9e6,{roughness:.2,metalness:.15,emissive:night?0x0d2a4a:0x0a2a40});
-    const b=add(new T.PlaneGeometry(6,480),sand,SX-1,.012,0);b.rotation.x=-Math.PI/2;b.castShadow=false;
-    const w=add(new T.PlaneGeometry(240,480),sea,SX+122,.03,0);w.rotation.x=-Math.PI/2;w.castShadow=false;
+  // البحر والشاطئ (لون متدرّج: فيروزي قرب الشاطئ ← أزرق عميق)
+  {const SX=22,LL=1600,sand=M(night?0xb8a675:0xf2dca0);
+    const b=add(new T.PlaneGeometry(6,LL),sand,SX-1,.012,0);b.rotation.x=-Math.PI/2;b.castShadow=false;
+    const sg=new T.PlaneGeometry(700,LL,40,1);sg.rotateX(-Math.PI/2);sg.translate(SX+350,.03,0);
+    const sc=[],c1=new T.Color(night?0x1f4f6e:0x5fd0e0),c2=new T.Color(night?0x0c2440:0x1e6fc0),c3=new T.Color(night?0x081a30:0x15529a),C=new T.Color(),SP=sg.attributes.position;
+    for(let i=0;i<SP.count;i++){const u=Math.min(1,(SP.getX(i)-SX)/60);C.copy(c1).lerp(c2,u);if(u>=1)C.lerp(c3,Math.min(1,(SP.getX(i)-SX-60)/200));sc.push(C.r,C.g,C.b)}
+    sg.setAttribute('color',new T.Float32BufferAttribute(sc,3));
+    const w=new T.Mesh(sg,new T.MeshStandardMaterial({vertexColors:true,roughness:.25,metalness:.1}));S.add(w);
     const foam=new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.75});
-    for(let k=0;k<3;k++){const f=new T.Mesh(new T.PlaneGeometry(.35,480),foam);f.rotation.x=-Math.PI/2;S.add(f);anim.push(t=>{const u=(t*.25+k/3)%1;f.position.set(SX+2.2+u*5,.04,0);f.material.opacity=.75*(1-u)})}
+    for(let k=0;k<3;k++){const f=new T.Mesh(new T.PlaneGeometry(.35,LL),new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.75}));f.rotation.x=-Math.PI/2;S.add(f);anim.push(t=>{const u=(t*.25+k/3)%1;f.position.set(SX+2.2+u*5,.04,0);f.material.opacity=(night?.4:.75)*(1-u)})}
     // قوارب شراعية تتهادى
-    [[34,-20,0xff6b6b],[46,6,0xffd23f],[30,22,0x4fc3ff]].forEach(([x,z,c],k)=>{const B=new T.Group();B.position.set(x,0,z);S.add(B);
+    [[34,-20,0xff6b6b],[46,6,0xffd23f],[30,22,0x4fc3ff],[70,-70,0xffffff],[90,30,0xff9f43]].forEach(([x,z,c],k)=>{const B=new T.Group();B.position.set(x,0,z);S.add(B);
       add(new T.BoxGeometry(1.2,.5,3),M(0x8b5a2b),0,.25,0,B);add(new T.CylinderGeometry(.06,.06,3,6),M(0xeeeeee),0,1.8,0,B);
-      const sl=add(new T.ConeGeometry(1,2.4,3),M(c,{side:T.DoubleSide}),0,1.9,.4,B);sl.scale.set(.1,1,1);
+      const sl=add(new T.ConeGeometry(1,2.4,3),M(c,{side:T.DoubleSide}),0,1.9,.4,B);sl.scale.set(.1,1,1);if(x>60)B.scale.setScalar(1.6);
       anim.push(t=>{B.position.y=Math.sin(t*1.2+k)*.15;B.rotation.z=Math.sin(t*.9+k)*.06;B.position.z=z+Math.sin(t*.05+k)*6})});
     // نخيل على الشاطئ
-    for(let z=-60;z<=40;z+=11)if(Math.abs(z+4.6)>3)palm(SX-2.2,z,null)}
+    for(let z=-150;z<=80;z+=11)if(Math.abs(z+4.6)>3)palm(SX-2.2,z,null)}
+  // (v12.4) ثلج يتساقط في أيام الشتاء (كانون الأول، كانون الثاني، شباط) — City3D.debugSnow للتجربة
+  if(WIN){const N=2000,pos=new Float32Array(N*3),sp=new Float32Array(N),cv=document.createElement('canvas');cv.width=cv.height=32;
+    const cx=cv.getContext('2d'),gr=cx.createRadialGradient(16,16,0,16,16,16);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.5,'rgba(255,255,255,.8)');gr.addColorStop(1,'rgba(255,255,255,0)');cx.fillStyle=gr;cx.fillRect(0,0,32,32);
+    for(let i=0;i<N;i++){pos[i*3]=(Math.random()-.5)*110;pos[i*3+1]=Math.random()*40;pos[i*3+2]=(Math.random()-.5)*110-8;sp[i]=1.2+Math.random()*1.6}
+    const sg=new T.BufferGeometry();sg.setAttribute('position',new T.BufferAttribute(pos,3));
+    const pm=new T.PointsMaterial({size:.95,map:new T.CanvasTexture(cv),transparent:true,depthWrite:false,color:0xffffff});
+    const flakes=new T.Points(sg,pm);flakes.frustumCulled=false;S.add(flakes);let last=0;
+    anim.push(t=>{const dt=Math.min(.1,last?t-last:0);last=t;for(let i=0;i<N;i++){let y=pos[i*3+1]-sp[i]*dt;if(y<0)y+=40;pos[i*3+1]=y;pos[i*3]+=Math.sin(t*.8+i)*dt*.35}sg.attributes.position.needsUpdate=true});
+    // طبقة ثلج خفيفة على العشب
+    for(let i=0;i<30;i++){const a=i*2.1,r=6+(i*41%40),p=add(new T.CircleGeometry(1.5+i%4,18),M(0xf4f8ff,{transparent:true,opacity:.75}),Math.cos(a)*r,.008,Math.sin(a)*r-6);p.rotation.x=-Math.PI/2;p.castShadow=false}}
   // أشجار متفرقة على طول السهل
   [[-10,-36],[8,-34],[-16,-48],[12,-52],[-6,-62],[10,-72],[-14,-80],[6,-92],[-9,24],[9,28],[-15,34],[13,40]].forEach(([x,z])=>tree(x,z,null,1.3));
-  // الطرق بلون دافئ وأرصفة بيضاء
+  for(let i=0;i<40;i++){const z=-110-i*8,x=(i%2?1:-1)*(6+(i*29%12));tree(x,z,null,1.2+(i%3)*.2)}
+  // الطرق بلون دافئ وأرصفة بيضاء — الطريق الرئيسي طويل جدًا يغيب في الضباب
   const road=M(night?0xb9ad96:0xd9c49c),curb=M(0xffffff),line=M(night?0xfff3c4:0xffffff);
-  const rd=add(new T.PlaneGeometry(4,160),road,0,.01,-30);rd.rotation.x=-Math.PI/2;
-  [-2.1,2.1].forEach(x=>{const c=add(new T.BoxGeometry(.18,.08,160),curb,x,.04,-30);c.castShadow=false});
+  const RL=1400,RZ=-500;
+  const rd=add(new T.PlaneGeometry(4,RL),road,0,.01,RZ);rd.rotation.x=-Math.PI/2;rd.castShadow=false;
+  [-2.1,2.1].forEach(x=>{const c=add(new T.BoxGeometry(.18,.08,RL),curb,x,.04,RZ);c.castShadow=false});
   [-4.6,4.6].forEach(z=>{const r=add(new T.PlaneGeometry(28,1.8),road,0,.012,z);r.rotation.x=-Math.PI/2});
-  for(let z=-109;z<=49;z+=3){const l=add(new T.PlaneGeometry(.18,1.4),line,0,.02,z);l.rotation.x=-Math.PI/2}
+  {const lg=new T.PlaneGeometry(.18,1.4);lg.rotateX(-Math.PI/2);const n=Math.floor(RL/3),im=new T.InstancedMesh(lg,line,n),o=new T.Object3D();
+    for(let i=0;i<n;i++){o.position.set(0,.02,RZ+RL/2-1-i*3);o.updateMatrix();im.setMatrixAt(i,o.matrix)}S.add(im)}
   // زهور ملوّنة كثيرة على العشب
   {const fl=[0xff5c8a,0xffd23f,0xb07cff,0xff8c42,0xffffff,0x4fc3ff,0xff4f4f],geo=new T.SphereGeometry(.24,8,6),im=new T.InstancedMesh(geo,new T.MeshStandardMaterial({roughness:.6}),240);
     const o=new T.Object3D(),col=new T.Color();let n=0,k=0;
@@ -298,6 +327,7 @@ function makeKid(){const T=THREE,G=new T.Group(),M=(c)=>new T.MeshStandardMateri
 
 /* ---------- (v11.9) حياة المدينة: طلاب في ساحة المدرسة نهارًا، حارس ليلًا، باص وسيارات صباحًا وعند الانصراف، ومصلّون وقت الصلاة ---------- */
 // الأوقات حسب ساعة الجهاز: الوصول ٦–٨ صباحًا، الانصراف ١–٢:٣٠ ظهرًا. (City3D.debugHour للتجربة فقط)
+function winter(){const d=window.City3D&&City3D.debugSnow;if(d!=null)return !!d;return [11,0,1].includes(new Date().getMonth())}
 function hourNow(){const d=window.City3D&&City3D.debugHour;if(d!=null)return d;const n=new Date();return n.getHours()+n.getMinutes()/60}
 function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMaterial({color:c,roughness:.75});
   const add=(geo,m,x,y,z,p)=>{const o=new T.Mesh(geo,m);o.position.set(x,y,z);o.castShadow=true;p.add(o);return o};
@@ -392,7 +422,7 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
   const R=new T.WebGLRenderer({antialias:true});R.setPixelRatio(Math.min(2,devicePixelRatio||1));R.setSize(W,H);
   R.shadowMap.enabled=true;R.shadowMap.type=T.PCFSoftShadowMap;
   ov.insertBefore(R.domElement,ov.firstChild);R.domElement.style.display='block';R.domElement.style.touchAction='none';
-  const cam=new T.PerspectiveCamera(45,W/H,.1,250);let S=makeScene(night);
+  const cam=new T.PerspectiveCamera(45,W/H,.1,950);let S=makeScene(night);
   if(!cam0.dist)cam0.dist=Math.min(72,Math.max(38,31/(W/H)));
   let {th,ph,dist}=cam0,drag=null,pinch=0,down=null;const pts=new Map(),MAXD=80;
   const place=()=>{cam.position.set(dist*Math.sin(th)*Math.sin(ph),dist*Math.cos(ph),dist*Math.cos(th)*Math.sin(ph));cam.lookAt(0,1.5,-5)};
@@ -423,7 +453,7 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
   // (v11.7) «سعادة مدينتي» أعلى المدينة: ترتفع بالأعمال الصالحة اليوم وتنخفض إذا غاب الطفل (wajiha.js)
   function drawHp(){const el=ov.querySelector(".m3hp");if(!el||!window.Wajiha)return;const h=Wajiha.happy(),c=Wajiha.barCol(h);
     const m=h>=80?["😄","مدينتك سعيدة جدًا! ما شاء الله"]:h>=55?["🙂",`مدينتك سعيدة، ${B("زِدها","زيديها")} بعمل صالح`]:h>=30?["😐","مدينتك تنتظر أعمالك اليوم"]:["😟",`مدينتك مشتاقة لك! ${B("صلِّ","صلّي")} أو ${B("اسقِ","اسقي")} الشجر لتفرح`];
-    el.innerHTML=`<span class="e">${m[0]}</span><span class="t"><b>سعادة مدينتي: ${arn(h)}٪</b><small>${m[1]}</small><div class="hb"><i style="width:${h}%;background:${c}"></i></div></span>`}
+    el.title=m[1];el.setAttribute('aria-label','سعادة مدينتي '+h+'٪');el.innerHTML=`<span class="e">${m[0]}</span><b>${arn(h)}٪</b>`}
   const showJ=()=>{ui.j.textContent="💎 "+arn(window.Deco?Deco.j:0);drawHp()};showJ();
   const closeTo=f=>{ui.close();setTimeout(f,60)};
   // الأعمال
@@ -496,7 +526,7 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
   cv.addEventListener('pointerdown',e=>{pts.set(e.pointerId,[e.clientX,e.clientY]);cv.setPointerCapture(e.pointerId);
     if(pts.size===1){drag=[e.clientX,e.clientY];down=[e.clientX,e.clientY,Date.now()]}else{drag=null;pinch=0;down=null}});
   cv.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,[e.clientX,e.clientY]);
-    if(pts.size===1&&drag){th-=(e.clientX-drag[0])*.008;ph=Math.max(.25,Math.min(1.15,ph-(e.clientY-drag[1])*.006));drag=[e.clientX,e.clientY]}
+    if(pts.size===1&&drag){th-=(e.clientX-drag[0])*.008;ph=Math.max(.25,Math.min(1.38,ph-(e.clientY-drag[1])*.006));drag=[e.clientX,e.clientY]}
     else if(pts.size===2){const [a,b]=[...pts.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(pinch)dist=Math.max(10,Math.min(MAXD,dist*pinch/d));pinch=d}});
   const up=e=>{const was=pts.has(e.pointerId)&&pts.size===1;pts.delete(e.pointerId);pinch=0;drag=pts.size===1?[...pts.values()][0]:null;
     if(was&&down&&e.type==='pointerup'&&Math.hypot(e.clientX-down[0],e.clientY-down[1])<10&&Date.now()-down[2]<600)tap(pick(e.clientX,e.clientY));down=null};
