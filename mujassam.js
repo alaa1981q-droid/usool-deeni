@@ -27,7 +27,7 @@ css.textContent=`body.m3on .modal{z-index:9100}body.m3on #confetti{z-index:9150}
 @keyframes m3fly{to{transform:translate(-50%,-90px);opacity:0}}
 #m3d .m3hp{position:absolute;top:12px;right:12px;left:68px;z-index:2;display:flex;align-items:center;gap:8px;background:#fffffff2;border-radius:16px;padding:6px 10px;box-shadow:0 3px 10px #0002;min-height:46px}
 #m3d .m3snd{position:absolute;top:108px;left:12px;z-index:2;width:42px;height:42px;border-radius:50%;border:0;background:#fffd;font-size:20px;box-shadow:0 2px 6px #0003}
-#m3d .m3hp:empty{display:none}#m3d .m3hp .e{font-size:30px;line-height:1}#m3d .m3hp .t{flex:1;min-width:0}#m3d .m3hp b{display:block;font-size:14.5px;color:#5a4a1a}#m3d .m3hp small{display:block;font-size:12px;font-weight:700;color:#7a6a3a}
+#m3d .m3msg:empty{display:none}#m3d .m3hp:empty{display:none}#m3d .m3hp .e{font-size:30px;line-height:1}#m3d .m3hp .t{flex:1;min-width:0}#m3d .m3hp b{display:block;font-size:14.5px;color:#5a4a1a}#m3d .m3hp small{display:block;font-size:12px;font-weight:700;color:#7a6a3a}
 #m3d .m3hp .hb{height:9px;border-radius:6px;background:#efe6d2;overflow:hidden;margin-top:3px}#m3d .m3hp .hb i{display:block;height:100%;border-radius:6px;transition:width .6s}`;
 document.head.appendChild(css);
 const cam0={th:.35,ph:.62,dist:0};let cur=null;
@@ -450,7 +450,7 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
           [['🏡 ادخل بيته',()=>A.fhouse()],['🏙️ ارجع لمدينتي',()=>A.back()]])})},
     fhouse(){const r=vr;if(!r)return;closeTo(()=>{if(window.Deco&&Deco.visit)Deco.visit({id:r.id,h:r.h,p:r.p},()=>{show('bayt');Bayt.menu()})})},
     back(){V=null;vr=null;at={x:-3.4,z:1,via:null};kid.position.set(-3.4,0,1);path=[];refresh();setBar();card('');
-      ui.msg.textContent=`👆 ${B('المس','المسي')} البناية لتطوّرها، والشجرة 💧 والنفايات 🧹 لتساعد مدينتك`}});
+      ui.msg.textContent=""}});
   const BAR_ME=ui.bar.innerHTML,BAR_V=`<button data-a="back"><b>🏙️</b>مدينتي</button><button data-a="fhouse"><b>🏡</b>ادخل بيته</button><button data-a="friends"><b>👥</b>صديق آخر</button>`;
   function setBar(){ui.bar.innerHTML=V?BAR_V:BAR_ME;ui.bar.style.gridTemplateColumns=V?'repeat(3,1fr)':'';
     ui.bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{try{window.Bayt&&Bayt.sTap()}catch(e){}if(busy||path.length&&!wander)return;A[b.dataset.a]()});
@@ -527,7 +527,7 @@ async function open(){if(document.getElementById('m3d'))return;const ov=document
   const fail=()=>{msg.innerHTML='😔 هذا الجهاز لا يعرض المجسّمات.<br><small>لا تقلق، مدينتك محفوظة وتراها بالرسم العادي.</small>'};
   if(!webgl())return fail();
   try{await loadThree();if(!ov.isConnected)return;
-    msg.textContent=`👆 ${B('المس','المسي')} البناية لتطوّرها، والشجرة 💧 والنفايات 🧹 لتساعد مدينتك`;
+    msg.textContent="";
     ov.querySelector('.m3bar').style.display='';
     cur=run(ov,{msg,snd:ov.querySelector('.m3snd'),card:ov.querySelector('.m3card'),bar:ov.querySelector('.m3bar'),j:ov.querySelector('.m3j'),close})}catch(e){console.error(e);fail()}}
 // (v11.6) طلب الشيخ: «المدينة هي الأساس». زر «بيتي في الجنة» يفتح المدينة المجسّمة فقط، و✖ يرجع للواجهة.
