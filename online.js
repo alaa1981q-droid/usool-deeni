@@ -121,6 +121,7 @@
       if (sx && !list().includes(av)) av = list()[0];
       body().innerHTML = `<div class="card" style="flex:none">
         <h2 style="text-align:center">${sx === 'g' ? 'مرحبًا يا بطلة! 👋' : 'مرحبًا يا بطل! 👋'}</h2>
+        ${!profile && window.Ramz ? `<div style="text-align:center"><button class="rzlink" id="rzOld">🔑 عندي رمز حفظ من موبايل قديم</button></div>` : ''}
         <div class="pick-h">أنا…</div>
         <div class="sxpick"><button class="${sx === 'b' ? 'on' : ''}" data-sx="b"><span>👦</span>ولد</button><button class="${sx === 'g' ? 'on' : ''}" data-sx="g"><span>👧</span>بنت</button></div>
         ${sx ? `<p style="text-align:center;color:var(--muted)">اختر${sx === 'g' ? 'ي' : ''} صورتك واكتب${sx === 'g' ? 'ي' : ''} اسمك الذي يراه أصدقاؤك.<br>ولقبك يأتي وحده من شطارتك: بالعقيدة، بالصلاة، بالقرآن، بالتحديات… 🌟</p>
@@ -133,6 +134,7 @@
       const lk = locked();
       if (lk && sx) { own = profile.nick; const i = $('#ownNick'); i.value = own; i.disabled = true; $('#nickPrev').textContent = own;
         $('#nickMsg').className = 'fb'; $('#nickMsg').textContent = `🔒 الإدارة ثبّتت اسمك حتى ${new Date(lk).toLocaleDateString('ar-IQ', { weekday: 'long', day: 'numeric', month: 'long' })}، وتقدر تغيّر صورتك 🤍`; }
+      if ($('#rzOld')) $('#rzOld').onclick = () => Ramz.openRestore();
       body().querySelectorAll('[data-sx]').forEach(b => b.onclick = () => { sx = b.dataset.sx; draw(); });
       if (!sx) return;
       body().querySelectorAll('[data-av]').forEach(b => b.onclick = () => { av = b.dataset.av; draw(); });

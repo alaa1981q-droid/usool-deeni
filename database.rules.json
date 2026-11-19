@@ -16,6 +16,13 @@
         ".write": "auth != null && (!data.exists() || data.val() === auth.uid) && (!newData.exists() || newData.val() === auth.uid)"
       }
     },
+    "saves": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.child('d').isString() && newData.child('d').val().length < 800000"
+      }
+    },
     "presence": {
       "$uid": {
         ".read": "auth != null",
