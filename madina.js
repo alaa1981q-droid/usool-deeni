@@ -12,7 +12,7 @@ try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.lv)st=Object.a
 const sv=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
 const boy=()=>!window.Cups||Cups.sex!='g',B=(m,f)=>boy()?m:f;
 const esc=v=>String(v==null?'':v).replace(/[<>&"]/g,'');
-const SAL={k:'sal',p:'اللّٰهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ وَآلِ مُحَمَّدٍ',e:'💚',n:'صلِّ على محمد وآل محمد'},TAS={k:'tas',p:'سُبْحَانَ اللهِ',e:'📿',n:'سبّح الله'};
+const SAL={k:'sal',p:'اللّٰهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ وَآلِ مُحَمَّدٍ',e:'💚',n:'صلِّ على محمد وآل محمد'},TAS={k:'tas',p:'سُبْحَانَ اللَّهِ',e:'📿',n:'سبّح الله'};
 const C=()=>{try{return Alqab.snap().c}catch(e){return {}}};
 // شرط فتح كل مستوى: [المفتاح في عدّادات الملف، العدد، كيف]
 const PARTS={

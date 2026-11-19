@@ -9,7 +9,7 @@ let st={w:0,g:0,t:[0,0,0],job:null};
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)st=Object.assign(st,s)}catch(e){}
 const sv=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
 const boy=()=>!window.Cups||Cups.sex!='g',B=(m,f)=>boy()?m:f;
-const SAL={k:'sal',p:'اللّٰهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ وَآلِ مُحَمَّدٍ',e:'💚',n:'صلِّ على محمد وآل محمد'},TAS={k:'tas',p:'سُبْحَانَ اللهِ',e:'📿',n:'سبّح الله'};
+const SAL={k:'sal',p:'اللّٰهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ وَآلِ مُحَمَّدٍ',e:'💚',n:'صلِّ على محمد وآل محمد'},TAS={k:'tas',p:'سُبْحَانَ اللَّهِ',e:'📿',n:'سبّح الله'};
 // [اسم المستوى، الجواهر، العمل الصالح، عدد المرات، الوقت بالدقائق]
 const PARTS={
   w:{n:'سور البيت',e:'🧱',lv:[['سور خشبي',40,TAS,10,1],['سور من الحجر',120,SAL,10,15],['سور رخام بزخارف ذهبية',300,SAL,30,60]]},
