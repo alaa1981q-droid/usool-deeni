@@ -51,7 +51,8 @@ const nearVil=(x,z)=>VIL.some(v=>Math.abs(x-v[0])<12&&Math.abs(z-v[1])<12);
 const RVZ=20,RVW=3.2,FBX=-9,MKX=4.6,PLZ=[14.6,0],NBZ=27;
 const FLK=[-27,10]; // (v13.8) مرعى الأغنام
 const MKT=[["bak",-16.5,"#c0392b","#ffffff","🍞 الخبّاز"],["fru",-20.5,"#1fa463","#ffffff","🍊 الفاكهة"],["swe",-24.5,"#2f6fd0","#ffffff","🍬 الحلويات"]];
-const NOFL=(x,z)=>Math.abs(z-RVZ)<2.6||x>3&&x<11&&z<-13&&z>-28||Math.hypot(x-PLZ[0],z-PLZ[1])<3.9||Math.abs(z-NBZ)<2.6&&Math.abs(Math.abs(x)-7)<2.6;
+const FB=[13.6,-19.5]; // (v14.5) ملعب كرة القدم
+const NOFL=(x,z)=>x>9.6&&x<17.6&&z<-14&&z>-25||Math.abs(z-RVZ)<2.6||x>3&&x<11&&z<-13&&z>-28||Math.hypot(x-PLZ[0],z-PLZ[1])<3.9||Math.abs(z-NBZ)<2.6&&Math.abs(Math.abs(x)-7)<2.6;
 const LITTER=[[-9,4.6],[9,-4.6],[-10,-4.6],[10,4.6],[-2.5,-15],[2.75,15]]; // (v13.9) آخر اثنتين على الرصيف لا في الشارع
 const thirsty=()=>{const s=seed(),r=[];for(let i=0;i<5;i++)r.push((s+i*7)%TREES.length);return r};
 const litter=()=>{const s=seed(),r=[];for(let i=0;i<3;i++)r.push((s+i*5)%LITTER.length);return r};
@@ -110,10 +111,12 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   const TRK=new T.CylinderGeometry(.13,.22,1,8),BRG=new T.CylinderGeometry(.045,.085,1,6),FRG=new T.SphereGeometry(.075,8,6);
   const bark=M(night?0x4a3626:0x6b4a2f,{roughness:1});
   const LVm=n=>({color:n,roughness:.85,flatShading:true});
-  const LF=(night?[0x2e6b33,0x3a7a37,0x25602f,0x40833a]:[0x3f8f3a,0x4f9e3c,0x2f7d3a,0x5aa845]).map(c=>new T.MeshStandardMaterial(LVm(c)));
-  const LF2=(night?[0x3b7d3d,0x478a40,0x316f38,0x4e9444]:[0x5aa848,0x66b34a,0x449545,0x74bd52]).map(c=>new T.MeshStandardMaterial(LVm(c)));
+  // (v14.5) ألوان الأوراق حسب الفصل الحقيقي: خريف أصفر وبرتقالي، شتاء أخضر هادئ، ربيع وصيف أخضر زاهٍ (وأزهار أكثر في الربيع)
+  const SEA=season(),SCL={au:[[0xd9a23a,0x9a9e3c,0xe0802c,0x6f9a3a],[0xf0c445,0xc98f2e,0xd8622a,0xa8b04a]],wi:[[0x4a7d42,0x557f3e,0x3d6e3d,0x5f8a48],[0x5f8f4e,0x6a9450,0x4f8048,0x76a058]]}[SEA]||[[0x3f8f3a,0x4f9e3c,0x2f7d3a,0x5aa845],[0x5aa848,0x66b34a,0x449545,0x74bd52]];
+  const nC=c=>night?new T.Color(c).multiplyScalar(.66).getHex():c;
+  const LF=SCL[0].map(c=>new T.MeshStandardMaterial(LVm(nC(c)))),LF2=SCL[1].map(c=>new T.MeshStandardMaterial(LVm(nC(c))));
   const BLS=new T.MeshStandardMaterial(LVm(night?0xc0789a:0xf590b8)),FRT=M(0xff9a1f,{roughness:.5});
-  const tree=(x,z,p,s=1)=>{const h=Math.abs(Math.round(x*7+z*13)),kind=h%3,bl=h%9===0,G=new T.Group();G.position.set(x,0,z);G.scale.setScalar(s);G.rotation.y=h*.7;(p||S).add(G);
+  const tree=(x,z,p,s=1)=>{const h=Math.abs(Math.round(x*7+z*13)),kind=h%3,bl=h%(SEA==='sp'?3:9)===0,G=new T.Group();G.position.set(x,0,z);G.scale.setScalar(s);G.rotation.y=h*.7;(p||S).add(G);
     const tall=kind===1,th=tall?1.75:1.15,m1=LF[h%4],m2=bl?BLS:LF2[(h>>2)%4];
     const tk=add(TRK,bark,0,th/2,0,G);tk.scale.set(1,th,1);
     [[.55,0],[-.5,2.2],[.45,4.1]].forEach(([lean,ry])=>{const b=new T.Group();b.position.set(0,th*.82,0);b.rotation.set(0,ry,0);G.add(b);const m=add(BRG,bark,0,.3,0,b);m.scale.set(1,.65,1);b.children[0].rotation.z=lean;m.position.x=-Math.sin(lean)*.3});
@@ -233,7 +236,11 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
     const ff=new T.MeshBasicMaterial({color:0xfff27a});for(let i=0;i<40;i++){const f=new T.Mesh(new T.SphereGeometry(.08,6,4),ff);const a=Math.random()*6.28,r=4+Math.random()*26,y0=.6+Math.random()*1.8;
       f.position.set(Math.cos(a)*r,y0,Math.sin(a)*r);S.add(f);const ph=Math.random()*6;anim.push(t=>{f.position.y=y0+Math.sin(t*1.5+ph)*.3;f.visible=Math.sin(t*2.2+ph)>-.4})}
     // قمر
-    const moon=new T.Mesh(new T.SphereGeometry(4,20,14),new T.MeshBasicMaterial({color:0xfff3b0}));moon.position.set(-40,45,-80);S.add(moon)}
+    // (v14.5) 🌙 القمر حسب الشهر الهجري: هلال في أوله، بدر في منتصفه، ثم يصغر. المسه لتعرف الشهر
+    const hj=hijri();if(hj&&hj.d>=2&&hj.d<=28){const mc=document.createElement('canvas');mc.width=mc.height=128;const cx=mc.getContext('2d'),im=cx.createImageData(128,128),pp=Math.min(.985,(hj.d-.5)/29.5);
+      for(let j=0;j<128;j++)for(let i=0;i<128;i++){const X=(i-64)/58,Y=(j-64)/58,r2=X*X+Y*Y;if(r2>1)continue;const o=(j*128+i)*4,sy=Math.sqrt(1-Y*Y),e=Math.min(1,(1-Math.sqrt(r2))*25);
+        const lit=pp<=.5?X>Math.cos(2*Math.PI*pp)*sy:-X>Math.cos(2*Math.PI*(1-pp))*sy;if(lit){im.data[o]=255;im.data[o+1]=244;im.data[o+2]=196;im.data[o+3]=255*e}else{im.data[o]=70;im.data[o+1]=82;im.data[o+2]=120;im.data[o+3]=55*e}}
+      cx.putImageData(im,0,0);const ms=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(mc),fog:false,transparent:true,depthWrite:false}));ms.scale.set(34,34,1);ms.position.set(-150,135,-260);ms.userData.act='moon';S.add(ms)}}
   // مصابيح الشوارع: بالليل تضيء وتنير الطريق حولها
   const pole=M(0x4a4f5a),bulb=M(night?0xfff1b0:0xf1efe6,night?{emissive:0xffd860,emissiveIntensity:1.6}:{});
   const pool=new T.MeshBasicMaterial({color:0xffd870,transparent:true,opacity:.28,depthWrite:false});
@@ -346,6 +353,11 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
       else{top=plot(G);mk=need(p,0)?['🔒','#9aa8b0']:['+','#f0a020']}
       const pr=P[p]||{};lb=textSprite(T,`${pr.e||''} ${pr.n||''}`,'rgba(255,255,255,.92)','#5a4a1a');
       if(mk&&!V)mark(G,mk[0],mk[1],top+.4,1.9)}
+    // (v14.5) 🕌 نور أخضر هادئ يخرج من قمّة الجامع وقت الأذان (٢٠ دقيقة)
+    if(p==='m'&&LV('m')>0){const gc=document.createElement('canvas');gc.width=gc.height=64;const gx=gc.getContext('2d'),gr=gx.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,'rgba(200,255,220,1)');gr.addColorStop(.4,'rgba(80,230,150,.6)');gr.addColorStop(1,'rgba(40,200,120,0)');gx.fillStyle=gr;gx.fillRect(0,0,64,64);
+      const hs=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(gc),transparent:true,depthWrite:false}));hs.scale.set(5,5,1);hs.position.set(0,top-.2,0);G.add(hs);
+      const gl=new T.PointLight(0x7dffb0,1.6,16,1.5);gl.position.set(0,top,0);G.add(gl);hs.visible=gl.visible=false;let ck=-9,on=false;
+      anim.push(t=>{if(t-ck>4){ck=t;on=adhanGlow()}hs.visible=gl.visible=on;if(on){const k=.75+Math.sin(t*2.2)*.25;hs.scale.set(5*k+1,5*k+1,1);gl.intensity=1.2+k}})}
     lb.position.set(0,top+.7,0);G.add(lb);G.scale.setScalar(p==='m'?mScale(LV('m')||1):(BS[p]||1));if(p==='sc'){const k=BS.sc-1;G.position.x-=k*4.6;G.position.z-=k*4.4}});
   // أشجار المدينة (العطشى عليها 💧)
   const th=thirsty(),trees=[];
@@ -554,6 +566,54 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
       // درب ترابي إلى رصيف الطريق الرئيسي
       const L=Math.abs(cx)-3.2,pth=add(new T.PlaneGeometry(L,1.6),dirt,(cx+(cx<0?-3:3))/2,.025,cz);pth.rotation.x=-Math.PI/2;pth.castShadow=false;
       label('🏘️ '+nm,cx,9.5,cz,2.2)})}
+  // ================= (v14.5) إضافات: الفصول، الطيور عند الغروب، الملعب، التنّور، الجار المريض، العصافير، صندوق الصدقات =================
+  {const D2=V?{}:day();
+    // 🍂 الخريف: أوراق تتساقط حول الأشجار وأوراق على الأرض
+    if(SEA==='au'){const lg=new T.PlaneGeometry(.2,.13),lm=[0xe0802c,0xf0c445,0xc9582a,0xd9a23a].map(c=>new T.MeshLambertMaterial({color:nC(c),side:T.DoubleSide}));
+      TREES.forEach(([x,z],ti)=>{for(let i=0;i<7;i++){const l=new T.Mesh(lg,lm[(ti+i)%4]);const ox=(Math.random()-.5)*2.4,oz=(Math.random()-.5)*2.4,y0=Math.random()*2.6,sp=.35+Math.random()*.3,ph=Math.random()*6;S.add(l);
+          anim.push(t=>{let y=2.6-((t*sp+y0)%2.6);l.position.set(x+ox+Math.sin(t*1.3+ph)*.35,y+.05,z+oz+Math.cos(t*1.1+ph)*.25);l.rotation.set(t*2+ph,t*1.5,ph)})}
+        for(let i=0;i<9;i++){const a=i*.7+ti,r=.6+(i%3)*.55,g=new T.Mesh(lg,lm[(i+ti)%4]);g.rotation.set(-Math.PI/2,0,a);g.position.set(x+Math.cos(a)*r,.03+i*.001,z+Math.sin(a)*r);g.scale.setScalar(1.3);S.add(g)}})}
+    // ☀️ الصيف: سراب يلمع على الشارع البعيد وقت الظهيرة
+    if(SEA==='su'&&!night&&!RN){[-34,-52,-75,30,48].forEach((z,i)=>{const m=new T.Mesh(new T.PlaneGeometry(2.6,9),new T.MeshBasicMaterial({color:0xe8f4ff,transparent:true,opacity:0,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.set(0,.06,z);S.add(m);
+        anim.push(t=>{const h=hourNow();m.visible=h>=11&&h<17;m.material.opacity=.18+Math.sin(t*3+i*1.7)*.12})})}
+    // 🐦 أسراب الطيور عند الغروب: تطير بشكل V نحو الجبال
+    if(!night&&!RN){const fl=new T.Group(),bm2=M(0x2b2b33);S.add(fl);const ws=[];for(let i=0;i<13;i++){const b=new T.Group(),k=Math.ceil(i/2)*(i%2?1:-1);b.position.set(Math.abs(k)*1.6,0,k*1.4);
+        const w1=add(new T.BoxGeometry(.6,.04,.2),bm2,-.3,0,0,b),w2=add(new T.BoxGeometry(.6,.04,.2),bm2,.3,0,0,b);fl.add(b);ws.push([w1,w2,i])}
+      fl.visible=false;let ck=-9,on=false;anim.push(t=>{if(t-ck>5){ck=t;on=sunsetBirds()}fl.visible=on;if(!on)return;const u=(t%45)/45;fl.position.set(70-u*170,24+Math.sin(t*.5)*1.5,-30+u*10);fl.rotation.y=Math.PI/2;
+        ws.forEach(([a,b,i])=>{const f=Math.sin(t*7+i)*.6;a.rotation.z=f;b.rotation.z=-f})})}
+    // ⚽ ملعب كرة القدم خلف السوق (الأطفال يلعبون العصر — makeLife)
+    {const F=new T.Group();F.position.set(FB[0],0,FB[1]);F.userData.act='football';S.add(F);const gm=M(night?0x2f6a32:0x4fb94a),gm2=M(night?0x2a6030:0x47ad44),wl=M(0xffffff);
+      for(let i=0;i<6;i++){const st=new T.Mesh(new T.PlaneGeometry(6.2,1.5),i%2?gm:gm2);st.rotation.x=-Math.PI/2;st.position.set(0,.035,-3.75+i*1.5);st.receiveShadow=true;F.add(st)}
+      [[6.2,.06,0,-4.5],[6.2,.06,0,4.5],[.06,9,-3.1,0],[.06,9,3.1,0],[6.2,.06,0,0]].forEach(([w,d,x,z])=>{const l=new T.Mesh(new T.PlaneGeometry(w,d),wl);l.rotation.x=-Math.PI/2;l.position.set(x,.045,z);F.add(l)});
+      const cc=new T.Mesh(new T.RingGeometry(.9,.96,32),wl);cc.rotation.x=-Math.PI/2;cc.position.y=.045;F.add(cc);
+      [-1,1].forEach(k=>{const z=k*4.5;[-1,1].forEach(j=>add(new T.CylinderGeometry(.05,.05,1,8),wl,j*1,.5,z,F));const cb=add(new T.CylinderGeometry(.05,.05,2,8),wl,0,1,z,F);cb.rotation.z=Math.PI/2;
+        const net=new T.Mesh(new T.PlaneGeometry(2,1),new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.35,side:T.DoubleSide,wireframe:true}));net.position.set(0,.5,z+k*.45);net.rotation.x=k*.4;F.add(net)});
+      label('⚽ ملعب الحيّ',0,2.4,0,.6,F)}
+    // 🔥 تنّور الجارة بجانب البيت الأيمن خلف النهر، وجارٌ مريض في البيت نفسه في بعض الأيام
+    {const TN=new T.Group();TN.position.set(10.2,0,24.8);TN.userData.act='tannour';S.add(TN);const clay=M(0xc9784a,{roughness:1}),clay2=M(0xa85f38,{roughness:1});
+      add(new T.CylinderGeometry(.5,.72,1,18,1,true),clay,0,.5,0,TN).material.side=T.DoubleSide;add(new T.TorusGeometry(.5,.08,8,18),clay2,0,1,0,TN).rotation.x=Math.PI/2;
+      const fire=new T.Mesh(new T.CircleGeometry(.42,16),new T.MeshBasicMaterial({color:night?0x803010:0xff7a1a}));fire.rotation.x=-Math.PI/2;fire.position.y=.25;TN.add(fire);
+      box(.9,.08,.6,M(0x8b5a2b),1,.55,0,TN);[[.8,.05],[1.1,-.12],[1.2,.14]].forEach(([x,z])=>{const b=add(new T.CylinderGeometry(.2,.2,.04,14),M(0xe9b46a),x,.62,z,TN)});
+      if(!night){const sm=new T.MeshBasicMaterial({color:0xdddddd,transparent:true,opacity:.35,depthWrite:false});for(let i=0;i<6;i++){const p=new T.Mesh(new T.SphereGeometry(.28,8,6),sm.clone());TN.add(p);const o=i/6;anim.push(t=>{const u=(t*.25+o)%1;p.position.set(Math.sin(t+i)*.25*u,1.1+u*3.2,u*.4);p.scale.setScalar(.6+u*1.8);p.material.opacity=.4*(1-u)})}}
+      if(!V&&!night&&!D2.tn)mark(TN,'🍞','#e0802c',2.3,0,.85);label('🔥 تنّور الجارة',0,3.4,0,.55,TN)}
+    // 🏘️ دخان تنانير في القرى البعيدة
+    if(!night)VIL.forEach(([cx,cz],vi)=>{const sm=new T.MeshBasicMaterial({color:0xe6e6e6,transparent:true,opacity:.3,depthWrite:false});for(let i=0;i<5;i++){const p=new T.Mesh(new T.SphereGeometry(.5,8,6),sm.clone());S.add(p);const o=i/5;
+        anim.push(t=>{const u=(t*.12+o)%1;p.position.set(cx+4+Math.sin(t*.5+i)*.6,1.5+u*7,cz-4+u*2);p.scale.setScalar(.7+u*2.2);p.material.opacity=.32*(1-u)})}});
+    {const SK=new T.Group();SK.position.set(7,0,NBZ);SK.userData.act='sick';S.add(SK);if(!V&&sickDay()&&!D2.sick)mark(SK,'🤒','#8f6bff',3.9,0,.95)}
+    // 🐦 مُطعِم العصافير أمام البيت (الشتاء) + عصافير تنزل لتأكل
+    {const FD=new T.Group();FD.position.set(-4.3,0,-3.1);FD.userData.act='birds';S.add(FD);add(new T.CylinderGeometry(.05,.05,1.1,8),M(0x6b4423),0,.55,0,FD);box(.6,.05,.6,M(0x8b5a2b),0,1.12,0,FD);
+      [[-1,0],[1,0],[0,-1],[0,1]].forEach(([a,b])=>box(a?0.05:.6,.1,b?.05:.6,M(0x8b5a2b),a*.28,1.18,b*.28,FD));prism(.8,.3,.8,M(0xc0563b),0,1.5,0,FD);
+      if(!V&&birdMonths()&&!D2.bf)mark(FD,'🐦','#3b9be0',2.3,0,.8);
+      const SP=S.userData.sparrows={on:0,x:-3.6,z:-3.2,b:[]};const brown=M(0x8a5a3a),cream=M(0xf0e0c0);
+      for(let i=0;i<7;i++){const b=new T.Group();ell(.1,1,.9,1.4,brown,0,.1,0,b);ell(.07,1,1,1,brown,0,.18,.12,b);ell(.07,1,.6,1,cream,0,.06,.04,b);add(new T.ConeGeometry(.025,.06,6),M(0xe0a020),0,.17,.2,b).rotation.x=Math.PI/2;
+        b.visible=false;S.add(b);SP.b.push({b,a:i/7*Math.PI*2,r:.4+(i%3)*.3,ph:i})}
+      anim.push((t,dt)=>{if(SP.on<=0){SP.b.forEach(o=>o.b.visible=false);return}SP.on-=dt;const k=Math.min(1,Math.min(SP.on,24-SP.on)/2.5);
+        SP.b.forEach(o=>{o.b.visible=true;const y=(1-k)*7;o.b.position.set(SP.x+Math.cos(o.a)*o.r*(1+(1-k)*6),y+Math.max(0,Math.sin(t*9+o.ph))*.05,SP.z+Math.sin(o.a)*o.r);o.b.rotation.y=o.a+Math.PI;o.b.rotation.x=k>.99?Math.max(0,Math.sin(t*5+o.ph))*.6:0})})}
+    // 💝 صندوق الصدقات عند باب الجامع
+    if(LV('m')>0){const SB=new T.Group();SB.position.set(7.6,0,3.3);SB.userData.act='sadaqa';S.add(SB);box(.12,.6,.12,M(0x777777),0,.3,0,SB);box(.55,.45,.4,M(0x1f8a5a),0,.82,0,SB);box(.3,.03,.06,M(0x151515),0,1.055,0,SB);box(.57,.08,.42,M(0xc9a227,{metalness:.6,roughness:.35}),0,1.06,0,SB);
+      if(!V&&!D2.sdq)mark(SB,'💝','#d94f8a',1.9,0,.75)}
+    // ❤️ علامة فوق الوالدين عند باب البيت حتى يبرّهما الطفل اليوم
+    if(!V&&!night){const br=D2.br||{};if(!(br.s&&br.b&&br.h)){const PM=new T.Group();PM.position.set(-3.1,0,1);PM.userData.act='parents';S.add(PM);mark(PM,'❤️','#e2504a',2.9,0,.85)}}}
   // ================= (v13.8) الدفعة الثانية: السماء، المطر وقوس قزح، الأغنام والراعي، زينة رمضان والعيد =================
   // ---- 🌅 قبّة سماء متدرّجة (تتلوّن عند الشروق والغروب — City3D.applySky في run) وقرص شمس قرب الأفق ----
   {const g=new T.SphereGeometry(700,32,20),n=g.attributes.position.count;g.setAttribute('color',new T.Float32BufferAttribute(new Float32Array(n*3),3));
@@ -669,6 +729,20 @@ function hourNow(){const d=window.City3D&&City3D.debugHour;if(d!=null)return d;c
 // (v14.3) صلاة الجمعة: يأتي الناس قبل الظهر بـ٤٥ دقيقة حتى بعده بـ١٠، ثم الصلاة، ثم يرجعون بعد الظهر بـ٣٥ إلى ٦٠ دقيقة
 function jumuaNow(){if(wDay()!==5)return '';let d=12.2;try{const x=new Date(+Adhan.times(new Date()).dhuhr);d=x.getHours()+x.getMinutes()/60}catch(e){}
   const h=hourNow();return h>=d-.75&&h<d+1/6?'come':h>=d+35/60&&h<d+1?'go':''}
+// ===== (v14.5) إضافات الشيخ العشر =====
+// الفصول الحقيقية: ربيع (آذار–أيار) / صيف (حزيران–أيلول) / خريف (تشرين ١–٢) / شتاء (كانون ١ – شباط)
+function season(){const d=window.City3D&&City3D.debugSeason;if(d)return d;const m=new Date().getMonth();return m>=2&&m<=4?'sp':m>=5&&m<=8?'su':m<=10&&m>=9?'au':'wi'}
+// إطعام العصافير في البرد: تشرين الثاني إلى شباط
+function birdMonths(){const d=window.City3D&&City3D.debugBirds;if(d!=null)return !!d;return [10,11,0,1].includes(new Date().getMonth())}
+const HM=['محرّم','صفر','ربيع الأول','ربيع الثاني','جمادى الأولى','جمادى الآخرة','رجب','شعبان','رمضان','شوّال','ذو القعدة','ذو الحجّة'];
+function hijri(){const d=window.City3D&&City3D.debugHijri;if(d)return d;try{const p=new Intl.DateTimeFormat("en-u-ca-islamic-umalqura",{month:"numeric",day:"numeric"}).formatToParts(new Date());return {m:+p.find(x=>x.type==="month").value,d:+p.find(x=>x.type==="day").value}}catch(e){return null}}
+function adhanGlow(){if(window.City3D&&City3D.debugGlow)return true;try{const t=Adhan.times(new Date()),n=Date.now();return ['fajr','dhuhr','maghrib'].some(p=>n>=+t[p]&&n<+t[p]+20*60e3)}catch(e){return false}}
+function maghribH(){try{const x=new Date(+Adhan.times(new Date()).maghrib);return x.getHours()+x.getMinutes()/60}catch(e){return 17.3}}
+function sunsetBirds(){const h=hourNow(),m=maghribH();return h>=m-.9&&h<m+.2}
+// جار مريض: يوم من كل ثلاثة تقريبًا
+function sickDay(){const d=window.City3D&&City3D.debugSick;if(d!=null)return !!d;const n=new Date(),k=n.getFullYear()*372+n.getMonth()*31+n.getDate();return (k*40503>>>0)%3===0}
+// وقت لعب الكرة: العصر، وصباح الجمعة والسبت أيضًا
+function footNow(){const h=hourNow(),we=wDay()>=5;return !rainNow()&&(h>=15&&h<maghribH()-.15||we&&h>=9.5&&h<11.8)}
 function wDay(){const d=window.City3D&&City3D.debugWd;return d!=null?d:new Date().getDay()}
 function rushNow(){const h=hourNow();return wDay()<5&&(h>=7.5&&h<8.5||h>=11.75&&h<12.75)}
 function sleepNow(){const h=hourNow();let f=5;try{const d=new Date(+Adhan.times(new Date()).fajr);const x=d.getHours()+d.getMinutes()/60;if(x>3&&x<7)f=x}catch(e){}return h>=0&&h<f}
@@ -689,7 +763,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
     const robe=M(robeC);add(kid?BODY.kid:kind==='woman'?BODY.woman:BODY.man,robe,0,0,0,P);
     const shoe=M(kid?[0xffffff,0x2b3a55,0xe2504a][i%3]:0x3a2a1e);
     if(kid){const pant=M(0x2b3a55);P.userData.legs=[-.1,.1].map(x=>{const L=new T.Group();L.position.set(x,.48,0);P.add(L);add(new T.CylinderGeometry(.085,.075,.42,8),pant,0,-.21,0,L);ball(shoe,.1,0,-.44,.04,1,.55,1.4,L);return L});
-      add(new T.BoxGeometry(.34,.38,.16),M([0x2f6fd0,0xd94f8a,0x1fa463][i%3]),0,.8,-.25,P)} // حقيبة
+      P.userData.bag=add(new T.BoxGeometry(.34,.38,.16),M([0x2f6fd0,0xd94f8a,0x1fa463][i%3]),0,.8,-.25,P)} // حقيبة
     else[-.1,.1].forEach(x=>ball(shoe,.09,x,.04,.08,1,.5,1.5));
     // اليدان: محور عند الكتف حتى تتأرجحا
     const sh=kid?.97:1.18,sw=kid?.22:.27,al=kid?.4:.55;
@@ -818,6 +892,16 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
     if(back){pts=pts.map(q=>[q[0],q[1]]).reverse();if(left){const k=pts.findIndex(q=>q[0]>2&&Math.abs(q[1]-4.95)<.01);if(k>=0)pts[k][2]=1.4}
       p.userData.bs=p.scale.x;p.scale.setScalar(.01)}
     walk(p,pts,1.4+Math.random()*.4,back?'gone':'enter');const w=walkers[walkers.length-1];w.wor=1;if(left)w.cross=1;if(back)w.grow=0;prN++}
+  // (v14.5) 👨‍👩‍👦 والدا الطفل عند باب البيت (بالنهار): الأمّ تحمل أكياسًا، والأب يستقبله
+  const father=person('man',2),mother=person('woman',5);father.position.set(-3.15,0,-.35);mother.position.set(-3.15,0,2.35);[father,mother].forEach(P=>{P.rotation.y=Math.PI/2;P.userData.act='parents'});
+  mother.userData.bags=[-1,1].map(k=>add(new T.BoxGeometry(.24,.28,.14),M(k<0?0xe9e2cf:0xd6e8f5),k*.36,.5,0,mother));
+  // ⚽ أطفال يلعبون الكرة العصر: فريق أحمر وفريق أزرق، والكرة تنتقل بينهم
+  const FBK=[],FBH=[[-1.6,-2.6],[1.4,-2.2],[0,-3.6],[-1.4,2.4],[1.5,2.6],[0,3.6]];
+  for(let i=0;i<6;i++){const p=person('kid',i<3?i*6:1+(i-3)*6);p.userData.bag.visible=false;p.userData.act='football';p.userData.fh=FBH[i];p.position.set(FB[0]+FBH[i][0],0,FB[1]+FBH[i][1]);FBK.push(p)}
+  const ball=new T.Mesh(new T.SphereGeometry(.15,14,10),new T.MeshStandardMaterial({color:0xffffff,roughness:.5}));[[0,.15,0],[0,-.15,0],[.15,0,0],[-.15,0,0],[0,0,.15],[0,0,-.15]].forEach(q=>{const d=new T.Mesh(new T.SphereGeometry(.05,6,4),M(0x222222));d.position.set(...q);ball.add(d)});
+  ball.position.set(FB[0],.15,FB[1]);ball.userData.act='football';g.add(ball);const bl={from:null,to:null,k:1,who:0,wait:1};
+  // 🔥 الجارة عند التنّور
+  const baker=person('woman',6);baker.position.set(11.1,0,25.5);baker.rotation.y=-Math.PI*.7;baker.userData.act='tannour';
   let lastCycle=-1;
   function update(t,dt,o){const h=hourNow(),day=!night;
     // الساحة والحارس
@@ -849,6 +933,16 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       if(c.dir<0&&phase&&c.z>=Z1&&cars.some(s=>s.v.visible&&s.v.position.z>120))block=true; // لا تدخل سيارة فوق الباص لحظة ظهوره
       if(!block)c.z+=c.dir*c.sp*(rush?.45:1)*dt;
       if(c.dir>0&&c.z>Z1||c.dir<0&&c.z<Z0){c.z=c.dir>0?Z0:Z1;if(c.ru){c.on=rush;c.v.visible=rush}}c.v.position.z=c.z});
+    // (v14.5) الوالدان والجارة بالنهار، والأطفال يلعبون الكرة العصر
+    [father,mother].forEach(P=>{P.visible=day&&!o.sleep});mother.userData.bags.forEach(b=>b.visible=!o.bagsDone);baker.visible=day&&!o.sleep;
+    if(baker.visible)baker.rotation.x=Math.max(0,Math.sin(t*.9))*.25;
+    const play=day&&!o.sleep&&footNow();ball.visible=play;FBK.forEach(p=>p.visible=play);
+    if(play){bl.wait-=dt;if(bl.k<1){bl.k=Math.min(1,bl.k+dt*1.2);const a=bl.from,b2=bl.to;ball.position.set(a.x+(b2.x-a.x)*bl.k,.15+Math.sin(bl.k*Math.PI)*.9,a.z+(b2.z-a.z)*bl.k);ball.rotation.x+=dt*8}
+      else if(bl.wait<=0){const tg=FBK[Math.floor(Math.random()*6)];bl.from=ball.position.clone();bl.to={x:tg.position.x,z:tg.position.z};bl.k=0;bl.wait=1.3+Math.random();bl.who=FBK.indexOf(tg)}
+      FBK.forEach((p,i)=>{const h0=p.userData.fh,chase=i===bl.who||Math.hypot(ball.position.x-p.position.x,ball.position.z-p.position.z)<1.6;
+        const tx=chase?ball.position.x:FB[0]+h0[0]+Math.sin(t*.4+i)*.8,tz=chase?ball.position.z:FB[1]+h0[1]+Math.cos(t*.3+i)*.6,dx=tx-p.position.x,dz=tz-p.position.z,d=Math.hypot(dx,dz);
+        if(d>.35){const sp=Math.min(d-.3,dt*(chase?2.4:1.2));p.position.x+=dx/d*sp;p.position.z+=dz/d*sp;p.rotation.y=Math.atan2(dx,dz);p.position.y=Math.abs(Math.sin(t*9+i))*.06}else{p.rotation.y=Math.atan2(ball.position.x-p.position.x,ball.position.z-p.position.z);p.position.y=0}
+        p.position.x=Math.max(FB[0]-2.9,Math.min(FB[0]+2.9,p.position.x));p.position.z=Math.max(FB[1]-4.3,Math.min(FB[1]+4.3,p.position.z))})}
     // الجيران على الأرصفة
     peds.forEach((P,i)=>{const u=P.userData.u,vis=(day||i<2)&&!o.sleep;if(P.userData.umb)P.userData.umb.visible=!!o.rain;P.visible=vis;if(!vis){if(u.bub)endGreet(i);if(u.hold)u.hold=0;return}
       if(u.hold>0){u.hold-=dt;if(K)P.rotation.y=Math.atan2(K.x-P.position.x,K.z-P.position.z);P.position.y=0}
@@ -874,7 +968,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       const [tx,tz,wt]=w.pts[0],dx=tx-P.position.x,dz=tz-P.position.z,d=Math.hypot(dx,dz),sp=w.sp*dt;
       if(d<=sp){P.position.x=tx;P.position.z=tz;w.pts.shift();if(wt)w.pause=wt}else{P.position.x+=dx/d*sp;P.position.z+=dz/d*sp;P.rotation.y=Math.atan2(dx,dz)}
       P.position.y=Math.abs(Math.sin(t*6+P.id))*.05;return true});swing(dt)}
-  return {g,update,count:()=>walkers.length,peds,say,endGreet,traffic,sellers,elder}}
+  return {g,update,count:()=>walkers.length,peds,say,endGreet,traffic,sellers,elder,father,mother,baker,FBK}}
 
 /* ---------- (v11.9) أصوات المدينة: نهارًا عصافير وحركة سير هادئة، وليلًا هدوء. تُصنع بالكود (بلا ملفات)، وتحترم كتم صوت التطبيق ---------- */
 const SKEY='usul5_m3snd';
@@ -936,7 +1030,7 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
     U.sky.set(top,hor);if(S.fog)S.fog.color.copy(hor);if(S.background&&S.background.copy)S.background.copy(hor);if(U.sun){U.sun.color.setHex(sc);U.sun.intensity=si}
     const d=U.sunDisc;if(d){d.visible=!!disc&&disc.k>.05;if(disc)d.position.set(disc.x,disc.y,disc.z)}}
   if(window.City3D)City3D.applySky=()=>applySky();
-  let kidSp=4.2,escort=0,lookT=0;const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),new T.MeshStandardMaterial({color:k<0?0xe9e2cf:0xd6e8f5,roughness:.8}));b.position.set(k*.34,.42,.06);b.visible=false;kid.add(b);return b});
+  let kidSp=4.2,escort=0,lookT=0,carry=0;const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),new T.MeshStandardMaterial({color:k<0?0xe9e2cf:0xd6e8f5,roughness:.8}));b.position.set(k*.34,.42,.06);b.visible=false;kid.add(b);return b});
   const sign=v=>v<0?-1:1;
   const door=p=>{if(p==='sc')return {x:-2.4,z:-17.6,via:null};if(p==='m')return {x:6,z:3.95,via:4.6};const [x,z]=SPOT[p];return {x:x-sign(x)*(2.2+(BS[p]||1)),z:z+1,via:null}};
   const treeSpot=i=>{const [x,z]=TREES[i];return Math.abs(x)<4?{x:x+sign(x)*.9,z,via:null}:{x:x-sign(x)*1.2,z,via:sign(z)*4.6}};
@@ -1062,6 +1156,41 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
           card(`🚶 ${B('تحمل','تحملين')} الأكياس ${B('وتمشي','وتمشين')} مع جدّو بهدوء…`);
           go({x:-4.3,z:NBZ,via:null},()=>{escort=0;kidSp=4.2;busy=0;D.eld=1;dsv();jewels(3);life.say(E,'جزاك الله خيرًا 🤲',3.5,2.4);
             card(`👴 جدّو: جزاك الله خيرًا يا ${B('ولدي','ابنتي')}، الله يحفظك 🤲 💎 +٣<br><b style="color:#1fa463;font-size:18px">🌟 هذا عمل صالح!</b><br><small>احترام الكبير ومساعدته من أخلاق المسلم 🤍</small>`,[['الحمد لله',null]])});busy=1}],['لاحقًا',null,'sec']])})},
+    // ===== (v14.5) 👨‍👩‍👦 بِرّ الوالدين، ⚽ الملعب، 🔥 التنّور، 🤒 الجار المريض، 🐦 العصافير، 💝 الصدقة، 🌙 القمر =====
+    parents(){if(night||sleeping){card(`🌙 ${B('أبوك','أبوكِ')} و${B('أمّك','أمّكِ')} يرتاحان داخل البيت الآن… ${B('ادعُ','ادعي')} لهما: «اللَّهمّ احفظهما» 🤲`);setTimeout(()=>card(''),2600);return}
+      const D=day(),br=D.br=D.br||{},L=life,ok=(k,n,msg,lesson)=>{const first=!br[k];br[k]=1;dsv();if(first)jewels(n);else{joyT=1.1;burst()}
+        const left=[['s','👋 السلام عليكم يا أمّي ويا أبي'],['b','🛍️ أحمل الأغراض عن أمّي'],['h','🤲 أقبّل يد أبي']].filter(x=>!br[x[0]]);
+        card(`${msg}${first?' 💎 +'+arn(n):''}`+(left.length?'':`<br><b style="color:#1fa463;font-size:18px">🌟 ${B('أنت','أنتِ')} ${B('بارّ','بارّة')} بوالديك!</b>`)+`<br><small>${lesson}</small>`,left.length?left.map(x=>[x[1],()=>act(x[0])]).concat([['لاحقًا',refresh,'sec']]):[['الحمد لله',refresh]])};
+      const act=k=>{if(k==='s'){L.say(kid,'السلام عليكم يا أمّي ويا أبي 👋',3,2.4);setTimeout(()=>{L.say(L.mother,'وعليكم السلام يا '+B('حبيبي','حبيبتي')+' 🤍',3,2.3);ok('s',2,`👋 ${B('سلّمتَ','سلّمتِ')} على والديك ففرحا بك`,'السلام على الوالدين أوّل البرّ بهما 🤍')},1200)}
+        if(k==='b'){L.say(kid,'عنكِ يا أمّي 🛍️',2.5,2.4);br.b=br.b||0;setTimeout(()=>{carry=1;kidBags.forEach(b=>b.visible=true);L.say(L.mother,'اللَّه يرضى عليك 🤲',3,2.3);
+          setTimeout(()=>{carry=0;kidBags.forEach(b=>b.visible=false);ok('b',2,`🛍️ ${B('حملتَ','حملتِ')} الأغراض عن ${B('أمّك','أمّكِ')} وأدخلتها البيت`,'مساعدة الأمّ من أحبّ الأعمال إلى اللَّه 🤍')},1500)},600)}
+        if(k==='h'){L.say(kid,'🤲',2,2.4);joyT=1.1;setTimeout(()=>{L.say(L.father,'رضي اللَّهُ عنك يا '+B('ولدي','ابنتي')+' 🤲',3.2,2.4);ok('h',2,`🤲 ${B('قبّلتَ','قبّلتِ')} يد ${B('أبيك','أبيكِ')} فدعا لك`,'احترام الوالدين وطاعتهما بابٌ إلى الجنّة 🤍')},1000)}};
+      go(door('home'),()=>{const left=[['s','👋 السلام عليكم يا أمّي ويا أبي'],['b','🛍️ أحمل الأغراض عن أمّي'],['h','🤲 أقبّل يد أبي']].filter(x=>!br[x[0]]);
+        if(!left.length){card(`👨‍👩‍👦 والداك يدعوان لك ويقولان: الله يحفظك 🤲<br><small>${B('برَرتَ','برَرتِ')} بهما اليوم، ${B('تعال','تعالي')} غدًا من جديد 🤍</small>`,[['الحمد لله',null]]);return}
+        card(`👨‍👩‍👦 ${B('أبوك','أبوكِ')} و${B('أمّك','أمّكِ')} عند باب البيت… ${B('أمّك','أمّكِ')} تحمل أكياسًا ثقيلة 🛍️<br><small>ماذا ${B('تفعل','تفعلين')}؟</small>`,left.map(x=>[x[1],()=>act(x[0])]).concat([['لاحقًا',null,'sec']]))})},
+    football(){const D=day();if(night||sleeping||!footNow()){card(`⚽ الملعب فارغ الآن… يلعب أطفال الحيّ العصر${wDay()>=5?' وصباح العطلة':''} 🙂`);setTimeout(()=>card(''),2400);return}
+      go({x:FB[0]-3.5,z:-18.5,via:null},()=>{const help=()=>{const first=!D.fb;D.fb=1;dsv();if(first)jewels(2);else{joyT=1.1;burst()}
+          card(`🤝 ${B('ساعدتَ','ساعدتِ')} اللاعب على النهوض، فقال: شكرًا يا ${B('صديقي','صديقتي')}!${first?' 💎 +٢':''}<br><b style="color:#1fa463;font-size:18px">🌟 هذا عمل صالح!</b><br><small>الروح الرياضية: نلعب بمحبّة، ونساعد من يقع، ولا نغضب إذا خسرنا 🤍</small>`,[['الحمد لله',null]])};
+        card(`⚽ أطفال الحيّ يلعبون… فجأة وقع لاعبٌ من الفريق الآخر 🤕<br><small>ماذا ${B('تفعل','تفعلين')}؟</small>`,[['🤝 أساعده على النهوض',help],['أكمل اللعب وأسجّل هدفًا',()=>card(`🤍 الهدف يستطيع أن ينتظر… الأجمل أن ${B('تساعده','تساعديه')} أوّلًا`,[['🤝 أساعده',help]]),'sec']])})},
+    tannour(){const D=day();if(night||sleeping){card('🔥 التنّور بارد الآن… الجارة تخبز في النهار 🍞');setTimeout(()=>card(''),2200);return}
+      if(D.tn){card(`🍞 ${B('أوصلتَ','أوصلتِ')} الخبز اليوم، وجدّو يدعو لك 🤲`);setTimeout(()=>card(''),2000);return}
+      go({x:9.1,z:24.4,via:null},()=>{life.say(life.baker,'السلام عليكم يا '+B('ولدي','ابنتي')+' 🍞',3,2.3);
+        card(`🔥 جارتك تخبز خبز التنّور الحارّ… أعطتك خبزات وقالت: «${B('أوصلها','أوصليها')} إلى بيت جدّو» 🍞`,[['🍞 أوصلها لجدّو',()=>{carry=1;kidBags.forEach(b=>b.visible=true);
+          go({x:-4.3,z:NBZ,via:null},()=>{carry=0;kidBags.forEach(b=>b.visible=false);D.tn=1;dsv();jewels(2);
+            card(`👴 جدّو: جزاك اللَّهُ خيرًا، وجزى جارتنا خيرًا 🤲 💎 +٢<br><b style="color:#1fa463;font-size:18px">🌟 هذا عمل صالح!</b><br><small>الإحسان إلى الجار وإهداؤه من أخلاق المسلم 🤍</small>`,[['الحمد لله',refresh]])})}],['لاحقًا',null,'sec']])})},
+    sick(){const D=day();if(!sickDay()){card('🏠 جارك بخير والحمد لله 💚');setTimeout(()=>card(''),1800);return}
+      if(D.sick){card('🤒 جارك يرتاح، ويدعو لك 🤲');setTimeout(()=>card(''),1800);return}
+      go({x:4.8,z:NBZ,via:null},()=>card(`🤒 جارك مريض في فراشه اليوم…<br><small>ماذا ${B('تفعل','تفعلين')}؟</small>`,[['🍎 أزوره بفاكهة وأدعو له',()=>{life.say(kid,'شفاك اللَّهُ وعافاك 🤲',3,2.4);
+          setTimeout(()=>{D.sick=1;dsv();jewels(3);card(`🍎 ${B('زرتَ','زرتِ')} جارك ${B('ودعوتَ','ودعوتِ')} له بالشفاء، ففرح كثيرًا 💎 +٣<br><b style="color:#1fa463;font-size:18px">🌟 هذا عمل صالح!</b><br><small>زيارة المريض من حقّ المسلم على أخيه 🤍</small>`,[['الحمد لله',refresh]])},1300)}],['لاحقًا',null,'sec']]))},
+    birds(){const D=day();if(!birdMonths()){card('🐦 العصافير تجد طعامها بنفسها في هذا الفصل… نطعمها في أيام البرد ❄️');setTimeout(()=>card(''),2400);return}
+      if(D.bf){card('🐦 العصافير شبعانة اليوم 💚');setTimeout(()=>card(''),1800);return}
+      go({x:-2.7,z:-3.1,via:null},()=>{busy=1;card(`🌾 ${B('تضع','تضعين')} الحَبّ للعصافير في البرد… انظر، إنها قادمة! 🐦`);const SP=S.userData.sparrows;if(SP)SP.on=24;
+        setTimeout(()=>{busy=0;D.bf=1;dsv();jewels(2);card(`🐦 أكلت العصافير وزقزقت: شكرًا! 💎 +٢<br><b style="color:#1fa463;font-size:18px">🌟 هذا عمل صالح!</b><br><small>في البرد يقلّ طعام الطيور، والرحمة بها من أخلاق المسلم 🤍</small>`,[['الحمد لله',null]])},3500)})},
+    sadaqa(){const D=day();if(D.sdq){card(`💝 ${B('تصدّقتَ','تصدّقتِ')} اليوم، تقبّل اللَّهُ منك 🤲`);setTimeout(()=>card(''),2000);return}
+      go(door('m'),()=>card(`💝 صندوق الصدقات عند باب الجامع… ما فيه يصل إلى الفقراء والمحتاجين<br><small>هل ${B('تتصدّق','تتصدّقين')} بجوهرة من جواهرك؟</small>`,[['🤲 أتصدّق بـ💎١',()=>{try{Deco.takeJ(1)}catch(e){}D.sdq=1;dsv();joyT=1.1;burst();showJ();try{Aamal.grow('akhlaq')}catch(e){}
+          card(`💝 ${B('وضعتَ','وضعتِ')} جوهرة في الصندوق سرًّا، ولم يرَك أحد إلا اللَّه 🤲<br><b style="color:#1fa463;font-size:18px">🌟 هذا عمل صالح!</b><br><small>«صدقة السرّ تطفئ غضب الربّ» — الصدقة تزيد المال بركة 🤍</small>`,[['الحمد لله',refresh]])}],['لاحقًا',null,'sec']]))},
+    moon(){const h=hijri();if(!h)return;const d=h.d,ph=d<=3?'هلال':d<=7?'هلال يكبر':d<=12?'القمر يكبر':d<=16?'بدر كامل 🌕':d<=22?'القمر يصغر':'هلال آخر الشهر';
+      card(`🌙 هذا ${ph} — شهر <b>${HM[h.m-1]}</b><br>اليوم ${arn(d)} من الشهر الهجري<br><small>القمر يعلّمنا الشهور: يبدأ الشهر بهلال صغير، وفي منتصفه يصير بدرًا، ثم يصغر حتى يختفي 🤍</small>`,[['سبحان اللَّه 🤍',null]])},
     library(){go(door('k'),()=>card(`📚 المكتبة: ${B('اقرأ','اقرئي')} ${B('وِردك','وِردكِ')} اليومي (٥ أسئلة) 📖`,[['📖 وِردي اليومي',()=>closeTo(()=>{const b=document.getElementById('openWird');b&&b.click()})],['لاحقًا',null,'sec']]))}};
   function reward(kind){const D=day();D.sl=D.sl|0;const give=D.sl<5;D.sl++;dsv();if(give)jewels(1);else{joyT=1.1;burst()}
     card(`<b style="color:#1fa463;font-size:19px">🌟 هذا عمل صالح!</b><br>${kind==='rd'?B('رددتَ','رددتِ'):B('ألقيتَ','ألقيتِ')} السلام${give?' 💎 +١':''}<br><small>${kind==='rd'?'ردّ السلام من آداب الإسلام الجميلة 🤍':'إفشاء السلام يزرع المحبة بين الناس 🤍'}</small>`,[['الحمد لله',null]])}
@@ -1148,14 +1277,14 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
     // (v13.7) 👴 جدّو: بالنهار (٨–١٧) ينتظر عند السوق بكيسيه، وأثناء المساعدة يمشي بجانب الطفل، وبعدها يقف عند باب بيته
     {const E=life.elder,hh=hourNow();if(V||sleeping||night||hh<8||hh>=17){E.visible=false}else{E.visible=true;const DD=day(),bg=E.userData.bags;
       if(escort){const a=kid.rotation.y;E.position.set(kid.position.x+Math.cos(a)*.75,Math.abs(Math.sin(t*3))*.03,kid.position.z-Math.sin(a)*.75);E.rotation.y=a;bg.forEach(b=>b.visible=false);kidBags.forEach(b=>b.visible=true);E.userData.mk.visible=false}
-      else if(DD.eld){E.position.set(-4.85,0,NBZ-.7);E.rotation.y=Math.PI/2;bg.forEach(b=>b.visible=false);kidBags.forEach(b=>b.visible=false);E.userData.mk.visible=false}
-      else{E.position.set(MKX+.6,0,-13.7);if(!path.length)E.rotation.y=-Math.PI/2+Math.sin(t*.2)*.5;bg.forEach(b=>b.visible=true);kidBags.forEach(b=>b.visible=false);E.userData.mk.visible=true}}}
+      else if(DD.eld){E.position.set(-4.85,0,NBZ-.7);E.rotation.y=Math.PI/2;bg.forEach(b=>b.visible=false);kidBags.forEach(b=>b.visible=carry>0);E.userData.mk.visible=false}
+      else{E.position.set(MKX+.6,0,-13.7);if(!path.length)E.rotation.y=-Math.PI/2+Math.sin(t*.2)*.5;bg.forEach(b=>b.visible=true);kidBags.forEach(b=>b.visible=carry>0);E.userData.mk.visible=true}}}
     (S.userData.anim||[]).forEach(f=>f(t,dt));
     if(performance.now()-prAt>2000){prAt=performance.now();prC=prayerNow();const sl=sleepNow();if(sl&&!sleeping&&!V)startSleep(t<1);else if(!sl&&sleeping)wake()
       // (v13.8) إذا بدأ المطر أو توقّف أو ظهر قوس قزح أو بدأت المناسبة: يُعاد رسم المشهد، وتتلوّن السماء حسب الوقت
       wxFetch();showWx();const wk=rainNow()+'|'+rainbowNow()+'|'+festNow()+'|'+winter()+'|'+cloudLv();wRain=rainNow();if(wk!==wKey){wKey=wk;refresh()}applySky();kidUmb.visible=wRain&&!night}
     if(zz.visible){zz.position.y=zz.userData.y+Math.sin(t*.8)*.25;zz.material.opacity=.75+Math.sin(t*1.3)*.25}
-    life.update(t,dt,{prayer:sleeping?null:prC,mosque:V?(V.lv.m|0):(window.Madina?Madina.st.lv.m|0:0),kid:kid.position,kidOn:kid.visible,kidWait:lookT>0,sleep:sleeping,rain:wRain&&!night});sounds&&sounds.tick(dt);
+    life.update(t,dt,{prayer:sleeping?null:prC,mosque:V?(V.lv.m|0):(window.Madina?Madina.st.lv.m|0:0),kid:kid.position,kidOn:kid.visible,kidWait:lookT>0,sleep:sleeping,rain:wRain&&!night,bagsDone:!!(day().br&&day().br.b)});sounds&&sounds.tick(dt);
     sparks=sparks.filter(s=>{s.userData.k+=dt;const k=s.userData.k;s.position.addScaledVector(s.userData.v,dt);s.rotation.y+=dt*6;s.material.opacity=Math.max(0,1-k/1.3);
       if(k>1.3){S.remove(s);s.geometry.dispose();s.material.dispose();return false}return true});
     drops=drops.filter(d=>{d.position.y-=dt*4;if(d.position.y<.1){S.remove(d);d.geometry.dispose();d.material.dispose();return false}return true});
