@@ -198,11 +198,14 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   // (v14.8) أشجار على جانبي الشارع جنوبًا أيضًا حتى يمتدّ المنظر
   for(let i=0;i<34;i++){const z=48+i*9,x=(i%2?1:-1)*(6+(i*23%11));if(!nearVil(x,z)&&Math.abs(z-NBZ)>4&&Math.abs(z-RVZ)>4)tree(x,z,null,1.2+(i%3)*.2)}
   // الطرق بلون دافئ وأرصفة بيضاء — الطريق الرئيسي طويل جدًا يغيب في الضباب
-  const road=M(night?0xb9ad96:0xd9c49c),curb=M(0xffffff),line=M(night?0xfff3c4:0xffffff);
+  // (v14.9) طلب الشيخ: الشارع أسود (إسفلت)، والخطوط بيضاء، والرصيف مخطّط أسود وأبيض
+  const road=M(night?0x2a2c31:0x3b3e44,{roughness:.95}),curb=M(0xffffff),line=M(night?0xe8e8e8:0xffffff);
   // (v14.8) طلب الشيخ: شارع ممتد لا تُرى نهايته — يمتد ١٢٠٠ في كل اتجاه فيغيب في الضباب من الجهتين
   const RL=2400,RZ=0;
   const rd=add(new T.PlaneGeometry(4,RL),road,0,.01,RZ);rd.rotation.x=-Math.PI/2;rd.castShadow=false;
-  [-2.1,2.1].forEach(x=>{const c=add(new T.BoxGeometry(.18,.08,RL),curb,x,.04,RZ);c.castShadow=false});
+  {const cg=new T.BoxGeometry(.2,.14,1),n=RL,o=new T.Object3D(),cB=new T.Color(0x1c1c1c),cW=new T.Color(night?0xcfcfcf:0xffffff);
+    [-2.1,2.1].forEach(x=>{const im=new T.InstancedMesh(cg,M(0xffffff),n);for(let i=0;i<n;i++){o.position.set(x,.07,RZ-RL/2+.5+i);o.updateMatrix();im.setMatrixAt(i,o.matrix);im.setColorAt(i,i%2?cB:cW)}
+      im.instanceColor.needsUpdate=true;im.receiveShadow=true;S.add(im)})}
   [-4.6,4.6].forEach(z=>{const r=add(new T.PlaneGeometry(28,1.8),road,0,.012,z);r.rotation.x=-Math.PI/2});
   {const lg=new T.PlaneGeometry(.18,1.4);lg.rotateX(-Math.PI/2);const n=Math.floor(RL/3),im=new T.InstancedMesh(lg,line,n),o=new T.Object3D();
     for(let i=0;i<n;i++){o.position.set(0,.02,RZ+RL/2-1-i*3);o.updateMatrix();im.setMatrixAt(i,o.matrix)}S.add(im)}
