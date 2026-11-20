@@ -64,7 +64,7 @@ const hm=d=>{let h=d.getHours(),m=d.getMinutes();return arn(h)+':'+arn(String(m)
 /* ---------- لافتات ---------- */
 function textSprite(T,t,bg,fg){const c=document.createElement('canvas');c.width=512;c.height=112;const x=c.getContext('2d');
   x.fillStyle=bg;x.strokeStyle='#d8c58a';x.lineWidth=6;const r=50;x.beginPath();x.moveTo(r+4,4);x.lineTo(508-r,4);x.arc(508-r,56,r-2,-Math.PI/2,Math.PI/2);x.lineTo(r+4,108);x.arc(r+4,56,r-2,Math.PI/2,Math.PI*1.5);x.closePath();x.fill();x.stroke();
-  x.fillStyle=fg;x.font='800 50px system-ui,"Segoe UI",sans-serif';x.textAlign='center';x.textBaseline='middle';try{x.direction='rtl'}catch(e){}x.fillText(t,256,60);
+  x.fillStyle=fg;x.font='800 50px system-ui,"Segoe UI",sans-serif';x.textAlign='center';x.textBaseline='middle';try{x.direction='rtl'}catch(e){}x.fillText(t,256,60,468);
   const s=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(c),depthTest:false}));s.scale.set(4.4,.96,1);s.renderOrder=10;return s}
 function markSprite(T,e,col,sc){const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');
   x.fillStyle=col;x.strokeStyle='#fff';x.lineWidth=9;x.beginPath();x.arc(64,64,54,0,Math.PI*2);x.fill();x.stroke();
@@ -89,7 +89,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   const Md=window.Madina,lv=V?V.lv:(Md?Md.st.lv:{}),job=V?null:(Md?Md.st.job:null),need=(p,l)=>Md&&Md.need?Md.need(p,l):'';
   const LV=p=>Math.max(0,Math.min(3,lv[p]|0));
   const floors=Math.max(1,Math.min(4,(V?V.f:(window.Bayt&&Bayt.done))|0||1));
-  const RN=rainNow(),RBW=rainbowNow(),FEST=festNow();
+  const RN=rainNow(),RBW=rainbowNow(),OC=occNow(),FEST=OC&&OC.k==='sad'?null:festNow(),JOY=!FEST&&OC&&OC.k==='joy'?OC:null;
   // (v11.4) ألوان أزهى: أرض خضراء حتى الأفق، تلال، زهور، فراشات وطيور بالنهار، يراعات بالليل
   const WN=winter();S.background=new T.Color(night?0x1a2a5e:WN?0xb7c4d0:0x9fdcff);S.fog=new T.Fog(night?0x1a2a5e:WN?0xc9d3dc:0xc8ecff,night?110:130,night?480:560);
   S.add(new T.HemisphereLight(night?0x9aa8e0:0xffffff,night?0x335533:0x6fb04a,night?.8:RN?.5:.62));
@@ -656,7 +656,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
       dogA+=dt*.35;const r=5.6;DG.position.set(FLK[0]+Math.cos(dogA)*r,Math.abs(Math.sin(t*6))*.05,FLK[1]+Math.sin(dogA)*r*.75);DG.rotation.y=Math.atan2(-Math.sin(dogA),Math.cos(dogA)*.75);DT.rotation.z=Math.sin(t*8)*.5});
     label('🐑 المرعى',FLK[0],3.2,FLK[1]-4,.6)}
   // ---- 🌙 زينة رمضان و🎉 العيد: أضواء ملوّنة فوق الشارع، فوانيس على الأعمدة، هلال ونجمة، ولافتة تهنئة (City3D.debugFest للتجربة) ----
-  if(FEST){const ram=FEST==='ramadan',cols=ram?[0xffd23f,0xffffff,0x3fd27a,0xffb020]:[0xff5c8a,0xffd23f,0x4fc3ff,0x7be37b,0xb07cff,0xff9f43];
+  if(FEST||JOY){const ram=FEST==='ramadan',cols=ram?[0xffd23f,0xffffff,0x3fd27a,0xffb020]:[0xff5c8a,0xffd23f,0x4fc3ff,0x7be37b,0xb07cff,0xff9f43];
     const LM=cols.map(c=>new T.MeshStandardMaterial({color:c,emissive:c,emissiveIntensity:night?1.6:.5})),bg=new T.SphereGeometry(.09,8,6);
     [-13,-7.5,-1.8,7.5,13].forEach((z,r)=>{for(let i=0;i<=12;i++){const u=i/12,x=-2.25+u*4.2,y=2.62-Math.sin(Math.PI*u)*.55;const b=add(bg,LM[(i+r)%LM.length],x,y,z);b.castShadow=false}});
     anim.push(t=>LM.forEach((m,i)=>m.emissiveIntensity=(night?1.2:.35)+Math.max(0,Math.sin(t*2+i*1.7))*(night?1.2:.5)));
@@ -670,10 +670,23 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
     const ar=new T.Mesh(new T.TorusGeometry(1.1,.2,10,40,Math.PI*1.35),gm);ar.rotation.z=Math.PI*.83;cr.add(ar);
     const st=new T.Mesh(new T.OctahedronGeometry(.35),gm);st.position.set(.55,.15,0);st.scale.z=.3;cr.add(st);[-2.6,2.6].forEach(x=>box(.12,5.4,.12,M(0x4a4f5a),x,2.7,16.6));box(5.3,.08,.08,M(0x4a4f5a),0,5.4,16.6);
     anim.push(t=>{cr.rotation.y=Math.sin(t*.3)*.35});
-    const bn=textSprite(T,ram?'🌙 رمضان كريم':'🎉 عيد مبارك','rgba(255,250,235,.95)',ram?'#14794f':'#c0392b');bn.scale.set(6.6,1.45,1);bn.position.set(0,7.2,16.6);S.add(bn);
+    const bn=textSprite(T,ram?'🌙 رمضان كريم':JOY?JOY.b:'🎉 عيد مبارك','rgba(255,250,235,.95)',ram||JOY?'#14794f':'#c0392b');bn.scale.set(6.6,1.45,1);bn.position.set(0,7.2,16.6);S.add(bn);
     if(!ram){// بالونات العيد في الساحة والسوق
       [[PLZ[0]-2.2,PLZ[1]+2.6],[PLZ[0]+2.4,PLZ[1]-2.4],[MKX+.6,-14.6],[-3.2,1.6],[-3.3,-12]].forEach(([x,z],k)=>{for(let i=0;i<5;i++){const c=cols[(i+k)%cols.length],h=2.3+(i%3)*.35,b=ell(.24,.85,1,.85,M(c,{roughness:.35}),x+(i-2)*.18,h,z+(i%2)*.15);b.castShadow=false;
         const s=add(new T.CylinderGeometry(.006,.006,h,3),M(0xffffff),x+(i-2)*.09,h/2,z);s.castShadow=false;anim.push(t=>{b.position.y=h+Math.sin(t*1.3+i+k)*.08})}})}}
+  // ---- 🖤 (v14.6) المناسبات الحزينة: أقمشة سوداء فوق الشارع، رايات سود على الأعمدة وفوق الجامع، ولافتة سوداء بالأبيض ----
+  if(OC&&OC.k==='sad'){const blk=new T.MeshStandardMaterial({color:0x111111,roughness:.9,side:T.DoubleSide}),rope=M(0x333333),pg=new T.BufferGeometry();
+    pg.setAttribute('position',new T.Float32BufferAttribute([-.14,0,0,.14,0,0,0,-.34,0],3));pg.computeVertexNormals();
+    [-13,-7.5,-1.8,7.5,13].forEach((z,r)=>{for(let i=0;i<12;i++){const u=(i+.5)/12,x=-2.25+u*4.2,y=2.62-Math.sin(Math.PI*u)*.55;const sg=add(new T.BoxGeometry(.36,.02,.02),rope,x,y,z);sg.castShadow=false;
+        const pn=new T.Mesh(pg,blk);pn.position.set(x,y,z);S.add(pn);anim.push(t=>{pn.rotation.x=Math.sin(t*1.4+i+r)*.25})}});
+    const flag=(x,y,z,s,p)=>{const G=new T.Group();G.position.set(x,y,z);G.scale.setScalar(s||1);(p||S).add(G);add(new T.CylinderGeometry(.025,.025,1.5,6),M(0x8a8a8a),0,.75,0,G);
+      const f=new T.Mesh(new T.PlaneGeometry(.9,.55,6,1),blk);f.position.set(.47,1.2,0);G.add(f);const P=f.geometry.attributes.position,X0=[];for(let i=0;i<P.count;i++)X0.push(P.getX(i));
+      anim.push(t=>{for(let i=0;i<P.count;i++){const xx=X0[i]+.45;P.setZ(i,Math.sin(t*3-xx*5+x)*.08*xx)}P.needsUpdate=true})};
+    LAMPS.forEach(([x,z])=>flag(x+(x<0?.15:-.15),2.3,z,.9));
+    if(LV('m')>0)flag(6,3.4*mScale(LV('m')),0,1.2);flag(-3.7,0,-1.9,1.3);
+    const ab=new T.Group();ab.position.set(0,0,16.6);S.add(ab);[-2.6,2.6].forEach(x=>box(.12,5.4,.12,M(0x4a4f5a),x,2.7,0,ab));box(5.3,.08,.08,M(0x4a4f5a),0,5.4,0,ab);
+    const cl=new T.Mesh(new T.PlaneGeometry(5.1,1.1),blk);cl.position.set(0,4.8,0);ab.add(cl);
+    const bn=textSprite(T,OC.b,'rgba(18,18,18,.94)','#ffffff');bn.scale.set(6.6,1.45,1);bn.position.set(0,7.2,16.6);S.add(bn)}
   // نجوم الليل
   if(night){const sg=new T.BufferGeometry(),p=[];for(let i=0;i<300;i++){const a=Math.random()*6.28,b=Math.random()*1.3+.15,r=95;p.push(r*Math.cos(a)*Math.cos(b),r*Math.sin(b),r*Math.sin(a)*Math.cos(b))}
     sg.setAttribute('position',new T.Float32BufferAttribute(p,3));S.add(new T.Points(sg,new T.PointsMaterial({color:0xffffff,size:.5})))}
@@ -722,6 +735,24 @@ function rainbowNow(){const d=window.City3D&&City3D.debugRainbow;if(d!=null)retu
 // رمضان (الشهر ٩) والعيدان (١–٣ شوال، ١٠–١٣ ذو الحجة) بالتقويم الهجري (أم القرى) — قد يختلف يومًا عن الرؤية المحلية
 function festNow(){const d=window.City3D&&City3D.debugFest;if(d!=null)return d||null;try{const p=new Intl.DateTimeFormat("en-u-ca-islamic-umalqura",{month:"numeric",day:"numeric"}).formatToParts(new Date()),m=+p.find(x=>x.type==="month").value,dd=+p.find(x=>x.type==="day").value;
   if(m===9)return "ramadan";if(m===10&&dd<=3||m===12&&dd>=10&&dd<=13)return "eid"}catch(e){}return null}
+// (v14.6) طلب الشيخ: زينة المناسبات الدينية المعروفة. sad = سواد ورايات سود (محرّم…)، joy = أضواء وأعلام وفرح.
+// [الشهر الهجري، من يوم، إلى يوم، النوع، لافتة الشارع، عنوان البطاقة، درس البطاقة] — الأيام بتقويم أم القرى (قد يفرق يومًا عن الرؤية)
+const OCC=[[1,1,9,'sad','🖤 أيام محرّم الحرام','🖤 أيام محرّم الحرام','في هذه الأيام نتذكّر الإمام الحسين عليه السلام، الذي ضحّى من أجل الحقّ والإصلاح، ونتعلّم منه الصبر والشجاعة والثبات 🤍'],
+  [1,10,10,'sad','🖤 ذكرى عاشوراء','🖤 ذكرى عاشوراء: استشهاد الإمام الحسين عليه السلام','في مثل هذا اليوم استُشهد الإمام الحسين عليه السلام وأهل بيته وأصحابه، فتعلّمنا منهم أن نقف مع الحقّ ولا نخاف 🤍'],
+  [1,11,13,'sad','🖤 أيام محرّم الحرام','🖤 أيام محرّم الحرام','نتذكّر الإمام الحسين عليه السلام وأهل بيته، ونتعلّم منهم الصبر والوفاء 🤍'],
+  [2,18,20,'sad','🖤 ذكرى الأربعين','🖤 ذكرى أربعين الإمام الحسين عليه السلام','بعد أربعين يومًا نتذكّر الإمام الحسين عليه السلام وأصحابه، ونتعلّم منهم الوفاء والثبات على الحقّ 🤍'],
+  [2,28,28,'sad','🖤 ذكرى وفاة النبي ﷺ','🖤 ذكرى وفاة النبي محمد ﷺ','نتذكّر رسول اللَّه ﷺ الذي جاء رحمةً للناس، ونقتدي بأخلاقه الكريمة ونصلّي عليه 🤍'],
+  [3,12,17,'joy','🌹 المولد النبوي الشريف','🌹 المولد النبوي الشريف','نفرح بمولد رسول اللَّه محمد ﷺ، نصلّي عليه ونقتدي بأخلاقه: الصدق والرحمة والأمانة 🌹'],
+  [6,20,20,'joy','🌸 مولد السيدة الزهراء','🌸 مولد السيدة فاطمة الزهراء عليها السلام','نفرح بمولد السيدة فاطمة الزهراء عليها السلام، بنت رسول اللَّه ﷺ، قدوتنا في العبادة والطهر 🌸'],
+  [7,13,13,'joy','🌟 مولد الإمام علي','🌟 مولد الإمام علي عليه السلام','نفرح بمولد أمير المؤمنين الإمام علي عليه السلام، مثال الشجاعة والعدل والعلم 🌟'],
+  [7,27,27,'joy','✨ المبعث النبوي الشريف','✨ المبعث النبوي الشريف','في هذا اليوم بُعث النبي محمد ﷺ رسولًا إلى الناس، ونزل عليه الوحي ليعلّمهم الخير ✨'],
+  [8,3,3,'joy','🌟 مولد الإمام الحسين','🌟 مولد الإمام الحسين عليه السلام','نفرح بمولد الإمام الحسين عليه السلام، سبط رسول اللَّه ﷺ وريحانته 🌟'],
+  [8,15,15,'joy','🌕 مولد الإمام المهدي','🌕 مولد الإمام المهدي عليه السلام','نفرح بمولد الإمام المهدي عليه السلام في ليلة النصف من شعبان المباركة 🌕'],
+  [9,19,21,'sad','🖤 ذكرى استشهاد الإمام علي','🖤 ذكرى استشهاد الإمام علي عليه السلام','نتذكّر أمير المؤمنين الإمام علي عليه السلام الذي استُشهد في محرابه، وهو مثال العدل والتقوى 🤍'],
+  [12,9,9,'joy','🤲 يوم عرفة','🤲 يوم عرفة','يوم عرفة يوم الدعاء والتوبة، والحجّاج يقفون على جبل عرفات يدعون اللَّه 🤲'],
+  [12,18,18,'joy','💚 عيد الغدير','💚 عيد الغدير الأغرّ','نفرح بعيد الغدير، ونتذكّر خطبة رسول اللَّه ﷺ في غدير خمّ 💚']];
+function occNow(){const d=window.City3D&&City3D.debugOcc;let h;if(d!=null){if(!d)return null;h=d}else h=hijri();if(!h)return null;
+  const o=OCC.find(o=>o[0]===h.m&&h.d>=o[1]&&h.d<=o[2]);return o?{k:o[3],b:o[4],t:o[5],msg:o[6],id:o[0]+'-'+o[1]}:null}
 function winter(){const d=window.City3D&&City3D.debugSnow;if(d!=null)return !!d;const w=wxNow();if(w)return wSnowy(w);return [11,0,1].includes(new Date().getMonth())}
 function hourNow(){const d=window.City3D&&City3D.debugHour;if(d!=null)return d;const n=new Date();return n.getHours()+n.getMinutes()/60}
 // (v13.5) وقت النوم: من ١٢ ليلًا حتى أذان الفجر (أو ٥ صباحًا إن لم يُعرف)
@@ -1016,7 +1047,7 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
   const kid=makeKid();S.add(kid);let at={x:-3.4,z:1,via:null},path=[],onArrive=null,busy=0;kid.position.set(at.x,0,at.z);kid.rotation.y=Math.PI/2;
   // (v13.7) سرعة مشي الطفل (تبطؤ حين يرافق جدّو) وكيسان يحملهما عنه
   // (v13.8) ☂️ مظلّة الطفل وقت المطر، وألوان السماء حسب الوقت: فجر وردي-برتقالي، نهار أزرق، غروب برتقالي فوق الجبال، ليل كحلي
-  let wKey=rainNow()+'|'+rainbowNow()+'|'+festNow()+'|'+winter()+'|'+cloudLv(),wRain=rainNow();
+  let wKey=rainNow()+'|'+rainbowNow()+'|'+festNow()+'|'+(occNow()||{}).id+'|'+winter()+'|'+cloudLv(),wRain=rainNow();
   const kidUmb=new T.Group();kidUmb.visible=false;kid.add(kidUmb);
   {const p=new T.Mesh(new T.CylinderGeometry(.02,.02,1.1,5),new T.MeshStandardMaterial({color:0x333333}));p.position.set(.28,1.35,.08);kidUmb.add(p);
     const c=new T.Mesh(new T.SphereGeometry(.75,16,6,0,Math.PI*2,0,Math.PI/2.6),new T.MeshStandardMaterial({color:boy()?0x2f6fd0:0xd94f8a,roughness:.6,side:T.DoubleSide}));c.position.set(.28,1.68,.08);c.castShadow=true;kidUmb.add(c)}
@@ -1227,7 +1258,8 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
     const p=prayerNow();if(!V&&p&&!day().pr[p])ui.bar.querySelector('[data-a=mosque]').classList.add('hot')}
   setBar();const pn=prayerNow();if(window.City3D)City3D._A=A; // للتجربة فقط
   // (v13.8) تهنئة مرة في اليوم أيام رمضان والعيد
-  {const f=festNow(),D=day();if(f&&!V&&!D.fs&&!sleepNow()){D.fs=1;dsv();setTimeout(()=>card(f==='ramadan'?`🌙 رمضان كريم! تقبّل الله صيامكم 🤲<br><small>زُيّنت ${B('مدينتك','مدينتكِ')} بالفوانيس والأضواء ✨</small>`:`🎉 عيد مبارك! كل عام ${B('وأنت','وأنتِ')} بخير 🤍<br><small>زُيّنت ${B('مدينتك','مدينتكِ')} بالبالونات والأضواء 🎈</small>`,[['🤍 آمين',null]]),900)}}
+  {const oc=occNow(),D=day();if(oc&&!V&&D.oc!==oc.id&&!sleepNow()){D.oc=oc.id;D.fs=1;dsv();setTimeout(()=>card(`<b>${oc.t}</b><br><small>${oc.msg}</small><br><small>${oc.k==='sad'?'لبست '+B('مدينتك','مدينتكِ')+' السواد في هذه الأيام 🖤':'زُيّنت '+B('مدينتك','مدينتكِ')+' بالأضواء والفوانيس والبالونات ✨'}</small>`,[[oc.k==='sad'?'🤍 حسنًا':'🤍 الحمد لله',null]]),900)}}
+  {const f=occNow()&&occNow().k==='sad'?null:festNow(),D=day();if(f&&!V&&!D.fs&&!sleepNow()){D.fs=1;dsv();setTimeout(()=>card(f==='ramadan'?`🌙 رمضان كريم! تقبّل الله صيامكم 🤲<br><small>زُيّنت ${B('مدينتك','مدينتكِ')} بالفوانيس والأضواء ✨</small>`:`🎉 عيد مبارك! كل عام ${B('وأنت','وأنتِ')} بخير 🤍<br><small>زُيّنت ${B('مدينتك','مدينتكِ')} بالبالونات والأضواء 🎈</small>`,[['🤍 آمين',null]]),900)}}
   // اللمس
   const cv=R.domElement,ray=new T.Raycaster();
   function pick(x,y){const r=cv.getBoundingClientRect();ray.setFromCamera(new T.Vector2((x-r.left)/r.width*2-1,-(y-r.top)/r.height*2+1),cam);
@@ -1282,7 +1314,7 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
     (S.userData.anim||[]).forEach(f=>f(t,dt));
     if(performance.now()-prAt>2000){prAt=performance.now();prC=prayerNow();const sl=sleepNow();if(sl&&!sleeping&&!V)startSleep(t<1);else if(!sl&&sleeping)wake()
       // (v13.8) إذا بدأ المطر أو توقّف أو ظهر قوس قزح أو بدأت المناسبة: يُعاد رسم المشهد، وتتلوّن السماء حسب الوقت
-      wxFetch();showWx();const wk=rainNow()+'|'+rainbowNow()+'|'+festNow()+'|'+winter()+'|'+cloudLv();wRain=rainNow();if(wk!==wKey){wKey=wk;refresh()}applySky();kidUmb.visible=wRain&&!night}
+      wxFetch();showWx();const wk=rainNow()+'|'+rainbowNow()+'|'+festNow()+'|'+(occNow()||{}).id+'|'+winter()+'|'+cloudLv();wRain=rainNow();if(wk!==wKey){wKey=wk;refresh()}applySky();kidUmb.visible=wRain&&!night}
     if(zz.visible){zz.position.y=zz.userData.y+Math.sin(t*.8)*.25;zz.material.opacity=.75+Math.sin(t*1.3)*.25}
     life.update(t,dt,{prayer:sleeping?null:prC,mosque:V?(V.lv.m|0):(window.Madina?Madina.st.lv.m|0:0),kid:kid.position,kidOn:kid.visible,kidWait:lookT>0,sleep:sleeping,rain:wRain&&!night,bagsDone:!!(day().br&&day().br.b)});sounds&&sounds.tick(dt);
     sparks=sparks.filter(s=>{s.userData.k+=dt;const k=s.userData.k;s.position.addScaledVector(s.userData.v,dt);s.rotation.y+=dt*6;s.material.opacity=Math.max(0,1-k/1.3);
