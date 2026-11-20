@@ -649,9 +649,9 @@ function festNow(){const d=window.City3D&&City3D.debugFest;if(d!=null)return d||
 function winter(){const d=window.City3D&&City3D.debugSnow;if(d!=null)return !!d;const w=wxNow();if(w)return wSnowy(w);return [11,0,1].includes(new Date().getMonth())}
 function hourNow(){const d=window.City3D&&City3D.debugHour;if(d!=null)return d;const n=new Date();return n.getHours()+n.getMinutes()/60}
 // (v13.5) وقت النوم: من ١٢ ليلًا حتى أذان الفجر (أو ٥ صباحًا إن لم يُعرف)
-// (v14.1) وقت الزحام: ذهاب الطلاب والموظفين صباحًا ورجوعهم ظهرًا (ليس الجمعة)
+// (v14.1) وقت الزحام: ذهاب الطلاب والموظفين صباحًا ورجوعهم ظهرًا (ليس الجمعة والسبت)
 function wDay(){const d=window.City3D&&City3D.debugWd;return d!=null?d:new Date().getDay()}
-function rushNow(){const h=hourNow();return wDay()!==5&&(h>=7.5&&h<8.5||h>=11.75&&h<12.75)}
+function rushNow(){const h=hourNow();return wDay()<5&&(h>=7.5&&h<8.5||h>=11.75&&h<12.75)}
 function sleepNow(){const h=hourNow();let f=5;try{const d=new Date(+Adhan.times(new Date()).fajr);const x=d.getHours()+d.getMinutes()/60;if(x>3&&x<7)f=x}catch(e){}return h>=0&&h<f}
 function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMaterial({color:c,roughness:.75});
   const add=(geo,m,x,y,z,p)=>{const o=new T.Mesh(geo,m);o.position.set(x,y,z);o.castShadow=true;p.add(o);return o};
@@ -806,7 +806,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
     // الباص والسيارات: صباحًا يجلبون الطلاب، وظهرًا يأخذونهم
     // (v13.5) يأتون من بعيد (z=150) ويذهبون بعيدًا (z=-150)؛ إذا انتهى الوقت أثناء الطريق يكملون حتى الأفق، ولا يظهرون فجأة في منتصف الطريق
     // (v14.1) طلب الشيخ: الباص يجلب الطلاب الساعة ٨ صباحًا، ويأخذهم الساعة ١٢ ظهرًا
-    const fri=wDay()===5,phase=fri?'':day&&h>=7.75&&h<8.5?'arrive':day&&h>=12&&h<12.75?'leave':'',rush=day&&rushNow();const P=45,away=c=>{if(c.v.visible){c.v.position.z-=12*dt;if(c.v.position.z<-150)c.v.visible=false}};
+    const fri=wDay()>=5,phase=fri?'':day&&h>=7.75&&h<8.5?'arrive':day&&h>=12&&h<12.75?'leave':'',rush=day&&rushNow();const P=45,away=c=>{if(c.v.visible){c.v.position.z-=12*dt;if(c.v.position.z<-150)c.v.visible=false}};
     cars.forEach(c=>{const cyc=Math.floor(((t/3)+c.off)/P);if(!phase){c.skip=cyc;away(c);return}if(c.skip===cyc){away(c);return}
       const ct=((t/3)+c.off)%P,sp=12,t1=(150-c.stop)/sp,t2=t1+5,t3=t2+(c.stop+150)/sp;
       c.v.position.x=-1;if(ct<t1){c.v.visible=true;c.v.position.z=150-ct*sp}else if(ct<t2){c.v.position.z=c.stop;
