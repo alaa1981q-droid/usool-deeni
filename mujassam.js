@@ -56,7 +56,8 @@ const RVZ=20,RVW=3.2,FBX=-9,MKX=4.6,PLZ=[14.6,0],NBZ=27;
 const FLK=[-27,10]; // (v13.8) مرعى الأغنام
 const MKT=[["bak",-16.5,"#c0392b","#ffffff","🍞 الخبّاز"],["fru",-20.5,"#1fa463","#ffffff","🍊 الفاكهة"],["swe",-24.5,"#2f6fd0","#ffffff","🍬 الحلويات"]];
 const FB=[13.6,-19.5];
-const HSP=[10.5,36]; // (v15.2) 🏥 مستشفى المدينة: يمين الطريق بعد النهر وبيوت الجيران، بابه نحو الطريق
+const HSP=[10.5,36];
+const PKC=[-12.5,-37]; // (v15.4) 🎡 مدينة الألعاب يسار الطريق بعد المدرسة، بوابتها على الرصيف (x≈-5) // (v15.2) 🏥 مستشفى المدينة: يمين الطريق بعد النهر وبيوت الجيران، بابه نحو الطريق
 // (v14.7) 🚌 موقفا باص المدينة على جانبي الشارع الرئيسي (قبل الجسر): [اتجاه الحارة، z، رصيف الانتظار x، مكان الوقوف داخل المظلّة x]
 const BSTOP=[[1,16.6,2.85,3.45],[-1,16.6,-2.75,-3.45]]; // (v14.5) ملعب كرة القدم
 const NOFL=(x,z)=>x>9.6&&x<17.6&&z<-14&&z>-25||Math.abs(z-RVZ)<2.6||x>3&&x<11&&z<-13&&z>-28||Math.hypot(x-PLZ[0],z-PLZ[1])<3.9||Math.abs(z-NBZ)<2.6&&Math.abs(Math.abs(x)-7)<2.6;
@@ -198,7 +199,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
     // طبقة ثلج خفيفة على العشب
     for(let i=0;i<30;i++){const a=i*2.1,r=6+(i*41%40),p=add(new T.CircleGeometry(1.5+i%4,18),M(0xf4f8ff,{transparent:true,opacity:.75}),Math.cos(a)*r,.008,Math.sin(a)*r-6);p.rotation.x=-Math.PI/2;p.castShadow=false}}
   // أشجار متفرقة على طول السهل
-  [[-10,-36],[8,-34],[-16,-48],[12,-52],[-6,-62],[10,-72],[-14,-80],[6,-92],[-12,24.5],[16,27.5],[-15,34],[17,45]].forEach(([x,z])=>nearVil(x,z)||tree(x,z,null,1.3));
+  [[-23,-36],[8,-34],[-16,-48],[12,-52],[-6,-62],[10,-72],[-14,-80],[6,-92],[-12,24.5],[16,27.5],[-15,34],[17,45]].forEach(([x,z])=>nearVil(x,z)||tree(x,z,null,1.3));
   for(let i=0;i<40;i++){const z=-110-i*8,x=(i%2?1:-1)*(6+(i*29%12));if(!nearVil(x,z))tree(x,z,null,1.2+(i%3)*.2)}
   // (v14.8) أشجار على جانبي الشارع جنوبًا أيضًا حتى يمتدّ المنظر
   for(let i=0;i<34;i++){const z=48+i*9,x=(i%2?1:-1)*(6+(i*23%11));if(!nearVil(x,z)&&Math.abs(z-NBZ)>4&&Math.abs(z-RVZ)>4)tree(x,z,null,1.2+(i%3)*.2)}
@@ -900,6 +901,12 @@ function sunsetBirds(){const h=hourNow(),m=maghribH();return h>=m-.9&&h<m+.2}
 function sickDay(){const d=window.City3D&&City3D.debugSick;if(d!=null)return !!d;const n=new Date(),k=n.getFullYear()*372+n.getMonth()*31+n.getDate();return (k*40503>>>0)%3===0}
 // وقت لعب الكرة: العصر، وصباح الجمعة والسبت أيضًا
 function footNow(){const h=hourNow(),we=wDay()>=5;return !rainNow()&&(h>=15&&h<maghribH()-.15||we&&h>=9.5&&h<11.8)}
+// (v15.4) طلب الشيخ: 🎡 مدينة الألعاب يحضرها الأطفال الجمعة والسبت، والعطل (الصيفية ١٥ حزيران–آخر آب، ونصف السنة ٢٠ ك٢–٥ شباط)، والعيدين والمناسبات السعيدة.
+// مغلقة في أيام الحزن (محرّم…). تعمل من ٩ صباحًا حتى ٩ مساءً، ولا تعمل وقت المطر.
+function parkWhy(){const d=window.City3D&&City3D.debugPark;if(d!=null)return d?'🎉 يوم عطلة':null;const o=occNow();if(o&&o.k==='sad')return null;if(festNow()==='eid')return '🎉 اليوم عيد';if(o&&o.k==='joy')return o.t;
+  const w=wDay();if(w===5)return '🕌 اليوم الجمعة';if(w===6)return '🌞 اليوم السبت';const n=new Date(),m=n.getMonth(),dd=n.getDate();
+  if(m===5&&dd>=15||m===6||m===7)return '☀️ العطلة الصيفية';if(m===0&&dd>=20||m===1&&dd<=5)return '📚 عطلة نصف السنة';return null}
+function parkOpen(){const h=hourNow();return !!parkWhy()&&h>=9&&h<21&&!rainNow()&&!sleepNow()}
 function wDay(){const d=window.City3D&&City3D.debugWd;return d!=null?d:new Date().getDay()}
 function rushNow(){const h=hourNow();return wDay()<5&&(h>=7.5&&h<8.5||h>=11.75&&h<12.75)}
 function sleepNow(){const h=hourNow();let f=5;try{const d=new Date(+Adhan.times(new Date()).fajr);const x=d.getHours()+d.getMinutes()/60;if(x>3&&x<7)f=x}catch(e){}return h>=0&&h<f}
@@ -1198,12 +1205,92 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
     // حركة المشاة
     // (v13.9) 🚸 طلاب يعبرون من ممرّ المشاة بالنهار: يقفون عند الرصيف، ينظرون يمينًا ويسارًا، ثم يعبرون والسيارات تقف لهم
     if(road&&!o.sleep){crT-=dt;if(crT<=0){crT=(phase?8:16)+Math.random()*8;crossers(CROSS[crI++%CROSS.length])}}
+    parkTick(t,dt,o,h);
     walkers=walkers.filter(w=>{const P=w.P;if(w.grow!=null&&w.grow<1){w.grow=Math.min(1,w.grow+dt*2);P.scale.setScalar(P.userData.bs*w.grow)}
       if(!w.pts.length){if(w.end==='enter'||w.end==='gone'){w.k+=dt*3;P.scale.multiplyScalar(Math.max(.01,1-dt*3));if(w.k>1){g.remove(P);P.traverse(x=>{x.geometry&&x.geometry.dispose();x.material&&x.material.dispose()});return false}}return true}
       if(w.pause>0){w.pause-=dt;const [nx,nz]=w.pts[0];P.rotation.y=Math.atan2(nx-P.position.x,nz-P.position.z)+Math.sin(w.pause*4.5)*1.1;P.position.y=0;return true}
       const [tx,tz,wt]=w.pts[0],dx=tx-P.position.x,dz=tz-P.position.z,d=Math.hypot(dx,dz);w.v=(w.v||0)+(w.sp-(w.v||0))*Math.min(1,dt*2.2);const sp=w.v*dt,cut=w.pts.length>1&&!wt?.4:0;
       if(d<=Math.max(sp,cut)){if(!cut){P.position.x=tx;P.position.z=tz}w.pts.shift();if(wt)w.pause=wt}else{P.position.x+=dx/d*sp;P.position.z+=dz/d*sp;turn(P,Math.atan2(dx,dz),dt,7)}
       P.position.y=Math.abs(Math.sin(t*6+P.id))*.05;return true});swing(dt)}
+  // ================= (v15.4) 🎡 مدينة الألعاب =================
+  // دولاب هواء كبير، دوّامة بخيول، زحليقة، ميزان (سيسو)، كشك غزل البنات، أعلام ملوّنة وبالونات عند البوابة.
+  // يوم الفتح: الألعاب تدور والأطفال يركبون ويلعبون، وعائلات تأتي من الطريق والقرية وتدخل، وأخرى تخرج. غير ذلك: متوقفة ولوحة «مغلقة».
+  const PKG=new T.Group();PKG.position.set(PKC[0],0,PKC[1]);PKG.userData.act='park';g.add(PKG);
+  const pkM=(c,o)=>new T.MeshStandardMaterial(Object.assign({color:c,roughness:.6},o||{})),bx=(w,h,d,m,x,y,z,p)=>add(new T.BoxGeometry(w,h,d),m,x,y,z,p||PKG);
+  const PC=[0xff5c8a,0xffd23f,0x4fc3ff,0x7be37b,0xb07cff,0xff8c42];
+  {const gr=new T.Mesh(new T.PlaneGeometry(15,14),pkM(night?0x8a7f9c:0xf3e3c8,{roughness:1,polygonOffset:true,polygonOffsetFactor:-2}));gr.rotation.x=-Math.PI/2;gr.position.y=.05;gr.receiveShadow=true;PKG.add(gr);
+    [[3.5,3.5,1.6],[-1,4.2,1.4]].forEach(([x,z,r])=>{const c=new T.Mesh(new T.CircleGeometry(r,24),pkM(0x6fcf8a,{polygonOffset:true,polygonOffsetFactor:-3}));c.rotation.x=-Math.PI/2;c.position.set(x,.06,z);PKG.add(c)});
+    // السياج: أعمدة ملوّنة وقضبان، والبوابة على جهة الطريق (+x)
+    const rail=pkM(0xffffff);for(let i=0;i<=20;i++){const u=i/20,pts=[[-7.5+15*u,-7],[-7.5+15*u,7],[-7.5,-7+14*u],[7.5,-7+14*u]];pts.forEach(([x,z],k)=>{if(k===3&&Math.abs(z)<2)return;bx(.12,.8,.12,pkM(PC[(i+k)%6]),x,.4,z)})}
+    [[0,-7,15,0],[0,7,15,0],[-7.5,0,0,14]].forEach(([x,z,w,d])=>{bx(w||.06,.06,d||.06,rail,x,.72,z);bx(w||.06,.06,d||.06,rail,x,.35,z)});
+    [-1,1].forEach(k=>{bx(.06,.06,5,rail,7.5,.72,k*4.5);bx(.06,.06,5,rail,7.5,.35,k*4.5)});
+    // البوابة
+    [-1,1].forEach(k=>{for(let j=0;j<6;j++)add(new T.CylinderGeometry(.22,.22,.55,12),pkM(j%2?0xffffff:0xff5c8a),7.5,.28+j*.55,k*2,PKG);add(new T.SphereGeometry(.3,12,10),pkM(0xffd23f,{metalness:.4}),7.5,3.55,k*2,PKG)});
+    const ar=new T.Mesh(new T.TorusGeometry(2,.16,8,30,Math.PI),pkM(0x4fc3ff));ar.position.set(7.5,3.1,0);ar.rotation.y=Math.PI/2;PKG.add(ar);
+    const sg=textSprite(T,'🎡 مدينة الألعاب','rgba(255,255,255,.95)','#c2185b');sg.scale.set(3.6,.78,1);sg.position.set(7.6,4.9,0);PKG.add(sg);
+    // بالونات عند البوابة
+    const bal=[];[-1,1].forEach(k=>{for(let j=0;j<4;j++){const b=add(new T.SphereGeometry(.26,12,10),pkM(PC[(j+(k>0?2:0))%6],{roughness:.3}),7.9,4.2+j%2*.4,k*(2.4+j*.25),PKG);b.scale.y=1.2;bal.push(b);
+      add(new T.CylinderGeometry(.008,.008,1,3),pkM(0xffffff),7.9,3.7,k*(2.2+j*.12),PKG)}});
+    PKG.userData.bal=bal;
+    // أعمدة الأعلام عند الزوايا وخيوط الرايات المثلثة
+    const cor=[[-7.5,-7],[7.5,-7],[7.5,7],[-7.5,7]];cor.forEach(([x,z])=>bx(.12,3.6,.12,pkM(0xeeeeee),x,1.8,z));
+    const tri=new T.ConeGeometry(.16,.32,3);for(let k=0;k<4;k++){const [a,b]=[cor[k],cor[(k+1)%4]],n=Math.round(Math.hypot(b[0]-a[0],b[1]-a[1])/.55);
+      for(let i=1;i<n;i++){const u=i/n,y=3.5-Math.sin(u*Math.PI)*.6,f=add(tri,pkM(PC[i%6]),a[0]+(b[0]-a[0])*u,y,a[1]+(b[1]-a[1])*u,PKG);f.rotation.x=Math.PI;f.castShadow=false}}
+    // لوحة «مغلقة»
+    const cl=textSprite(T,'🔒 مغلقة اليوم','rgba(255,255,255,.95)','#8a2b2b');cl.scale.set(2.2,.48,1);cl.position.set(8,1.6,0);PKG.add(cl);PKG.userData.closed=cl}
+  // 🎡 دولاب الهواء (وجهه نحو الطريق): يدور ببطء، والمقصورات تبقى معتدلة
+  const WH=new T.Group(),WR=new T.Group(),cabs=[];WH.position.set(-4.2,0,-2.4);PKG.add(WH);
+  {const st=pkM(0xdfe6ee,{metalness:.4});[-1,1].forEach(k=>[-1,1].forEach(s2=>{const L=add(new T.CylinderGeometry(.09,.12,5.6,8),st,k*.55,2.65,s2*1.25,WH);L.rotation.x=-s2*.45}));
+    bx(1.4,.15,3.4,pkM(0x9aa6b2),0,.08,0,WH);WR.position.set(0,5,0);WH.add(WR);add(new T.CylinderGeometry(.25,.25,1.3,12),st,0,0,0,WR).rotation.z=Math.PI/2;
+    const R=3.7;[0,.35].forEach(x=>{const ri=new T.Mesh(new T.TorusGeometry(R,.07,6,48),pkM(0xff5c8a));ri.rotation.y=Math.PI/2;ri.position.x=x-.17;WR.add(ri)});
+    for(let i=0;i<8;i++){const a=i/8*Math.PI*2,sp=bx(.05,R,.05,st,0,Math.sin(a)*R/2,Math.cos(a)*R/2,WR);sp.rotation.x=-a+Math.PI/2;
+      const C=new T.Group();C.position.set(0,Math.sin(a)*R,Math.cos(a)*R);WR.add(C);const cb=new T.Group();cb.position.y=-.55;C.add(cb);
+      bx(.85,.55,.8,pkM(PC[i%6]),0,0,0,cb);bx(.95,.1,.9,pkM(0xffffff),0,.45,0,cb);bx(.04,.4,.04,st,0,.15,0,C);cabs.push({C,cb})}
+    if(night)for(let i=0;i<16;i++){const a=i/16*Math.PI*2;add(new T.SphereGeometry(.09,8,6),new T.MeshStandardMaterial({color:0xfff1b0,emissive:0xffd860,emissiveIntensity:1.8}),.2,Math.sin(a)*R,Math.cos(a)*R,WR)}}
+  // 🎠 الدوّامة: ٦ خيول تصعد وتنزل، وسقف مخطّط
+  const CR=new T.Group(),horses=[];CR.position.set(2.6,0,-3.4);PKG.add(CR);
+  {add(new T.CylinderGeometry(2.5,2.6,.3,28),pkM(0xffffff),0,.15,0,CR);const top=new T.Group();top.position.y=.3;CR.add(top);CR.userData.top=top;
+    add(new T.CylinderGeometry(2.4,2.4,.08,28),pkM(0xffd23f),0,.04,0,top);add(new T.CylinderGeometry(.18,.18,3,10),pkM(0xffd23f,{metalness:.5}),0,1.5,0,top);
+    for(let i=0;i<8;i++)add(new T.ConeGeometry(2.8,1.3,6,1,false,i*Math.PI/4,Math.PI/4),pkM(i%2?0xffffff:0xe2504a),0,3.55,0,top);
+    add(new T.CylinderGeometry(2.8,2.8,.3,32,1,true),pkM(0xffd23f),0,2.85,0,top);add(new T.SphereGeometry(.2,10,8),pkM(0xffd23f,{metalness:.5}),0,4.3,0,top);
+    for(let i=0;i<6;i++){const a=i/6*Math.PI*2,x=Math.cos(a)*1.75,z=Math.sin(a)*1.75;add(new T.CylinderGeometry(.03,.03,2.7,6),pkM(0xffd23f,{metalness:.6}),x,1.4,z,top);
+      const H=new T.Group();H.position.set(x,.9,z);H.rotation.y=-a;top.add(H);const hc=pkM([0xffffff,0x8d6e63,0xffd0e0][i%3]);
+      bx(.22,.28,.72,hc,0,0,0,H);bx(.18,.38,.18,hc,0,.25,.32,H);bx(.16,.14,.3,hc,0,.42,.45,H);bx(.08,.32,.08,hc,.07,-.26,.25,H);bx(.08,.32,.08,hc,-.07,-.26,-.25,H);bx(.24,.04,.2,pkM(0xe2504a),0,.16,0,H);horses.push(H)}
+    if(night)for(let i=0;i<12;i++){const a=i/12*Math.PI*2;add(new T.SphereGeometry(.08,8,6),new T.MeshStandardMaterial({color:0xfff1b0,emissive:0xffd860,emissiveIntensity:1.8}),Math.cos(a)*2.82,2.72,Math.sin(a)*2.82,top)}}
+  // 🛝 زحليقة، ⚖️ ميزان، 🍭 كشك غزل البنات، مقاعد
+  {const SL=new T.Group();SL.position.set(3.4,0,3.6);SL.rotation.y=Math.PI/2;PKG.add(SL);bx(1.2,.12,1.2,pkM(0x4fc3ff),0,2,-1.2,SL);[-1,1].forEach(k=>[-1,1].forEach(s2=>bx(.08,2,.08,pkM(0xffd23f),k*.55,1,-1.2+s2*.55,SL)));
+    for(let j=0;j<6;j++)bx(.9,.06,.08,pkM(0xffffff),0,.3+j*.32,-1.85,SL);const ch=bx(.9,.08,3,pkM(0xff8c42),0,1.05,.65,SL);ch.rotation.x=.62;[-1,1].forEach(k=>{const e=bx(.06,.22,3,pkM(0xff8c42),k*.45,1.15,.65,SL);e.rotation.x=.62});
+    const SS=new T.Group();SS.position.set(-1,.45,4.2);PKG.add(SS);bx(.3,.45,.3,pkM(0x7be37b),0,-.22,0,SS);const pl=new T.Group();SS.add(pl);bx(3,.08,.32,pkM(0xb07cff),0,.05,0,pl);[-1,1].forEach(k=>bx(.06,.3,.3,pkM(0xffd23f),k*1.3,.22,0,pl));PKG.userData.saw=pl;
+    const K=new T.Group();K.position.set(-5.4,0,4.4);PKG.add(K);bx(1.8,1.1,1.2,pkM(0xffffff),0,.55,0,K);for(let i=0;i<6;i++)bx(.32,.08,1.5,pkM(i%2?0xffffff:0xff5c8a),-.75+i*.3,1.95,.1,K);
+    [-1,1].forEach(k=>bx(.06,.9,.06,pkM(0xdddddd),k*.85,1.5,.7,K));[[-.5,0xffb3d1],[0,0xb3e5ff],[.5,0xffb3d1]].forEach(([x,c])=>{add(new T.SphereGeometry(.18,10,8),pkM(c),x,1.35,.45,K);add(new T.CylinderGeometry(.02,.02,.3,4),pkM(0xffffff),x,1.1,.45,K)});
+    const kl=textSprite(T,'🍭 غزل البنات','rgba(255,255,255,.92)','#c2185b');kl.scale.set(1.6,.35,1);kl.position.set(0,2.5,0);K.add(kl);
+    [[1.2,6],[-3,6]].forEach(([x,z])=>{bx(1.4,.08,.4,pkM(0x8f6238),x,.45,z);[-.6,.6].forEach(o2=>bx(.06,.45,.35,pkM(0x444444),x+o2,.22,z))})}
+  // الأطفال والأهل داخل مدينة الألعاب (يظهرون يوم الفتح فقط)
+  const pkPeople=[],sit=P=>{const L=P.userData.legs;if(L)L.forEach(l=>l.rotation.x=-1.3)};
+  horses.forEach((H,i)=>{if(i===4)return;const P=person('kid',i+2);H.add(P);P.position.set(0,.05,-.05);P.scale.setScalar(P.scale.x*.95);sit(P);pkPeople.push(P)});
+  cabs.forEach(({cb},i)=>{if(i%2)return;const P=person('kid',i+5);cb.add(P);P.position.set(0,-.25,0);P.rotation.y=Math.PI/2;sit(P);pkPeople.push(P)});
+  [-1,1].forEach(k=>{const P=person('kid',k>0?3:8);PKG.userData.saw.add(P);P.position.set(k*1.25,.05,0);P.rotation.y=k>0?-Math.PI/2:Math.PI/2;sit(P);pkPeople.push(P)});
+  const slider=person('kid',6);PKG.add(slider);pkPeople.push(slider);
+  const PKW=[[.5,.2],[-1,1.6],[5.2,.6],[-5.5,.8],[1.6,5.4],[-3.2,5.8],[5.6,-6],[-.6,-6],[-6,-6],[4.6,3.2],[0,2.6],[-2.5,2.2]],wand=[];
+  for(let i=0;i<6;i++){const P=person(i<4?'kid':i===4?'woman':'man',i+1);PKG.add(P);const q=PKW[i*2%PKW.length];P.position.set(q[0],0,q[1]);P.userData.pk={t:PKW[(i*5+3)%PKW.length],w:Math.random()*3};pkPeople.push(P);wand.push(P)}
+  {const P=person('woman',4);PKG.add(P);P.position.set(-5.4,0,3.3);pkPeople.push(P)}{const P=person('man',3);PKG.add(P);P.position.set(1.2,0,5.6);P.rotation.y=Math.PI;sit(P);P.position.y=-.05;pkPeople.push(P)}
+  const pkMk=markSprite(T,'🎡','#e2504a',1);pkMk.position.set(8.6,5.6,0);pkMk.visible=false;pkMk.userData.act='park';PKG.add(pkMk);
+  let pkSp=0,pkA=0,pkT=3;
+  function parkTick(t,dt,o,h){const op=parkOpen(),day0=!night;pkSp+=((op?1:0)-pkSp)*Math.min(1,dt*.8);pkA+=pkSp*dt;
+    WR.rotation.x=pkA*.22;cabs.forEach(({C})=>C.rotation.x=-WR.rotation.x);CR.userData.top.rotation.y=pkA*.9;horses.forEach((H,i)=>H.position.y=.9+Math.sin(pkA*3+i*1.3)*.22*pkSp);
+    PKG.userData.saw.rotation.z=Math.sin(pkA*1.8)*.28*pkSp;PKG.userData.bal.forEach((b,i)=>b.position.y=4.2+(i%2)*.4+Math.sin(t*1.5+i)*.08);
+    PKG.userData.closed.visible=!op;pkMk.visible=op&&!o.v&&!o.pkDone;pkMk.position.y=5.6+Math.sin(t*2)*.12;
+    pkPeople.forEach(P=>P.visible=op);if(!op)return;
+    // الطفل على الزحليقة: يصعد السلّم ثم ينزلق
+    {const u=(t*.25)%1,SL=[3.4,3.6];if(u<.45){const k=u/.45;slider.position.set(SL[0]-1.85+.0,.05+k*1.95,SL[1]);slider.rotation.y=Math.PI/2}else{const k=(u-.45)/.55;slider.position.set(SL[0]-1.2+k*2.9,2.05-k*1.9,SL[1]);slider.rotation.y=Math.PI/2}}
+    wand.forEach(P=>{const u=P.userData.pk;if(u.w>0){u.w-=dt;return}const dx=u.t[0]-P.position.x,dz=u.t[1]-P.position.z,d=Math.hypot(dx,dz);
+      if(d<.15){u.w=1+Math.random()*3;u.t=PKW[Math.floor(Math.random()*PKW.length)];return}const sp=Math.min(d,(P.userData.legs?1.2:.9)*dt);P.position.x+=dx/d*sp;P.position.z+=dz/d*sp;turn(P,Math.atan2(dx,dz),dt);P.position.y=Math.abs(Math.sin(t*7+P.id))*.04});
+    // 👨‍👧‍👦 عائلات تأتي إلى مدينة الألعاب (من الطريق والقرية) وأخرى ترجع
+    pkT-=dt;if(pkT<=0&&h<20.3){pkT=6+Math.random()*6;if(walkers.filter(w=>w.pk).length<14){const back=Math.random()<.35,n=1+Math.floor(Math.random()*2),GX=PKC[0]+8.6,GZ=PKC[1];
+      const r=Math.random(),src=r<.4?[[L2,-75]]:r<.75?[[L2,8],[L2,-6]]:[VL[0],[VL[0][0]+4,VL[0][1]],[L2,VL[0][1]]];
+      for(let i=0;i<=n;i++){const kid2=i>0,P=person(kid2?'kid':Math.random()<.55?'man':'woman',Math.floor(Math.random()*12)),o2=(i-.5)*.32;
+        let pts=src.map(q=>[q[0]+(Math.abs(q[0])<4?o2:0),q[1]]).concat([[L2+o2,GZ+.3*i],[GX,GZ+o2],[GX-2.4,GZ+o2*2]]);if(back)pts=pts.reverse();
+        P.userData.bs=P.scale.x;if(back)P.scale.setScalar(.01);walk(P,pts,kid2?1.35:1.2,back?'gone':'enter');const w=walkers[walkers.length-1];w.pk=1;if(back)w.grow=0}}}}
   return {g,update,stops,count:()=>walkers.length,peds,say,endGreet,traffic,sellers,elder,faller,fallMk,father,mother,baker,FBK}}
 
 /* ---------- (v11.9) أصوات المدينة: نهارًا عصافير وحركة سير هادئة، وليلًا هدوء. تُصنع بالكود (بلا ملفات)، وتحترم كتم صوت التطبيق ---------- */
@@ -1425,6 +1512,26 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
           go({x:-4.3,z:NBZ,via:null},()=>{carry=0;kidBags.forEach(b=>b.visible=false);D.tn=1;dsv();jewels(2);
             card(`👴 جدّو: جزاك اللَّهُ خيرًا، وجزى جارتنا خيرًا 🤲 💎 +٢<br><b style="color:#1fa463;font-size:18px">🌟 هذا عمل صالح!</b><br><small>الإحسان إلى الجار وإهداؤه من أخلاق المسلم 🤍</small>`,[['الحمد لله',refresh]])})}],['لاحقًا',null,'sec']])})},
     // ===== (v15.2) 🏥 المستشفى: زيارة طفل مريض (💎3 مرة يوميًا)، و🤕 رجل وقع في الشارع: يسنده الطفل ويوصله إلى المستشفى (💎4) =====
+    // ===== (v15.4) 🎡 مدينة الألعاب: في أيام الفتح يذهب الطفل ويختار التصرّف الصحيح (الدور، النظافة، مساعدة الصغير) 💎3 مرة يوميًا =====
+    park(){const D=day(),why=parkWhy(),h=hourNow();viewAt('pk');
+      if(!parkOpen()){const o=occNow();card(o&&o.k==='sad'?`🎡 مدينة الألعاب مغلقة في هذه الأيام احترامًا للمناسبة 🖤`:
+          why&&rainNow()?`🎡 مدينة الألعاب مغلقة الآن بسبب المطر 🌧️… ${B('ارجع','ارجعي')} بعد أن يتوقف`:
+          why?`🎡 مدينة الألعاب تفتح اليوم من ٩ صباحًا حتى ٩ مساءً 🕘`:
+          `🎡 مدينة الألعاب مغلقة اليوم<br><small>تفتح يوم <b>الجمعة والسبت</b>، وفي <b>العطل والأعياد والمناسبات السعيدة</b> 🎉<br>من ٩ صباحًا حتى ٩ مساءً</small>`,[['حسنًا',null,'sec']]);return}
+      go({x:PKC[0]+8.3,z:PKC[1]+.9,via:null},()=>{
+        if(D.pk){card(`🎡 ${B('لعبتَ','لعبتِ')} اليوم في مدينة الألعاب 😊<br><small>${why} · الأطفال يلعبون ويفرحون 🎠</small>`,[['حسنًا',null,'sec']]);return}
+        const good=(msg,lesson)=>()=>{D.pk=1;dsv();jewels(3);try{Aamal.grow('akhlaq')}catch(e){}card(`${msg} 💎 +٣<br><b style="color:#1fa463;font-size:18px">🌟 هذا عمل صالح!</b><br><small>${lesson}</small>`,[['الحمد لله',null]])};
+        const SC=[
+          [`🎠 ${why}… والأطفال ${B('ينتظرون','ينتظرون')} دورهم في طابور الدوّامة. ماذا ${B('تفعل','تفعلين')}؟`,
+            ['👫 أقف في الطابور وأنتظر دوري',good(`🎠 ${B('انتظرتَ','انتظرتِ')} دورك ثم ${B('ركبتَ','ركبتِ')} الدوّامة وفرحت كثيرًا`,'انتظار الدور واحترام الآخرين من الأخلاق الحسنة 🤍')],
+            ['🏃 أتقدّم على الأطفال',`🤍 الأجمل أن ${B('تنتظر','تنتظري')} دورك مثل أصدقائك… فالكلّ يحبّ أن يلعب`]],
+          [`🍭 ${why}… ${B('أكلتَ','أكلتِ')} غزل البنات وبقي العود والكيس في يدك. ماذا ${B('تفعل','تفعلين')}؟`,
+            ['🗑️ أضعهما في سلّة المهملات',good(`🗑️ ${B('وضعتَ','وضعتِ')} المهملات في السلّة فبقيت مدينة الألعاب نظيفة جميلة`,'المسلم يحافظ على نظافة الأماكن التي يلعب فيها الناس 🤍')],
+            ['أرميهما على الأرض',`🤍 لو رمى كلّ طفل كيسه لامتلأت مدينة الألعاب بالأوساخ… ${B('ضعه','ضعيه')} في السلّة`]],
+          [`🛝 ${why}… طفل صغير خائف من الزحليقة ويبكي. ماذا ${B('تفعل','تفعلين')}؟`,
+            ['🤝 أمسك يده وأشجّعه',good(`🤝 ${B('أمسكتَ','أمسكتِ')} يده ${B('وشجّعتَه','وشجّعتِه')} فانزلق وضحك فرحًا 😊`,'الرحمة بالصغير ومساعدته من أخلاق المسلم 🤍')],
+            ['أضحك عليه',`🤍 الضحك على الخائف يحزنه… ${B('ساعده','ساعديه')} حتى يفرح`]]];
+        const sc=SC[Math.floor(Date.now()/864e5)%3],ask=()=>card(sc[0],[sc[1],[sc[2][0],()=>card(sc[2][1],[[sc[1][0],sc[1][1]]]),'sec']]);ask()})},
     hospital(){hosView();const D=day(),L=hpLv(),up=L<3?[['⬆️ '+B('طوّر','طوّري')+' المستشفى',()=>{try{Binaa.open('hp')}catch(e){}}]]:[];
       if(night||sleeping){card(`🏥 المستشفى يعمل في الليل والنهار… الأطباء والممرّضون يسهرون على المرضى 🩺<br><small>${B('ادعُ','ادعي')} للمرضى بالشفاء 🤲</small>`,up.concat([['حسنًا',null,'sec']]));return}
       go({x:HSP[0]-4.6,z:HSP[1],via:null},()=>{
@@ -1493,11 +1600,14 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
     const p=prayerNow();if(!V&&p&&!day().pr[p])ui.bar.querySelector('[data-a=mosque]').classList.add('hot');try{if(V&&foc)cityView();hosLbl()}catch(e){}}
   // (v15.3) 🏥 زر المستشفى (يسار الشاشة): الكاميرا تطير وتعرض المستشفى بعرض الشاشة من جهة الشارع، ومرة ثانية «🏙️ مدينتي» ترجع للمدينة كلها
   const hosBtn=ui.hos,HOME={th:cam0.th,ph:cam0.ph,dist:cam0.dist};
-  function hosView(){const hf=Math.atan(Math.tan(22.5*Math.PI/180)*cam.aspect),d=Math.max(24,Math.min(MAXD,15/(2*Math.tan(hf))));
-    const P=[HSP[0]-1,1.8,HSP[1]+.6];flyTo({c:P,l:P,th:-1.2,ph:.95,dist:d});foc='hp';hosLbl()}
+  // (v15.4) صار زر «📍 الأماكن»: المستشفى ومدينة الألعاب، كلٌّ يُعرض بعرض الشاشة
+  const VIEWS={hp:{P:[HSP[0]-1,1.8,HSP[1]+.6],th:-1.2,ph:.95,w:15},pk:{P:[PKC[0]+.5,2.6,PKC[1]],th:1.2,ph:1,w:18}};
+  function viewAt(k){const v=VIEWS[k],hf=Math.atan(Math.tan(22.5*Math.PI/180)*cam.aspect),d=Math.max(24,Math.min(MAXD,v.w/(2*Math.tan(hf))));flyTo({c:v.P,l:v.P,th:v.th,ph:v.ph,dist:d});foc=k;hosLbl()}
+  function hosView(){viewAt('hp')}
   function cityView(){if(!foc)return;flyTo({c:C0,l:LK0,th:HOME.th,ph:HOME.ph,dist:HOME.dist});foc=null;hosLbl()}
-  function hosLbl(){if(!hosBtn)return;hosBtn.hidden=!!V;hosBtn.innerHTML=foc?'<b>🏙️</b>مدينتي':'<b>🏥</b>المستشفى';const sb=ui.snd;hosBtn.style.top=(sb&&sb.offsetHeight?sb.offsetTop+sb.offsetHeight+10:160)+'px'}
-  if(hosBtn){hosBtn.onclick=()=>{try{window.Bayt&&Bayt.sTap()}catch(e){}if(foc)cityView();else hosView()};hosLbl()}
+  function hosLbl(){if(!hosBtn)return;hosBtn.hidden=!!V;hosBtn.innerHTML=foc?'<b>🏙️</b>مدينتي':'<b>📍</b>الأماكن';const sb=ui.snd;hosBtn.style.top=(sb&&sb.offsetHeight?sb.offsetTop+sb.offsetHeight+10:160)+'px'}
+  if(hosBtn){hosBtn.onclick=()=>{try{window.Bayt&&Bayt.sTap()}catch(e){}if(foc){cityView();return}
+    card('📍 إلى أين '+B('تريد','تريدين')+' أن '+B('تذهب','تذهبي')+'؟',[['🏥 المستشفى',()=>viewAt('hp')],['🎡 مدينة الألعاب',()=>{viewAt('pk');A.park()}],['حسنًا',null,'sec']])};hosLbl()}
   setBar();const pn=prayerNow();if(window.City3D)City3D._A=A; // للتجربة فقط
   // (v13.8) تهنئة مرة في اليوم أيام رمضان والعيد
   {const oc=occNow(),D=day();if(oc&&!V&&D.oc!==oc.id&&!sleepNow()){D.oc=oc.id;D.fs=1;dsv();setTimeout(()=>card(`<b>${oc.t}</b><br><small>${oc.msg}</small><br><small>${oc.k==='sad'?'لبست '+B('مدينتك','مدينتكِ')+' السواد في هذه الأيام 🖤':'زُيّنت '+B('مدينتك','مدينتكِ')+' بالأضواء والفوانيس والبالونات ✨'}</small>`,[[oc.k==='sad'?'🤍 حسنًا':'🤍 الحمد لله',null]]),900)}}
@@ -1564,7 +1674,7 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
       // (v13.8) إذا بدأ المطر أو توقّف أو ظهر قوس قزح أو بدأت المناسبة: يُعاد رسم المشهد، وتتلوّن السماء حسب الوقت
       {const bk=window.Binaa?Binaa.code()+'|'+(Binaa.job?Binaa.job.p+(Binaa.job.ready?'r':''):''):'';if(!V&&bk!==bKey){bKey=bk;refresh()}}wxFetch();showWx();const wk=rainNow()+'|'+rainbowNow()+'|'+festNow()+'|'+(occNow()||{}).id+'|'+winter()+'|'+cloudLv();wRain=rainNow();if(wk!==wKey){wKey=wk;refresh()}applySky();kidUmb.visible=wRain&&!night}
     if(zz.visible){zz.position.y=zz.userData.y+Math.sin(t*.8)*.25;zz.material.opacity=.75+Math.sin(t*1.3)*.25}
-    life.update(t,dt,{hosp:V?0:hpLv(),prayer:sleeping?null:prC,mosque:V?(V.lv.m|0):(window.Madina?Madina.st.lv.m|0:0),kid:kid.position,kidOn:kid.visible,kidWait:lookT>0,sleep:sleeping,rain:wRain&&!night,bagsDone:!!(day().br&&day().br.b)});sounds&&sounds.tick(dt);
+    life.update(t,dt,{v:!!V,pkDone:!!day().pk,hosp:V?0:hpLv(),prayer:sleeping?null:prC,mosque:V?(V.lv.m|0):(window.Madina?Madina.st.lv.m|0:0),kid:kid.position,kidOn:kid.visible,kidWait:lookT>0,sleep:sleeping,rain:wRain&&!night,bagsDone:!!(day().br&&day().br.b)});sounds&&sounds.tick(dt);
     sparks=sparks.filter(s=>{s.userData.k+=dt;const k=s.userData.k;s.position.addScaledVector(s.userData.v,dt);s.rotation.y+=dt*6;s.material.opacity=Math.max(0,1-k/1.3);
       if(k>1.3){S.remove(s);s.geometry.dispose();s.material.dispose();return false}return true});
     drops=drops.filter(d=>{d.position.y-=dt*4;if(d.position.y<.1){S.remove(d);d.geometry.dispose();d.material.dispose();return false}return true});
@@ -1585,7 +1695,7 @@ async function open(){if(document.getElementById('m3d'))return;const ov=document
   ov.innerHTML=`<button class="m3x" aria-label="إغلاق" style="position:absolute;top:12px;left:12px;z-index:2;width:46px;height:46px;border-radius:50%;border:0;background:#fff;font-size:22px;box-shadow:0 2px 8px #0004">✖</button>
     <div class="m3hp"></div>
     <div class="m3msg" style="position:absolute;top:74px;right:12px;left:104px;z-index:2;background:#fffd;border-radius:14px;padding:6px 10px;font-weight:800;text-align:center;font-size:13px">⏳ لحظة…</div>
-    <div class="m3j"></div><button class="m3wx" hidden aria-label="الطقس"></button><button class="m3snd" aria-label="الصوت"></button><button class="m3hos" hidden aria-label="المستشفى"></button><div class="m3card"></div>
+    <div class="m3j"></div><button class="m3wx" hidden aria-label="الطقس"></button><button class="m3snd" aria-label="الصوت"></button><button class="m3hos" hidden aria-label="الأماكن"></button><div class="m3card"></div>
     <div class="m3bar" style="display:none"><button data-a="mosque"><b>🕌</b>إلى الجامع</button><button data-a="water"><b>💧</b>اسقِ الشجر</button><button data-a="school"><b>🏫</b>احفظ القرآن</button><button data-a="library"><b>📚</b>المكتبة</button><button data-a="mySchool"><b>🎒</b>مدرستي</button><button data-a="friends"><b>👥</b>زيارة صديق</button></div>`;
   document.body.appendChild(ov);document.body.classList.add('m3on');const msg=ov.querySelector('.m3msg');
   const close=()=>{try{cur&&cur.stop()}catch(e){}cur=null;ov.remove();document.body.classList.remove('m3on')};
