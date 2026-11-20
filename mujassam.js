@@ -42,8 +42,11 @@ function day(){if(ds.d!==today())ds={d:today(),pr:{},tr:{},lt:{},cat:0};return d
 const dsv=()=>{try{localStorage.setItem(DKEY,JSON.stringify(ds))}catch(e){}};
 const seed=()=>{let h=0;for(const c of today())h=(h*31+c.charCodeAt(0))>>>0;return h};
 // (v12.1) ثلاث أشجار يسار البيت أُبعدت قليلًا لتتّسع المزرعة (FARM)
-const TREES=[[-21,-3],[-21,6.2],[12,-3],[12,4],[-2.8,-28],[3.6,12.9],[-13,12],[13,-12],[-13,-12],[13,12],[-22,0],[16.5,-8]];
-const FARM=[-14.5,0],FARM_IN={x:-14.5,z:2.2,via:4.6};
+const TREES=[[-23.4,-3],[-23.4,6.2],[12,-3],[12,4],[-2.8,-28],[3.6,12.9],[-13,12],[13,-12],[-13,-12],[13,12],[-23.6,0],[16.5,-8]];
+// (v15.0) المزرعة أُبعدت يسارًا لتتّسع حديقة البيت وسوره
+const FARM=[-17.8,0],FARM_IN={x:-17.8,z:2.2,via:4.6};
+// (v15.0) أرض البيت: من السور الأمامي XF إلى الخلفي XL، وعرضها ±HZ
+const XF=-2.95,XL=-14.4,HZ=3.55;
 // (v13.7) أماكن جديدة: النهر (RVZ) والجسر الخشبي (FBX)، السوق (MKX/MKT)، ساحة النافورة (PLZ)، بيوت الجيران (NBZ)
 // (v14.3) قرى قريبة: [x,z,الاسم]
 const VIL=[[-24,-82,'قرية النخيل'],[-25,64,'قرية الرمّان'],[-28,-150,'قرية البساتين']];
@@ -212,7 +215,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   // زهور ملوّنة كثيرة على العشب
   {const fl=[0xff5c8a,0xffd23f,0xb07cff,0xff8c42,0xffffff,0x4fc3ff,0xff4f4f],geo=new T.SphereGeometry(.13,8,6),im=new T.InstancedMesh(geo,new T.MeshStandardMaterial({roughness:.6}),240);
     const o=new T.Object3D(),col=new T.Color();let n=0,k=0;
-    const bad=(x,z)=>Math.abs(x)<2.8||x<-2.4&&x>-11.2&&z<-14.8&&z>-25||Math.abs(Math.abs(z)-4.6)<1.4&&Math.abs(x)<15||Object.values(SPOT).some(([a,b])=>Math.hypot(x-a,z-b)<3.9)||Math.hypot(x,z)>34||x>17||NOFL(x,z)||Math.abs(x-FARM[0])<3.6&&Math.abs(z-FARM[1])<3.8;
+    const bad=(x,z)=>x<-2.6&&x>XL-.4&&Math.abs(z)<HZ+.35||Math.abs(x)<2.8||x<-2.4&&x>-11.2&&z<-14.8&&z>-25||Math.abs(Math.abs(z)-4.6)<1.4&&Math.abs(x)<15||Object.values(SPOT).some(([a,b])=>Math.hypot(x-a,z-b)<3.9)||Math.hypot(x,z)>34||x>17||NOFL(x,z)||Math.abs(x-FARM[0])<3.6&&Math.abs(z-FARM[1])<3.8;
     while(n<240&&k<4000){k++;const a=Math.random()*Math.PI*2,r=3+Math.random()*31,x=Math.cos(a)*r,z=Math.sin(a)*r;if(bad(x,z))continue;
       o.position.set(x,.09,z);o.scale.setScalar(.7+Math.random()*.6);o.updateMatrix();im.setMatrixAt(n,o.matrix);im.setColorAt(n,col.setHex(fl[n%fl.length]));n++}
     im.count=n;S.add(im)}
@@ -327,7 +330,13 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   function school(G){const wall=M(0xffd166),wall2=M(0xffe39a),roofM=M(0xff6b6b),blue=M(0x4f8fe0),white=M(0xffffff),dk=M(0x222222);
     const W=7.4,H=4.4,D=4.6;box(W,H,D,wall,0,H/2,0,G);box(W+.1,.25,D+.1,white,0,H/2,0,G);box(W+.3,.3,D+.3,white,0,H+.15,0,G);
     prism(W+.6,1.8,D+.6,roofM,0,H+.3,0,G);
-    for(let r=0;r<2;r++)for(let i=0;i<6;i++){const x=-W/2+.75+i*(W-1.5)/5;if(r===0&&Math.abs(x)<1)continue;box(.7,.85,.06,winM,x,1.05+r*2.2,D/2+.03,G);box(.8,.08,.1,white,x,.58+r*2.2,D/2+.06,G)}
+    // (v15.0) طلب الشيخ: مدرسة أكثر واقعية — قاعدة حجرية، نوافذ بإطارات بيضاء على كل الجهات، أعمدة عند المدخل، مكيّفات، وحزام أخضر
+    box(W+.16,.32,D+.16,M(night?0x8a8070:0xb7a990),0,.16,0,G);box(W+.04,.14,D+.04,M(0x1fa463),0,H-.35,0,G);
+    for(let r=0;r<2;r++)for(let i=0;i<6;i++){const x=-W/2+.75+i*(W-1.5)/5;[1,-1].forEach(sd=>{if(sd>0&&r===0&&Math.abs(x)<1)return;const zz=sd*(D/2+.03);
+        box(.84,.99,.05,white,x,1.05+r*2.2,zz,G);box(.7,.85,.06,winM,x,1.05+r*2.2,zz+sd*.01,G);box(.03,.85,.07,white,x,1.05+r*2.2,zz+sd*.015,G);box(.9,.08,.14,white,x,.56+r*2.2,zz+sd*.05,G)})}
+    for(let r=0;r<2;r++)[-1,0,1].forEach(k=>[1,-1].forEach(sd=>{const z=k*1.3,xx=sd*(W/2+.03);box(.05,.99,.84,white,xx,1.05+r*2.2,z,G);box(.06,.85,.7,winM,xx+sd*.01,1.05+r*2.2,z,G)}));
+    [-.95,.95].forEach(x=>add(new T.CylinderGeometry(.11,.13,2.0,12),white,x,1.0,D/2+.52,G));
+    [[-W/2-.18,2.9],[-W/2-.18,.9]].forEach(([x,y])=>{box(.32,.38,.75,white,x,y,-.6,G);box(.03,.26,.55,M(0x9aa3ab),x-.17,y,-.6,G)});
     box(1.7,2,.1,blue,0,1,D/2+.05,G);box(.05,2,.12,white,0,1,D/2+.08,G);box(2.2,.35,.6,white,0,2.15,D/2+.3,G);
     const ck=add(new T.CylinderGeometry(.6,.6,.12,24),white,0,H+.9,D/2+.32,G);ck.rotation.x=Math.PI/2;
     const rim=add(new T.TorusGeometry(.6,.06,8,24),blue,0,H+.9,D/2+.38,G);
@@ -345,12 +354,28 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
     const rm=M(0xc0563b);[1.6,2.8].forEach(x=>{const a=box(.08,1.8,.08,rm,x,.9,yz+2.1,G),b=box(.08,1.8,.08,rm,x,.9,yz+2.7,G);a.rotation.x=.18;b.rotation.x=-.18});
     box(1.3,.08,.08,rm,2.2,1.75,yz+2.4,G);box(.5,.06,.25,wood,2.2,.5,yz+2.4,G);
     return H+3.6}
-  function home(G){const fh=1.6,hw=4,hd=3.4,wallC=[0xffe08a,0xffc2d6,0xb8e6ff,0xc9f2b4];
-    for(let i=0;i<floors;i++){box(hw,fh,hd,M(wallC[i]),0,fh/2+i*fh,0,G);
-      for(let k=-1;k<=1;k+=2){box(.7,.6,.06,winM,k*1.1,fh/2+i*fh+.1,hd/2+.03,G);box(.06,.6,.7,winM,hw/2+.03,fh/2+i*fh+.1,k*.9,G)}}
-    box(.8,1.1,.06,wood,0,.55,hd/2+.04,G);
-    const roof=add(new T.ConeGeometry(3.3,1.8,4),M(0xff5a5a),0,floors*fh+.9,0,G);roof.rotation.y=Math.PI/4;
-    tree(-2.8,-1.4,G,.8);palm(-2.8,1.4,G);return floors*fh+2}
+  // (v15.0) طلب الشيخ: بيت الطفل أجمل وأكثر واقعية وأضخم (أعرض وأقلّ ارتفاعًا): قاعدة حجرية، أحزمة بيضاء بين الطوابق، نوافذ بإطارات وعتبات،
+  // شرفات بدرابزين في الطوابق العليا، باب خشبي بإطار ودرجتين ومصباح، مكيّفات على الجدار الجانبي، وسقف جملوني بقرميد أحمر وحافة بارزة ومدخنة.
+  // الواجهة نحو الشارع (+x). المجموعة مكبّرة ×1.25 (BS.home).
+  function home(G){const fh=1.42,hw=4.2,hd=4.2,wallC=[0xf6e3b4,0xf9d9d0,0xd8e9f3,0xdff0d2],wh=M(0xffffff),stn=M(night?0x8a8070:0xb7a990),frm=M(0xf4f1ea),dk=M(0x4a3426);
+    box(hw+.16,.32,hd+.16,stn,0,.16,0,G);
+    const win=(x,y,z,ax)=>{const w=.7,h=.62;if(ax==='x'){box(.06,h+.12,w+.12,frm,x,y,z,G);box(.07,h,w,winM,x+(x>0?.01:-.01),y,z,G);box(.16,.06,w+.2,wh,x,y-h/2-.07,z,G);box(.07,.03,w,frm,x+(x>0?.02:-.02),y,z,G)}
+      else{box(w+.12,h+.12,.06,frm,x,y,z,G);box(w,h,.07,winM,x,y,z+(z>0?.01:-.01),G);box(w+.2,.06,.16,wh,x,y-h/2-.07,z,G);box(.03,h,.07,frm,x,y,z+(z>0?.02:-.02),G)}};
+    for(let i=0;i<floors;i++){const y0=.32+i*fh,yc=y0+fh/2;box(hw,fh,hd,M(wallC[i%4]),0,yc,0,G);box(hw+.14,.1,hd+.14,wh,0,y0+fh-.02,0,G);
+      [-1.25,1.25].forEach(z=>{if(!(i===0&&z>0))win(hw/2+.03,yc+.08,z,'x');win(-hw/2-.03,yc+.08,z,'x')});
+      [-1.15,1.15].forEach(x=>{win(x,yc+.08,hd/2+.03,'z');win(x,yc+.08,-hd/2-.03,'z')});
+      if(i>0){box(.35,.06,1.9,wh,hw/2+.2,y0+.06,0,G);for(let k=-4;k<=4;k++)box(.03,.42,.03,frm,hw/2+.36,y0+.27,k*.22,G);box(.04,.04,1.9,frm,hw/2+.36,y0+.48,0,G);
+        box(.06,.95,.62,dk,hw/2+.02,y0+.5,0,G)}
+      if(i<floors-1||floors===1){const ac=box(.32,.38,.75,wh,0,yc+.25,-hd/2-.2,G);ac.rotation.y=Math.PI/2;box(.03,.26,.55,M(0x9aa3ab),.17,yc+.25,-hd/2-.2,G)}}
+    // الباب الأمامي (نحو الشارع) بإطار ودرجتين ومصباح
+    box(.08,1.35,1.05,frm,hw/2+.04,.32+.68,1.0,G);box(.07,1.2,.85,M(0x7a4a26),hw/2+.06,.32+.62,1.0,G);add(new T.SphereGeometry(.035,8,6),M(0xffd23f,{metalness:.6}),hw/2+.12,.32+.62,.7,G);
+    box(.5,.12,1.3,stn,hw/2+.25,.06,1.0,G);box(.28,.12,1.3,stn,hw/2+.14,.18,1.0,G);
+    add(new T.SphereGeometry(.09,10,8),M(0xfff1b0,{emissive:0xffd860,emissiveIntensity:night?1.6:.2}),hw/2+.12,1.65,.35,G);
+    // السقف: جملوني رباعي بقرميد أحمر، حافة بارزة، ومدخنة
+    const top=.32+floors*fh;box(hw+.5,.12,hd+.5,M(0xe9e2d4),0,top+.06,0,G);
+    const roof=add(new T.ConeGeometry((hw/2+.32)*Math.SQRT2,1.55,4),M(night?0x8a3a2c:0xc4513b,{roughness:.7}),0,top+.12+.775,0,G);roof.rotation.y=Math.PI/4;
+    box(.4,.9,.4,M(0xb07a5a),-1,top+1.15,-.9,G);box(.5,.1,.5,wh,-1,top+1.62,-.9,G);
+    return top+1.9}
   const P=Md&&Md.PARTS||{};
   Object.keys(SPOT).forEach(p=>{const G=new T.Group();G.position.set(SPOT[p][0],0,SPOT[p][1]);G.userData.p=p;S.add(G);let top,lb;
     if(p==='sc'){top=school(G);lb=textSprite(T,V?'🎒 المدرسة':'🎒 مدرستي','rgba(255,255,255,.92)','#5a4a1a')}
@@ -629,6 +654,53 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
     box(.38,.06,2.2,M(0x8b5a2b),k*.15,.48,0,G);[-.9,.9].forEach(a=>box(.06,.45,.06,pm,k*.15,.24,a,G));
     add(new T.CylinderGeometry(.04,.04,2.6,8),pm,-k*.55,1.3,-1.75,G);const sg=markSprite(T,'🚌','#2f6fd0',.9);sg.position.set(-k*.55,2.85,-1.75);G.add(sg);
     label('🚌 موقف الباص',0,3.2,0,.6,G)});
+  // ---- 🧱🌳 (v15.0) سور البيت وبستانه وأشجاره الثلاث، كلٌّ بثلاث مراحل (binaa.js: نفس مستويات البيت القديم) ----
+  // السور: ١ خشبي ← ٢ حجر ← ٣ رخام أبيض بحافة ذهبية وفوانيس. البستان خلف البيت: ١ عشب وسياج شجيرات ← ٢ ورود وممرّ حجري ← ٣ نافورة وفوانيس.
+  // الأشجار: ١ شتلة ← ٢ شجرة ← ٣ شجرة مثمرة (تفّاح، رمّان، برتقال). المس أيّ جزء لتبنيه أو تطوّره (Binaa.open).
+  {const uc=V?String(V.u||''):(window.Binaa?Binaa.code():''),BL=k=>Math.max(0,Math.min(3,+uc[k]||0)),wL=BL(0),gL=BL(1),tL=[BL(2),BL(3),BL(4)];
+    const job=V||!window.Binaa?null:Binaa.job;
+    const WG=new T.Group();WG.userData.act='bn_w';S.add(WG);
+    const segs=[[XF,-HZ,XF,-.8],[XF,2.9,XF,HZ],[XF,HZ,XL,HZ],[XF,-HZ,XL,-HZ],[XL,-HZ,XL,HZ]],pil=[[XF,-HZ],[XF,-.8],[XF,2.9],[XF,HZ],[XL,HZ],[XL,-HZ],[XL,0],[-8.7,HZ],[-8.7,-HZ]];
+    const along=(a,b,f)=>{const dx=b[0]-a[0],dz=b[1]-a[1],L=Math.hypot(dx,dz);f((a[0]+b[0])/2,(a[1]+b[1])/2,L,Math.abs(dx)>Math.abs(dz)?'x':'z',dx,dz)};
+    if(wL===1){const wd=M(0xb98552),wd2=M(0x8f6238);segs.forEach(([x1,z1,x2,z2])=>along([x1,z1],[x2,z2],(cx,cz,L,ax,dx,dz)=>{
+        const n=Math.max(1,Math.round(L/.26));for(let i=0;i<=n;i++){const u=i/n,x=x1+dx*u,z=z1+dz*u;box(.08,.72,.08,wd,x,.36,z,WG);const tp=add(new T.ConeGeometry(.06,.1,4),wd,x,.77,z,WG)}
+        [.25,.55].forEach(y=>box(ax==='x'?L:.05,.07,ax==='x'?.05:L,wd2,cx,y,cz,WG))}));pil.forEach(([x,z])=>box(.16,.9,.16,M(0x8f6238),x,.45,z,WG))}
+    if(wL===2){const sm=M(night?0x9a9282:0xcfc3a8),cap=M(night?0x7f7768:0xa89a7c);segs.forEach(([x1,z1,x2,z2])=>along([x1,z1],[x2,z2],(cx,cz,L,ax)=>{
+        box(ax==='x'?L:.24,.85,ax==='x'?.24:L,sm,cx,.425,cz,WG);box(ax==='x'?L+.06:.32,.08,ax==='x'?.32:L+.06,cap,cx,.89,cz,WG)}));
+      pil.forEach(([x,z])=>{box(.38,1.1,.38,sm,x,.55,z,WG);box(.46,.1,.46,cap,x,1.13,z,WG)})}
+    if(wL>=3){const mb=M(0xf7f5f0,{roughness:.35}),gd=M(0xd4a520,{metalness:.7,roughness:.3}),lmp=M(0xfff1b0,{emissive:0xffd860,emissiveIntensity:night?1.8:.35});
+      segs.forEach(([x1,z1,x2,z2])=>along([x1,z1],[x2,z2],(cx,cz,L,ax)=>{box(ax==='x'?L:.26,.95,ax==='x'?.26:L,mb,cx,.475,cz,WG);box(ax==='x'?L+.04:.32,.06,ax==='x'?.32:L+.04,gd,cx,.98,cz,WG);box(ax==='x'?L:.28,.05,ax==='x'?.28:L,gd,cx,.15,cz,WG)}));
+      pil.forEach(([x,z])=>{box(.42,1.25,.42,mb,x,.625,z,WG);box(.5,.06,.5,gd,x,1.28,z,WG);add(new T.SphereGeometry(.13,12,10),lmp,x,1.43,z,WG)});
+      const ar=new T.Mesh(new T.TorusGeometry(1.85,.09,8,28,Math.PI),gd);ar.position.set(XF,1.25,1.05);ar.rotation.y=Math.PI/2;WG.add(ar)}
+    if(wL===0){[[XF,-.8],[XF,2.9]].forEach(([x,z])=>box(.14,.5,.14,M(0xb98552),x,.25,z,WG));const pg=add(new T.PlaneGeometry(.04,.04),M(0xffffff),XF,.01,1,WG)}
+    // البستان خلف البيت
+    const GG=new T.Group();GG.userData.act='bn_g';S.add(GG);const GX0=XL+.3,GX1=-8.75,GCX=(GX0+GX1)/2,GW=GX1-GX0,GD=HZ*2-.4;
+    const soil=new T.Mesh(new T.PlaneGeometry(GW,GD),M(gL?(night?0x3f7d3a:0x5cbf4f):0xb08a5c,{roughness:1}));soil.rotation.x=-Math.PI/2;soil.position.set(GCX,.03,0);soil.receiveShadow=true;GG.add(soil);
+    if(gL>=1){const hg=M(night?0x2f6a32:0x3f9a3e,{flatShading:true});for(let x=GX0+.3;x<GX1-.2;x+=.62)[-1,1].forEach(k=>{const b=add(TG[0],hg,x,.32,k*(HZ-.42),GG);b.scale.set(.36,.34,.3)});
+      for(let z=-HZ+.8;z<HZ-.7;z+=.62){const b=add(TG[1],hg,GX0+.15,.32,z,GG);b.scale.set(.3,.34,.36)}}
+    if(gL>=2){const pv=M(night?0xa69c88:0xe2d6bd);for(let x=GX1-.4;x>GX0+1.4;x-=.55){const st=add(new T.CylinderGeometry(.24,.24,.05,10),pv,x,.05,0,GG);st.receiveShadow=true}
+      const FC=[0xff5c8a,0xffd23f,0xff8c42,0xb07cff,0xffffff,0xe2504a];let k=0;[-1,1].forEach(s2=>{for(let x=GX0+.9;x<GX1-.5;x+=.32){for(let r=0;r<2;r++){const f=add(new T.SphereGeometry(.09,6,5),M(FC[k++%6]),x+(r?.16:0),.2,s2*(HZ-.95-r*.25),GG);f.castShadow=false;
+            const st=add(new T.CylinderGeometry(.015,.015,.16,4),M(0x2f7d3a),x+(r?.16:0),.1,s2*(HZ-.95-r*.25),GG);st.castShadow=false}}})}
+    if(gL>=3){const FX=GX0+2.1,stn=M(0xe9e2d4),wtr=new T.MeshStandardMaterial({color:0x5fb8ee,roughness:.1,metalness:.2,transparent:true,opacity:.85});
+      add(new T.CylinderGeometry(.85,.95,.4,24),stn,FX,.2,0,GG);const wv=add(new T.CircleGeometry(.75,24),wtr,FX,.41,0,GG);wv.rotation.x=-Math.PI/2;
+      add(new T.CylinderGeometry(.12,.16,.8,10),stn,FX,.6,0,GG);add(new T.CylinderGeometry(.35,.25,.12,14),stn,FX,1.0,0,GG);
+      const jet=add(new T.ConeGeometry(.08,.5,8),wtr,FX,1.3,0,GG);anim.push(t=>{jet.scale.y=.8+Math.sin(t*6)*.2;wv.material.opacity=.75+Math.sin(t*2)*.1});
+      const lmp=M(0xfff1b0,{emissive:0xffd860,emissiveIntensity:night?1.8:.3});[[GX0+.7,-HZ+.7],[GX0+.7,HZ-.7],[GX1-.6,-HZ+.7],[GX1-.6,HZ-.7]].forEach(([x,z])=>{add(new T.CylinderGeometry(.04,.05,1.1,8),M(0x2b2b2b),x,.55,z,GG);add(new T.SphereGeometry(.12,10,8),lmp,x,1.15,z,GG)})}
+    // الأشجار الثلاث
+    const TZ=[-2.1,0,2.1],FRC=[0xd8282d,0x9e1b32,0xff9a1f],TGs=[];
+    tL.forEach((L,i)=>{const G=new T.Group();G.position.set(XL+1.15,0,TZ[i]);G.userData.act='bn_t'+i;S.add(G);TGs.push(G);
+      if(!gL||!L){const m=add(new T.CircleGeometry(.4,14),M(0x8a6a44),0,.04,0,G);m.rotation.x=-Math.PI/2;return}
+      if(L===1){add(new T.CylinderGeometry(.03,.04,.7,6),bark,0,.35,0,G);const b=add(TG[i%3],LF2[i%4],0,.8,0,G);b.scale.setScalar(.28);add(new T.CylinderGeometry(.015,.015,.8,4),M(0xc9a26a),.12,.4,0,G)}
+      else{tree(0,0,G,L===2?.8:1);if(L>=3)for(let k=0;k<12;k++){const a=k*2.4+i,y=1.55+(k%4)*.18,r=.88;const f=add(new T.SphereGeometry(.09,8,6),M(FRC[i],{roughness:.4}),Math.cos(a)*r,y,Math.sin(a)*r,G);f.castShadow=false}}});
+    // علامات الورشة: 👷 أثناء البناء، ✔ عند الاستلام، و⬆/+ على الجزء المقترح التالي
+    if(!V&&window.Binaa){const gp={w:[WG,XF,1.6,1],g:[GG,GCX,1.4,0],t0:[TGs[0],0,2.6,0],t1:[TGs[1],0,2.6,0],t2:[TGs[2],0,2.6,0]},mk=(p,e,c)=>{const [G2,x,y,z]=gp[p];const sp=markSprite(T,e,c,1.1);
+        if(G2===WG||G2===GG){const H=new T.Group();H.position.set(x,0,p==='w'?1.05:0);G2.add(H);sp.position.set(0,y,0);sp.userData.y=y;H.add(sp)}else{sp.position.set(0,y,0);sp.userData.y=y;G2.add(sp)}marks.push(sp)};
+      if(job){mk(job.p,job.ready?'✔':'👷',job.ready?'#1fa463':'#2f6fd0');
+        const [G2,x]=gp[job.p];if(!job.ready){const wk=new T.Group();wk.position.set(G2===WG?XF-.7:G2===GG?GCX:G2.position.x+.8,0,G2===WG?-1.8:G2===GG?1.2:G2.position.z+.6);S.add(wk);
+          add(new T.CylinderGeometry(.16,.2,.6,10),M(0xff8c1a),0,.5,0,wk);add(new T.SphereGeometry(.14,10,8),M(0xe8b48a),0,.95,0,wk);add(new T.SphereGeometry(.15,10,6,0,Math.PI*2,0,Math.PI/2),M(0xffd23f),0,1.0,0,wk);
+          const hm=new T.Group();hm.position.set(.2,.7,0);wk.add(hm);add(new T.CylinderGeometry(.02,.02,.35,5),M(0x6b4423),0,.17,0,hm);box(.12,.07,.07,M(0x555555),0,.35,0,hm);anim.push(t=>{hm.rotation.z=-.4+Math.sin(t*9)*.7;wk.position.y=Math.abs(Math.sin(t*4.5))*.04})}}
+      else{const L={w:wL,g:gL,t0:tL[0],t1:tL[1],t2:tL[2]},ok=p=>L[p]<3&&(p==='w'||(p==='g'?wL>=1:gL>=1));const cand=['w','g','t0','t1','t2'].filter(ok).sort((a,b)=>L[a]-L[b]);
+        if(cand.length)mk(cand[0],L[cand[0]]?'⬆':'+','#f0a020')}}}
   // ================= (v13.8) الدفعة الثانية: السماء، المطر وقوس قزح، الأغنام والراعي، زينة رمضان والعيد =================
   // ---- 🌅 قبّة سماء متدرّجة (تتلوّن عند الشروق والغروب — City3D.applySky في run) وقرص شمس قرب الأفق ----
   {const g=new T.SphereGeometry(700,32,20),n=g.attributes.position.count;g.setAttribute('color',new T.Float32BufferAttribute(new Float32Array(n*3),3));
@@ -1086,6 +1158,7 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
   // City3D.debugLook=[x,y,z,dist] للتجربة فقط: يدور حول نقطة قريبة (مثل المزرعة)
   const place=()=>{const L=window.City3D&&City3D.debugLook,c=L||[0,0,0],d=L?L[3]:dist;cam.position.set(c[0]+d*Math.sin(th)*Math.sin(ph),c[1]+d*Math.cos(ph),c[2]+d*Math.cos(th)*Math.sin(ph));L?cam.lookAt(c[0],c[1],c[2]):cam.lookAt(0,1.5,-5)};
   // الشخصية: تبدأ عند باب البيت
+  let bKey=window.Binaa?Binaa.code()+'|'+(Binaa.job?Binaa.job.p+(Binaa.job.ready?'r':''):''):'';
   const life=makeLife(night);S.add(life.g);let prC=null,prAt=0;const sounds=makeSounds(night);if(window.City3D)City3D._life=life;
   if(ui.snd){const upd=()=>{ui.snd.textContent=sounds.quiet?"🌙":sndOn()?"🔊":"🔇"};upd();ui.snd.onclick=()=>{if(sounds.quiet){card("🌙 الليل هادئ… المدينة نائمة 😴");setTimeout(()=>card(""),2200);return}try{localStorage.setItem(SKEY,sndOn()?"0":"1")}catch(e){}upd()}}
   const kid=makeKid();S.add(kid);let at={x:-3.4,z:1,via:null},path=[],onArrive=null,busy=0;kid.position.set(at.x,0,at.z);kid.rotation.y=Math.PI/2;
@@ -1127,7 +1200,7 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
     card(`🌙 الساعة ١٢ ليلًا… حان وقت النوم 😴<br><small>${B('تذهب','تذهبين')} إلى ${B('بيتك','بيتكِ')} ${B('لتنام','لتنامي')}</small>`)}
   function wake(){sleeping=false;zz.visible=false;at=door('home');kid.position.set(at.x,0,at.z);kid.visible=true;path=[];
     card(`☀️ صباح الخير! ${B('استيقظتَ','استيقظتِ')} لصلاة الفجر 🤲`);setTimeout(()=>{if(ui.card.textContent.includes('صباح الخير'))card('')},3500)}
-  const WP=[{x:SW,z:-6},{x:SW,z:7},{x:SW,z:12},{x:SW,z:-12},{x:-5,z:3.2,via:4.6},{x:-10.3,z:3.6,via:4.6},{x:-5.5,z:-5.9,via:-4.6}];
+  const WP=[{x:SW,z:-6},{x:SW,z:7},{x:SW,z:12},{x:SW,z:-12},{x:-5,z:4.05,via:4.6},{x:-10.3,z:4.05,via:4.6},{x:-5.5,z:-5.9,via:-4.6}];
   const here=()=>{const x=kid.position.x,z=kid.position.z;return {x,z,via:Math.abs(x)>2.6&&Math.abs(Math.abs(z)-4.6)<1.2?sign(z)*4.6:null}};
   // (v13.9) طلب الشيخ: الطفل يعبر الشارع الرئيسي من ممرّ المشاة فقط (z=±4.6)، ويقف عند الرصيف ينظر يمينًا ويسارًا (النقطة الثالثة =1)
   // الأماكن يمين الشارع بلا via يصلها عبر الممرّ الأقرب ثم الرصيف الأيمن (x=2.8)
@@ -1289,7 +1362,7 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
       card(`👥 ${B('اختر','اختاري')} صديقًا ${B('لتزور','لتزوري')} مدينته<br><small>كل زيارة لصديق جديد اليوم 💎${arn(FV_J)} (حتى ${arn(FV_MAX)} أصدقاء)</small>`,
         f.slice(0,6).map(r=>[`${v[r.id]?'✔':n<FV_MAX?'💎':'🏙️'} ${short(r.nick)}`,()=>A.visit(r)]).concat([['إلغاء',null,'sec']]));
       ui.card.querySelector('.row').style.flexWrap='wrap'},
-    visit(r){vr=r;V={lv:Madina.fromCode(r.m||'00000'),f:r.f,nick:short(r.nick)};
+    visit(r){vr=r;V={lv:Madina.fromCode(r.m||'00000'),f:r.f,u:r.u||'',nick:short(r.nick)};
       at={x:0,z:-15,via:null};kid.position.set(0,0,-15);path=[];refresh();setBar();
       ui.msg.textContent=`🏙️ ${B('أنت','أنتِ')} الآن في مدينة ${V.nick} 🤍`;
       go({x:-2.6,z:1,via:null},()=>{const v=fv();
@@ -1313,7 +1386,7 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
     for(const h of ray.intersectObjects(S.children,true)){let o=h.object;while(o&&!(o.userData&&(o.userData.p||o.userData.t!=null||o.userData.l!=null||o.userData.cat||o.userData.ped||o.userData.fk||o.userData.act)))o=o.parent;if(o)return o.userData}return null}
   function tap(u){if(!u)return;try{window.Bayt&&Bayt.sTap()}catch(e){}if(sleeping){sleepCard();return}
     if(u.ped){if(!busy&&(!path.length||wander))A.salam(u.ped-1);return}
-    if(u.act){if(V){card('🤍 هذا في مدينة '+V.nick);setTimeout(()=>card(''),1600);return}if(!busy&&(!path.length||wander)){const a=u.act;if(a.indexOf('mk_')===0)A.mk(a.slice(3));else if(A[a])A[a]()}return}
+    if(u.act){if(V){card('🤍 هذا في مدينة '+V.nick);setTimeout(()=>card(''),1600);return}if(!busy&&(!path.length||wander)){const a=u.act;if(a.indexOf('bn_')===0){try{Bayt.sTap()}catch(e){}if(window.Binaa)Binaa.open(a.slice(3));return}if(a.indexOf('mk_')===0)A.mk(a.slice(3));else if(A[a])A[a]()}return}
     if(u.fk){if(V){card(`🐄 مزرعة ${V.nick} 🤍`);setTimeout(()=>card(''),1800);return}if(!busy&&(!path.length||wander))A.farm(u.fk);return}
     if(V){if(u.p==='home')card(`🏡 بيت ${V.nick}`,[['🏡 ادخل بيته',()=>A.fhouse()],['حسنًا',null,'sec']]);
       else if(u.p&&Madina.PARTS[u.p])card(`${Madina.PARTS[u.p].e} ${Madina.PARTS[u.p].n} في مدينة ${V.nick} 🤍`);return}
@@ -1361,7 +1434,7 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
     (S.userData.anim||[]).forEach(f=>f(t,dt));
     if(performance.now()-prAt>2000){prAt=performance.now();prC=prayerNow();const sl=sleepNow();if(sl&&!sleeping&&!V)startSleep(t<1);else if(!sl&&sleeping)wake()
       // (v13.8) إذا بدأ المطر أو توقّف أو ظهر قوس قزح أو بدأت المناسبة: يُعاد رسم المشهد، وتتلوّن السماء حسب الوقت
-      wxFetch();showWx();const wk=rainNow()+'|'+rainbowNow()+'|'+festNow()+'|'+(occNow()||{}).id+'|'+winter()+'|'+cloudLv();wRain=rainNow();if(wk!==wKey){wKey=wk;refresh()}applySky();kidUmb.visible=wRain&&!night}
+      {const bk=window.Binaa?Binaa.code()+'|'+(Binaa.job?Binaa.job.p+(Binaa.job.ready?'r':''):''):'';if(!V&&bk!==bKey){bKey=bk;refresh()}}wxFetch();showWx();const wk=rainNow()+'|'+rainbowNow()+'|'+festNow()+'|'+(occNow()||{}).id+'|'+winter()+'|'+cloudLv();wRain=rainNow();if(wk!==wKey){wKey=wk;refresh()}applySky();kidUmb.visible=wRain&&!night}
     if(zz.visible){zz.position.y=zz.userData.y+Math.sin(t*.8)*.25;zz.material.opacity=.75+Math.sin(t*1.3)*.25}
     life.update(t,dt,{prayer:sleeping?null:prC,mosque:V?(V.lv.m|0):(window.Madina?Madina.st.lv.m|0:0),kid:kid.position,kidOn:kid.visible,kidWait:lookT>0,sleep:sleeping,rain:wRain&&!night,bagsDone:!!(day().br&&day().br.b)});sounds&&sounds.tick(dt);
     sparks=sparks.filter(s=>{s.userData.k+=dt;const k=s.userData.k;s.position.addScaledVector(s.userData.v,dt);s.rotation.y+=dt*6;s.material.opacity=Math.max(0,1-k/1.3);
