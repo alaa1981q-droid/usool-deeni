@@ -27,6 +27,7 @@ css.textContent=`body.m3on .modal{z-index:9100}body.m3on #confetti{z-index:9150}
 @keyframes m3fly{to{transform:translate(-50%,-90px);opacity:0}}
 #m3d .m3hp{position:absolute;top:12px;right:12px;z-index:2;display:flex;align-items:center;gap:6px;background:#fffffff2;border-radius:22px;padding:4px 12px 4px 8px;box-shadow:0 3px 0 #c9d6e3,0 3px 10px #0002;min-height:40px}#m3d .m3hp>b{font-size:18px!important;color:#1d4e9e!important}#m3d .m3hp>.e{font-size:24px!important}
 #m3d .m3wx{position:absolute;top:60px;right:12px;z-index:2;display:flex;align-items:center;gap:4px;border:0;background:#fffffff2;border-radius:18px;padding:3px 10px;font:inherit;font-weight:900;color:#1d4e9e;box-shadow:0 3px 0 #c9d6e3,0 3px 10px #0002}#m3d .m3wx[hidden]{display:none}#m3d .m3wx span{font-size:20px}#m3d .m3wx b{font-size:15px}
+#m3d .m3hos{position:absolute;left:12px;z-index:2;display:flex;align-items:center;gap:4px;border:0;border-radius:22px;padding:5px 12px 5px 9px;font:inherit;font-weight:900;font-size:14px;color:#b0262c;background:linear-gradient(160deg,#fff,#ffe9ea);box-shadow:0 3px 0 #e8b8bb,0 3px 10px #0002}#m3d .m3hos b{font-size:22px;line-height:1}#m3d .m3hos[hidden]{display:none}
 #m3d .m3snd{position:absolute;top:108px;left:12px;z-index:2;width:42px;height:42px;border-radius:50%;border:0;background:#fffd;font-size:20px;box-shadow:0 2px 6px #0003}
 #m3d .m3msg:empty{display:none}#m3d .m3hp:empty{display:none}#m3d .m3hp .e{font-size:30px;line-height:1}#m3d .m3hp .t{flex:1;min-width:0}#m3d .m3hp b{display:block;font-size:14.5px;color:#5a4a1a}#m3d .m3hp small{display:block;font-size:12px;font-weight:700;color:#7a6a3a}
 #m3d .m3hp .hb{height:9px;border-radius:6px;background:#efe6d2;overflow:hidden;margin-top:3px}#m3d .m3hp .hb i{display:block;height:100%;border-radius:6px;transition:width .6s}`;
@@ -661,7 +662,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   const HG=new T.Group();HG.position.set(HSP[0],0,HSP[1]);HG.rotation.y=-Math.PI/2;HG.userData.act=hpL&&!hpJob?'hospital':'bn_hp';S.add(HG);let hpTop=2.4;
   {const G=HG,wh=M(night?0xd9dde2:0xf7f8fa,{roughness:.6}),bl=M(0x7fc4e8),gr=M(0x1fa463),rd=M(0xd8282d),dk=M(0x2b3440),
       gl=new T.MeshStandardMaterial({color:night?0xffe6a0:0x9ccbe6,roughness:.15,metalness:.3,emissive:night?0xffd27a:0x000000,emissiveIntensity:night?.9:0});
-    const lot=add(new T.PlaneGeometry(11,12),M(hpL?(night?0x8f8a80:0xd9d3c4):0xb08a5c,{roughness:1}),0,.025,0,G);lot.rotation.x=-Math.PI/2;lot.receiveShadow=true;
+    const lot=add(new T.PlaneGeometry(11,12),M(hpL?(night?0x8f8a80:0xd9d3c4):0xb08a5c,{roughness:1,polygonOffset:true,polygonOffsetFactor:-2}),0,.05,0,G);lot.rotation.x=-Math.PI/2;lot.receiveShadow=true;
     const cres=(x,y,z,r,p)=>{const a=add(new T.CircleGeometry(r,24),rd,x,y,z,p);const b=add(new T.CircleGeometry(r*.82,24),wh,x+r*.38,y+r*.08,z+.005,p);[a,b].forEach(m=>m.castShadow=false)};
     if(!hpL){ // أرض فارغة بأوتاد ولوحة
       [[-5,-4],[5,-4],[-5,4],[5,4],[0,-4],[0,4],[-5,0],[5,0]].forEach(([x,z])=>box(.12,.6,.12,M(0xc98a3a),x,.3,z,G));
@@ -1237,14 +1238,21 @@ function makeSounds(night){if(night)return {tick(){},stop(){},quiet:true};
 /* ---------- التشغيل ---------- */
 function run(ov,ui){const T=THREE,night=document.body.classList.contains('night');
   const W=innerWidth,H=innerHeight;
-  const R=new T.WebGLRenderer({antialias:true});R.setPixelRatio(Math.min(2,devicePixelRatio||1));R.setSize(W,H);
+  const R=new T.WebGLRenderer({antialias:true,logarithmicDepthBuffer:true}); // (v15.3) يمنع الوميض (تداخل الأسطح) أثناء تقليب المدينة
+  R.setPixelRatio(Math.min(2,devicePixelRatio||1));R.setSize(W,H);
   R.shadowMap.enabled=true;R.shadowMap.type=T.PCFSoftShadowMap;
   ov.insertBefore(R.domElement,ov.firstChild);R.domElement.style.display='block';R.domElement.style.touchAction='none';
-  const cam=new T.PerspectiveCamera(45,W/H,.1,950);let S=makeScene(night);
+  const cam=new T.PerspectiveCamera(45,W/H,.5,950);let S=makeScene(night);
   if(!cam0.dist)cam0.dist=Math.min(72,Math.max(38,31/(W/H)));
   let {th,ph,dist}=cam0,drag=null,pinch=0,down=null;const pts=new Map(),MAXD=80;
   // City3D.debugLook=[x,y,z,dist] للتجربة فقط: يدور حول نقطة قريبة (مثل المزرعة)
-  const place=()=>{const L=window.City3D&&City3D.debugLook,c=L||[0,0,0],d=L?L[3]:dist;cam.position.set(c[0]+d*Math.sin(th)*Math.sin(ph),c[1]+d*Math.cos(ph),c[2]+d*Math.cos(th)*Math.sin(ph));L?cam.lookAt(c[0],c[1],c[2]):cam.lookAt(0,1.5,-5)};
+  // (v15.3) طلب الشيخ: تقليب المدينة صعب على الموبايل → الكاميرا تطير بنعومة إلى مكان (flyTo) ثم تدور حوله، وترجع للمدينة كلها
+  const C0=[0,0,0],LK0=[0,1.5,-5],CC=C0.slice(),LK=LK0.slice();let goal=null,foc=null;
+  function flyTo(g){goal=g}
+  function stepFly(dt){if(!goal)return;const k=Math.min(1,dt*2.6),lr=(a,b)=>a+(b-a)*k;for(let i=0;i<3;i++){CC[i]=lr(CC[i],goal.c[i]);LK[i]=lr(LK[i],goal.l[i])}
+    let da=goal.th-th;da=Math.atan2(Math.sin(da),Math.cos(da));th+=da*k;ph=lr(ph,goal.ph);dist=lr(dist,goal.dist);
+    if(Math.abs(da)<.003&&Math.abs(dist-goal.dist)<.05&&Math.hypot(CC[0]-goal.c[0],CC[2]-goal.c[2])<.03)goal=null}
+  const place=()=>{const L=window.City3D&&City3D.debugLook,c=L||CC,d=L?L[3]:dist;cam.position.set(c[0]+d*Math.sin(th)*Math.sin(ph),c[1]+d*Math.cos(ph),c[2]+d*Math.cos(th)*Math.sin(ph));L?cam.lookAt(c[0],c[1],c[2]):cam.lookAt(LK[0],LK[1],LK[2])};
   // الشخصية: تبدأ عند باب البيت
   let bKey=window.Binaa?Binaa.code()+'|'+(Binaa.job?Binaa.job.p+(Binaa.job.ready?'r':''):''):'';
   const life=makeLife(night);S.add(life.g);let prC=null,prAt=0;const sounds=makeSounds(night);if(window.City3D)City3D._life=life;
@@ -1417,7 +1425,7 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
           go({x:-4.3,z:NBZ,via:null},()=>{carry=0;kidBags.forEach(b=>b.visible=false);D.tn=1;dsv();jewels(2);
             card(`👴 جدّو: جزاك اللَّهُ خيرًا، وجزى جارتنا خيرًا 🤲 💎 +٢<br><b style="color:#1fa463;font-size:18px">🌟 هذا عمل صالح!</b><br><small>الإحسان إلى الجار وإهداؤه من أخلاق المسلم 🤍</small>`,[['الحمد لله',refresh]])})}],['لاحقًا',null,'sec']])})},
     // ===== (v15.2) 🏥 المستشفى: زيارة طفل مريض (💎3 مرة يوميًا)، و🤕 رجل وقع في الشارع: يسنده الطفل ويوصله إلى المستشفى (💎4) =====
-    hospital(){const D=day(),L=hpLv(),up=L<3?[['⬆️ '+B('طوّر','طوّري')+' المستشفى',()=>{try{Binaa.open('hp')}catch(e){}}]]:[];
+    hospital(){hosView();const D=day(),L=hpLv(),up=L<3?[['⬆️ '+B('طوّر','طوّري')+' المستشفى',()=>{try{Binaa.open('hp')}catch(e){}}]]:[];
       if(night||sleeping){card(`🏥 المستشفى يعمل في الليل والنهار… الأطباء والممرّضون يسهرون على المرضى 🩺<br><small>${B('ادعُ','ادعي')} للمرضى بالشفاء 🤲</small>`,up.concat([['حسنًا',null,'sec']]));return}
       go({x:HSP[0]-4.6,z:HSP[1],via:null},()=>{
         if(D.hv){card(`🏥 ${B('زرتَ','زرتِ')} المرضى اليوم ✔ وهم يدعون لك 🤲`,up.concat([['حسنًا',null,'sec']]));return}
@@ -1429,7 +1437,7 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
       go({x:-2.3,z:FALLP[1]-.8,via:null},()=>{life.say(F,'آخ… رجلي! 🤕',2.5,1);
         const help=()=>{life.say(kid,'لا تخف يا عمّ، أنا '+B('أساعدك','أساعدك')+' 🤝',2.6,2.4);setTimeout(()=>{fallEsc=1;kidSp=1.5;
           card(`🚶 ${B('تسند','تسندين')} الرجل ${B('وتمشي','وتمشين')} معه بهدوء إلى المستشفى 🏥`);
-          go({x:HSP[0]-4.6,z:HSP[1],via:null},()=>{fallEsc=0;kidSp=4.2;busy=0;D.fall=1;dsv();F.visible=false;life.fallMk.visible=false;jewels(4);try{Aamal.grow('akhlaq')}catch(e){}
+          go({x:HSP[0]-4.6,z:HSP[1],via:null},()=>{hosView();fallEsc=0;kidSp=4.2;busy=0;D.fall=1;dsv();F.visible=false;life.fallMk.visible=false;jewels(4);try{Aamal.grow('akhlaq')}catch(e){}
             card(`🏥 ${B('أوصلتَ','أوصلتِ')} الرجل إلى المستشفى، والطبيب يعالج رجله الآن 🩺 💎 +٤<br>قال لك: «جزاك اللَّهُ خيرًا يا ${B('ولدي','ابنتي')}» 🤲<br><b style="color:#1fa463;font-size:18px">🌟 هذا عمل صالح!</b><br><small>مساعدة المصاب والمحتاج من أخلاق المسلم 🤍</small>`,[['الحمد لله',null]])});busy=1},1400)};
         card(`🤕 رجلٌ وقع في الشارع وتأذّت رجله، ولا يستطيع المشي وحده…<br><small>ماذا ${B('تفعل','تفعلين')}؟</small>`,
           [['🤝 أسنده وأوصله إلى المستشفى',help],['أكمل طريقي',()=>card(`🤍 المسلم يساعد من يحتاج إليه… ${B('ساعده','ساعديه')} حتى يصل إلى المستشفى 🏥`,[['🤝 أسنده وأوصله',help]]),'sec']])})},
@@ -1481,8 +1489,15 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
       ui.msg.textContent=""}});
   const BAR_ME=ui.bar.innerHTML,BAR_V=`<button data-a="back"><b>🏙️</b>مدينتي</button><button data-a="fhouse"><b>🏡</b>ادخل بيته</button><button data-a="friends"><b>👥</b>صديق آخر</button>`;
   function setBar(){ui.bar.innerHTML=V?BAR_V:BAR_ME;ui.bar.style.gridTemplateColumns=V?'repeat(3,1fr)':'';
-    ui.bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{try{window.Bayt&&Bayt.sTap()}catch(e){}if(sleeping&&b.dataset.a!=="back"){sleepCard();return}if(busy||path.length&&!wander)return;A[b.dataset.a]()});
-    const p=prayerNow();if(!V&&p&&!day().pr[p])ui.bar.querySelector('[data-a=mosque]').classList.add('hot')}
+    ui.bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{try{window.Bayt&&Bayt.sTap()}catch(e){}if(sleeping&&b.dataset.a!=="back"){sleepCard();return}if(busy||path.length&&!wander)return;if(foc&&b.dataset.a!=='back')cityView();A[b.dataset.a]()});
+    const p=prayerNow();if(!V&&p&&!day().pr[p])ui.bar.querySelector('[data-a=mosque]').classList.add('hot');try{if(V&&foc)cityView();hosLbl()}catch(e){}}
+  // (v15.3) 🏥 زر المستشفى (يسار الشاشة): الكاميرا تطير وتعرض المستشفى بعرض الشاشة من جهة الشارع، ومرة ثانية «🏙️ مدينتي» ترجع للمدينة كلها
+  const hosBtn=ui.hos,HOME={th:cam0.th,ph:cam0.ph,dist:cam0.dist};
+  function hosView(){const hf=Math.atan(Math.tan(22.5*Math.PI/180)*cam.aspect),d=Math.max(24,Math.min(MAXD,15/(2*Math.tan(hf))));
+    const P=[HSP[0]-1,1.8,HSP[1]+.6];flyTo({c:P,l:P,th:-1.2,ph:.95,dist:d});foc='hp';hosLbl()}
+  function cityView(){if(!foc)return;flyTo({c:C0,l:LK0,th:HOME.th,ph:HOME.ph,dist:HOME.dist});foc=null;hosLbl()}
+  function hosLbl(){if(!hosBtn)return;hosBtn.hidden=!!V;hosBtn.innerHTML=foc?'<b>🏙️</b>مدينتي':'<b>🏥</b>المستشفى';const sb=ui.snd;hosBtn.style.top=(sb&&sb.offsetHeight?sb.offsetTop+sb.offsetHeight+10:160)+'px'}
+  if(hosBtn){hosBtn.onclick=()=>{try{window.Bayt&&Bayt.sTap()}catch(e){}if(foc)cityView();else hosView()};hosLbl()}
   setBar();const pn=prayerNow();if(window.City3D)City3D._A=A; // للتجربة فقط
   // (v13.8) تهنئة مرة في اليوم أيام رمضان والعيد
   {const oc=occNow(),D=day();if(oc&&!V&&D.oc!==oc.id&&!sleepNow()){D.oc=oc.id;D.fs=1;dsv();setTimeout(()=>card(`<b>${oc.t}</b><br><small>${oc.msg}</small><br><small>${oc.k==='sad'?'لبست '+B('مدينتك','مدينتكِ')+' السواد في هذه الأيام 🖤':'زُيّنت '+B('مدينتك','مدينتكِ')+' بالأضواء والفوانيس والبالونات ✨'}</small>`,[[oc.k==='sad'?'🤍 حسنًا':'🤍 الحمد لله',null]]),900)}}
@@ -1506,12 +1521,13 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
   cv.addEventListener('pointerdown',e=>{pts.set(e.pointerId,[e.clientX,e.clientY]);cv.setPointerCapture(e.pointerId);
     if(pts.size===1){drag=[e.clientX,e.clientY];down=[e.clientX,e.clientY,Date.now()]}else{drag=null;pinch=0;down=null}});
   cv.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,[e.clientX,e.clientY]);
+    if(pts.size===1&&drag||pts.size===2)goal=null;
     if(pts.size===1&&drag){th-=(e.clientX-drag[0])*.008;ph=Math.max(.25,Math.min(1.38,ph-(e.clientY-drag[1])*.006));drag=[e.clientX,e.clientY]}
     else if(pts.size===2){const [a,b]=[...pts.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(pinch)dist=Math.max(10,Math.min(MAXD,dist*pinch/d));pinch=d}});
   const up=e=>{const was=pts.has(e.pointerId)&&pts.size===1;pts.delete(e.pointerId);pinch=0;drag=pts.size===1?[...pts.values()][0]:null;
     if(was&&down&&e.type==='pointerup'&&Math.hypot(e.clientX-down[0],e.clientY-down[1])<10&&Date.now()-down[2]<600)tap(pick(e.clientX,e.clientY));down=null};
   cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
-  cv.addEventListener('wheel',e=>{e.preventDefault();dist=Math.max(10,Math.min(MAXD,dist*(e.deltaY>0?1.1:.9)))},{passive:false});
+  cv.addEventListener('wheel',e=>{e.preventDefault();goal=null;dist=Math.max(10,Math.min(MAXD,dist*(e.deltaY>0?1.1:.9)))},{passive:false});
   const rs=()=>{const w=innerWidth,h=innerHeight;cam.aspect=w/h;cam.updateProjectionMatrix();R.setSize(w,h)};addEventListener('resize',rs);
   // الحلقة
   let alive=true,idle=0,t=0,last=performance.now();(function loop(now){if(!alive)return;const dt=Math.min(.05,((now||performance.now())-last)/1000);last=now||performance.now();t+=dt*3;
@@ -1553,14 +1569,14 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
       if(k>1.3){S.remove(s);s.geometry.dispose();s.material.dispose();return false}return true});
     drops=drops.filter(d=>{d.position.y-=dt*4;if(d.position.y<.1){S.remove(d);d.geometry.dispose();d.material.dispose();return false}return true});
     (S.userData.trees||[]).forEach(G=>{if(G&&G.userData.grow){G.userData.grow+=dt;const k=G.userData.grow-1;G.scale.setScalar(k<.6?1+Math.sin(k/.6*Math.PI)*.25:1.08);if(k>.6)G.userData.grow=0}});
-    place();R.render(S,cam);requestAnimationFrame(loop)})();
+    stepFly(dt);place();R.render(S,cam);requestAnimationFrame(loop)})();
   // عند وقت الأذان: الشخصية تذهب للجامع وحدها
   if(pn&&!day().pr[pn]&&window.Madina&&Madina.st.lv.m)setTimeout(()=>{if(alive&&!V&&!path.length&&!busy&&!sleeping){card(`🕌 الله أكبر! حان وقت صلاة ${PNAME[pn]}… هيّا إلى الجامع`);setTimeout(()=>A.mosque(),1200)}},1500);
   function refresh(){const old=S;old.remove(kid);old.remove(life.g);S=makeScene(night,V);S.add(kid);S.add(life.g);applySky();
     // الأشجار التي تكبر الآن تبقى بحجمها
     old.userData.trees.forEach((G,i)=>{if(G&&S.userData.trees[i])S.userData.trees[i].scale.copy(G.scale)});
     drops.concat(sparks).forEach(d=>{old.remove(d);S.add(d)});dispose(old);showJ()}
-  return {refresh,stop(){alive=false;try{sounds.stop()}catch(e){}Object.assign(cam0,{th,ph,dist});removeEventListener('resize',rs);dispose(S);R.dispose();R.forceContextLoss&&R.forceContextLoss()}}}
+  return {refresh,stop(){alive=false;try{sounds.stop()}catch(e){}Object.assign(cam0,foc?HOME:{th,ph,dist});removeEventListener('resize',rs);dispose(S);R.dispose();R.forceContextLoss&&R.forceContextLoss()}}}
 
 function dispose(S){S.traverse(o=>{o.geometry&&o.geometry.dispose();const m=o.material;if(m){(Array.isArray(m)?m:[m]).forEach(x=>{x.map&&x.map.dispose();x.dispose()})}})}
 
@@ -1569,7 +1585,7 @@ async function open(){if(document.getElementById('m3d'))return;const ov=document
   ov.innerHTML=`<button class="m3x" aria-label="إغلاق" style="position:absolute;top:12px;left:12px;z-index:2;width:46px;height:46px;border-radius:50%;border:0;background:#fff;font-size:22px;box-shadow:0 2px 8px #0004">✖</button>
     <div class="m3hp"></div>
     <div class="m3msg" style="position:absolute;top:74px;right:12px;left:104px;z-index:2;background:#fffd;border-radius:14px;padding:6px 10px;font-weight:800;text-align:center;font-size:13px">⏳ لحظة…</div>
-    <div class="m3j"></div><button class="m3wx" hidden aria-label="الطقس"></button><button class="m3snd" aria-label="الصوت"></button><div class="m3card"></div>
+    <div class="m3j"></div><button class="m3wx" hidden aria-label="الطقس"></button><button class="m3snd" aria-label="الصوت"></button><button class="m3hos" hidden aria-label="المستشفى"></button><div class="m3card"></div>
     <div class="m3bar" style="display:none"><button data-a="mosque"><b>🕌</b>إلى الجامع</button><button data-a="water"><b>💧</b>اسقِ الشجر</button><button data-a="school"><b>🏫</b>احفظ القرآن</button><button data-a="library"><b>📚</b>المكتبة</button><button data-a="mySchool"><b>🎒</b>مدرستي</button><button data-a="friends"><b>👥</b>زيارة صديق</button></div>`;
   document.body.appendChild(ov);document.body.classList.add('m3on');const msg=ov.querySelector('.m3msg');
   const close=()=>{try{cur&&cur.stop()}catch(e){}cur=null;ov.remove();document.body.classList.remove('m3on')};
@@ -1579,7 +1595,7 @@ async function open(){if(document.getElementById('m3d'))return;const ov=document
   try{await loadThree();if(!ov.isConnected)return;
     msg.textContent="";
     ov.querySelector('.m3bar').style.display='';
-    cur=run(ov,{msg,snd:ov.querySelector('.m3snd'),card:ov.querySelector('.m3card'),bar:ov.querySelector('.m3bar'),j:ov.querySelector('.m3j'),close})}catch(e){console.error(e);fail()}}
+    cur=run(ov,{msg,hos:ov.querySelector('.m3hos'),snd:ov.querySelector('.m3snd'),card:ov.querySelector('.m3card'),bar:ov.querySelector('.m3bar'),j:ov.querySelector('.m3j'),close})}catch(e){console.error(e);fail()}}
 // (v11.6) طلب الشيخ: «المدينة هي الأساس». زر «بيتي في الجنة» يفتح المدينة المجسّمة فقط، و✖ يرجع للواجهة.
 // صفحة البيت القديمة (الطوابق، الزينة، السباق…) صارت داخل «☰ المزيد» (wajiha.js). وإذا الجهاز لا يعرض المجسّمات تُفتح الصفحة القديمة.
 // (v13.0) صفحة البيت بوضعين بسيطين: 'deco' من بيت المدينة (زيّن وادخل فقط، والرجوع إلى المدينة)، و'game' من «ألعابي» (لعبة الطوابق فقط).
