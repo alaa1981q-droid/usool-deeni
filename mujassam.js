@@ -195,9 +195,12 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   // أشجار متفرقة على طول السهل
   [[-10,-36],[8,-34],[-16,-48],[12,-52],[-6,-62],[10,-72],[-14,-80],[6,-92],[-12,24.5],[12,30],[-15,34],[13,40]].forEach(([x,z])=>nearVil(x,z)||tree(x,z,null,1.3));
   for(let i=0;i<40;i++){const z=-110-i*8,x=(i%2?1:-1)*(6+(i*29%12));if(!nearVil(x,z))tree(x,z,null,1.2+(i%3)*.2)}
+  // (v14.8) أشجار على جانبي الشارع جنوبًا أيضًا حتى يمتدّ المنظر
+  for(let i=0;i<34;i++){const z=48+i*9,x=(i%2?1:-1)*(6+(i*23%11));if(!nearVil(x,z)&&Math.abs(z-NBZ)>4&&Math.abs(z-RVZ)>4)tree(x,z,null,1.2+(i%3)*.2)}
   // الطرق بلون دافئ وأرصفة بيضاء — الطريق الرئيسي طويل جدًا يغيب في الضباب
   const road=M(night?0xb9ad96:0xd9c49c),curb=M(0xffffff),line=M(night?0xfff3c4:0xffffff);
-  const RL=1400,RZ=-500;
+  // (v14.8) طلب الشيخ: شارع ممتد لا تُرى نهايته — يمتد ١٢٠٠ في كل اتجاه فيغيب في الضباب من الجهتين
+  const RL=2400,RZ=0;
   const rd=add(new T.PlaneGeometry(4,RL),road,0,.01,RZ);rd.rotation.x=-Math.PI/2;rd.castShadow=false;
   [-2.1,2.1].forEach(x=>{const c=add(new T.BoxGeometry(.18,.08,RL),curb,x,.04,RZ);c.castShadow=false});
   [-4.6,4.6].forEach(z=>{const r=add(new T.PlaneGeometry(28,1.8),road,0,.012,z);r.rotation.x=-Math.PI/2});
@@ -865,6 +868,9 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
     const glass=suv?[[.64,.9],[.43,r-.02],[-1.25,r-.02],[-1.34,.95]]:[[.53,.8],[.17,r-.02],[-.66,r-.02],[-1.04,.84]];
     const side=suv?[[.5,.94],[.33,r-.08],[-1.15,r-.08],[-1.22,.96]]:[[.38,.86],[.12,r-.07],[-.6,r-.07],[-.9,.87]];
     return carG[k]={body:prof(body,CW-.12,.06),glass:prof(glass,CW-.2,.04),side:prof(side,CW+.02,0)}}
+  // (v14.8) كل سيارة بمستويين (LOD): تفصيلية قريبًا، ومجسّم بسيط من بعيد حتى تبقى خفيفة مع سيارات كثيرة على الشارع الطويل
+  const lodG={b:new T.BoxGeometry(1.36,.55,2.7),c:new T.BoxGeometry(1.2,.42,1.4),w:new T.BoxGeometry(1.4,.3,2.2)};
+  function lodWrap(V,simple,d){const W=new T.Group(),L=new T.LOD();L.addLevel(V,0);L.addLevel(simple,d||70);W.add(L);W.scale.copy(V.scale);V.scale.setScalar(1);g.add(W);return W}
   function car(c,suv){const V=new T.Group(),G=carGeo(suv),paint=new T.MeshStandardMaterial({color:c,roughness:.3,metalness:.45});
     const tw=(o,x,y,z)=>{o.position.set(x,y,z);o.castShadow=true;V.add(o);return o};
     tw(new T.Mesh(G.body,paint),0,0,0);tw(new T.Mesh(G.glass,glassM),0,0,0);tw(new T.Mesh(G.side,glassM),0,0,0);
@@ -876,7 +882,8 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
     [[-1,.86],[1,.86],[-1,-.86],[1,-.86]].forEach(([k,z])=>{const t=add(new T.CylinderGeometry(.3,.3,.22,18),tireM,k*(CW/2-.08),.3,z,V);t.rotation.z=Math.PI/2;
       const h=add(new T.CylinderGeometry(.17,.17,.24,14),hubM,k*(CW/2-.08),.3,z,V);h.rotation.z=Math.PI/2});
     if(night){const l=new T.SpotLight(0xfff1c0,1.2,14,.5,.6);l.position.set(0,.6,1.4);l.target.position.set(0,0,7);V.add(l,l.target)}
-    V.scale.setScalar(.95);g.add(V);return V}
+    V.scale.setScalar(.95);const Sm=new T.Group(),b=new T.Mesh(lodG.b,paint);b.position.y=.6;const cb=new T.Mesh(lodG.c,glassM);cb.position.set(0,1.05,-.2);const wh=new T.Mesh(lodG.w,tireM);wh.position.y=.3;Sm.add(b,cb,wh);
+    return lodWrap(V,Sm)}
   const cars=[{v:bus(),stop:-17.6,off:0},{v:car(0xe2504a),stop:-12.4,off:1.6},{v:car(0x4f8fe0),stop:-8.6,off:3.2}];
   cars.forEach(c=>{c.v.rotation.y=Math.PI;c.v.visible=false});
   // طلاب الساحة
@@ -901,7 +908,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
   const CC=[0xf2f2f2,0xb8bec6,0x1f2833,0x1d3f7a,0xb3262e,0xd9c9a3,0x2f6b4f,0xe07b24];
   // (v13.5) السيارات تأتي من بعيد وتذهب بعيدًا حتى تختفي في الأفق (بلا اختفاء مفاجئ): الطريق من Z0 إلى Z1
   // (v14.1) طلب الشيخ: زحام وقت المدرسة. سيارات إضافية (rush) تدخل الطريق فقط بين ٧:٣٠–٨:٣٠ و١١:٤٥–١٢:٤٥ وتمشي أبطأ فتتزاحم
-  const Z0=-240,Z1=190,TN=night?2:16,RU=night?0:10;
+  const Z0=-600,Z1=600,TN=night?5:40,RU=night?0:25; // (v14.8) تظهر وتختفي على بُعد ٦٠٠ (داخل الضباب) فلا يُرى ظهورها
   const traffic=[];[1,-1].forEach(dir=>{for(let k=0;k<TN;k++){const v=car(CC[(traffic.length*3)%CC.length],traffic.length%3===1),z=Z0+(k+(dir<0?.5:0))*(Z1-Z0)/TN;
     v.rotation.y=dir>0?0:Math.PI;v.position.set(dir,0,z);const ru=RU>0&&![0,3,5].includes(k%8);traffic.push({v,dir,z,sp:7+Math.random()*2,ru})}});
   traffic.forEach(c=>{if(c.ru){c.on=rushNow();c.v.visible=c.on}});
@@ -914,9 +921,9 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
     [[3.13,headM],[-3.13,tailM]].forEach(([z,m])=>[-.7,.7].forEach(x=>add(new T.BoxGeometry(.3,.16,.05),m,x,.7,z,V)));
     [[-1,2],[1,2],[-1,-2],[1,-2]].forEach(([k,z])=>{const t2=add(new T.CylinderGeometry(.42,.42,.3,18),tireM,k*.88,.42,z,V);t2.rotation.z=Math.PI/2;const h2=add(new T.CylinderGeometry(.22,.22,.32,12),hubM,k*.88,.42,z,V);h2.rotation.z=Math.PI/2});
     if(night){const l=new T.SpotLight(0xfff1c0,1.2,16,.5,.6);l.position.set(0,.8,3.2);l.target.position.set(0,0,8);V.add(l,l.target)}
-    V.scale.setScalar(.95);g.add(V);return V}
+    V.scale.setScalar(.95);const Sm=new T.Group(),b=new T.Mesh(new T.BoxGeometry(2,2,6.2),w);b.position.y=1.4;const sb=new T.Mesh(new T.BoxGeometry(2.04,.3,6.24),st);sb.position.y=.75;Sm.add(b,sb);return lodWrap(V,Sm,80)}
   const stops=BSTOP.map(([dir,z,sx,wx])=>({dir,z,sx,wx,q:[],t:2+Math.random()*4}));
-  {const L=Z1-Z0;[1,-1].forEach(dir=>[0,1].forEach(j=>{const v=cityBus([0x1fa463,0x2f6fd0][j]),z=Z0+((j*8+(dir>0?.5:1))*(L/16))%L;v.rotation.y=dir>0?0:Math.PI;v.position.set(dir,0,z);
+  {const L=Z1-Z0;[1,-1].forEach(dir=>[0,1,2].forEach(j=>{const v=cityBus([0x1fa463,0x2f6fd0,0x1fa463][j]),z=Z0+((j*13+(dir>0?.5:1))*(L/TN))%L;v.rotation.y=dir>0?0:Math.PI;v.position.set(dir,0,z);
     traffic.push({v,dir,z,sp:6,cb:1,st:stops.find(o=>o.dir===dir)})}))}
   const ppl=()=>{const r=Math.random();return person(r<.5?'man':r<.85?'woman':'kid',Math.floor(Math.random()*12))};
   function busArrive(c){const st=c.st,dx=st.dir*2.05;
@@ -975,10 +982,10 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
     // الباص والسيارات: صباحًا يجلبون الطلاب، وظهرًا يأخذونهم
     // (v13.5) يأتون من بعيد (z=150) ويذهبون بعيدًا (z=-150)؛ إذا انتهى الوقت أثناء الطريق يكملون حتى الأفق، ولا يظهرون فجأة في منتصف الطريق
     // (v14.1) طلب الشيخ: الباص يجلب الطلاب الساعة ٨ صباحًا، ويأخذهم الساعة ١٢ ظهرًا
-    const fri=wDay()>=5,phase=fri?'':day&&h>=7.75&&h<8.5?'arrive':day&&h>=12&&h<12.75?'leave':'',rush=day&&rushNow();const P=45,away=c=>{if(c.v.visible){c.v.position.z-=12*dt;if(c.v.position.z<-150)c.v.visible=false}};
+    const fri=wDay()>=5,phase=fri?'':day&&h>=7.75&&h<8.5?'arrive':day&&h>=12&&h<12.75?'leave':'',rush=day&&rushNow();const P=110,away=c=>{if(c.v.visible){c.v.position.z-=12*dt;if(c.v.position.z<-580)c.v.visible=false}};
     cars.forEach(c=>{const cyc=Math.floor(((t/3)+c.off)/P);if(!phase){c.skip=cyc;away(c);return}if(c.skip===cyc){away(c);return}
-      const ct=((t/3)+c.off)%P,sp=12,t1=(150-c.stop)/sp,t2=t1+5,t3=t2+(c.stop+150)/sp;
-      c.v.position.x=-1;if(ct<t1){c.v.visible=true;c.v.position.z=150-ct*sp}else if(ct<t2){c.v.position.z=c.stop;
+      const ct=((t/3)+c.off)%P,sp=12,t1=(560-c.stop)/sp,t2=t1+5,t3=t2+(c.stop+560)/sp;
+      c.v.position.x=-1;if(ct<t1){c.v.visible=true;c.v.position.z=560-ct*sp}else if(ct<t2){c.v.position.z=c.stop;
         const k=cyc+':'+c.stop;if(c.done!==k){c.done=k;dropKids(c.stop,phase==='leave')}}
       else if(ct<t3){c.v.position.z=c.stop-(ct-t2)*sp}else c.v.visible=false});
     // السيارات العادية: تقف خلف السيارة التي أمامها (ومنها الباص)، وتقف للطفل إذا عبر أمامها
@@ -991,7 +998,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       traffic.concat(c.dir<0?cars.filter(s=>s.v.visible).map(s=>({dir:-1,z:s.v.position.z,v:s.v})):[]).forEach(d=>{if(d!==c&&d.dir===c.dir&&d.v.visible){const gp=(d.z-c.z)*c.dir;if(gp>0&&gp<(c.cb?3:1.4)+(d.cb?3:d.v===cars[0].v?2.3:1.4)+.8)block=true}});
       // (v14.7) 🚌 باص المدينة يقف عند الموقف ٧ ثوانٍ (من ٦ صباحًا إلى ١١ ليلًا): ينزل ركّاب ويصعد المنتظرون
       if(c.cb){const sc=c.st.z-2.1*c.dir;if(c.hold>0){c.hold-=dt;block=true}else if(!c.done&&!block&&h>=6&&h<23&&!o.sleep){const ah=(sc-c.z)*c.dir;if(ah>=0&&ah<=c.sp*dt*1.6+.05){c.z=sc;c.hold=7;c.done=1;block=true;busArrive(c)}}}
-      if(c.dir<0&&phase&&c.z>=Z1&&cars.some(s=>s.v.visible&&s.v.position.z>120))block=true; // لا تدخل سيارة فوق الباص لحظة ظهوره
+      if(c.dir<0&&phase&&c.z>=Z1&&cars.some(s=>s.v.visible&&s.v.position.z>530))block=true; // لا تدخل سيارة فوق الباص لحظة ظهوره
       if(!block)c.z+=c.dir*c.sp*(rush?.45:1)*dt;
       if(c.dir>0&&c.z>Z1||c.dir<0&&c.z<Z0){c.z=c.dir>0?Z0:Z1;c.done=0;if(c.ru){c.on=rush;c.v.visible=rush}}c.v.position.z=c.z});
     // (v14.5) الوالدان والجارة بالنهار، والأطفال يلعبون الكرة العصر
