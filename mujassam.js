@@ -970,12 +970,46 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
   function unsay(b){if(!b)return;const i=bubs.indexOf(b);if(i>=0)bubs.splice(i,1);g.remove(b.s);b.s.material.map.dispose();b.s.material.dispose()}
   // (v12.1) 🚶 جيران يمشون على الأرصفة، وأحيانًا يُلقي أحدهم «السلام عليكم» (الأول والثاني يبقيان بالليل)
   // (v13.4) على الطرق الجانبية z=±4.6 (حافتها الخارجية ±5) لأن البنايات الكبيرة تملأ أرصفة الطريق الرئيسي
-  const ROUTES=[['x',5,3,13,'man'],['x',-5,-12,-3,'woman'],['x',-5,3,13,'kid'],['x',5,-12,-3,'man'],['x',FLK[1]-3.2,FLK[0]-3,FLK[0]+3,'shep']];
-  const peds=ROUTES.map((r,i)=>{const P=person(r[4],i+3);P.userData.ped=i+1;
-    P.userData.u={ax:r[0],fix:r[1],a:r[2],b:r[3],kind:r[4],h:r[4]==='kid'?1.7:2.3,pos:Math.min(r[2],r[3])+Math.random()*Math.abs(r[3]-r[2]),dir:Math.random()<.5?1:-1,sp:.9+Math.random()*.4,w:0,greet:0,hold:0,bub:null};return P});
-  // (v13.8) ☂️ مظلّات تظهر للجيران وقت المطر
-  const UMC=[0xe2504a,0x2f6fd0,0x1fa463,0xffc21a,0x8f6bff];peds.forEach((P,i)=>{const U=new T.Group();U.visible=false;P.add(U);P.userData.umb=U;add(new T.CylinderGeometry(.02,.02,1.15,5),M(0x333333),.24,1.55,.05,U);
-    const c=add(new T.SphereGeometry(.7,14,6,0,Math.PI*2,0,Math.PI/2.6),new T.MeshStandardMaterial({color:UMC[i%5],roughness:.6,side:T.DoubleSide}),.24,1.85,.05,U);c.castShadow=true});
+  // (v15.1) طلب الشيخ: حركة الناس انسيابية طبيعية، لا أحد يروح ويرجع بنفس المكان. كل جار يخرج من مكان (باب بيت، قرية، سوق، أول الشارع)
+  // ويمشي إلى مكان معيّن (الجامع، السوق، القرى، المزرعة، آخر الشارع) ثم يغيب، وبعد قليل يخرج شخص غيره من مكان آخر.
+  // TRIPS: [نقاط المسار [x,z,وقفة]], شرط (m = يحتاج الجامع), يظهر من باب (1) أو من بعيد (0)، يدخل/يغيب في النهاية
+  const VL=VIL.map(([x,z])=>[x+4,z]),L2=-2.6,R2=2.8,Ze=4.95;
+  const TRIPS=[
+    {p:[[-4.5,NBZ],[L2,NBZ],[L2,6],[L2,Ze,1.5],[R2,Ze],[R2,4.1],[6,4.1],[6,3.75]],m:1},            // بيت جدّو ← الجامع
+    {p:[[6,3.75],[6,4.1],[R2,4.1],[R2,6],[R2,NBZ],[4.6,NBZ]],m:1},                                    // الجامع ← بيت الجار
+    {p:[VL[0],[VL[0][0]+4,VL[0][1]],[L2,VL[0][1]],[L2,-6],[L2,-Ze,1.5],[R2,-Ze],[R2,-14],[MKX+.6,-14.6]]}, // قرية النخيل ← السوق
+    {p:[[MKX+.6,-14.6],[R2,-14],[R2,-6],[R2,-Ze,1.5],[L2,-Ze],[L2,6],[L2,VL[1][1]],[VL[1][0]+4,VL[1][1]],VL[1]]}, // السوق ← قرية الرمّان
+    {p:[[4.6,NBZ],[R2,NBZ],[R2,60],[R2,95]]},                                                          // بيت الجار ← آخر الشارع
+    {p:[[L2,-70],[L2,-6],[L2,-Ze],[L2,5.1],[-12,5.1],[FARM[0],5.1],[FARM[0],3.7]]},                     // أول الشارع ← المزرعة
+    {p:[[R2,-60],[R2,-6],[R2,-5.1],[11.2,-5.1],[PLZ[0]-3.3,PLZ[1]-3],[PLZ[0]+3.4,PLZ[1]-3],[PLZ[0]+3.4,PLZ[1]+3],[11.2,5.1],[R2,5.1],[R2,60],[R2,95]]}, // يمرّ بساحة النافورة ويمضي
+    {p:[[L2,70],[L2,NBZ+1],[-4.5,NBZ]]},                                                                // من بعيد ← بيت جدّو
+    {p:[VL[2],[VL[2][0]+4,VL[2][1]],[L2,VL[2][1]],[L2,-30],[L2,-18.4],[-2.4,-17.6]]},                    // قرية البساتين ← باب المدرسة
+    {p:[[-2.4,-17.6],[L2,-16],[L2,-6],[L2,-Ze,1.5],[R2,-Ze],[R2,-5.1],[11.2,-5.1],[PLZ[0]-3.3,PLZ[1]-3]],end:1}, // المدرسة ← ساحة النافورة
+    {p:[[FARM[0],3.7],[FARM[0],5.1],[-12,5.1],[L2,5.1],[L2,VL[1][1]],[VL[1][0]+4,VL[1][1]],VL[1]]},         // المزرعة ← قرية الرمّان
+    {p:[[R2,95],[R2,40],[R2,6],[R2,4.1],[6,4.1],[6,3.75]],m:1}                                          // من آخر الشارع ← الجامع
+  ];
+  const near=(q)=>Math.hypot(q[0],q[1])<45; // البداية/النهاية قريبة (باب) ← يكبر/يصغر بلطف
+  const NP=6,KINDS=['man','woman','man','kid','woman','man'];
+  function umbrella(P,i){const U=new T.Group();U.visible=false;P.add(U);P.userData.umb=U;add(new T.CylinderGeometry(.02,.02,1.15,5),M(0x333333),.24,1.55,.05,U);
+    const c=add(new T.SphereGeometry(.7,14,6,0,Math.PI*2,0,Math.PI/2.6),new T.MeshStandardMaterial({color:UMC[i%5],roughness:.6,side:T.DoubleSide}),.24,1.85,.05,U);c.castShadow=true}
+  const UMC=[0xe2504a,0x2f6fd0,0x1fa463,0xffc21a,0x8f6bff];
+  const peds=[];
+  for(let i=0;i<NP;i++){const P=person(KINDS[i],i+3);P.userData.ped=i+1;P.visible=false;
+    P.userData.u={kind:KINDS[i],h:KINDS[i]==='kid'?1.7:2.3,pts:[],sp:1,v:0,gap:.5+i*1.6,greet:0,hold:0,bub:null,bs:P.scale.x,gr:1,out:0,trip:-1};umbrella(P,i);peds.push(P)}
+  {const P=person('shep',7);P.userData.ped=NP+1;P.position.set(FLK[0],0,FLK[1]-3.2);
+    P.userData.u={kind:'shep',h:2.3,pts:[],sp:.6,v:0,gap:0,greet:0,hold:0,bub:null,bs:P.scale.x,gr:1,out:0,shep:1,w:2};umbrella(P,NP);peds.push(P)}
+  // (v15.1) دوران ناعم: يلتفت الشخص تدريجيًا نحو اتجاهه بدل القفز المفاجئ
+  function turn(P,a,dt,k){let d=a-P.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));P.rotation.y+=d*Math.min(1,dt*(k||6))}
+  // يبدأ رحلة جديدة بشخص جديد (شكل مختلف كل مرة)
+  function newTrip(i,o){const old=peds[i],u=old.userData.u,busy=peds.map(P=>P.userData.u.trip);
+    const ok=TRIPS.map((r,k)=>k).filter(k=>!busy.includes(k)&&(!TRIPS[k].m||o.mosque));if(!ok.length){u.gap=3;return}
+    const k=ok[Math.floor(Math.random()*ok.length)],r=Math.random(),kind=r<.45?'man':r<.82?'woman':'kid';
+    const P=person(kind,Math.floor(Math.random()*12));P.userData.ped=i+1;umbrella(P,i);
+    g.remove(old);old.traverse(x=>{x.geometry&&x.geometry.dispose()});peds[i]=P;
+    const off=(Math.random()-.5)*.35,pts=TRIPS[k].p.map(q=>[q[0]+(Math.abs(q[0])<4?off:0),q[1]+(Math.abs(Math.abs(q[1])-5)<.3?off:0),q[2]]);
+    Object.assign(u,{kind,h:kind==='kid'?1.7:2.3,trip:k,pts:pts.slice(1),sp:(kind==='kid'?1.15:1)*(.85+Math.random()*.35),v:0,bs:P.scale.x,gr:near(pts[0])?0:1,
+      out:near(pts[pts.length-1])||TRIPS[k].end?1:0,fade:0,look:0,greet:0,hold:0,bub:null});P.userData.u=u;
+    P.position.set(pts[0][0],0,pts[0][1]);const n=pts[1];P.rotation.y=Math.atan2(n[0]-pts[0][0],n[1]-pts[0][1]);P.scale.setScalar(u.bs*Math.max(.01,u.gr))}
   let gT=5;
   function endGreet(i){const u=peds[i]&&peds[i].userData.u;if(!u)return;u.greet=0;unsay(u.bub);u.bub=null}
   // (v12.1) 🚗 سيارات تمرّ طول اليوم في الاتجاهين، وتقف إذا كان الطفل أمامها في الطريق
@@ -1069,6 +1103,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       // (v13.9) تقف للمشاة على ممرّ العبور أو الواقفين عند حافته (ومنهم الطفل إذا وقف ينظر يمينًا ويسارًا)
       const yz=(x,z,wait)=>{if(Math.abs(Math.abs(z)-4.8)>.8)return;if(!wait&&Math.abs(x-c.dir)>1.3)return;const ah=(z-c.z)*c.dir;if(wait?ah>1.5&&ah<7:ah>-.2&&ah<4)block=true};
       walkers.forEach(w=>{if(w.cross&&w.P.visible&&(Math.abs(w.P.position.x)<2.2||w.pause>0))yz(w.P.position.x,w.P.position.z,w.pause>0)});
+      peds.forEach(P=>{const u=P.userData.u;if(P.visible&&(Math.abs(P.position.x)<2.2||u.look>0))yz(P.position.x,P.position.z,u.look>0)});
       if(K&&o.kidWait)yz(K.x,K.z,true);
       traffic.concat(c.dir<0?cars.filter(s=>s.v.visible).map(s=>({dir:-1,z:s.v.position.z,v:s.v})):[]).forEach(d=>{if(d!==c&&d.dir===c.dir&&d.v.visible){const gp=(d.z-c.z)*c.dir;if(gp>0&&gp<(c.cb?3:1.4)+(d.cb?3:d.v===cars[0].v?2.3:1.4)+.8)block=true}});
       // (v14.7) 🚌 باص المدينة يقف عند الموقف ٧ ثوانٍ (من ٦ صباحًا إلى ١١ ليلًا): ينزل ركّاب ويصعد المنتظرون
@@ -1091,16 +1126,26 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       const p=ppl();if(p.userData.bag)p.userData.bag.visible=false;const from=st.z+(Math.random()<.5?-1:1)*(18+Math.random()*12),i=st.q.length;
       walk(p,[[st.sx,from],[st.sx,st.z+(i-1.5)*.62],[st.wx,st.z+(i-1.5)*.62]],1.2+Math.random()*.3,'wait');st.q.push(walkers[walkers.length-1])});
     // الجيران على الأرصفة
-    peds.forEach((P,i)=>{const u=P.userData.u,vis=(day||i<2)&&!o.sleep;if(P.userData.umb)P.userData.umb.visible=!!o.rain;P.visible=vis;if(!vis){if(u.bub)endGreet(i);if(u.hold)u.hold=0;return}
-      if(u.hold>0){u.hold-=dt;if(K)P.rotation.y=Math.atan2(K.x-P.position.x,K.z-P.position.z);P.position.y=0}
-      else if(u.greet>0){u.greet-=dt;P.position.y=Math.abs(Math.sin(t*2))*.04;if(u.greet<=0)endGreet(i)}
-      else if(u.w>0){u.w-=dt;P.position.y=0}
-      else{u.pos+=u.dir*u.sp*dt;if(u.pos>u.b||u.pos<u.a){u.pos=Math.max(u.a,Math.min(u.b,u.pos));u.dir*=-1;u.w=1+Math.random()*2}else if(Math.random()<dt*.05)u.w=1.5+Math.random()*2;
-        P.position.y=Math.abs(Math.sin(t*6+i))*.05}
-      if(u.ax==='z'){P.position.x=u.fix;P.position.z=u.pos;if(!(u.hold>0))P.rotation.y=u.dir>0?0:Math.PI}
-      else{P.position.z=u.fix;P.position.x=u.pos;if(!(u.hold>0))P.rotation.y=u.dir>0?Math.PI/2:-Math.PI/2}});
-    gT-=dt;if(gT<=0){gT=9+Math.random()*7;if(!peds.some(P=>P.userData.u.greet>0||P.userData.u.hold>0)){const c=peds.filter(P=>P.visible);
-      if(c.length){const P=c[Math.floor(Math.random()*c.length)],u=P.userData.u;u.greet=16;u.bub=say(P,'السلام عليكم 👋',1e9,u.h)}}}
+    // (v15.1) الجيران: كل واحد في رحلة من مكان إلى مكان، يمشي بانسيابية (يبدأ ببطء ويقف بلطف، يلتفت تدريجيًا، يقطع الزوايا)
+    peds.forEach((P,i)=>{const u=P.userData.u,on=u.shep?day&&!o.sleep:(day||i<2)&&!o.sleep;if(P.userData.umb)P.userData.umb.visible=!!o.rain;
+      if(!on){P.visible=false;if(u.bub)endGreet(i);u.hold=0;if(!u.shep&&u.trip>=0){u.trip=-1;u.gap=1+Math.random()*3}return}
+      if(!u.shep&&u.trip<0){P.visible=false;u.gap-=dt;if(u.gap<=0)newTrip(i,o);return}
+      P.visible=true;
+      if(u.gr<1){u.gr=Math.min(1,u.gr+dt*1.6);P.scale.setScalar(u.bs*u.gr)}
+      if(u.hold>0){u.hold-=dt;u.v=0;if(K)turn(P,Math.atan2(K.x-P.position.x,K.z-P.position.z),dt,5);P.position.y=0;return}
+      if(u.greet>0){u.greet-=dt;u.v=Math.max(0,u.v-dt*2);P.position.y=Math.abs(Math.sin(t*2))*.04;if(u.greet<=0)endGreet(i);if(u.v<=0)return}
+      if(u.look>0){u.look-=dt;u.v=Math.max(0,u.v-dt*3);const q=u.pts[0];if(q)P.rotation.y=Math.atan2(q[0]-P.position.x,q[1]-P.position.z)+Math.sin(u.look*4.2)*1.05;P.position.y=0;return}
+      if(u.shep&&!u.pts.length){u.w-=dt;P.position.y=0;if(u.w<=0){u.pts=[[FLK[0]+(Math.random()-.5)*7,FLK[1]+(Math.random()-.5)*7]];u.w=2+Math.random()*4}return}
+      if(!u.pts.length){ // وصل: يدخل الباب ويغيب، أو يبتعد في آخر الشارع
+        u.fade+=dt*1.8;P.scale.setScalar(u.bs*Math.max(.01,1-u.fade));P.position.y=0;if(u.fade>=1){P.visible=false;if(u.bub)endGreet(i);u.trip=-1;u.gap=2+Math.random()*6}return}
+      const q=u.pts[0],dx=q[0]-P.position.x,dz=q[1]-P.position.z,d=Math.hypot(dx,dz),last=u.pts.length===1;
+      const want=u.sp*(last&&u.out?Math.min(1,.35+d/1.6):1);u.v+=(want-u.v)*Math.min(1,dt*1.8);const st=u.v*dt;
+      if(d<=Math.max(st,last||q[2]?0:.45)){if(last||q[2]){P.position.x=q[0];P.position.z=q[1]}u.pts.shift();if(q[2])u.look=q[2]}
+      else{P.position.x+=dx/d*st;P.position.z+=dz/d*st;turn(P,Math.atan2(dx,dz),dt)}
+      if(!u.shep&&!last&&!q[2]&&Math.random()<dt*.012)u.look=.9+Math.random()*.8; // أحيانًا يقف لحظة ويتلفّت
+      P.position.y=Math.abs(Math.sin(t*6.5+i))*.035*Math.min(1,u.v)});
+    gT-=dt;if(gT<=0){gT=9+Math.random()*7;if(!peds.some(P=>P.userData.u.greet>0||P.userData.u.hold>0)){const c=peds.filter(P=>{const u=P.userData.u;return P.visible&&u.gr>=1&&!u.fade&&u.pts.length>(u.shep?-1:1)&&Math.hypot(P.position.x,P.position.z)<30});
+      if(c.length){const P=c[Math.floor(Math.random()*c.length)],u=P.userData.u;u.greet=11;u.bub=say(P,'السلام عليكم 👋',1e9,u.h)}}}
     bubs.slice().forEach(b=>{b.k-=dt;b.s.position.set(b.o.position.x,b.o.position.y+b.h,b.o.position.z);if(b.k<=0)unsay(b)});
     // المصلّون وقت الصلاة (إذا بُني الجامع)
     const jum=day&&jumuaNow();
@@ -1112,8 +1157,8 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
     walkers=walkers.filter(w=>{const P=w.P;if(w.grow!=null&&w.grow<1){w.grow=Math.min(1,w.grow+dt*2);P.scale.setScalar(P.userData.bs*w.grow)}
       if(!w.pts.length){if(w.end==='enter'||w.end==='gone'){w.k+=dt*3;P.scale.multiplyScalar(Math.max(.01,1-dt*3));if(w.k>1){g.remove(P);P.traverse(x=>{x.geometry&&x.geometry.dispose();x.material&&x.material.dispose()});return false}}return true}
       if(w.pause>0){w.pause-=dt;const [nx,nz]=w.pts[0];P.rotation.y=Math.atan2(nx-P.position.x,nz-P.position.z)+Math.sin(w.pause*4.5)*1.1;P.position.y=0;return true}
-      const [tx,tz,wt]=w.pts[0],dx=tx-P.position.x,dz=tz-P.position.z,d=Math.hypot(dx,dz),sp=w.sp*dt;
-      if(d<=sp){P.position.x=tx;P.position.z=tz;w.pts.shift();if(wt)w.pause=wt}else{P.position.x+=dx/d*sp;P.position.z+=dz/d*sp;P.rotation.y=Math.atan2(dx,dz)}
+      const [tx,tz,wt]=w.pts[0],dx=tx-P.position.x,dz=tz-P.position.z,d=Math.hypot(dx,dz);w.v=(w.v||0)+(w.sp-(w.v||0))*Math.min(1,dt*2.2);const sp=w.v*dt,cut=w.pts.length>1&&!wt?.4:0;
+      if(d<=Math.max(sp,cut)){if(!cut){P.position.x=tx;P.position.z=tz}w.pts.shift();if(wt)w.pause=wt}else{P.position.x+=dx/d*sp;P.position.z+=dz/d*sp;turn(P,Math.atan2(dx,dz),dt,7)}
       P.position.y=Math.abs(Math.sin(t*6+P.id))*.05;return true});swing(dt)}
   return {g,update,stops,count:()=>walkers.length,peds,say,endGreet,traffic,sellers,elder,father,mother,baker,FBK}}
 
@@ -1255,7 +1300,7 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
       card(`🎒 ${B('ذهبتَ','ذهبتِ')} إلى المدرسة اليوم ✔<br><small>${B('تعال','تعالي')} غدًا ${B('وخذ','وخذي')} 💎٥ مرة أخرى</small>`,[['📚 دروس الكتاب',()=>closeTo(()=>{const b=document.getElementById('wjDurBtn');b&&b.click()})],['حسنًا',null,'sec']])})},
     // (v12.1) 👋 السلام: الطفل يُلقي السلام على جاره، أو يردّ على من سلّم عليه ← «هذا عمل صالح» (💎1، حتى ٥ مرات يوميًا)
     salam(i){const P=life.peds[i];if(!P||!P.visible)return;const u=P.userData.u,greeted=u.greet>0,she=u.kind==='woman';u.hold=25;
-      const px=P.position.x,pz=P.position.z,to=u.kind==='shep'?{x:px+1.1,z:pz,via:4.6}:u.ax==='z'?{x:sign(px)*2.3,z:pz,via:null}:{x:px-sign(px)*.9,z:sign(pz)*4.6,via:sign(pz)*4.6};
+      const px=P.position.x,pz=P.position.z,to=u.kind==='shep'?{x:px+1.1,z:pz,via:4.6}:Math.abs(px)<4.5?(px<0?{x:-2.3,z:pz-.9,via:null}:{x:2.3,z:pz-.9,via:null}):Math.abs(Math.abs(pz)-4.8)<1.2?{x:px-sign(px)*.9,z:sign(pz)*4.6,via:sign(pz)*4.6}:{x:px+(px<0?1:-1),z:pz,via:null};
       const who=she?'جارتك':u.kind==='kid'?B('صديقك','صديقتك'):'جارك',rel=()=>{u.hold=Math.min(u.hold,2.5)};
       const RD='وعليكم السلام ورحمة الله وبركاته';
       const reply=()=>{life.endGreet(i);life.say(kid,RD,3.5,2.4);setTimeout(()=>{reward('rd');rel()},700)};
