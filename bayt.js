@@ -386,11 +386,11 @@ function yTree(i,lv,ed,canPlant,ts=YTS,tk=1.65){const [x,y]=ts[i],c=YFR[i];let s
 const OX0=-114,OX1=-8,OCX=(OX0+OX1)/2,OTS=[[-95,GY-5],[-61,GY-9],[-27,GY-5]],OTK=1.8;
 // البستان يُكبَّر ١٫٤ مرة حول طرفه الأيمن السفلي حتى يكون واضحًا مثل المسجد
 const OK=1.4,OTR=`translate(-6 ${GY+13}) scale(${OK}) translate(6 ${-GY-13})`;
-const orchW=(u,ed)=>{u=/^[0-3]{5}$/.test(u||'')?u:'00000';return (+u[1]>=1||ed)?185:0};
+const orchW=(u,ed)=>{u=/^[0-3]{5,6}$/.test(u||'')?u:'00000';return (+u[1]>=1||ed)?185:0};
 // الدوائر الصفراء وشارة «استلم» تُرسم في آخر الصورة (فوق الزينة): YTOP للسور (داخل مقياس البيت) و OTOP للبستان
 let YTOP='',OTOP='',ORCH='';
-function yard(u,job,ed,fx){YTOP='';OTOP='';ORCH='';const YXL=YXL0,YXR=YXR0,YCX=YCX0;
-  u=/^[0-3]{5}$/.test(u||'')?u:'00000';const w=+u[0],g=+u[1],T=[+u[2],+u[3],+u[4]];
+function yard(u,job,ed,fx){YTOP='';OTOP='';ORCH='';if(job&&job.p=='hp')job=null;if(fx&&fx.p=='hp')fx=null; /* v15.2: المستشفى يُرسم في المدينة المجسّمة فقط */const YXL=YXL0,YXR=YXR0,YCX=YCX0;
+  u=/^[0-3]{5,6}$/.test(u||'')?u:'00000';const w=+u[0],g=+u[1],T=[+u[2],+u[3],+u[4]];
   const busy=!!(job&&!job.ready),rdy=!!(job&&job.ready),pop=(p,html)=>fx&&fx.p==p?`<g class="bn-pop">${html}</g>`:html;
   // ---------- البستان ----------
   let O='';const GF=GY+13,GB=GY-9;

@@ -5,7 +5,7 @@
    - الحالة محلية (usul5_binaa_v1)، والرمز u (٥ أرقام) يُنشر مع البيت فيراه الأصدقاء. الرسم في bayt.js (houseSVG). */
 (function(){
 const KEY='usul5_binaa_v1',MIN=60e3;
-let st={w:0,g:0,t:[0,0,0],job:null};
+let st={w:0,g:0,t:[0,0,0],hp:0,job:null};
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)st=Object.assign(st,s)}catch(e){}
 const sv=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
 const boy=()=>!window.Cups||Cups.sex!='g',B=(m,f)=>boy()?m:f;
@@ -16,10 +16,12 @@ const PARTS={
   g:{n:'بستان البيت',e:'🌳',need:()=>st.w>=1?'':'ابنِ السور أولًا 🧱',lv:[['بستان أخضر بسياج من الشجيرات',40,TAS,10,2],['ورود وممرّ حجري',120,SAL,10,20],['نافورة وفوانيس',300,SAL,30,60]]},
   t0:{n:'شجرة التفّاح',e:'🍎',need:()=>st.g>=1?'':'ازرع البستان أولًا 🌳',lv:[['شتلة صغيرة',20,TAS,10,1],['شجرة خضراء',60,SAL,10,10],['شجرة تفّاح مثمرة',150,TAS,30,40]]},
   t1:{n:'شجرة الرمّان',e:'🍒',need:()=>st.g>=1?'':'ازرع البستان أولًا 🌳',lv:[['شتلة صغيرة',20,TAS,10,1],['شجرة خضراء',60,SAL,10,10],['شجرة رمّان مثمرة',150,TAS,30,40]]},
-  t2:{n:'شجرة البرتقال',e:'🍊',need:()=>st.g>=1?'':'ازرع البستان أولًا 🌳',lv:[['شتلة صغيرة',20,TAS,10,1],['شجرة خضراء',60,SAL,10,10],['شجرة برتقال مثمرة',150,TAS,30,40]]}};
-const lvOf=p=>p=='w'?st.w:p=='g'?st.g:st.t[+p[1]];
-const setLv=(p,v)=>{if(p=='w')st.w=v;else if(p=='g')st.g=v;else st.t[+p[1]]=v};
-const code=()=>`${st.w}${st.g}${st.t.join('')}`;
+  t2:{n:'شجرة البرتقال',e:'🍊',need:()=>st.g>=1?'':'ازرع البستان أولًا 🌳',lv:[['شتلة صغيرة',20,TAS,10,1],['شجرة خضراء',60,SAL,10,10],['شجرة برتقال مثمرة',150,TAS,30,40]]},
+  // (v15.2) طلب الشيخ: 🏥 مستشفى المدينة يُبنى بعمل صالح أو بالجواهر (أو مجانًا بالانتظار)، ويظهر في المدينة المجسّمة
+  hp:{n:'مستشفى المدينة',e:'🏥',lv:[['مستوصف صغير',60,SAL,10,5],['مستشفى بطابقين',150,TAS,30,20],['مستشفى كبير بسيارة إسعاف',300,SAL,30,60]]}};
+const lvOf=p=>p=='w'?st.w:p=='g'?st.g:p=='hp'?(st.hp|0):st.t[+p[1]];
+const setLv=(p,v)=>{if(p=='w')st.w=v;else if(p=='g')st.g=v;else if(p=='hp')st.hp=v;else st.t[+p[1]]=v};
+const code=()=>`${st.w}${st.g}${st.t.join('')}${st.hp?st.hp:''}`; // الرقم السادس (إن وُجد) = المستشفى
 const mmss=ms=>{ms=Math.max(0,ms);const s=Math.ceil(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return h?`${ar(h)}:${ar(String(m).padStart(2,'0'))}:${ar(String(x).padStart(2,'0'))}`:`${ar(m)}:${ar(String(x).padStart(2,'0'))}`};
 const tm=m=>m>=60?(m==60?'ساعة':`${ar(m/60)} ساعات`):m==1?'دقيقة':m==2?'دقيقتان':m<=10?`${ar(m)} دقائق`:`${ar(m)} دقيقة`;
 

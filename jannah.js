@@ -475,7 +475,7 @@ let pubT=0;
 function publishSoon(){clearTimeout(pubT);pubT=setTimeout(publish,1200)}
 function publish(){if(!ready())return;const A=O(),L=Deco.myLook();
   A.db.ref('houses/'+A.me).set({f:Bayt.done,c:Bayt.cups,p:L.p,w:L.w,i:L.i,g:L.g||'',u:L.u||'',m:window.Madina?Madina.code():'',n:A.profile.nick,a:A.profile.av,t:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{})}
-const clean=h=>({w:WALLS.some(w=>w.id==(h&&h.w))?h.w:'cream',f:Math.max(0,Math.min(5,h&&h.f|0)),c:Math.max(0,+(h&&h.c)||0),p:PT[h&&h.p]?h.p:'sand',i:lookItems({i:h&&h.i}).join(','),g:cleanG(h&&h.g),u:/^[0-3]{5}$/.test(h&&h.u||'')?h.u:''});
+const clean=h=>({w:WALLS.some(w=>w.id==(h&&h.w))?h.w:'cream',f:Math.max(0,Math.min(5,h&&h.f|0)),c:Math.max(0,+(h&&h.c)||0),p:PT[h&&h.p]?h.p:'sand',i:lookItems({i:h&&h.i}).join(','),g:cleanG(h&&h.g),u:/^[0-3]{5,6}$/.test(h&&h.u||'')?h.u:''});
 
 async function friends(){show('jannah');backTo=null;$('#jTitle').textContent='👥 بيوت أصدقائي';updJ();const B=$('#jBody');
   B.innerHTML=`<div class="handoff"><div class="big spin">🌐</div><p>جارٍ الاتصال…</p></div>`;
@@ -510,7 +510,7 @@ async function visit(r){const A=O(),B=$('#jBody'),L=clean(r.h),day=today();backT
     <button class="btn gold" id="jGift" ${js.gave[r.id]==day?'disabled':''}>${js.gave[r.id]==day?'🎁 أهديتَه اليوم':'🎁 أهدِه هدية'}</button></div>
     ${ADM()?`<div class="nav"><button class="btn" id="jAdmG" style="background:linear-gradient(160deg,#f6b33d,#e0731f);box-shadow:0 5px 0 #a8551a">👑 💎 أهدِه جواهر من المدير</button></div>`:''}
     <div class="nav"><button class="btn" id="jInF" style="background:linear-gradient(160deg,#ffb36b,#c96a2a)">🛋️ ادخل بيته</button></div>
-    ${window.Madina&&/^[0-3]{5}$/.test(r.h&&r.h.m||'')?`<div class="nav"><button class="btn" id="jCity" style="background:linear-gradient(135deg,#2f6fd0,#13958c)">🏙️ شاهد مدينته</button></div>`:''}
+    ${window.Madina&&/^[0-3]{5,6}$/.test(r.h&&r.h.m||'')?`<div class="nav"><button class="btn" id="jCity" style="background:linear-gradient(135deg,#2f6fd0,#13958c)">🏙️ شاهد مدينته</button></div>`:''}
     <p class="bcap">${boy()?'تستطيع':'تستطيعين'} أن ${boy()?'تعجب':'تعجبي'} ببيت كل صديق، و${boy()?'تهديه':'تهديه'} هديةً واحدة كل يوم 🤍</p>
     <div class="nav"><button class="btn sec" id="jBackFr">بيوت أصدقائي</button></div></div>`;
   $('#jBackFr').onclick=friends;
