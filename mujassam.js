@@ -45,6 +45,9 @@ const seed=()=>{let h=0;for(const c of today())h=(h*31+c.charCodeAt(0))>>>0;retu
 const TREES=[[-21,-3],[-21,6.2],[12,-3],[12,4],[-2.8,-28],[2.8,14],[-13,12],[13,-12],[-13,-12],[13,12],[-22,0],[16.5,-8]];
 const FARM=[-14.5,0],FARM_IN={x:-14.5,z:2.2,via:4.6};
 // (v13.7) أماكن جديدة: النهر (RVZ) والجسر الخشبي (FBX)، السوق (MKX/MKT)، ساحة النافورة (PLZ)، بيوت الجيران (NBZ)
+// (v14.3) قرى قريبة: [x,z,الاسم]
+const VIL=[[-24,-82,'قرية النخيل'],[-25,64,'قرية الرمّان'],[-28,-150,'قرية البساتين']];
+const nearVil=(x,z)=>VIL.some(v=>Math.abs(x-v[0])<12&&Math.abs(z-v[1])<12);
 const RVZ=20,RVW=3.2,FBX=-9,MKX=4.6,PLZ=[14.6,0],NBZ=27;
 const FLK=[-27,10]; // (v13.8) مرعى الأغنام
 const MKT=[["bak",-16.5,"#c0392b","#ffffff","🍞 الخبّاز"],["fru",-20.5,"#1fa463","#ffffff","🍊 الفاكهة"],["swe",-24.5,"#2f6fd0","#ffffff","🍬 الحلويات"]];
@@ -156,7 +159,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
       add(new T.CylinderGeometry(.18*s,.24*s,1*s,6),ptr,x,y+.5*s,z).castShadow=false;
       // (v13.6) صنوبر بطبقات (ثلاث مخاريط متدرّجة) بدل مخروط واحد
       [[1.2,1.5,1.45],[.95,1.3,2.25],[.65,1.1,3]].forEach(([r,hh,yy],k)=>{const c=add(new T.ConeGeometry(r*s,hh*s,9),k===1?pine2:pine,x,y+yy*s,z);c.castShadow=false;c.rotation.y=i+k})}
-    for(let i=0;i<14;i++){const z=-120+i*12,x=-28-(i%3)*2;if(Math.abs(z+22)<9)continue;tree(x,z,null,1.3+(i%3)*.2)}}
+    for(let i=0;i<14;i++){const z=-120+i*12,x=-28-(i%3)*2;if(Math.abs(z+22)<9||nearVil(x,z))continue;tree(x,z,null,1.3+(i%3)*.2)}}
   // البحر والشاطئ (لون متدرّج: فيروزي قرب الشاطئ ← أزرق عميق)
   {const SX=22,LL=1600,sand=M(night?0xb8a675:0xf2dca0);
     const b=add(new T.PlaneGeometry(6,LL),sand,SX-1,.012,0);b.rotation.x=-Math.PI/2;b.castShadow=false;
@@ -185,8 +188,8 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
     // طبقة ثلج خفيفة على العشب
     for(let i=0;i<30;i++){const a=i*2.1,r=6+(i*41%40),p=add(new T.CircleGeometry(1.5+i%4,18),M(0xf4f8ff,{transparent:true,opacity:.75}),Math.cos(a)*r,.008,Math.sin(a)*r-6);p.rotation.x=-Math.PI/2;p.castShadow=false}}
   // أشجار متفرقة على طول السهل
-  [[-10,-36],[8,-34],[-16,-48],[12,-52],[-6,-62],[10,-72],[-14,-80],[6,-92],[-12,24.5],[12,30],[-15,34],[13,40]].forEach(([x,z])=>tree(x,z,null,1.3));
-  for(let i=0;i<40;i++){const z=-110-i*8,x=(i%2?1:-1)*(6+(i*29%12));tree(x,z,null,1.2+(i%3)*.2)}
+  [[-10,-36],[8,-34],[-16,-48],[12,-52],[-6,-62],[10,-72],[-14,-80],[6,-92],[-12,24.5],[12,30],[-15,34],[13,40]].forEach(([x,z])=>nearVil(x,z)||tree(x,z,null,1.3));
+  for(let i=0;i<40;i++){const z=-110-i*8,x=(i%2?1:-1)*(6+(i*29%12));if(!nearVil(x,z))tree(x,z,null,1.2+(i%3)*.2)}
   // الطرق بلون دافئ وأرصفة بيضاء — الطريق الرئيسي طويل جدًا يغيب في الضباب
   const road=M(night?0xb9ad96:0xd9c49c),curb=M(0xffffff),line=M(night?0xfff3c4:0xffffff);
   const RL=1400,RZ=-500;
@@ -538,6 +541,19 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
       box(.8,1.4,.08,M(0x7a4f2a),0,.7,1.62,G);ell(.05,1,1,1,M(0xffd23f),.28,.7,1.68,G);
       [-1,1].forEach(j=>{box(.6,.55,.06,winM,j*1.05,1.5,1.62,G);box(.08,.6,.08,M(0x2f7d5a),j*1.05-.36,1.5,1.64,G);box(.08,.6,.08,M(0x2f7d5a),j*1.05+.36,1.5,1.64,G)});
       add(new T.CylinderGeometry(.06,.06,.05,8),M(0x777777),0,.03,1.9,G);palm(1.9,1.3,G);if(nm)label(nm,0,3.6,0,.62,G)})}
+  // ---- 🏘️ (v14.3) طلب الشيخ: قرى قريبة تُرى من بعيد، ومنها يأتي الناس لصلاة الجمعة. بيوت ريفية بسقوف مستوية وخزّانات ماء ونخيل،
+  // ودرب ترابي من كل قرية إلى الطريق الرئيسي. (VIL مشترك مع makeLife لطرق المصلّين)
+  {const dirt=M(0xd9bf8c,{roughness:1}),HC=[0xf3e3c3,0xe9d8b4,0xf6efe2,0xe2cfa6,0xefe0cc,0xdcc9a3],tank=M(0x2f6fd0),dr=M(0x7a4f2a),tr2=M(0xcdb68c);
+    VIL.forEach(([cx,cz,nm],vi)=>{const G=new T.Group();G.position.set(cx,0,cz);S.add(G);let k=0;
+      for(let r=-1;r<=1;r++)for(let c=-1;c<=1;c++){if(r===0&&c===1)continue;const hh=((vi*13+k*7)%5),w=3+hh*.25,h=2.1+(hh%3)*.55,d=3+((k*3)%4)*.25,x=c*6.2+((k*5)%3-1)*.6,z=r*6.4+((k*7)%3-1)*.6;k++;
+        const H=new T.Group();H.position.set(x,0,z);H.rotation.y=(k%4)*Math.PI/2;G.add(H);
+        box(w,h,d,M(HC[(k+vi)%HC.length]),0,h/2,0,H);box(w+.1,.12,d+.1,tr2,0,h+.06,0,H);
+        if(k%3!==1)add(new T.CylinderGeometry(.3,.3,.55,12),tank,w/4,h+.4,-d/4,H);
+        box(.75,1.3,.08,dr,0,.65,d/2+.02,H);[-1,1].forEach(j=>box(.55,.5,.06,winM,j*w*.3,h*.62,d/2+.03,H))}
+      [[-9,-7],[9,8],[-8,9],[10,-6],[0,10.5]].forEach(([x,z])=>palm(cx+x,cz+z,null));
+      // درب ترابي إلى رصيف الطريق الرئيسي
+      const L=Math.abs(cx)-3.2,pth=add(new T.PlaneGeometry(L,1.6),dirt,(cx+(cx<0?-3:3))/2,.025,cz);pth.rotation.x=-Math.PI/2;pth.castShadow=false;
+      label('🏘️ '+nm,cx,9.5,cz,2.2)})}
   // ================= (v13.8) الدفعة الثانية: السماء، المطر وقوس قزح، الأغنام والراعي، زينة رمضان والعيد =================
   // ---- 🌅 قبّة سماء متدرّجة (تتلوّن عند الشروق والغروب — City3D.applySky في run) وقرص شمس قرب الأفق ----
   {const g=new T.SphereGeometry(700,32,20),n=g.attributes.position.count;g.setAttribute('color',new T.Float32BufferAttribute(new Float32Array(n*3),3));
@@ -650,6 +666,9 @@ function winter(){const d=window.City3D&&City3D.debugSnow;if(d!=null)return !!d;
 function hourNow(){const d=window.City3D&&City3D.debugHour;if(d!=null)return d;const n=new Date();return n.getHours()+n.getMinutes()/60}
 // (v13.5) وقت النوم: من ١٢ ليلًا حتى أذان الفجر (أو ٥ صباحًا إن لم يُعرف)
 // (v14.1) وقت الزحام: ذهاب الطلاب والموظفين صباحًا ورجوعهم ظهرًا (ليس الجمعة والسبت)
+// (v14.3) صلاة الجمعة: يأتي الناس قبل الظهر بـ٤٥ دقيقة حتى بعده بـ١٠، ثم الصلاة، ثم يرجعون بعد الظهر بـ٣٥ إلى ٦٠ دقيقة
+function jumuaNow(){if(wDay()!==5)return '';let d=12.2;try{const x=new Date(+Adhan.times(new Date()).dhuhr);d=x.getHours()+x.getMinutes()/60}catch(e){}
+  const h=hourNow();return h>=d-.75&&h<d+1/6?'come':h>=d+35/60&&h<d+1?'go':''}
 function wDay(){const d=window.City3D&&City3D.debugWd;return d!=null?d:new Date().getDay()}
 function rushNow(){const h=hourNow();return wDay()<5&&(h>=7.5&&h<8.5||h>=11.75&&h<12.75)}
 function sleepNow(){const h=hourNow();let f=5;try{const d=new Date(+Adhan.times(new Date()).fajr);const x=d.getHours()+d.getMinutes()/60;if(x>3&&x<7)f=x}catch(e){}return h>=0&&h<f}
@@ -790,10 +809,15 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
   // (v14.0) طلب الشيخ: المصلّون لا يمشون في وسط الشارع. يمشون على الأرصفة (x=±2.7)، وإذا جاؤوا من يسار الطريق الرئيسي
   // يقفون عند ممرّ المشاة (z=4.95) وينظرون يمينًا ويسارًا ثم يعبرون، والسيارات تقف لهم، ثم يمشون على رصيف الجامع إلى بابه.
   const PR=[[[2.8,30]],[[2.8,-30]],[[14,4.1]],[[-14,5.1],[-2.6,5.1]],[[-14,-5.1],[-2.6,-5.1]],[[-2.6,30]],[[-2.6,-30]]];let prT=0,prN=0;
-  function worshipper(){const r=PR[Math.floor(Math.random()*PR.length)],p=person(Math.random()<.6?'man':'woman',Math.floor(Math.random()*9)),o=(Math.random()-.5)*.3;
-    const pts=r.map(q=>[q[0]+(Math.abs(q[0])<3?o:0),q[1]]),left=pts[pts.length-1][0]<0;
-    if(left)pts.push([-2.6+o,4.95,1.4],[2.8+o,4.95]);if(pts[0][0]<5)pts.push([2.8+o,4.1]);pts.push([6+(Math.random()-.5)*.8,4.1],[6,3.75]);
-    walk(p,pts,1.4+Math.random()*.4,'enter');if(left)walkers[walkers.length-1].cross=1;prN++}
+  // (v14.3) يوم الجمعة: يأتي ناس كثيرون، كثير منهم من القرى القريبة (VIL) عبر الدرب الترابي ثم الرصيف، وبعد الصلاة يرجعون إلى قراهم
+  const VR=VIL.map(([x,z])=>x<0?[[x+8,z],[-2.6,z]]:[[x-8,z],[2.8,z]]);
+  function worshipper(jum,back){const far=jum&&Math.random()<.6,r=far?VR[Math.floor(Math.random()*VR.length)]:PR[Math.floor(Math.random()*PR.length)],
+      p=person(Math.random()<.65?'man':'woman',Math.floor(Math.random()*9)),o=(Math.random()-.5)*.3;
+    let pts=r.map(q=>[q[0]+(Math.abs(q[0])<3?o:0),q[1]]);const left=pts[pts.length-1][0]<0;
+    if(left)pts.push([-2.6+o,4.95,1.4],[2.8+o,4.95]);if(pts[pts.length-1][0]<5)pts.push([2.8+o,4.1]);pts.push([6+(Math.random()-.5)*.8,4.1],[6,3.75]);
+    if(back){pts=pts.map(q=>[q[0],q[1]]).reverse();if(left){const k=pts.findIndex(q=>q[0]>2&&Math.abs(q[1]-4.95)<.01);if(k>=0)pts[k][2]=1.4}
+      p.userData.bs=p.scale.x;p.scale.setScalar(.01)}
+    walk(p,pts,1.4+Math.random()*.4,back?'gone':'enter');const w=walkers[walkers.length-1];w.wor=1;if(left)w.cross=1;if(back)w.grow=0;prN++}
   let lastCycle=-1;
   function update(t,dt,o){const h=hourNow(),day=!night;
     // الساحة والحارس
@@ -838,7 +862,9 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       if(c.length){const P=c[Math.floor(Math.random()*c.length)],u=P.userData.u;u.greet=16;u.bub=say(P,'السلام عليكم 👋',1e9,u.h)}}}
     bubs.slice().forEach(b=>{b.k-=dt;b.s.position.set(b.o.position.x,b.o.position.y+b.h,b.o.position.z);if(b.k<=0)unsay(b)});
     // المصلّون وقت الصلاة (إذا بُني الجامع)
-    if(o.prayer&&o.mosque){prT-=dt;if(prT<=0&&prN<14){prT=2.2+Math.random()*2;worshipper()}}else{prN=0}
+    const jum=day&&jumuaNow();
+    if(jum&&o.mosque){prT-=dt;if(prT<=0&&walkers.filter(w=>w.wor).length<36){prT=.6+Math.random()*.7;worshipper(1,jum==='go')}}
+    else if(o.prayer&&o.mosque){prT-=dt;if(prT<=0&&prN<14){prT=2.2+Math.random()*2;worshipper()}}else{prN=0}
     // حركة المشاة
     // (v13.9) 🚸 طلاب يعبرون من ممرّ المشاة بالنهار: يقفون عند الرصيف، ينظرون يمينًا ويسارًا، ثم يعبرون والسيارات تقف لهم
     if(road&&!o.sleep){crT-=dt;if(crT<=0){crT=(phase?8:16)+Math.random()*8;crossers(CROSS[crI++%CROSS.length])}}
