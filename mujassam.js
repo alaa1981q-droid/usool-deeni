@@ -1799,7 +1799,8 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
   const here=()=>{const x=kid.position.x,z=kid.position.z;return {x,z,via:Math.abs(x)>2.6&&Math.abs(Math.abs(z)-4.6)<1.2?sign(z)*4.6:null}};
   // (v13.9) طلب الشيخ: الطفل يعبر الشارع الرئيسي من ممرّ المشاة فقط (z=±4.6)، ويقف عند الرصيف ينظر يمينًا ويسارًا (النقطة الثالثة =1)
   // الأماكن يمين الشارع بلا via يصلها عبر الممرّ الأقرب ثم الرصيف الأيمن (x=2.8)
-  function go(to,done,w){if(busy)return;if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0?4.6:-4.6,rt=a=>a.via==null&&a.x>2.2;
+  function go(to,done,w){if(busy)return;if(window.City3D&&City3D.debugTp&&!w){path=[];at=to;kid.position.set(to.x,0,to.z);card('');if(done)setTimeout(done,50);return} // للتجربة فقط: وصول فوري
+if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0?4.6:-4.6,rt=a=>a.via==null&&a.x>2.2;
     if(rt(at)&&rt(to)&&(at.z>=0)===(to.z>=0))p.push([R,at.z],[R,to.z],[to.x,to.z]);
     else{if(at.via!=null){p.push([at.x,at.via]);if(at.x>0)p.push([R,at.via,1])}
       else if(rt(at))p.push([R,at.z],[R,zb(at.z),1]);
