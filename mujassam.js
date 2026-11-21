@@ -1032,7 +1032,7 @@ function makeKid(){const T=THREE,G=new T.Group(),M=(c)=>new T.MeshStandardMateri
   const arms=[-1,1].map(k=>{const A=new T.Group();A.position.set(k*.27,.92,0);G.add(A);add(new T.CylinderGeometry(.06,.06,.42,8),shirt,0,-.2,0,A);add(new T.SphereGeometry(.065,8,6),skin,0,-.43,0,A);return A});
   // (v11.4) وجه أوضح: رأس أكبر، عيون كبيرة لامعة، خدود وردية وابتسامة
   const face=new T.MeshStandardMaterial({color:0xf6cfa6,roughness:.6,emissive:0x4a3020,emissiveIntensity:.35});
-  add(new T.SphereGeometry(.32,20,16),face,0,1.32,0);
+  const n0=G.children.length;add(new T.SphereGeometry(.32,20,16),face,0,1.32,0);
   const wh=new T.MeshBasicMaterial({color:0xffffff}),pu=new T.MeshBasicMaterial({color:0x1a1a2a});
   [-.115,.115].forEach(x=>{add(new T.SphereGeometry(.085,12,10),wh,x,1.35,.24);add(new T.SphereGeometry(.052,10,8),pu,x,1.35,.31);add(new T.SphereGeometry(.018,6,4),wh,x-.018,1.375,.36)});
   const ck=new T.MeshBasicMaterial({color:0xff9aa8});[-.2,.2].forEach(x=>{const c=add(new T.SphereGeometry(.055,10,8),ck,x,1.25,.24);c.scale.z=.4});
@@ -1042,7 +1042,8 @@ function makeKid(){const T=THREE,G=new T.Group(),M=(c)=>new T.MeshStandardMateri
     add(new T.ConeGeometry(.4,.4,20,1,true),hj,0,1.05,-.02);add(new T.TorusGeometry(.31,.035,8,24),M(0xff7fb0),0,1.36,.06).rotation.x=-.3}
   else{const hair=M(0x3b2414);const hr=add(new T.SphereGeometry(.335,20,12,0,Math.PI*2,0,Math.PI*.5),hair,0,1.33,-.03);hr.rotation.x=-.35;
     add(new T.SphereGeometry(.26,16,8,0,Math.PI*2,0,Math.PI/2),M(0xffffff),0,1.5,-.04)}
-  G.scale.setScalar(KS);G.userData={legs,arms};return G}
+  const H=new T.Group();H.position.y=1.08;G.children.slice(n0).forEach(c=>{G.remove(c);c.position.y-=1.08;H.add(c)});G.add(H);
+  G.scale.setScalar(KS);G.userData={legs,arms,head:H};return G}
 
 /* ---------- (v11.9) حياة المدينة: طلاب في ساحة المدرسة نهارًا، حارس ليلًا، باص وسيارات صباحًا وعند الانصراف، ومصلّون وقت الصلاة ---------- */
 // الأوقات حسب ساعة الجهاز: الوصول ٦–٨ صباحًا، الانصراف ١–٢:٣٠ ظهرًا. (City3D.debugHour للتجربة فقط)
@@ -1141,7 +1142,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       const sl=add(new T.CylinderGeometry(kid?.065:.075,kid?.075:.095,al,8),kind==='guard'||kind==='woman'||kind==='shep'||kind==='man'?robe:M(robeC),0,-al/2,0,A);sl.rotation.z=k*.08;
       ball(sk,kid?.06:.07,k*.02,-al-.04,0,1,1.1,1,A);return A});
     // الرقبة والرأس
-    const hy=kid?1.3:1.52,hr=kid?.24:.19;add(new T.CylinderGeometry(hr*.38,hr*.42,.14,8),sk,0,hy-hr*.95,0,P);
+    const hy=kid?1.3:1.52,hr=kid?.24:.19;add(new T.CylinderGeometry(hr*.38,hr*.42,.14,8),sk,0,hy-hr*.95,0,P);const n0=P.children.length;
     ball(sk,hr,0,hy,0,1,1.08,1);
     [-1,1].forEach(k=>{ball(M(0xffffff),hr*.2,k*hr*.38,hy+hr*.12,hr*.84,1,1.1,.6);ball(dk,hr*.11,k*hr*.38,hy+hr*.11,hr*.95);
       add(new T.BoxGeometry(hr*.32,hr*.06,hr*.06),dk,k*hr*.38,hy+hr*.4,hr*.86,P).rotation.z=k*-.15;
@@ -1157,6 +1158,8 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       else if(kind==='man'){const kc=new T.Mesh(new T.SphereGeometry(hr*1.04,16,8,0,Math.PI*2,0,Math.PI*.42),M(0xffffff));kc.position.set(0,hy+.02,-.01);kc.castShadow=true;P.add(kc)}}
     if(kind==='woman'){const hj=M(0x1d1d24,{side:T.DoubleSide});const hd=new T.Mesh(new T.SphereGeometry(hr*1.16,18,12,Math.PI/2+.75,Math.PI*2-1.5,0,Math.PI*.78),hj);hd.position.set(0,hy+.01,-.01);hd.castShadow=true;P.add(hd);
       add(new T.CylinderGeometry(hr*1.05,.3,.3,18,1,true),hj,0,hy-hr*.9-.15,-.01,P)}
+    // (v16.6) الرأس مجموعة وحدها محورها الرقبة: يلتفت الرأس وحده (يمينًا ويسارًا) والجسم ثابت، بحدّ أقصى طبيعي
+    {const H=new T.Group(),py=hy-hr*.8;H.position.set(0,py,0);P.children.slice(n0).forEach(c=>{P.remove(c);c.position.y-=py;H.add(c)});P.add(H);P.userData.head=H}
     if(kind==='shep'){add(new T.CylinderGeometry(.025,.025,1.9,6),M(0x6b4423),.34,.95,.12,P);add(new T.TorusGeometry(.1,.025,5,10,Math.PI),M(0x6b4423),.44,1.9,.12,P)}
     if(kind==='guard'){add(new T.CylinderGeometry(.22,.22,.14,12),M(0x152a4f),0,hy+.13,0,P);add(new T.BoxGeometry(.3,.03,.18),M(0x101010),0,hy+.07,.17,P);
       add(new T.SphereGeometry(.11,10,8),new T.MeshStandardMaterial({color:0xfff1b0,emissive:0xffd860,emissiveIntensity:1.6}),.32,.8,.15,P);
@@ -1167,7 +1170,10 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
   function swing(dt){g.children.forEach(P=>{const u=P.userData;if(!u.arms||!P.visible)return;const x=P.position.x,z=P.position.z,lp=u.lp;
     const mv=lp?Math.hypot(x-lp[0],z-lp[1])/Math.max(dt,1e-3):0;u.lp=[x,z];const on=mv>.08&&mv<10;u.ph+=dt*(on?Math.min(11,2.5+mv*4.8):0);
     u.am=(u.am||0)+((on?Math.min(.6,.15+mv*.35):0)-(u.am||0))*Math.min(1,dt*5);const a=Math.sin(u.ph)*u.am;u.arms[0].rotation.x=a;u.arms[1].rotation.x=-a;
-    if(u.legs){u.legs[0].rotation.x=-a;u.legs[1].rotation.x=a}})}
+    if(u.legs){u.legs[0].rotation.x=-a;u.legs[1].rotation.x=a}
+    if(u.head){let ht=u.hyT||0;u.hyT=0;
+      if(!ht&&!on){u.gl=(u.gl==null?2+Math.random()*5:u.gl)-dt;if(u.gl<0){u.gla=u.gla?0:(Math.random()-.5)*1.3;u.gl=u.gla?1+Math.random()*1.5:3+Math.random()*6}ht=u.gla||0}else u.gla=0;
+      ht=Math.max(-1.05,Math.min(1.05,ht));u.head.rotation.y+=(ht-u.head.rotation.y)*Math.min(1,dt*4);u.head.rotation.x=on?Math.sin(u.ph*2)*.03:0}})}
   // (v13.7) 🏪 باعة السوق خلف دكاكينهم (بالنهار)، يلتفتون يمينًا ويسارًا
   const sellers={};MKT.forEach(([k,z],i)=>{const P=person('man',i+1);P.position.set(MKX+2.45,0,z);P.rotation.y=-Math.PI/2;P.userData.act='mk_'+k;
     if(k==='bak')add(new T.CylinderGeometry(.19,.21,.28,12),M(0xffffff),0,1.68,0,P);sellers[k]=P});
@@ -1256,7 +1262,10 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
   {const P=person('shep',7);P.userData.ped=NP+1;P.position.set(FLK[0],0,FLK[1]-3.2);
     P.userData.u={kind:'shep',h:2.3,pts:[],sp:.6,v:0,gap:0,greet:0,hold:0,bub:null,bs:P.scale.x,gr:1,out:0,shep:1,w:2};umbrella(P,NP);peds.push(P)}
   // (v15.1) دوران ناعم: يلتفت الشخص تدريجيًا نحو اتجاهه بدل القفز المفاجئ
-  function turn(P,a,dt,k){let d=a-P.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));P.rotation.y+=d*Math.min(1,dt*(k||6))}
+  // (v16.6) طلب الشيخ: لا التفات مفاجئ ١٨٠° → سرعة دوران الجسم محدودة (نصف لفّة في ثانية تقريبًا)، ويرجع فرق الزاوية
+  function turn(P,a,dt,k,mx){let d=a-P.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));const m=(mx||3.2)*dt;P.rotation.y+=Math.max(-m,Math.min(m,d*Math.min(1,dt*(k||6))));return Math.abs(d)}
+  // يبطئ وهو يستدير (لا يمشي جانبيًا أو للخلف)
+  const tf=df=>Math.max(.12,1-df/1.7);
   // (v16.0) طلب الشيخ: حركة الأطفال أكثر انسيابية — يبدأ المشي ويتوقّف بالتدريج، يبطئ قبل الوصول، يستدير بنعومة،
   // ولا يمشي «بالعرض»: ينتظر حتى يلتفت نحو هدفه ثم يسرع. يرجع true عند الوصول
   function glide(P,u,tx,tz,max,dt,t){const dx=tx-P.position.x,dz=tz-P.position.z,d=Math.hypot(dx,dz);u.v=u.v||0;
@@ -1404,7 +1413,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
     up(){if(FG.fall<0)return;const P=FBK[FG.fall];P.rotation.z=0;P.position.y=0;FG.fall=-1;say(P,'شكرًا 🤍',2,1.8)}};
   function update(t,dt,o){const h=hourNow(),day=!night;
     // الساحة والحارس
-    Object.values(sellers).forEach((P,i)=>{P.visible=day&&!o.sleep;P.rotation.y=-Math.PI/2+Math.sin(t*.3+i*2)*.35;P.position.y=Math.abs(Math.sin(t*.9+i))*.02});
+    Object.values(sellers).forEach((P,i)=>{P.visible=day&&!o.sleep;P.rotation.y=-Math.PI/2+Math.sin(t*.3+i*2)*.12;P.userData.hyT=Math.sin(t*.45+i*2)*.6;P.position.y=Math.abs(Math.sin(t*.9+i))*.02});
     // (v14.3) طلب الشيخ: الطلاب في ساحة المدرسة فقط وقت الدوام (٨ صباحًا – ١٢:٤٥ ظهرًا) من الأحد إلى الخميس؛ الجمعة والسبت المدرسة فارغة
     const dawam=day&&wDay()<5&&h>=7.75&&h<12.75,road=day&&wDay()<5&&h>=7.4&&h<13.2;
     // (v16.1) الطلاب لا يختفون فجأة: كل طالب يدخل من بوابة الساحة صباحًا (واحدًا بعد واحد) ويخرج منها قبل الانصراف
@@ -1416,7 +1425,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       if(u.w>0){u.w-=dt;if(u.j>0){u.j-=dt;p.position.y=Math.abs(Math.sin(u.j*9))*.25}else p.position.y*=.8;
         if(u.w<=0){[u.tx,u.tz]=nearPt(p.position.x,p.position.z,YX[0],YX[1],YZ[0],YZ[1],2.6);if(Math.random()<.3)u.j=1}}
       else if(glide(p,u,u.tx,u.tz,1.25,dt,t))u.w=1+Math.random()*3});
-    guard.visible=night;if(night){const z=-17+Math.sin(t*.15)*1.4;guard.rotation.y=Math.cos(t*.15)>0?0:Math.PI;guard.position.z=z;guard.position.y=Math.abs(Math.sin(t*3))*.03}
+    guard.visible=night;if(night){const z=-17+Math.sin(t*.15)*1.4;turn(guard,Math.cos(t*.15)>0?0:Math.PI,dt,3,2);guard.position.z=z;guard.position.y=Math.abs(Math.sin(t*3))*.03}
     // الباص والسيارات: صباحًا يجلبون الطلاب، وظهرًا يأخذونهم
     // (v13.5) يأتون من بعيد (z=150) ويذهبون بعيدًا (z=-150)؛ إذا انتهى الوقت أثناء الطريق يكملون حتى الأفق، ولا يظهرون فجأة في منتصف الطريق
     // (v14.1) طلب الشيخ: الباص يجلب الطلاب الساعة ٨ صباحًا، ويأخذهم الساعة ١٢ ظهرًا
@@ -1459,14 +1468,14 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       if(u.gr<1){u.gr=Math.min(1,u.gr+dt*.9);setOp(P,u.gr)}else if(!P.visible)setOp(P,1);
       if(u.hold>0){u.hold-=dt;u.v=0;if(K)turn(P,Math.atan2(K.x-P.position.x,K.z-P.position.z),dt,5);P.position.y=0;return}
       if(u.greet>0){u.greet-=dt;u.v=Math.max(0,u.v-dt*2);P.position.y=Math.abs(Math.sin(t*2))*.04;if(u.greet<=0)endGreet(i);if(u.v<=0)return}
-      if(u.look>0){u.look-=dt;if(u.look<=0&&nearZeb(P.position.x,P.position.z)&&!pedGo())u.look=.25;u.v=Math.max(0,u.v-dt*3);const q=u.pts[0];if(q)P.rotation.y=Math.atan2(q[0]-P.position.x,q[1]-P.position.z)+Math.sin(u.look*4.2)*1.05;P.position.y=0;return}
+      if(u.look>0){u.look-=dt;if(u.look<=0&&nearZeb(P.position.x,P.position.z)&&!pedGo())u.look=.25;u.v=Math.max(0,u.v-dt*3);const q=u.pts[0];if(q)turn(P,Math.atan2(q[0]-P.position.x,q[1]-P.position.z),dt,4);u.lph=(u.lph||0)+dt*2.3;P.userData.hyT=Math.sin(u.lph)*1;P.position.y=0;return}
       if(u.shep&&!u.pts.length){u.w-=dt;P.position.y=0;if(u.w<=0){u.pts=[[FLK[0]+(Math.random()-.5)*7,FLK[1]+(Math.random()-.5)*7]];u.w=2+Math.random()*4}return}
       if(!u.pts.length){ // وصل: يدخل الباب ويغيب، أو يبتعد في آخر الشارع
         u.fade+=dt*.9;const dr=dt*.45*(1-u.fade);P.position.x+=Math.sin(P.rotation.y)*dr;P.position.z+=Math.cos(P.rotation.y)*dr;setOp(P,1-u.fade);P.position.y=0;if(u.fade>=1){P.visible=false;if(u.bub)endGreet(i);u.trip=-1;u.gap=2+Math.random()*6}return}
       const q=u.pts[0],dx=q[0]-P.position.x,dz=q[1]-P.position.z,d=Math.hypot(dx,dz),last=u.pts.length===1;
       const want=u.sp*(last&&u.out?Math.min(1,.35+d/1.6):1);u.v+=(want-u.v)*Math.min(1,dt*1.8);const st=u.v*dt*(d>1e-4?spF(P.position.x,dx/d,dz/d):1);
       if(d<=Math.max(st,last||q[2]?0:.45)){if(last||q[2]){P.position.x=q[0];P.position.z=q[1]}u.pts.shift();if(q[2])u.look=q[2]}
-      else{P.position.x+=dx/d*st;P.position.z+=dz/d*st;turn(P,Math.atan2(dx,dz),dt)}
+      else{const df=turn(P,Math.atan2(dx,dz),dt),k=tf(df);P.position.x+=dx/d*st*k;P.position.z+=dz/d*st*k;if(df>.5)u.v*=1-Math.min(1,dt*2)}
       if(!u.shep&&!last&&!q[2]&&Math.random()<dt*.012)u.look=.9+Math.random()*.8; // أحيانًا يقف لحظة ويتلفّت
       P.position.y=Math.abs(Math.sin(t*6.5+i))*.035*Math.min(1,u.v)});
     gT-=dt;if(gT<=0){gT=quiet?180+Math.random()*60:50+Math.random()*40;if(!peds.some(P=>P.userData.u.greet>0||P.userData.u.hold>0)){const c=peds.filter(P=>{const u=P.userData.u;return P.visible&&u.gr>=1&&!u.fade&&u.pts.length>(u.shep?-1:1)&&Math.hypot(P.position.x,P.position.z)<30});
@@ -1482,9 +1491,9 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
     parkTick(t,dt,o,h);
     walkers=walkers.filter(w=>{const P=w.P;if(w.grow!=null&&w.grow<1){w.grow=Math.min(1,w.grow+dt*1.1);P.scale.setScalar(P.userData.bs);setOp(P,Math.max(.02,w.grow))}
       if(!w.pts.length){if(w.end==='enter'||w.end==='gone'){w.k+=dt*1.1;const dr=dt*.5*(1-w.k);P.position.x+=Math.sin(P.rotation.y)*dr;P.position.z+=Math.cos(P.rotation.y)*dr;setOp(P,1-w.k);if(w.k>1){g.remove(P);P.traverse(x=>{x.geometry&&x.geometry.dispose();x.material&&x.material.dispose()});return false}}return true}
-      if(w.pause>0||w.sigW){w.pause-=dt;if(w.pause<=0){w.sigW=nearZeb(P.position.x,P.position.z)&&!pedGo();if(w.sigW)w.pause=.25}const [nx,nz]=w.pts[0];P.rotation.y=Math.atan2(nx-P.position.x,nz-P.position.z)+Math.sin(w.pause*4.5)*1.1;P.position.y=0;return true}
+      if(w.pause>0||w.sigW){w.pause-=dt;if(w.pause<=0){w.sigW=nearZeb(P.position.x,P.position.z)&&!pedGo();if(w.sigW)w.pause=.25}const [nx,nz]=w.pts[0];turn(P,Math.atan2(nx-P.position.x,nz-P.position.z),dt,4);w.lph=(w.lph||0)+dt*2.3;P.userData.hyT=Math.sin(w.lph);P.position.y=0;return true}
       const [tx,tz,wt]=w.pts[0],dx=tx-P.position.x,dz=tz-P.position.z,d=Math.hypot(dx,dz);w.v=(w.v||0)+(w.sp-(w.v||0))*Math.min(1,dt*2.2);const sp=w.v*dt*(d>1e-4?spF(P.position.x,dx/d,dz/d):1),cut=w.pts.length>1&&!wt?.4:0;
-      if(d<=Math.max(sp,cut)){if(!cut){P.position.x=tx;P.position.z=tz}w.pts.shift();if(wt)w.pause=wt}else{P.position.x+=dx/d*sp;P.position.z+=dz/d*sp;turn(P,Math.atan2(dx,dz),dt,7)}
+      if(d<=Math.max(sp,cut)){if(!cut){P.position.x=tx;P.position.z=tz}w.pts.shift();if(wt)w.pause=wt}else{const df=turn(P,Math.atan2(dx,dz),dt,7),k=tf(df);P.position.x+=dx/d*sp*k;P.position.z+=dz/d*sp*k;if(df>.5)w.v*=1-Math.min(1,dt*2)}
       P.position.y=Math.abs(Math.sin(t*6+P.id))*.05*Math.min(1,(w.v||0)/Math.max(.1,w.sp));return true});try{separate(o)}catch(e){}swing(dt)}
   // (v16.1) طلب الشيخ: الناس كانوا يدخلون في بعض. الآن لكل شخص مساحة: إذا اقترب اثنان يتنحّى كلٌّ منهما قليلًا (ويميل لليمين)
   // فيمرّان بجانب بعض كما في الواقع. الواقفون (الباعة، الأب والأم، الحارس…) لا يتحرّكون، والآخرون يلتفّون حولهم. والطفل كذلك
@@ -2055,12 +2064,13 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
     if(!pts.size&&!document.querySelector('#modal.on')&&++idle>240)th+=.002;else idle=0;
     (S.userData.marks||[]).forEach((m,i)=>m.position.y=m.userData.y+Math.sin(t+i)*.18);
     const L=kid.userData;
+    if(L.head){L.head.rotation.y+=((L.hyT||0)-L.head.rotation.y)*Math.min(1,dt*5);L.hyT=0}
     if(path.length&&lookT>0){// 🚸 يقف عند حافة الرصيف وينظر يمينًا ويسارًا قبل العبور
-      lookT-=dt;if(lookT<=0&&nearZeb(kid.position.x,kid.position.z)&&!pedGo()){lookT=.3;if(!kid.userData.sw){kid.userData.sw=1;life.say(kid,'🚦 أنتظر الضوء الأخضر',3,2.4)}}else if(lookT<=0)kid.userData.sw=0;const [nx,nz]=path[0];kid.rotation.y=Math.atan2(nx-kid.position.x,nz-kid.position.z)+Math.sin((1.6-lookT)*4)*1.1;
+      lookT-=dt;if(lookT<=0&&nearZeb(kid.position.x,kid.position.z)&&!pedGo()){lookT=.3;if(!kid.userData.sw){kid.userData.sw=1;life.say(kid,'🚦 أنتظر الضوء الأخضر',3,2.4)}}else if(lookT<=0)kid.userData.sw=0;const [nx,nz]=path[0];{let da=Math.atan2(nx-kid.position.x,nz-kid.position.z)-kid.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));kid.rotation.y+=Math.max(-5*dt,Math.min(5*dt,da*Math.min(1,dt*6)))}L.lph=(L.lph||0)+dt*2.6;L.hyT=Math.sin(L.lph)*.95;
       L.legs.forEach(l=>l.rotation.x*=.7);L.arms.forEach(a=>a.rotation.x*=.7);kid.position.y=0;still=0}
     else if(path.length){const [tx,tz,lk]=path[0],dx=tx-kid.position.x,dz=tz-kid.position.z,d=Math.hypot(dx,dz),sp=kidSp*dt*(fast&&!escort&&!fallEsc&&!carry?2.6:1)*(d>1e-4?spF(kid.position.x,dx/d,dz/d):1);
       if(d<=sp){kid.position.x=tx;kid.position.z=tz;path.shift();if(lk&&path.length)lookT=fast?.9:1.6;if(!path.length)fast=0;if(!path.length&&onArrive){const f=onArrive;onArrive=null;setTimeout(f,150)}}
-      else{kid.position.x+=dx/d*sp;kid.position.z+=dz/d*sp;kid.rotation.y=Math.atan2(dx,dz)}
+      else{let da=Math.atan2(dx,dz)-kid.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));const m=(fast?9:6)*dt;kid.rotation.y+=Math.max(-m,Math.min(m,da*Math.min(1,dt*10)));const k=Math.max(.2,1-Math.abs(da)/1.8);kid.position.x+=dx/d*sp*k;kid.position.z+=dz/d*sp*k}
       const sw=Math.sin(t*4)*.6;L.legs[0].rotation.x=sw;L.legs[1].rotation.x=-sw;L.arms[0].rotation.x=-sw;L.arms[1].rotation.x=sw;kid.position.y=Math.abs(Math.sin(t*4))*.06}
     else{L.legs.forEach(l=>l.rotation.x*=.8);L.arms.forEach(a=>a.rotation.x*=.8);still+=dt;waveT+=dt;
       // يلتفت نحوك ليظهر وجهه
