@@ -20,14 +20,14 @@ css.textContent=`body.m3on .modal{z-index:9100}body.m3on #confetti{z-index:9150}
 @keyframes m3hot{to{transform:scale(1.06)}}
 #m3d .m3card{position:absolute;left:12px;right:12px;bottom:calc(max(10px,env(safe-area-inset-bottom)) + 84px);z-index:2;background:#fffffff2;border-radius:18px;padding:10px 12px;text-align:center;font-weight:800;font-size:15px;box-shadow:0 4px 14px #0003;display:none}
 #m3d .m3card.on{display:block;animation:m3in .3s ease}@keyframes m3in{from{transform:translateY(20px);opacity:0}}
-#m3d .m3card .row{display:flex;gap:8px;justify-content:center;margin-top:8px}#m3d .m3card .row button{border:0;border-radius:14px;padding:8px 14px;font:inherit;font-weight:800;background:#1fa463;color:#fff}
+#m3d .m3card .row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:8px}#m3d .m3card .row button{border:0;border-radius:14px;padding:8px 14px;font:inherit;font-weight:800;background:#1fa463;color:#fff}
 #m3d .m3card .row button.sec{background:#e3ecf7;color:#1d4e9e}
 #m3d .m3j{position:absolute;top:66px;left:12px;z-index:2;background:#fff;border-radius:14px;padding:4px 10px;font-weight:900;color:#1d4e9e;box-shadow:0 3px 0 #c9d6e3,0 3px 10px #0002}
 #m3d .m3fly{position:absolute;z-index:3;left:50%;top:45%;transform:translateX(-50%);font-size:30px;font-weight:900;color:#1d7ad0;text-shadow:0 2px 0 #fff;pointer-events:none;animation:m3fly 1.4s ease forwards}
 @keyframes m3fly{to{transform:translate(-50%,-90px);opacity:0}}
 #m3d .m3hp{position:absolute;top:12px;right:12px;z-index:2;display:flex;align-items:center;gap:6px;background:#fffffff2;border-radius:22px;padding:4px 12px 4px 8px;box-shadow:0 3px 0 #c9d6e3,0 3px 10px #0002;min-height:40px}#m3d .m3hp>b{font-size:18px!important;color:#1d4e9e!important}#m3d .m3hp>.e{font-size:24px!important}
 #m3d .m3wx{position:absolute;top:60px;right:12px;z-index:2;display:flex;align-items:center;gap:4px;border:0;background:#fffffff2;border-radius:18px;padding:3px 10px;font:inherit;font-weight:900;color:#1d4e9e;box-shadow:0 3px 0 #c9d6e3,0 3px 10px #0002}#m3d .m3wx[hidden]{display:none}#m3d .m3wx span{font-size:20px}#m3d .m3wx b{font-size:15px}
-#m3d .m3hos{position:absolute;left:12px;z-index:2;display:flex;align-items:center;gap:4px;border:0;border-radius:22px;padding:5px 12px 5px 9px;font:inherit;font-weight:900;font-size:14px;color:#b0262c;background:linear-gradient(160deg,#fff,#ffe9ea);box-shadow:0 3px 0 #e8b8bb,0 3px 10px #0002}#m3d .m3hos b{font-size:22px;line-height:1}#m3d .m3hos.go{font-size:17px;padding:8px 16px 8px 12px;color:#6a4300;background:linear-gradient(160deg,#fff3b8,#ffc53a);box-shadow:0 4px 0 #c98a12,0 4px 12px #0003;animation:m3gob 1.6s ease-in-out infinite}#m3d .m3hos.go b{font-size:26px}@keyframes m3gob{50%{transform:scale(1.07)}}#m3d .m3go{position:absolute;inset:0;z-index:5;background:#0006;display:flex;align-items:center;justify-content:center;padding:14px}#m3d .m3go[hidden]{display:none}#m3d .m3go .in{background:#fffdf5;border-radius:22px;padding:12px 10px 10px;width:100%;max-width:440px;max-height:92%;overflow:auto;box-shadow:0 6px 0 #d9c58a,0 10px 30px #0005;animation:m3in .25s ease}#m3d .m3go h4{margin:0 0 10px;text-align:center;font-size:19px;color:#5a3d00}#m3d .m3go .g{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}#m3d .m3go .g button{border:0;border-radius:16px;padding:9px 2px 8px;font:inherit;font-weight:900;font-size:13.5px;line-height:1.25;color:#2b3550;background:var(--c);box-shadow:0 4px 0 var(--d),0 4px 8px #0002,inset 0 2px 0 #fff9}#m3d .m3go .g button b{display:block;font-size:30px;line-height:1.15;margin-bottom:2px}#m3d .m3go .g button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--d)}#m3d .m3go h5{margin:2px 0 8px;font-size:15px;color:#1f7a4a;text-align:center}#m3d .m3go .tk{display:grid;gap:8px;margin-bottom:12px}#m3d .m3go .tk button{display:flex;align-items:center;gap:10px;border:0;border-radius:16px;padding:9px 12px;font:inherit;font-weight:900;font-size:15.5px;text-align:right;color:#24402f;background:var(--c);box-shadow:0 4px 0 var(--d),0 4px 8px #0002,inset 0 2px 0 #fff9}#m3d .m3go .tk button b{font-size:30px}#m3d .m3go .tk button small{display:block;font-size:12.5px;color:#4b5b52}#m3d .m3go .tk button i{margin-inline-start:auto;font-style:normal;font-size:20px}#m3d .m3go .tk button.ok{opacity:.6}#m3d .m3sal{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(max(10px,env(safe-area-inset-bottom)) + 88px);z-index:3;border:0;border-radius:24px;padding:10px 18px;font:inherit;font-weight:900;font-size:17px;color:#fff;background:linear-gradient(160deg,#3cc47c,#1f9a5b);box-shadow:0 5px 0 #157244,0 6px 16px #0004;white-space:nowrap;animation:m3sb 1s ease-in-out infinite alternate}#m3d .m3sal[hidden]{display:none}@keyframes m3sb{to{transform:translateX(-50%) scale(1.08)}}#m3d .m3go .x{display:block;margin:12px auto 0;border:0;border-radius:14px;padding:9px 26px;font:inherit;font-weight:900;font-size:15px;background:#e3ecf7;color:#1d4e9e;box-shadow:0 3px 0 #a9bcd6}#m3d .m3hos[hidden]{display:none}
+#m3d .m3hos{position:absolute;left:12px;z-index:2;display:flex;align-items:center;gap:4px;border:0;border-radius:22px;padding:5px 12px 5px 9px;font:inherit;font-weight:900;font-size:14px;color:#b0262c;background:linear-gradient(160deg,#fff,#ffe9ea);box-shadow:0 3px 0 #e8b8bb,0 3px 10px #0002}#m3d .m3hos b{font-size:22px;line-height:1}#m3d .m3hos.go{font-size:17px;padding:8px 16px 8px 12px;color:#6a4300;background:linear-gradient(160deg,#fff3b8,#ffc53a);box-shadow:0 4px 0 #c98a12,0 4px 12px #0003;animation:m3gob 1.6s ease-in-out infinite}#m3d .m3hos.go b{font-size:26px}@keyframes m3gob{50%{transform:scale(1.07)}}#m3d .m3go{position:absolute;inset:0;z-index:5;background:#0006;display:flex;align-items:center;justify-content:center;padding:14px}#m3d .m3go[hidden]{display:none}#m3d .m3go .in{background:#fffdf5;border-radius:22px;padding:12px 10px 10px;width:100%;max-width:440px;max-height:92%;overflow:auto;box-shadow:0 6px 0 #d9c58a,0 10px 30px #0005;animation:m3in .25s ease}#m3d .m3go h4{margin:0 0 10px;text-align:center;font-size:19px;color:#5a3d00}#m3d .m3go .g{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}#m3d .m3go .g button{border:0;border-radius:16px;padding:9px 2px 8px;font:inherit;font-weight:900;font-size:13.5px;line-height:1.25;color:#2b3550;background:var(--c);box-shadow:0 4px 0 var(--d),0 4px 8px #0002,inset 0 2px 0 #fff9}#m3d .m3go .g button b{display:block;font-size:30px;line-height:1.15;margin-bottom:2px}#m3d .m3go .g button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--d)}#m3d .m3go h5{margin:2px 0 8px;font-size:15px;color:#1f7a4a;text-align:center}#m3d .m3go .tk{display:grid;gap:8px;margin-bottom:12px}#m3d .m3go .tk button{display:flex;align-items:center;gap:10px;border:0;border-radius:16px;padding:9px 12px;font:inherit;font-weight:900;font-size:15.5px;text-align:right;color:#24402f;background:var(--c);box-shadow:0 4px 0 var(--d),0 4px 8px #0002,inset 0 2px 0 #fff9}#m3d .m3go .tk button b{font-size:30px}#m3d .m3go .tk button small{display:block;font-size:12.5px;color:#4b5b52}#m3d .m3go .tk button i{margin-inline-start:auto;font-style:normal;font-size:20px}#m3d .m3go .tk button.ok{opacity:.6}#m3d .m3sal{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(max(10px,env(safe-area-inset-bottom)) + 88px);z-index:3;border:0;border-radius:24px;padding:10px 18px;font:inherit;font-weight:900;font-size:17px;color:#fff;background:linear-gradient(160deg,#3cc47c,#1f9a5b);box-shadow:0 5px 0 #157244,0 6px 16px #0004;white-space:nowrap;animation:m3sb 1s ease-in-out infinite alternate}#m3d .m3sal[hidden]{display:none}@keyframes m3sb{to{transform:translateX(-50%) scale(1.08)}}#m3d .m3go .st{margin:-4px 0 10px;text-align:center;font-weight:900;font-size:14px;color:#8a5a00;background:#fff3c4;border-radius:12px;padding:6px 8px;box-shadow:0 3px 0 #e3c56e}#m3d .m3cam{position:absolute;top:108px;right:12px;z-index:2;width:46px;height:46px;border-radius:50%;border:0;font-size:22px;background:#fff;box-shadow:0 3px 0 #c9d6e8,0 3px 8px #0002}#m3d .m3flash{position:absolute;inset:0;z-index:6;background:#fff;opacity:.9;pointer-events:none;animation:m3fl .5s ease forwards}@keyframes m3fl{to{opacity:0}}#m3d .m3alb .g{grid-template-columns:repeat(2,1fr)!important}#m3d .m3alb .g button{padding:5px!important;font-size:12px!important}#m3d .m3alb .g img{display:block;width:100%;border-radius:10px;margin-bottom:3px}#m3d .m3big{position:absolute;inset:0;z-index:7;background:#000d;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:14px}#m3d .m3big img{max-width:100%;max-height:72%;border-radius:14px;box-shadow:0 6px 20px #0008}#m3d .m3big .r{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}#m3d .m3big .r>*{border:0;border-radius:14px;padding:9px 16px;font:inherit;font-weight:900;font-size:15px;background:#fff;color:#1d4e9e;text-decoration:none;box-shadow:0 3px 0 #a9bcd6}#m3d .m3go .x{display:block;margin:12px auto 0;border:0;border-radius:14px;padding:9px 26px;font:inherit;font-weight:900;font-size:15px;background:#e3ecf7;color:#1d4e9e;box-shadow:0 3px 0 #a9bcd6}#m3d .m3hos[hidden]{display:none}
 #m3d .m3snd{position:absolute;top:108px;left:12px;z-index:2;width:42px;height:42px;border-radius:50%;border:0;background:#fffd;font-size:20px;box-shadow:0 2px 6px #0003}
 #m3d .m3msg:empty{display:none}#m3d .m3hp:empty{display:none}#m3d .m3hp .e{font-size:30px;line-height:1}#m3d .m3hp .t{flex:1;min-width:0}#m3d .m3hp b{display:block;font-size:14.5px;color:#5a4a1a}#m3d .m3hp small{display:block;font-size:12px;font-weight:700;color:#7a6a3a}
 #m3d .m3hp .hb{height:9px;border-radius:6px;background:#efe6d2;overflow:hidden;margin-top:3px}#m3d .m3hp .hb i{display:block;height:100%;border-radius:6px;transition:width .6s}`;
@@ -41,6 +41,27 @@ const DKEY='usul5_m3d_v1',today=()=>{const d=new Date();return d.getFullYear()+'
 let ds={};try{ds=JSON.parse(localStorage.getItem(DKEY)||'{}')||{}}catch(e){}
 function day(){if(ds.d!==today())ds={d:today(),pr:{},tr:{},lt:{},cat:0};return ds}
 const dsv=()=>{try{localStorage.setItem(DKEY,JSON.stringify(ds))}catch(e){}};
+// (v15.9) اختيارات الطفل في مدينته: أسماء الشوارع وألوان بيوت الجيران
+const CKEY='usul5_city_v1';let CITY={};try{CITY=JSON.parse(localStorage.getItem(CKEY)||'{}')||{}}catch(e){}
+const csv=()=>{try{localStorage.setItem(CKEY,JSON.stringify(CITY))}catch(e){}};
+const HCOL=[0xf3e3c3,0xe6efe0,0xffd6dc,0xd6eaff,0xfff0b3,0xe6dcff,0xffdfc4,0xffffff];
+const HCN=['رملي','نعناعي','وردي','سماوي','أصفر','بنفسجي','مشمشي','أبيض'];
+// (v15.9) ٦ اسم الطفل: الجيران ينادونه باسمه
+const kidN=()=>{try{const p=window.OnlineAPI&&OnlineAPI.profile,st=typeof state!=='undefined'?state:null,n=(p&&p.nick)||(st&&(st.nick||st.name))||'';return String(n).replace(/[👑\s]+$/,'').replace(/^[👑\s]+/,'').slice(0,16)}catch(e){return ''}};
+const yaN=()=>kidN()?' يا '+kidN():'';
+// (v15.9) ٩ المدينة تزهر بالأعمال الصالحة: كل عمل = وردة، وكل ١٠ أعمال = شجرة جديدة (usul5_bloom_v1)
+const BLK='usul5_bloom_v1';let BLOOM={n:0};try{BLOOM=JSON.parse(localStorage.getItem(BLK)||'{"n":0}')||{n:0}}catch(e){}
+function bloomAdd(){BLOOM.n=(BLOOM.n|0)+1;try{localStorage.setItem(BLK,JSON.stringify(BLOOM))}catch(e){}}
+// (v15.9) ٧ الحيوان الأليف (usul5_pet_v1): {k,f: عدد مرات الإطعام, d: آخر يوم}
+const PTK='usul5_pet_v1';let PET={};try{PET=JSON.parse(localStorage.getItem(PTK)||'{}')||{}}catch(e){}
+const ptsv=()=>{try{localStorage.setItem(PTK,JSON.stringify(PET))}catch(e){}};
+const PETS={cat:['🐱','بسبوسة','قطّتي','🐟','she'],bird:['🐦','زقزوق','عصفوري','🌾','he'],rab:['🐰','أرنوب','أرنبي','🥕','he']};
+// (v15.9) ٨ هدية اليوم المخفية: مكان يتغيّر كل يوم، مع تلميح
+const GIFTS=[[-23.6,7.6,'قرب المرعى حيث ترعى الأغنام 🐑'],[-10.6,17.1,'عند طرف الجسر الخشبي فوق النهر 🌉'],[21.6,-5.4,'على الشاطئ قرب برج الساعة 🕰️'],[-4.4,-30.5,'قرب بوّابة مدينة الألعاب 🎡'],
+  [-22,-6.6,'خلف المزرعة قرب الدجاج 🐔'],[17.2,-13.4,'قرب ملعب كرة القدم ⚽'],[-19.9,35.4,'في آخر الدربونة القديمة 🏮'],[6.4,31,'أمام المستشفى 🏥'],[18.4,3.8,'قرب ساحة النافورة ⛲'],[-14.4,13.6,'تحت شجرة كبيرة قرب المكتبة 📚']];
+// (v15.9) ١٢ ألبوم الصور: خارج نسخة «رمز الحفظ» لأن الصور كبيرة (مفتاح لا يبدأ بـ usul5_)
+const ALK='jannah_album_v1';const albGet=()=>{try{return JSON.parse(localStorage.getItem(ALK)||'[]')||[]}catch(e){return []}};
+function albPut(a){for(let i=0;i<6;i++){try{localStorage.setItem(ALK,JSON.stringify(a));return true}catch(e){if(a.length<=2)return false;a.splice(1,1)}}return false}
 const seed=()=>{let h=0;for(const c of today())h=(h*31+c.charCodeAt(0))>>>0;return h};
 // (v12.1) ثلاث أشجار يسار البيت أُبعدت قليلًا لتتّسع المزرعة (FARM)
 const TREES=[[-23.4,-3],[-23.4,6.2],[12,-3],[12,4],[-2.8,-28],[3.6,12.9],[-13,12],[13,-12],[-13,-12],[13,12],[-23.6,0],[16.5,-8]];
@@ -565,6 +586,10 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
     const N=60,dm=new T.InstancedMesh(new T.SphereGeometry(.045,5,4),new T.MeshBasicMaterial({color:night?0x9fd0ff:0xd8f2ff}),N),o=new T.Object3D();dm.position.y=0;P.add(dm);
     anim.push(t=>{for(let i=0;i<N;i++){const top=i<20,u=((t*.55+i/N*3.1)%1),a=i*2.39,r=(top?.05+u*.55:.6+u*.75),y=top?2.08+u*.9-u*u*1.35:1.52+u*.25-u*u*1.35;
       o.position.set(Math.cos(a)*r,Math.max(.4,y),Math.sin(a)*r);o.updateMatrix();dm.setMatrixAt(i,o.matrix)}dm.instanceMatrix.needsUpdate=true});
+    // (v15.9) 🌈 في الليل تضيء النافورة بألوان تتبدّل بهدوء
+    if(night){const pl=new T.PointLight(0xff66aa,1.6,10,1.5);pl.position.set(0,1.3,0);P.add(pl);const cc=new T.Color(),wh=new T.Color(0xffffff);
+      const bulbs=[];for(let i=0;i<8;i++){const a=i/8*Math.PI*2;bulbs.push(add(new T.SphereGeometry(.09,8,6),new T.MeshBasicMaterial({color:0xffffff}),Math.cos(a)*1.45,.44,Math.sin(a)*1.45,P))}
+      w.material.emissiveIntensity=.9;anim.push(t=>{cc.setHSL((t*.06)%1,.85,.58);pl.color.copy(cc);w.material.emissive.copy(cc);dm.material.color.copy(cc).lerp(wh,.45);bulbs.forEach((b,i)=>b.material.color.setHSL((t*.06+i/8)%1,.9,.62))})}
     // مقاعد
     const bw=M(0x8b5a2b),bm=M(0x3a3f45);[0,1,2,3].forEach(k=>{const a=k*Math.PI/2+Math.PI/4,G=new T.Group();G.position.set(Math.cos(a)*2.85,0,Math.sin(a)*2.85);G.rotation.y=-a-Math.PI/2;P.add(G);
       box(1.3,.07,.4,bw,0,.45,0,G);box(1.3,.35,.06,bw,0,.7,-.2,G);[-.55,.55].forEach(x=>box(.06,.45,.4,bm,x,.22,0,G))});
@@ -583,13 +608,26 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
         G.position.x+=(b.hx-G.position.x)*Math.min(1,dt*2);G.position.z+=(b.hz-G.position.z)*Math.min(1,dt*2)}})});
     }
   // ---- 🏠 بيوت الجيران خلف النهر (سقف مستوٍ بسياج وخزّان ماء)، والأيسر بيت جدّو ----
-  {[[-1,0xf3e3c3,'🏠 بيت جدّو'],[1,0xe6efe0,null]].forEach(([k,c,nm])=>{const G=new T.Group();G.position.set(k*7,0,NBZ);G.rotation.y=k<0?Math.PI/2:-Math.PI/2;S.add(G);
-      const wl=M(c),tr2=M(0xd8c39a);box(3,2.3,3.2,wl,0,1.15,0,G);box(3.1,.12,3.3,tr2,0,2.36,0,G);
-      [[0,1.6],[0,-1.6]].forEach(([x,z])=>box(3.1,.35,.08,tr2,x,2.58,z,G));[-1.5,1.5].forEach(x=>box(.08,.35,3.2,tr2,x,2.58,0,G));
-      add(new T.CylinderGeometry(.35,.35,.6,14),M(0x2f6fd0),.8,2.75,-.8,G);
+  // (v15.9) طلب الشيخ: شناشيل بغدادية — صار بيتا الجيران بطابقين، وفي الطابق العلوي شنشول خشبي بارز بزجاج ملوّن،
+  // وأصص ورد على الشبابيك وستائر. لون البيت يختاره الطفل (CITY.hc)
+  {[[-1,0xf3e3c3,'🏠 بيت جدّو','l'],[1,0xe6efe0,null,'r']].forEach(([k,c,nm,id])=>{const G=new T.Group();G.position.set(k*7,0,NBZ);G.rotation.y=k<0?Math.PI/2:-Math.PI/2;G.userData.act='nbh_'+id;S.add(G);
+      const hc=!V&&CITY.hc&&CITY.hc[id]!=null?HCOL[CITY.hc[id]]:c;const wl=M(hc),tr2=M(0xd8c39a);box(3,2.3,3.2,wl,0,1.15,0,G);box(3.1,.12,3.3,tr2,0,2.36,0,G);
+      box(3,1.9,3.2,wl,0,3.37,0,G);box(3.12,.12,3.32,tr2,0,4.38,0,G);
+      [[0,1.6],[0,-1.6]].forEach(([x,z])=>box(3.1,.35,.08,tr2,x,4.6,z,G));[-1.5,1.5].forEach(x=>box(.08,.35,3.2,tr2,x,4.6,0,G));
+      add(new T.CylinderGeometry(.35,.35,.6,14),M(0x2f6fd0),.8,4.77,-.8,G);
       box(.8,1.4,.08,M(0x7a4f2a),0,.7,1.62,G);ell(.05,1,1,1,M(0xffd23f),.28,.7,1.68,G);
-      [-1,1].forEach(j=>{box(.6,.55,.06,winM,j*1.05,1.5,1.62,G);box(.08,.6,.08,M(0x2f7d5a),j*1.05-.36,1.5,1.64,G);box(.08,.6,.08,M(0x2f7d5a),j*1.05+.36,1.5,1.64,G)});
-      add(new T.CylinderGeometry(.06,.06,.05,8),M(0x777777),0,.03,1.9,G);palm(1.9,1.3,G);if(nm)label(nm,0,3.6,0,.62,G)})}
+      const cur=M(k<0?0xd94f6a:0x3f7fd0),pot=M(0xb5652b),fl=[0xff4f7a,0xffd23f,0xffffff,0xff8a3d].map(x=>M(x));
+      [-1,1].forEach(j=>{box(.6,.55,.06,winM,j*1.05,1.5,1.62,G);box(.08,.6,.08,M(0x2f7d5a),j*1.05-.36,1.5,1.64,G);box(.08,.6,.08,M(0x2f7d5a),j*1.05+.36,1.5,1.64,G);
+        box(.2,.5,.02,cur,j*1.05-.18,1.52,1.66,G);box(.7,.06,.2,tr2,j*1.05,1.2,1.72,G);box(.5,.16,.14,pot,j*1.05,1.31,1.74,G);
+        for(let i=0;i<4;i++)ell(.07,1,1,1,fl[(i+j+2)%4],j*1.05-.18+i*.12,1.45,1.75,G)});
+      // الشنشول: صندوق خشبي بارز بشبّاك مشبّك وزجاج ملوّن، تحته كوابيل وفوقه طنف
+      const wd=M(0x8a5a2e),wd2=M(0x6b4423),SZ=1.6+.3;box(2.3,1.3,.6,wd,0,3.35,SZ,G);box(2.5,.12,.78,wd2,0,4.06,SZ+.02,G);box(2.1,.16,.5,wd2,0,2.64,SZ-.02,G);
+      [-.85,0,.85].forEach(x=>{const b=box(.12,.35,.3,wd2,x,2.45,1.75,G);b.rotation.x=.5});
+      const gl=[0x3f8fd0,0x2fa36b,0xd94f4f,0xffc53a].map(x=>M(x,{emissive:x,emissiveIntensity:night?.9:.15,roughness:.3}));
+      for(let i=0;i<4;i++)box(.42,.5,.02,gl[i],-.78+i*.52,3.5,SZ+.31,G);
+      for(let i=0;i<=10;i++)box(.04,1.05,.04,wd2,-1.1+i*.22,3.35,SZ+.33,G);[3.05,3.65].forEach(y=>box(2.2,.04,.04,wd2,0,y,SZ+.33,G));
+      [-1,1].forEach(x=>{for(let i=0;i<3;i++)box(.02,.9,.04,wd2,x*1.16,3.35,SZ-.15+i*.17,G)});
+      add(new T.CylinderGeometry(.06,.06,.05,8),M(0x777777),0,.03,1.9,G);palm(1.9,1.3,G);if(nm)label(nm,0,5.4,0,.62,G)})}
   // ---- 🏘️ (v14.3) طلب الشيخ: قرى قريبة تُرى من بعيد، ومنها يأتي الناس لصلاة الجمعة. بيوت ريفية بسقوف مستوية وخزّانات ماء ونخيل،
   // ودرب ترابي من كل قرية إلى الطريق الرئيسي. (VIL مشترك مع makeLife لطرق المصلّين)
   {const dirt=M(0xd9bf8c,{roughness:1}),HC=[0xf3e3c3,0xe9d8b4,0xf6efe2,0xe2cfa6,0xefe0cc,0xdcc9a3],tank=M(0x2f6fd0),dr=M(0x7a4f2a),tr2=M(0xcdb68c);
@@ -636,7 +674,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
     // 🏘️ دخان تنانير في القرى البعيدة
     if(!night)VIL.forEach(([cx,cz],vi)=>{const sm=new T.MeshBasicMaterial({color:0xe6e6e6,transparent:true,opacity:.3,depthWrite:false});for(let i=0;i<5;i++){const p=new T.Mesh(new T.SphereGeometry(.5,8,6),sm.clone());S.add(p);const o=i/5;
         anim.push(t=>{const u=(t*.12+o)%1;p.position.set(cx+4+Math.sin(t*.5+i)*.6,1.5+u*7,cz-4+u*2);p.scale.setScalar(.7+u*2.2);p.material.opacity=.32*(1-u)})}});
-    {const SK=new T.Group();SK.position.set(7,0,NBZ);SK.userData.act='sick';S.add(SK);if(!V&&sickDay()&&!D2.sick)mark(SK,'🤒','#8f6bff',3.9,0,.95)}
+    {const SK=new T.Group();SK.position.set(7,0,NBZ);SK.userData.act='sick';S.add(SK);if(!V&&sickDay()&&!D2.sick)mark(SK,'🤒','#8f6bff',5.4,0,.95)}
     // 🐦 مُطعِم العصافير أمام البيت (الشتاء) + عصافير تنزل لتأكل
     {const FD=new T.Group();FD.position.set(-4.3,0,-3.1);FD.userData.act='birds';S.add(FD);add(new T.CylinderGeometry(.05,.05,1.1,8),M(0x6b4423),0,.55,0,FD);box(.6,.05,.6,M(0x8b5a2b),0,1.12,0,FD);
       [[-1,0],[1,0],[0,-1],[0,1]].forEach(([a,b])=>box(a?0.05:.6,.1,b?.05:.6,M(0x8b5a2b),a*.28,1.18,b*.28,FD));prism(.8,.3,.8,M(0xc0563b),0,1.5,0,FD);
@@ -818,6 +856,112 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   // نجوم الليل
   if(night){const sg=new T.BufferGeometry(),p=[];for(let i=0;i<300;i++){const a=Math.random()*6.28,b=Math.random()*1.3+.15,r=95;p.push(r*Math.cos(a)*Math.cos(b),r*Math.sin(b),r*Math.sin(a)*Math.cos(b))}
     sg.setAttribute('position',new T.Float32BufferAttribute(p,3));S.add(new T.Points(sg,new T.PointsMaterial({color:0xffffff,size:.5})))}
+  // ===== (v15.9) جمال المدينة: مشحوف ونخيل وفوانيس على النهر، برج ساعة، نافورة ملوّنة ليلًا، ألعاب نارية بالعيد، والدربونة القديمة =====
+  {// 🛶 مشحوف عراقي: قارب طويل ضيّق مقيّر بطرفين مرفوعين، يدفعه رجل بالمردي (عصا طويلة)
+    const tar=M(0x2e2218,{roughness:.6}),robe=M(0xf4f1ea),skin=M(0xc68b59),shm=M(0xd23b3b);
+    const boat=(G,man)=>{ell(.3,1,.5,7.2,tar,0,.06,0,G);box(.44,.04,3.4,M(0x5a4230),0,.13,0,G);
+      [-1,1].forEach(k=>{const p=add(new T.CylinderGeometry(.05,.11,1.1,6),tar,0,.42,k*2.25,G);p.rotation.x=k*-.95});
+      if(man){const P=new T.Group();P.position.set(0,.13,-.9);G.add(P);add(new T.CylinderGeometry(.16,.26,1.15,10),robe,0,.6,0,P);ell(.15,1,1.1,1,skin,0,1.33,0,P);
+        const h=ell(.17,1.05,.55,1.05,shm,0,1.46,0,P);h.material=shm;box(.3,.05,.3,M(0x111111),0,1.52,0,P);
+        const pole=add(new T.CylinderGeometry(.025,.025,4.2,5),M(0x8b6a3e),.32,1.1,.5,P);pole.rotation.x=.45;P.userData.pole=pole;G.userData.man=P}};
+    const MB=new T.Group();S.add(MB);boat(MB,1);MB.userData.act='mashhoof';
+    anim.push(t=>{const u=(t*.018)%2,f=u<1?u:2-u,x=-47+f*17,dir=u<1?1:-1;MB.position.set(x,.02+Math.sin(t*1.3)*.02,RVZ+.35);MB.rotation.y=dir>0?Math.PI/2:-Math.PI/2;MB.rotation.z=Math.sin(t*1.1)*.03;
+      const pl=MB.userData.man&&MB.userData.man.userData.pole;if(pl)pl.rotation.x=.3+Math.sin(t*1.4)*.25});
+    const MB2=new T.Group();MB2.position.set(-21,.02,RVZ-1.05);MB2.rotation.y=Math.PI/2+.08;S.add(MB2);boat(MB2,0);MB2.userData.act='mashhoof';
+    // نخيل على ضفّتي النهر
+    [[-44,RVZ-3],[-36,RVZ+3],[-30,RVZ-3.1],[-17.5,RVZ+3],[10,RVZ-3],[15,RVZ+3],[18,RVZ-3]].forEach(([x,z])=>palm(x,z,null));
+    // فوانيس على الجسر الخشبي وعلى جسر الطريق
+    const pm=M(0x2b2b33),lm=M(0xfff1b0,{emissive:0xffc940,emissiveIntensity:night?2:.35});
+    const lan=(x,z,h)=>{box(.08,h,.08,pm,x,h/2,z);box(.26,.32,.26,pm,x,h+.12,z);box(.2,.26,.2,lm,x,h+.12,z);add(new T.ConeGeometry(.2,.18,4),pm,x,h+.37,z).rotation.y=Math.PI/4};
+    [[FBX-.85,RVZ-2.75],[FBX+.85,RVZ-2.75],[FBX-.85,RVZ+2.75],[FBX+.85,RVZ+2.75]].forEach(([x,z])=>lan(x,z,1.5));
+    [-1,1].forEach(k=>[-1,1].forEach(j=>lan(k*3.05,RVZ+j*(RVW+1.4)/2,1.25)));
+    if(night){const l=new T.PointLight(0xffcf70,1,7,1.6);l.position.set(FBX,1.8,RVZ);S.add(l)}}
+  {// 🕰️ برج ساعة المدينة على الكورنيش قرب ساحة النافورة؛ عقارب حقيقية، ويدقّ كل ساعة بهدوء
+    const CT=new T.Group();CT.position.set(20.4,0,-2.2);CT.userData.act='clock';S.add(CT);const st=M(night?0xcfc6b2:0xf1e7d2),st2=M(night?0xa99d84:0xcdbb95),gd=M(0xd4a520,{metalness:.6,roughness:.35});
+    box(1.7,.35,1.7,st2,0,.17,0,CT);box(1.2,5,1.2,st,0,2.85,0,CT);[1.4,2.6,3.8].forEach(y=>box(1.28,.1,1.28,st2,0,y,0,CT));
+    for(let i=0;i<4;i++){const a=i*Math.PI/2;const w=box(.34,.7,.04,M(0x3a5a7a),Math.sin(a)*.61,3.2,Math.cos(a)*.61,CT);w.rotation.y=a}
+    box(1.5,1.5,1.5,st,0,6.1,0,CT);box(1.62,.12,1.62,st2,0,6.9,0,CT);box(1.62,.12,1.62,st2,0,5.3,0,CT);
+    const cv=document.createElement('canvas');cv.width=cv.height=128;const cx=cv.getContext('2d'),tex=new T.CanvasTexture(cv);let lastM=-1;
+    const draw=()=>{const d=new Date(),h=d.getHours()%12,m=d.getMinutes();lastM=m;cx.fillStyle='#fffdf3';cx.beginPath();cx.arc(64,64,60,0,7);cx.fill();cx.lineWidth=6;cx.strokeStyle='#c9a227';cx.stroke();
+      cx.fillStyle='#333';for(let i=0;i<12;i++){const a=i/12*Math.PI*2;cx.fillRect(64+Math.sin(a)*48-3,64-Math.cos(a)*48-3,6,6)}
+      cx.lineCap='round';const hand=(a,l,w)=>{cx.lineWidth=w;cx.beginPath();cx.moveTo(64,64);cx.lineTo(64+Math.sin(a)*l,64-Math.cos(a)*l);cx.stroke()};
+      cx.strokeStyle='#222';hand((h+m/60)/12*Math.PI*2,30,7);hand(m/60*Math.PI*2,46,4);cx.fillStyle='#c9a227';cx.beginPath();cx.arc(64,64,6,0,7);cx.fill();tex.needsUpdate=true};draw();
+    const fm=new T.MeshStandardMaterial({map:tex,roughness:.5,emissive:night?0xfff1c0:0x000000,emissiveIntensity:night?.55:0,emissiveMap:night?tex:null});
+    for(let i=0;i<4;i++){const a=i*Math.PI/2,f=new T.Mesh(new T.CircleGeometry(.6,32),fm);f.position.set(Math.sin(a)*.76,6.1,Math.cos(a)*.76);f.rotation.y=a;CT.add(f)}
+    add(new T.SphereGeometry(.7,20,10,0,Math.PI*2,0,Math.PI/2),M(0x2fa39a),0,6.95,0,CT);add(new T.CylinderGeometry(.03,.05,.7,6),gd,0,7.95,0,CT);
+    const cr=add(new T.TorusGeometry(.16,.04,6,16,Math.PI*1.4),gd,0,8.4,0,CT);cr.rotation.z=-.7;
+    let lastH=new Date().getHours();
+    anim.push(()=>{const d=new Date();if(d.getMinutes()!==lastM)draw();const h=d.getHours();if(h!==lastH){lastH=h;if(!V&&h>=6&&h<=22&&sndOn()&&typeof tone=='function'){const n=h%12||12;for(let i=0;i<n;i++){tone(587,1.2,'sine',.05,i*1.3);tone(880,.7,'sine',.025,i*1.3)}}}})}
+  {// 🎆 ألعاب نارية في ليالي العيد والمناسبات السعيدة (City3D.debugFireworks للتجربة)
+    const fw=window.City3D&&City3D.debugFireworks;if(night&&(fw||FEST==='eid'||JOY)){const pool=[],CL=[0xff4f7a,0xffd23f,0x4fc3ff,0x7be37b,0xff9f43,0xc58bff,0xffffff];
+      for(let k=0;k<5;k++){const N=70,g=new T.BufferGeometry(),pos=new Float32Array(N*3),vel=[];for(let i=0;i<N;i++){const a=Math.random()*Math.PI*2,b=Math.acos(2*Math.random()-1),sp=5+Math.random()*2;vel.push([Math.sin(b)*Math.cos(a)*sp,Math.cos(b)*sp,Math.sin(b)*Math.sin(a)*sp])}
+        g.setAttribute('position',new T.BufferAttribute(pos,3));const m=new T.PointsMaterial({color:CL[k],size:1.1,transparent:true,opacity:0,depthWrite:false,fog:false,blending:T.AdditiveBlending});const P=new T.Points(g,m);P.frustumCulled=false;S.add(P);
+        const rk=new T.Mesh(new T.SphereGeometry(.15,6,4),new T.MeshBasicMaterial({color:0xfff1b0}));rk.visible=false;S.add(rk);pool.push({P,g,pos,vel,m,rk,st:0,k:0,o:[0,0,0],wait:k*1.1})}
+      anim.push((t,dt)=>{pool.forEach(f=>{if(f.st===0){f.wait-=dt;if(f.wait<=0){f.st=1;f.k=0;f.o=[-12+Math.random()*30,15+Math.random()*7,-48+Math.random()*26];f.rk.visible=true;f.m.color.setHex(CL[(Math.random()*CL.length)|0])}}
+        else if(f.st===1){f.k+=dt/1.1;f.rk.position.set(f.o[0],f.o[1]*Math.min(1,f.k),f.o[2]);if(f.k>=1){f.st=2;f.k=0;f.rk.visible=false;try{if(sndOn()&&typeof tone=='function')tone(90+Math.random()*40,.35,'triangle',.06)}catch(e){}}}
+        else{f.k+=dt;const k=f.k;for(let i=0;i<f.vel.length;i++){const v=f.vel[i];f.pos[i*3]=f.o[0]+v[0]*k*(1-k*.25);f.pos[i*3+1]=f.o[1]+v[1]*k*(1-k*.25)-2.2*k*k;f.pos[i*3+2]=f.o[2]+v[2]*k*(1-k*.25)}
+          f.g.attributes.position.needsUpdate=true;f.m.opacity=Math.max(0,1-k/1.8);if(k>1.8){f.st=0;f.wait=.6+Math.random()*2.2;f.m.opacity=0}}})})}}
+  {// 🏮 الدربونة القديمة: زقاق مبلّط بالحجر بين بيوت بشناشيل، فوانيس معلّقة، ومقهى صغير للجيران عند مدخله
+    const AZ=36,AX0=-4.4,AX1=-19,AW=2.6,G=new T.Group();S.add(G);
+    const sc=document.createElement('canvas');sc.width=sc.height=128;const sx=sc.getContext('2d');sx.fillStyle=night?'#8f8576':'#cbbd9f';sx.fillRect(0,0,128,128);
+    for(let r=0;r<8;r++)for(let c=0;c<4;c++){const o=r%2?16:0;sx.fillStyle=['#d8ccb0','#c2b292','#d2c3a3','#bfae8c'][(r+c)%4];if(night)sx.fillStyle='#9a8f7c';sx.fillRect(c*32+o-14,r*16+1,30,14)}
+    const stx=new T.CanvasTexture(sc);stx.wrapS=stx.wrapT=T.RepeatWrapping;stx.repeat.set(7,1.3);
+    flat(add(new T.PlaneGeometry(AX0-AX1,AW),new T.MeshStandardMaterial({map:stx,roughness:.95}),(AX0+AX1)/2,.02,AZ,G)).receiveShadow=true;
+    // بوّابة قديمة بقوس عند المدخل
+    const brk=M(night?0xa8875a:0xd9b77a),brk2=M(night?0x8f7048:0xc29a5e);[-1,1].forEach(k=>box(.45,3,.45,brk,AX0+.1,1.5,AZ+k*(AW/2+.2),G));
+    const ar=add(new T.TorusGeometry(AW/2+.2,.2,8,20,Math.PI),brk2,AX0+.1,3,AZ,G);ar.rotation.y=Math.PI/2;label('🏮 الدربونة القديمة',AX0+.1,4.35,AZ,.6,G);
+    // البيوت على الجانبين (طابوق قديم بشناشيل تطلّ على الزقاق)
+    const HC2=[0xd9b77a,0xe9d8b4,0xd2a76a,0xf0e2c4,0xdcbf8e,0xe5c99a],wd=M(0x8a5a2e),wd2=M(0x6b4423);
+    const gl=[0x3f8fd0,0x2fa36b,0xd94f4f,0xffc53a].map(x=>M(x,{emissive:x,emissiveIntensity:night?.9:.15,roughness:.3}));
+    for(let i=0;i<3;i++)[-1,1].forEach((k,j)=>{if(i===0&&k===-1)return;if(k>0&&i<2){const wx=AX0-2.4-i*4.6,wz=AZ+AW/2+.25;box(4.4,.75,.3,brk,wx,.37,wz,G);box(4.5,.08,.36,brk2,wx,.78,wz,G);palm(wx+(i?1.2:-1.2),wz+1.4,G);return}const low=k>0,x=AX0-2.4-i*4.6,z=AZ+k*(AW/2+1.6),h=low?2.7:4.3+((i+j)%2)*.5,H=new T.Group();H.position.set(x,0,z);G.add(H);
+      box(4.2,h,3,M(HC2[(i*2+j)%6]),0,h/2,0,H);box(4.3,.14,3.1,brk2,0,h+.07,0,H);const fz=-k*1.52;[-1,1].forEach(q=>box(4.3,.3,.08,brk2,0,h+.28,q*1.5,H));
+      box(.8,1.5,.06,M(0x6b3f22),-.9,.75,fz,H);box(.6,.55,.06,winM,1.1,1.4,fz,H);box(.7,.06,.2,brk2,1.1,1.1,fz-k*.1,H);
+      for(let q=0;q<4;q++)ell(.07,1,1,1,M([0xff4f7a,0xffd23f,0xffffff,0xff8a3d][q]),.92+q*.12,1.18,fz-k*.12,H);
+      [-1.2,1.2].forEach(q=>box(.55,.55,.06,winM,q,h-1.1,-fz,H));
+      if(low){box(1.2,.08,.6,wd2,-.9,1.7,fz-k*.3,H);return}
+      const sz=fz-k*.3;box(2.2,1.2,.6,wd,.2,h-1.35,sz,H);box(2.4,.1,.76,wd2,.2,h-.7,sz,H);box(2,.14,.5,wd2,.2,h-2.0,sz,H);
+      for(let q=0;q<4;q++)box(.4,.45,.02,gl[(q+i+j)%4],-.55+q*.5,h-1.25,sz-k*.31,H);for(let q=0;q<=9;q++)box(.04,.95,.04,wd2,-.8+q*.22,h-1.35,sz-k*.33,H)});
+    // حبال فوانيس معلّقة عبر الزقاق
+    const lm=M(0xffe9a8,{emissive:0xffb830,emissiveIntensity:night?2.2:.4}),cm=M(0x3a3a3a),LC=[0xff5c5c,0xffd23f,0x4fc3ff,0x7be37b];
+    [-7.6,-12.2,-16.8].forEach((x,q)=>{const r=box(.03,.03,AW+3,cm,x,3.55,AZ,G);r.castShadow=false;for(let i=0;i<3;i++){const z=AZ-1+i;box(.02,.35,.02,cm,x,3.35,z,G);
+      ell(.17,1,1.25,1,i===1?lm:M(LC[(i+q)%4],{emissive:LC[(i+q)%4],emissiveIntensity:night?1.4:.25}),x,3.05,z,G)}});
+    if(night)[-8,-15].forEach(x=>{const l=new T.PointLight(0xffc870,1.1,9,1.6);l.position.set(x,2.8,AZ);G.add(l)});
+    // ☕ مقهى الحيّ (في الجهة البعيدة عن الكاميرا ليُرى من الداخل): مفتوح على الزقاق، فيه سماور واستكانات شاي وطاولتان ورجلان كبيران يجلسان
+    const CF=new T.Group();CF.position.set(AX0-2.2,0,AZ-AW/2-.1);CF.rotation.y=Math.PI;CF.userData.act='cafe';G.add(CF);
+    const cw=M(night?0xb08a5a:0xe2c08a);box(4.2,2.6,.15,cw,0,1.3,2.9,CF);[-1,1].forEach(k=>box(.15,2.6,3,cw,k*2.1,1.3,1.45,CF));box(4.5,.16,3.3,brk2,0,2.68,1.45,CF);
+    const aw=new T.Mesh(new T.BoxGeometry(4.4,.06,1.3),new T.MeshStandardMaterial({map:(()=>{const c=document.createElement('canvas');c.width=128;c.height=16;const x=c.getContext('2d');for(let i=0;i<8;i++){x.fillStyle=i%2?'#ffffff':'#c0392b';x.fillRect(i*16,0,16,16)}return new T.CanvasTexture(c)})(),roughness:.8}));
+    aw.position.set(0,2.4,-.5);aw.rotation.x=-.28;aw.castShadow=true;CF.add(aw);box(2.4,.95,.5,M(0x7a4f2a),.6,.47,1.9,CF);
+    const tw=M(0x8b5a2b),ms=M(0xc0c0c8,{metalness:.7,roughness:.3}),tea=M(0xb34a12,{transparent:true,opacity:.85});
+    [[-1.1,-1.75],[1.1,-1.75]].forEach(([x,z])=>{add(new T.CylinderGeometry(.42,.42,.05,16),tw,x,.72,z,CF);add(new T.CylinderGeometry(.05,.06,.7,6),tw,x,.36,z,CF);
+      for(let i=0;i<3;i++){add(new T.CylinderGeometry(.045,.035,.11,8),tea,x-.15+i*.15,.8,z+.08*(i%2),CF)}
+      [-1,1].forEach(k=>{add(new T.CylinderGeometry(.17,.17,.06,10),M(0xb3542a),x+k*.62,.45,z,CF);add(new T.CylinderGeometry(.03,.03,.43,5),tw,x+k*.62,.21,z,CF)})});
+    add(new T.CylinderGeometry(.22,.28,.6,12),ms,1.2,1.25,1.9,CF);add(new T.CylinderGeometry(.1,.2,.2,10),ms,1.2,1.65,1.9,CF);
+    if(!night&&!RN){const robe=M(0xf4f1ea),robe2=M(0x8c7a5c),skin=M(0xc68b59),shm=M(0xd23b3b),sh2=M(0xf7f7f7),agal=M(0x111111);
+      [[-1.72,-1.75,1],[1.72,-1.75,-1]].forEach(([x,z,f],i)=>{const P=new T.Group();P.position.set(x,0,z);P.rotation.y=f>0?Math.PI/2:-Math.PI/2;CF.add(P);
+        add(new T.CylinderGeometry(.2,.26,.62,10),i?robe2:robe,0,.78,0,P);box(.42,.12,.5,i?robe2:robe,0,.5,.18,P);[-.1,.1].forEach(q=>box(.12,.45,.12,i?robe2:robe,q,.25,.38,P));
+        ell(.15,1,1.1,1,skin,0,1.24,0,P);ell(.17,1.05,.55,1.05,i?sh2:shm,0,1.37,0,P);add(new T.TorusGeometry(.13,.025,5,14),agal,0,1.42,0,P).rotation.x=Math.PI/2;ell(.09,1,.8,.7,M(0xdddddd),0,1.12,.09,P)})}
+    if(!V&&!(D.cf))mark(CF,'☕','#8a5a2e',3.2,0,.85)}
+  {// 🪧 (v15.9) ١٠ لوحات أسماء الشوارع: الطفل يختار اسم كل شارع (CITY.st)
+    const NM={m:'الشارع الكبير',f:'شارع الجامع',b:'شارع الحديقة'},sp=M(0x4a5560,{metalness:.5,roughness:.4});
+    const plate=t=>{const c=document.createElement('canvas');c.width=512;c.height=128;const x=c.getContext('2d');x.fillStyle='#1f5fae';x.fillRect(0,0,512,128);x.strokeStyle='#fff';x.lineWidth=8;x.strokeRect(10,10,492,108);
+      x.fillStyle='#fff';x.font='900 56px system-ui,"Segoe UI",sans-serif';x.textAlign='center';x.textBaseline='middle';try{x.direction='rtl'}catch(e){}x.fillText(t,256,68,460);return new T.MeshBasicMaterial({map:new T.CanvasTexture(c)})};
+    [['m',-3.05,-1.9,Math.PI/2],['f',-8.6,5.75,0],['b',-8.6,-5.75,0]].forEach(([k,x,z,r])=>{const G=new T.Group();G.position.set(x,0,z);G.rotation.y=r;G.userData.act='st_'+k;S.add(G);
+      box(.09,2.6,.09,sp,0,1.3,0,G);const mt=plate((!V&&CITY.st&&CITY.st[k])||NM[k]);[1,-1].forEach(q=>{const pl=new T.Mesh(new T.PlaneGeometry(1.9,.48),mt);pl.position.set(0,2.45,q*.03);if(q<0)pl.rotation.y=Math.PI;G.add(pl)});
+      box(1.96,.54,.04,M(0xffffff),0,2.45,0,G)})}
+  // 🎁 (v15.9) ٨ هدية اليوم المخفية (صندوق صغير بشريط ذهبي، نصفه خلف شيء)
+  if(!V&&!D.gf){const g=GIFTS[seed()%GIFTS.length],G=new T.Group();G.position.set(g[0],0,g[1]);G.rotation.y=.5;G.userData.act='gift';S.add(G);
+    const rb=M(0xffd23f,{metalness:.4,roughness:.3});box(.5,.42,.5,M(0xe2304a),0,.21,0,G);box(.54,.1,.54,M(0xc81f38),0,.44,0,G);box(.1,.47,.54,rb,0,.235,0,G);box(.54,.47,.1,rb,0,.235,0,G);
+    [-1,1].forEach(k=>{const l=ell(.11,1.3,.6,.6,rb,k*.1,.54,0,G);l.rotation.z=k*.5});anim.push(t=>{G.position.y=Math.max(0,Math.sin(t*2.2))*.06;G.rotation.y=.5+Math.sin(t*.8)*.15})}
+  // 🌷 (v15.9) ٩ المدينة تزهر بأعمال الطفل: وردة لكل عمل صالح (حتى ٤٠٠) وشجرة صغيرة لكل ١٠ أعمال (حتى ٣٠)
+  {const n=V?0:Math.min(400,BLOOM.n|0),nt=V?0:Math.min(30,Math.floor((BLOOM.n|0)/10));let sd=7;const rnd=()=>{sd=(sd*16807)%2147483647;return sd/2147483647};
+    const bad=(x,z)=>x<-2.6&&x>XL-.4&&Math.abs(z)<HZ+.35||Math.abs(x)<3||x<-2.4&&x>-11.2&&z<-14.8&&z>-25||Math.abs(Math.abs(z)-4.6)<1.4&&Math.abs(x)<16||Object.values(SPOT).some(([a,b])=>Math.hypot(x-a,z-b)<3.9)||x>17.5||NOFL(x,z)||Math.abs(x-FARM[0])<3.8&&Math.abs(z-FARM[1])<4||x<-3&&x>-21&&z>32&&z<41||Math.hypot(x-PKC[0],z-PKC[1])<9||Math.hypot(x-HSP[0],z-HSP[1])<6||Math.hypot(x-FLK[0],z-FLK[1])<6||Math.abs(z-NBZ)<3&&Math.abs(Math.abs(x)-7)<3;
+    if(n){const fl=[0xff4f7a,0xffd23f,0xc58bff,0xff8c42,0xffffff,0xff6fb5,0x4fc3ff],hd=new T.InstancedMesh(new T.SphereGeometry(.15,8,6),new T.MeshStandardMaterial({roughness:.5}),n),
+        lv=new T.InstancedMesh(new T.SphereGeometry(.2,6,4),M(0x3f9a3e),n),o=new T.Object3D(),col=new T.Color();let k=0,i=0;
+      while(i<n&&k<20000){k++;const a=rnd()*Math.PI*2,r=4+rnd()*36,x=Math.cos(a)*r,z=Math.sin(a)*r;if(bad(x,z))continue;
+        o.position.set(x,.2,z);o.rotation.set(0,0,0);o.scale.setScalar(1);o.updateMatrix();hd.setMatrixAt(i,o.matrix);hd.setColorAt(i,col.setHex(fl[i%fl.length]));
+        o.position.set(x,.07,z);o.scale.set(1.4,.35,1.4);o.updateMatrix();lv.setMatrixAt(i,o.matrix);i++}
+      hd.count=lv.count=i;S.add(hd,lv);S.userData.bloomN=i}
+    let k=0,i=0;sd=99;while(i<nt&&k<5000){k++;const a=rnd()*Math.PI*2,r=12+rnd()*30,x=Math.cos(a)*r,z=Math.sin(a)*r;if(bad(x,z)||Math.abs(x)<5)continue;tree(x,z,null,.75+((i*7)%4)*.08);i++}}
   Object.assign(S.userData,{marks,trees,lit,cat});return S}
 
 /* ---------- شخصية الطفل ---------- */
@@ -1197,7 +1341,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       if(!u.shep&&!last&&!q[2]&&Math.random()<dt*.012)u.look=.9+Math.random()*.8; // أحيانًا يقف لحظة ويتلفّت
       P.position.y=Math.abs(Math.sin(t*6.5+i))*.035*Math.min(1,u.v)});
     gT-=dt;if(gT<=0){gT=quiet?180+Math.random()*60:50+Math.random()*40;if(!peds.some(P=>P.userData.u.greet>0||P.userData.u.hold>0)){const c=peds.filter(P=>{const u=P.userData.u;return P.visible&&u.gr>=1&&!u.fade&&u.pts.length>(u.shep?-1:1)&&Math.hypot(P.position.x,P.position.z)<30});
-      if(c.length){const P=c[Math.floor(Math.random()*c.length)],u=P.userData.u;u.greet=16;u.bub=say(P,'السلام عليكم 👋',1e9,u.h)}}}
+      if(c.length){const P=c[Math.floor(Math.random()*c.length)],u=P.userData.u;u.greet=16;u.bub=say(P,'السلام عليكم'+yaN()+' 👋',1e9,u.h)}}}
     bubs.slice().forEach(b=>{b.k-=dt;b.s.position.set(b.o.position.x,b.o.position.y+b.h,b.o.position.z);if(b.k<=0)unsay(b)});
     // المصلّون وقت الصلاة (إذا بُني الجامع)
     const jum=day&&jumuaNow();
@@ -1404,7 +1548,7 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
   // نجوم وقلوب تتطاير حول الطفل عند الفرح
   function burst(){const C=[0xffd23f,0xff6fb5,0x4fc3ff,0x7be37b,0xffffff];for(let i=0;i<16;i++){const s=new T.Mesh(new T.OctahedronGeometry(.16),new T.MeshBasicMaterial({color:C[i%5],transparent:true}));
     s.position.set(kid.position.x,1.4,kid.position.z);const a=i/16*Math.PI*2;s.userData={k:0,v:new T.Vector3(Math.cos(a)*2.2,2.5+Math.random()*1.5,Math.sin(a)*2.2)};S.add(s);sparks.push(s)}}
-  function jewels(n){joyT=1.1;burst();try{Deco.addJ(n)}catch(e){}try{tone(988,.08,'triangle',.1);setTimeout(()=>tone(1318,.12,'triangle',.1),110)}catch(e){}
+  function jewels(n){joyT=1.1;burst();bloomAdd();bloomPop();try{Deco.addJ(n)}catch(e){}try{tone(988,.08,'triangle',.1);setTimeout(()=>tone(1318,.12,'triangle',.1),110)}catch(e){}
     const f=document.createElement('div');f.className='m3fly';f.textContent='💎 +'+arn(n);ov.appendChild(f);setTimeout(()=>f.remove(),1500);showJ()}
   // (v11.7) «سعادة مدينتي» أعلى المدينة: ترتفع بالأعمال الصالحة اليوم وتنخفض إذا غاب الطفل (wajiha.js)
   function drawHp(){const el=ov.querySelector(".m3hp");if(!el||!window.Wajiha)return;const h=Wajiha.happy(),c=Wajiha.barCol(h);
@@ -1448,11 +1592,11 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
       const px=P.position.x,pz=P.position.z,to=u.kind==='shep'?{x:px+1.1,z:pz,via:4.6}:Math.abs(px)<4.5?(px<0?{x:-2.3,z:pz-.9,via:null}:{x:2.3,z:pz-.9,via:null}):Math.abs(Math.abs(pz)-4.8)<1.2?{x:px-sign(px)*.9,z:sign(pz)*4.6,via:sign(pz)*4.6}:{x:px+(px<0?1:-1),z:pz,via:null};
       const who=she?'جارتك':u.kind==='kid'?B('صديقك','صديقتك'):'جارك',rel=()=>{u.hold=Math.min(u.hold,2.5)};
       const RD='وعليكم السلام ورحمة الله وبركاته';
-      const reply=()=>{life.endGreet(i);life.say(kid,RD,3.5,2.4);setTimeout(()=>{reward('rd');rel()},700)};
+      const reply=()=>{life.endGreet(i);life.say(kid,RD,3.5,2.4);setTimeout(()=>{life.say(P,'بارك اللَّهُ فيك'+yaN()+' 🤍',3,u.h);reward('rd');rel()},700)};
       go(to,()=>{if(greeted){card(`👋 ${she?'قالت':'قال'} لك ${who}: «السلام عليكم»<br><small>بماذا ${B('تردّ','تردّين')}؟</small>`,
           [[RD,reply],['مرحبا 🙂',()=>card(`🤍 الأجمل أن ${B('تردّ','تردّي')} بتحية الإسلام`,[[RD,reply]]),'sec']]);return}
         card(`🙂 هذا ${who}… ${B('سلّم','سلّمي')} ${she?'عليها':'عليه'}`,[['👋 السلام عليكم',()=>{life.say(kid,'السلام عليكم 👋',3,2.4);
-          setTimeout(()=>{life.say(P,RD,3.5,u.h);reward('sl');rel()},1300)}],['لاحقًا',rel,'sec']])})},
+          setTimeout(()=>{life.say(P,RD+yaN(),3.5,u.h);reward('sl');rel()},1300)}],['لاحقًا',rel,'sec']])})},
     // (v12.1) 🐄 المزرعة: إطعام البقر، إطعام الدجاج، سقي الحيوانات — كلٌّ مرة يوميًا 💎2
     farm(k){const D=day(),F=D.fm=D.fm||{},ks=['cow','hen','wat'];if(!k||k==='any')k=ks.find(x=>!F[x]);
       const FD={cow:{btn:'🌾 '+B('أطعم','أطعمي')+' البقر',doing:`🌾 ${B('تضع','تضعين')} العلف للبقرات…`,done:'🐄 أكلت البقرات وقالت: مووو! شكرًا',full:'🐄 البقرات شبعانة اليوم 💚'},
@@ -1492,7 +1636,7 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
       go({x:E.position.x-1,z:E.position.z,via:null},()=>{life.say(E,'السلام عليكم يا '+B('ولدي','ابنتي'),3,2.4);
         card(`👴 جدّو يحمل كيسين ثقيلين من السوق، وبيته بعيد خلف النهر…`,[['🤝 أساعدك يا جدّي',()=>{escort=1;kidSp=1.3;
           card(`🚶 ${B('تحمل','تحملين')} الأكياس ${B('وتمشي','وتمشين')} مع جدّو بهدوء…`);
-          go({x:-4.3,z:NBZ,via:null},()=>{escort=0;kidSp=4.2;busy=0;D.eld=1;dsv();jewels(3);life.say(E,'جزاك الله خيرًا 🤲',3.5,2.4);
+          go({x:-4.3,z:NBZ,via:null},()=>{escort=0;kidSp=4.2;busy=0;D.eld=1;dsv();jewels(3);life.say(E,'جزاك الله خيرًا'+yaN()+' 🤲',3.5,2.4);
             card(`👴 جدّو: جزاك الله خيرًا يا ${B('ولدي','ابنتي')}، الله يحفظك 🤲 💎 +٣<br><b style="color:#1fa463;font-size:18px">🌟 هذا عمل صالح!</b><br><small>احترام الكبير ومساعدته من أخلاق المسلم 🤍</small>`,[['الحمد لله',null]])});busy=1}],['لاحقًا',null,'sec']])})},
     // ===== (v14.5) 👨‍👩‍👦 بِرّ الوالدين، ⚽ الملعب، 🔥 التنّور، 🤒 الجار المريض، 🐦 العصافير، 💝 الصدقة، 🌙 القمر =====
     parents(){if(night||sleeping){card(`🌙 ${B('أبوك','أبوكِ')} و${B('أمّك','أمّكِ')} يرتاحان داخل البيت الآن… ${B('ادعُ','ادعي')} لهما: «اللَّهمّ احفظهما» 🤲`);setTimeout(()=>card(''),2600);return}
@@ -1569,6 +1713,31 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
       card(`🚌 ${B('صعدتَ','صعدتِ')} الباص ${B('وجلستَ','وجلستِ')}… ثم صعد رجل كبير في السنّ ولم يجد مقعدًا 🧓<br><small>ماذا ${B('تفعل','تفعلين')}؟</small>`,[['🪑 أعطيه مقعدي',give],['أبقى جالسًا',()=>card(`🤍 الكبير يتعب من الوقوف… الأجمل أن ${B('تعطيه','تعطيه')} مقعدك`,[['🪑 أعطيه مقعدي',give]]),'sec']])})},
     moon(){const h=hijri();if(!h)return;const d=h.d,ph=d<=3?'هلال':d<=7?'هلال يكبر':d<=12?'القمر يكبر':d<=16?'بدر كامل 🌕':d<=22?'القمر يصغر':'هلال آخر الشهر';
       card(`🌙 هذا ${ph} — شهر <b>${HM[h.m-1]}</b><br>اليوم ${arn(d)} من الشهر الهجري<br><small>القمر يعلّمنا الشهور: يبدأ الشهر بهلال صغير، وفي منتصفه يصير بدرًا، ثم يصغر حتى يختفي 🤍</small>`,[['سبحان اللَّه 🤍',null]])},
+    // ===== (v15.9) أماكن جديدة وأفعال «يحبّ مدينته» =====
+    cafe(){const D=day();go({x:-4.9,z:36.6,via:null},()=>{if(night||sleeping){card('☕ مقهى الحيّ مغلق الآن… الجيران نائمون 🌙');setTimeout(()=>card(''),2200);return}
+      if(D.cf){card(`☕ الجدّان يشربان الشاي ويدعوان لك: «اللَّهُ يحفظك${yaN()}» 🤍`);setTimeout(()=>card(''),2600);return}
+      card(`☕ في مقهى الحيّ جدّان كبيران يشربان الشاي…<br><small>ماذا ${B('تفعل','تفعلين')}؟</small>`,[['👋 السلام عليكم يا عمّي',()=>{life.say(kid,'السلام عليكم يا عمّي 👋',3,2.4);
+        setTimeout(()=>{D.cf=1;dsv();jewels(1);try{Aamal.grow('akhlaq')}catch(e){}refresh();card(`<b style="color:#1fa463;font-size:19px">🌟 هذا عمل صالح!</b><br>قالا: «وعليكم السلام، هلا${yaN()}! اللَّهُ يحفظك» 🤍<br><small>احترام الكبار وتوقيرهم من أخلاق المسلم 💎 +١</small>`,[['الحمد لله',null]])},1200)}],
+        ['🏃 أمرّ مسرعًا',()=>card(`🤍 الأجمل أن ${B('تسلّم','تسلّمي')} على الكبار ${B('وتبتسم','وتبتسمي')} لهم`,[['👋 السلام عليكم يا عمّي',()=>A.cafe()]]),'sec']])})},
+    mashhoof(){card('🛶 هذا مشحوف! قارب أهل الأهوار في جنوب العراق، يدفعه صاحبه بعصا طويلة اسمها «المردي» 🌾<br><small>نحافظ على أنهارنا نظيفة، فالماء نعمة 💧</small>',[['حسنًا',null,'sec']])},
+    clock(){const d=new Date(),np=nextPrayer();card(`🕰️ ساعة المدينة: الساعة الآن ${hm(d)}<br><small>الوقت نعمة من اللَّه، والمسلم يحافظ على وقته وصلاته ⏰${np&&np.t?`<br>🕌 الصلاة القادمة: ${PNAME[np.p]||''} ${hm(new Date(+np.t))}`:''}</small>`,[['حسنًا',null,'sec']])},
+    gift(){const D=day();if(D.gf)return;const g=GIFTS[seed()%GIFTS.length];go({x:g[0]+(g[0]>0?-.7:.7),z:g[1],via:null},()=>{D.gf=1;dsv();jewels(5);refresh();
+      card(`🎁 ${B('وجدتَ','وجدتِ')} هدية اليوم المخفية! 💎 +٥<br><small>${B('تعال','تعالي')} غدًا، ستُخبَّأ هدية جديدة في مكان آخر 🔍</small>`,[['🤍 الحمد لله',null]])})},
+    giftHint(){const D=day();if(D.gf){card(`🎁 ${B('وجدتَ','وجدتِ')} هدية اليوم ✔<br><small>غدًا هدية جديدة في مكان آخر 🔍</small>`,[['حسنًا',null,'sec']]);return}const g=GIFTS[seed()%GIFTS.length];
+      card(`🎁 هدية اليوم مخبّأة ${g[2]}<br><small>${B('ابحث','ابحثي')} عن صندوق أحمر صغير ${B('والمسه','والمسيه')} 🔍</small>`,[['🔍 '+B('دلّني','دلّيني'),()=>lookPt(g[0],g[1])],[B('سأبحث بنفسي','سأبحث بنفسي'),null,'sec']])},
+    pet(){const P=PETS[PET.k];if(!P){card(`🐾 ${B('اختر','اختاري')} حيوانك الأليف: يمشي معك في المدينة، ${B('وتطعمه','وتطعميه')} كل يوم فيكبر 💚`,[['🐱 قطّة',()=>setPet('cat')],['🐦 عصفور',()=>setPet('bird')],['🐰 أرنب',()=>setPet('rab')],['لاحقًا',null,'sec']]);return}
+      const fed=PET.d===today(),she=P[4]==='she',big=Math.min(10,PET.f|0);
+      if(fed){card(`${P[0]} ${P[1]} ${she?'شبعانة':'شبعان'} اليوم ${she?'وسعيدة':'وسعيد'} 💚<br><small>${she?'كبرت':'كبر'} ${arn(big)} من ${arn(10)} · ${B('تعال','تعالي')} غدًا ${B('وأطعمه','وأطعميه')} من جديد</small>`,[['حسنًا',null],['🔄 '+B('غيّر','غيّري')+' حيواني',()=>{PET={};ptsv();A.pet()},'sec']]);return}
+      card(`${P[0]} ${P[1]} ${she?'جائعة':'جائع'}… ${she?'تنظر':'ينظر'} إليك 🥺`,[[P[3]+' '+B('أطعم','أطعمي')+' '+P[1],()=>{PET.f=(PET.f|0)+1;PET.d=today();ptsv();jewels(2);petLook();
+        life.say(petG,'💚',2,1.2);card(`${P[0]} ${she?'أكلت':'أكل'} ${P[1]} ${she?'وشكرتك':'وشكرك'} 💚 💎 +٢<br><small>الرحمة بالحيوان من أخلاق المسلم · ${she?'كبرت':'كبر'} ${arn(Math.min(10,PET.f))} من ${arn(10)}</small>`,[['الحمد لله',null]])}],['لاحقًا',null,'sec']])},
+    paint(){const nm=k=>(CITY.st&&CITY.st[k])||{m:'الشارع الكبير',f:'شارع الجامع',b:'شارع الحديقة'}[k];
+      card(`🎨 ${B('سمِّ','سمّي')} شوارع ${B('مدينتك','مدينتكِ')} ${B('ولوّن','ولوّني')} بيوت الجيران`,[['🪧 '+nm('m'),()=>A.st('m')],['🪧 '+nm('f'),()=>A.st('f')],['🪧 '+nm('b'),()=>A.st('b')],['🏠 بيت جدّو',()=>A.nbh('l')],['🏠 بيت الجار',()=>A.nbh('r',1)],['لاحقًا',null,'sec']])},
+    st(k){const P={m:[-3.05,-1.9],f:[-8.6,5.75],b:[-8.6,-5.75]}[k];lookPt(P[0],P[1]);const n=kidN(),L=['شارع الرحمة','شارع النور','شارع الأمل','شارع الصدق','شارع الياسمين','شارع النخيل','شارع السلام','شارع الوفاء'];if(n)L.unshift('شارع '+n);
+      setTimeout(()=>card(`🪧 ${B('اختر','اختاري')} اسمًا لهذا الشارع`,L.map(t=>[t,()=>{CITY.st=CITY.st||{};CITY.st[k]=t;csv();refresh();card(`🪧 صار اسمه «${t}» ✨`);setTimeout(()=>card(''),2000)}]).concat([['لاحقًا',null,'sec']])),500)},
+    st_m(){A.st('m')},st_f(){A.st('f')},st_b(){A.st('b')},
+    nbh(id,noSick){const D=day();if(id==='r'&&!noSick&&sickDay()&&!D.sick&&!night){A.sick();return}lookPt(id==='l'?-7:7,NBZ);
+      setTimeout(()=>card(`🎨 ${B('اختر','اختاري')} لونًا ${id==='l'?'لبيت جدّو':'لبيت الجار'}`,HCN.map((t,i)=>[['🟫','🟩','🩷','🟦','🟨','🟪','🟧','⬜'][i]+' '+t,()=>{CITY.hc=CITY.hc||{};CITY.hc[id]=i;csv();refresh();card(`🎨 صار البيت ${t}! جميل 🤍`);setTimeout(()=>card(''),2000)}]).concat([['لاحقًا',null,'sec']])),500)},
+    nbh_l(){A.nbh('l')},nbh_r(){A.nbh('r')},
     library(){go(door('k'),()=>card(`📚 المكتبة: ${B('اقرأ','اقرئي')} ${B('وِردك','وِردكِ')} اليومي (٥ أسئلة) 📖`,[['📖 وِردي اليومي',()=>closeTo(()=>{const b=document.getElementById('openWird');b&&b.click()})],['لاحقًا',null,'sec']]))}};
   function reward(kind){const D=day();D.sl=D.sl|0;const give=D.sl<5;D.sl++;dsv();if(give)jewels(1);else{joyT=1.1;burst()}
     card(`<b style="color:#1fa463;font-size:19px">🌟 هذا عمل صالح!</b><br>${kind==='rd'?B('رددتَ','رددتِ'):B('ألقيتَ','ألقيتِ')} السلام${give?' 💎 +١':''}<br><small>${kind==='rd'?'ردّ السلام من آداب الإسلام الجميلة 🤍':'إفشاء السلام يزرع المحبة بين الناس 🤍'}</small>`,[['الحمد لله',null]])}
@@ -1618,14 +1787,20 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
     ['🏫','مدرسة القرآن',()=>A.school()],['📚','المكتبة',()=>A.library()],['🏥','المستشفى',()=>{if(hpLv()>0)A.hospital();else{hosView();setTimeout(()=>{try{Binaa.open('hp')}catch(e){}},700)}},1],
     ['🎡','مدينة الألعاب',()=>A.park(),1],['🛒','السوق',()=>card('🛒 أيّ دكّان؟',[...MKT.map(m=>[m[4],()=>follow(()=>A.mk(m[0]))]),['لاحقًا',null,'sec']])],
     ['🐄','المزرعة',()=>A.farm('any')],['🦆','البطّ في النهر',()=>A.ducks()],['🐑','المرعى',()=>A.sheep()],['⛲','النافورة',()=>A.plaza()],
-    ['🔥','التنّور',()=>A.tannour()],['⚽','الملعب',()=>A.football()],['🚌','موقف الباص',()=>A.busStop()]];
+    ['🔥','التنّور',()=>A.tannour()],['⚽','الملعب',()=>A.football()],['🚌','موقف الباص',()=>A.busStop()],
+    ['☕','الدربونة القديمة',()=>A.cafe()],['🕰️','برج الساعة',()=>go({x:19.2,z:-.9,via:null},()=>A.clock())],['🐾','حيواني الأليف',()=>A.pet(),1],['🎨','سمِّ ولوّن',()=>A.paint(),1],['🖼️','ألبومي',()=>openAlbum(),1]];
   const goBox=document.createElement('div');goBox.className='m3go';goBox.hidden=true;ov.appendChild(goBox);
-  function openGo(){const L=PLACES(),C=[['#dff5e3','#9fd3aa'],['#dcecff','#9dbde6'],['#ffe1ec','#e6a9bf'],['#fff3c4','#e3c56e'],['#ece3ff','#b9a6e6'],['#d9f5f1','#94d1c8']];
+  function openGo(){goBox.classList.remove('m3alb');const L=PLACES(),C=[['#dff5e3','#9fd3aa'],['#dcecff','#9dbde6'],['#ffe1ec','#e6a9bf'],['#fff3c4','#e3c56e'],['#ece3ff','#b9a6e6'],['#d9f5f1','#94d1c8']];
     const D=day(),tl=thirsty().filter(k=>!D.tr[k]).length,ll=litter().filter(k=>!D.lt[k]).length,sl=Math.min(5,D.sl|0);
     const TK=[['💧',B('اسقِ','اسقي')+' الأشجار العطشى',tl?`باقي ${arn(tl)} 🌳`:'كلها شربت اليوم ✔',!tl,()=>A.water(),'#dcf0ff','#93bfe6'],
       ['👋',B('سلّم','سلّمي')+' على جيرانك '+B('وردّ','وردّي')+' السلام',sl<5?`${arn(sl)} من ${arn(5)} اليوم`:'أكملتها اليوم ✔ (والسلام دائمًا جميل)',sl>=5,()=>A.salamNear(),'#dff5e3','#9fd3aa'],
-      ['🧹',B('نظّف','نظّفي')+' الطريق',ll?`باقي ${arn(ll)} 🗑️`:'المدينة نظيفة ✔',!ll,()=>A.clean(),'#fff3c4','#e3c56e']];
-    goBox.innerHTML=`<div class="in"><h5>✅ مهمّاتي اليوم</h5><div class="tk">${TK.map((t,i)=>`<button data-t="${i}" class="${t[3]?'ok':''}" style="--c:${t[5]};--d:${t[6]}"><b>${t[0]}</b><span>${t[1]}<small>${t[2]}</small></span><i>${t[3]?'✔':'◀'}</i></button>`).join('')}</div><h4>🗺️ إلى أين ${B('تذهب','تذهبين')}؟</h4><div class="g">${L.map((p,i)=>`<button data-i="${i}" style="--c:${C[i%6][0]};--d:${C[i%6][1]}"><b>${p[0]}</b>${p[1]}</button>`).join('')}</div><button class="x">✖ إغلاق</button></div>`;
+      ['🧹',B('نظّف','نظّفي')+' الطريق',ll?`باقي ${arn(ll)} 🗑️`:'المدينة نظيفة ✔',!ll,()=>A.clean(),'#fff3c4','#e3c56e'],
+      ['🎁',B('ابحث','ابحثي')+' عن هدية اليوم المخفية',D.gf?'وجدتها اليوم ✔':'صندوق أحمر صغير في مكانٍ ما 🔍',!!D.gf,()=>A.giftHint(),'#ffe1ec','#e6a9bf'],
+      PETS[PET.k]?[PETS[PET.k][0],B('أطعم','أطعمي')+' '+PETS[PET.k][1],PET.d===today()?'شبعان اليوم ✔':'جائع ينتظرك 🥺',PET.d===today(),()=>A.pet(),'#ece3ff','#b9a6e6']
+        :['🐾',B('اختر','اختاري')+' حيوانك الأليف','قطّة أو عصفور أو أرنب يمشي معك 💚',false,()=>A.pet(),'#ece3ff','#b9a6e6']];
+    const hero=D.hero?`🌟 ${B('أنت','أنتِ')} بطل المدينة اليوم!`.replace('بطل',B('بطل','بطلة')):`🌟 ${B('أكمل','أكملي')} السقي والسلام والتنظيف ${B('لتصير','لتصيري')} ${B('بطل','بطلة')} المدينة اليوم`;
+    const bl=`🌷 ${B('مدينتك','مدينتكِ')} أزهرت بـ ${arn(BLOOM.n|0)} ${(BLOOM.n|0)===1?'عمل صالح':'من أعمالك الصالحة'}`;
+    goBox.innerHTML=`<div class="in"><h5>✅ مهمّاتي اليوم</h5><div class="st">${hero}<br><small>${bl}</small></div><div class="tk">${TK.map((t,i)=>`<button data-t="${i}" class="${t[3]?'ok':''}" style="--c:${t[5]};--d:${t[6]}"><b>${t[0]}</b><span>${t[1]}<small>${t[2]}</small></span><i>${t[3]?'✔':'◀'}</i></button>`).join('')}</div><h4>🗺️ إلى أين ${B('تذهب','تذهبين')}؟</h4><div class="g">${L.map((p,i)=>`<button data-i="${i}" style="--c:${C[i%6][0]};--d:${C[i%6][1]}"><b>${p[0]}</b>${p[1]}</button>`).join('')}</div><button class="x">✖ إغلاق</button></div>`;
     goBox.hidden=false;card('');
     goBox.onclick=e=>{const b=e.target.closest('button');if(e.target===goBox||b&&b.classList.contains('x')){goBox.hidden=true;return}if(!b)return;
       try{window.Bayt&&Bayt.sTap()}catch(x){}goBox.hidden=true;const p=b.dataset.t!=null?[0,0,TK[+b.dataset.t][4]]:L[+b.dataset.i];if(sleeping){sleepCard();return}
@@ -1637,6 +1812,63 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
   function salTick(dt){salT-=dt;if(salT>0)return;salT=.3;try{life.setQuiet((day().sl|0)>=5)}catch(e){}let i=-1;if(!V&&!sleeping&&!busy&&!(path.length&&!wander)&&goBox.hidden&&!ui.card.classList.contains('on'))i=life.peds.findIndex(P=>P.visible&&P.userData.u.greet>0&&!(P.userData.u.hold>0));
     salI=i;if(i<0){salBtn.hidden=true;return}const u=life.peds[i].userData.u,she=u.kind==='woman',w=she?'جارتك تسلّم':u.kind==='kid'?B('صديقك يسلّم','صديقتك تسلّم'):'جارك يسلّم';
     salBtn.innerHTML=`👋 ${w} عليك… ${B('ردّ','ردّي')} السلام`;salBtn.hidden=false}
+  // ===== (v15.9) «طفل يحبّ مدينته» =====
+  function lookPt(x,z){fol=0;flyTo({c:[x,0,z],l:[x,.6,z],th,ph:Math.min(ph,.9),dist:20});foc='spot';hosLbl()}
+  // ٩ وردة تنبت أمام الطفل مع كل عمل صالح
+  function bloomPop(){try{const f=new T.Group(),a=Math.random()*Math.PI*2;f.position.set(kid.position.x+Math.cos(a)*.9,0,kid.position.z+Math.sin(a)*.9);
+    const c=[0xff4f7a,0xffd23f,0xc58bff,0xff8c42,0xff6fb5][(BLOOM.n|0)%5],st=new T.Mesh(new T.CylinderGeometry(.03,.03,.5,5),new T.MeshStandardMaterial({color:0x3f9a3e}));st.position.y=.25;f.add(st);
+    for(let i=0;i<5;i++){const p=new T.Mesh(new T.SphereGeometry(.11,8,6),new T.MeshStandardMaterial({color:c}));p.position.set(Math.cos(i*1.26)*.12,.55,Math.sin(i*1.26)*.12);f.add(p)}
+    const cc=new T.Mesh(new T.SphereGeometry(.07,8,6),new T.MeshStandardMaterial({color:0xffe066}));cc.position.y=.57;f.add(cc);f.scale.setScalar(.01);S.add(f);
+    let k=0;const iv=setInterval(()=>{k++;f.scale.setScalar(Math.min(1.3,k/8*1.3));if(k>=8)clearInterval(iv)},40);
+    const t=document.createElement('div');t.className='m3fly';t.style.top='38%';t.style.color='#d94f8a';t.textContent='🌷 '+(BLOOM.n%10===0?'شجرة جديدة في مدينتك!':'نبتت وردة في مدينتك');ov.appendChild(t);setTimeout(()=>t.remove(),1600)}catch(e){}}
+  // ٧ الحيوان الأليف يتبع الطفل
+  let petG=null;
+  function makePet(k){const G=new T.Group(),m=(c,o)=>new T.MeshStandardMaterial(Object.assign({color:c,roughness:.7},o||{})),e=(r,sx,sy,sz,mt,x,y,z,p)=>{const q=new T.Mesh(new T.SphereGeometry(r,14,10),mt);q.scale.set(sx,sy,sz);q.position.set(x,y,z);q.castShadow=true;(p||G).add(q);return q};
+    const eye=m(0x151515),body=new T.Group();G.add(body);G.userData.body=body;
+    if(k==='cat'){const o=m(0xf0a040),w=m(0xfff3e0);e(.2,1,.85,1.6,o,0,.3,0,body);e(.17,1,.95,1,o,0,.48,.32,body);e(.1,1,.7,1,w,0,.43,.45,body);
+      [-1,1].forEach(q=>{const ear=new T.Mesh(new T.ConeGeometry(.07,.14,4),o);ear.position.set(q*.09,.65,.3);body.add(ear);e(.025,1,1,1,eye,q*.065,.52,.47,body)});
+      const tl=new T.Mesh(new T.CylinderGeometry(.03,.04,.45,6),o);tl.position.set(0,.45,-.38);tl.rotation.x=-.7;body.add(tl);G.userData.tail=tl;
+      [[-.1,.18],[.1,.18],[-.1,-.18],[.1,-.18]].forEach(([x,z])=>e(.05,1,1.8,1,w,x,.1,z,body))}
+    else if(k==='rab'){const o=m(0xf4f4f4),pk=m(0xffb6c8);e(.22,1,.9,1.3,o,0,.27,0,body);e(.16,1,1,1,o,0,.46,.25,body);e(.07,1,1,1,o,0,.3,-.3,body);
+      [-1,1].forEach(q=>{const ea=e(.05,.9,3.3,.6,o,q*.07,.72,.22,body);ea.rotation.z=q*.15;e(.03,.6,2.6,.3,pk,q*.07,.72,.25,body);e(.024,1,1,1,eye,q*.07,.5,.39,body)});e(.025,1,1,1,pk,0,.45,.41,body)}
+    else{const o=m(0x8fd14f),y=m(0xffd23f),og=m(0xff8a3d);e(.14,1,.95,1.3,o,0,0,0,body);e(.11,1,1,1,y,0,.12,.14,body);const bk=new T.Mesh(new T.ConeGeometry(.035,.09,6),og);bk.rotation.x=Math.PI/2;bk.position.set(0,.11,.27);body.add(bk);
+      [-1,1].forEach(q=>e(.02,1,1,1,eye,q*.06,.15,.22,body));const wl=e(.1,.25,.6,1.1,o,-.14,.02,0,body),wr=e(.1,.25,.6,1.1,o,.14,.02,0,body);G.userData.wings=[wl,wr];e(.07,.5,.3,1.3,m(0x5fa83a),0,0,-.2,body)}
+    G.userData.act='pet';G.userData.k=k;
+    const P=PETS[k],sp=markSprite(T,P[3],'#8f6bff',.7);sp.position.y=k==='bird'?.55:1;G.add(sp);G.userData.mk=sp;return G}
+  function petLook(){if(!petG)return;const f=Math.min(10,PET.f|0);petG.scale.setScalar(.8+.05*f);petG.userData.mk.visible=PET.d!==today()}
+  function setPet(k){PET={k,f:0,d:''};ptsv();if(petG){life.g.remove(petG);petG=null}petG=makePet(k);life.g.add(petG);petG.position.set(kid.position.x-1,0,kid.position.z);petLook();
+    const P=PETS[k];life.say(petG,P[0]+' 💚',2.5,1.2);card(`${P[0]} هذا ${P[2]} «${P[1]}»! ${P[4]==='she'?'ستمشي':'سيمشي'} معك في كل مكان 💚<br><small>${B('أطعمه','أطعميه')} كل يوم ${P[3]} فيكبر قليلًا قليلًا</small>`,[[P[3]+' '+B('أطعمه','أطعميه')+' الآن',()=>A.pet()],['حسنًا',null,'sec']])}
+  if(PET.k&&PETS[PET.k]&&!V){petG=makePet(PET.k);life.g.add(petG);petG.position.set(kid.position.x-1,0,kid.position.z+.6);petLook()}
+  function petTick(dt,t){if(!petG)return;petG.visible=!V&&!sleeping&&kid.visible;if(!petG.visible)return;const k=petG.userData.k,a=kid.rotation.y,tx=kid.position.x-Math.sin(a)*1.05+Math.cos(a)*.55,tz=kid.position.z-Math.cos(a)*1.05-Math.sin(a)*.55;
+    const dx=tx-petG.position.x,dz=tz-petG.position.z,d=Math.hypot(dx,dz),b=petG.userData.body;if(d>14){petG.position.x=tx;petG.position.z=tz}
+    if(d>.12){const sp=Math.min(d,Math.max(1.2,d*2.4)*dt);petG.position.x+=dx/d*sp;petG.position.z+=dz/d*sp;let da=Math.atan2(dx,dz)-petG.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));petG.rotation.y+=da*Math.min(1,dt*6)}
+    else{const ta=Math.atan2(cam.position.x-petG.position.x,cam.position.z-petG.position.z);let da=ta-petG.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));petG.rotation.y+=da*Math.min(1,dt*2)}
+    const mv=d>.12;if(k==='bird'){petG.position.y=1.5+Math.sin(t*3)*.15;const w=petG.userData.wings,f=Math.sin(t*(mv?22:9))*.7;w[0].rotation.z=f;w[1].rotation.z=-f}
+    else if(k==='rab'){b.position.y=mv?Math.abs(Math.sin(t*9))*.22:0}else{b.position.y=mv?Math.abs(Math.sin(t*12))*.04:0;if(petG.userData.tail)petG.userData.tail.rotation.z=Math.sin(t*3)*.4}}
+  // ١١ بطل المدينة اليوم: يكمل السقي والسلام (٥) والتنظيف ← الجيران يصفّقون، تاج نجمة فوق الطفل، 💎10
+  const crown=markSprite(T,'⭐','#f0a020',.75);crown.position.y=2.35;crown.visible=!!day().hero;kid.add(crown);
+  function heroTick(){const D=day();crown.visible=!!D.hero&&!V;if(D.hero||V||sleeping||busy||path.length&&!wander||ui.card.classList.contains('on')||!goBox.hidden)return;
+    if(thirsty().some(k=>!D.tr[k])||litter().some(k=>!D.lt[k])||(D.sl|0)<5)return;D.hero=1;dsv();crown.visible=true;
+    life.peds.filter(P=>P.visible).slice(0,4).forEach((P,i)=>setTimeout(()=>life.say(P,'👏 '+B('أحسنت','أحسنتِ')+yaN()+'!',3,P.userData.u.h),i*350));
+    jewels(10);setTimeout(()=>burst(),500);try{if(sndOn()&&typeof tone=='function')[523,659,784,1046].forEach((f,i)=>tone(f,.2,'triangle',.1,i*.15))}catch(e){}
+    card(`<b style="color:#c98a12;font-size:21px">🌟 ${B('أنت','أنتِ')} ${B('بطل','بطلة')} المدينة اليوم! 🌟</b><br>أهل المدينة يصفّقون لك 👏👏 💎 +١٠<br><small>سقيتَ الأشجار، وسلّمت على الجيران، ونظّفت الطريق 🤍</small>`.replace('سقيتَ',B('سقيتَ','سقيتِ')).replace('وسلّمت',B('وسلّمتَ','وسلّمتِ')).replace('ونظّفت',B('ونظّفتَ','ونظّفتِ')),[['🤍 الحمد لله',null]])}
+  // ١٢ 📷 ألبوم الصور
+  const camBtn=document.createElement('button');camBtn.className='m3cam';camBtn.textContent='📷';camBtn.setAttribute('aria-label','صوّر مدينتك');ov.appendChild(camBtn);camBtn.hidden=!!V;
+  function snap(auto){try{R.render(S,cam);const src=R.domElement,w=Math.min(540,src.width),h=Math.round(src.height*w/src.width),c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(src,0,0,w,h);
+    const url=c.toDataURL('image/jpeg',.72),a=albGet();a.push({t:Date.now(),d:url,f:a.length?0:1});if(a.length>16)a.splice(1,1);if(!albPut(a))throw 0;
+    if(!auto){const f=document.createElement('div');f.className='m3flash';ov.appendChild(f);setTimeout(()=>f.remove(),600);try{if(sndOn()&&typeof tone=='function'){tone(1800,.04,'square',.05);tone(900,.06,'square',.04,.06)}}catch(e){}
+      card(`📸 ${B('حفظتُ','حفظتُ')} الصورة في ${B('ألبومك','ألبومكِ')}! ${B('صوّر','صوّري')} ${B('مدينتك','مدينتكِ')} كل فترة ${B('وشاهد','وشاهدي')} كيف تكبر 🌱`,[['🖼️ ألبومي',()=>openAlbum()],['حسنًا',null,'sec']])}}
+    catch(e){if(!auto)card('📷 لم أستطع حفظ الصورة… ربما الذاكرة ممتلئة');}}
+  camBtn.onclick=()=>{try{window.Bayt&&Bayt.sTap()}catch(e){}snap(0)};
+  if(!V&&!albGet().length)setTimeout(()=>{if(alive&&!albGet().length)snap(1)},7000);
+  function openAlbum(){const a=albGet(),fd=x=>{try{return new Date(x).toLocaleDateString('ar-IQ',{day:'numeric',month:'long',year:'numeric'})}catch(e){return ''}};
+    goBox.classList.add('m3alb');goBox.innerHTML=`<div class="in"><h4>🖼️ ${B('ألبوم مدينتي','ألبوم مدينتي')}</h4>${a.length?`<div class="st">${a.length>1?`من ${fd(a[0].t)} إلى اليوم… ${B('شاهد','شاهدي')} كيف كبرت ${B('مدينتك','مدينتكِ')} 🌱`:B('صوّر مدينتك كل فترة بزر 📷 وشاهد كيف تكبر','صوّري مدينتكِ كل فترة بزر 📷 وشاهدي كيف تكبر')}</div>`:''}
+      <div class="g">${a.length?a.map((p,i)=>`<button data-a="${i}" style="--c:#fff;--d:#d9c58a"><img src="${p.d}" alt="">${p.f?'🌱 أول يوم · ':''}${fd(p.t)}</button>`).reverse().join(''):`<p style="grid-column:1/-1;text-align:center">${B('لم تصوّر','لم تصوّري')} بعد… ${B('اضغط','اضغطي')} 📷</p>`}</div><button class="x">✖ إغلاق</button></div>`;
+    goBox.hidden=false;card('');goBox.onclick=e=>{const b=e.target.closest('button');if(e.target===goBox||b&&b.classList.contains('x')){goBox.hidden=true;goBox.classList.remove('m3alb');return}if(!b||b.dataset.a==null)return;
+      const i=+b.dataset.a,p=a[i],v=document.createElement('div');v.className='m3big';v.innerHTML=`<img src="${p.d}" alt=""><b style="color:#fff">${fd(p.t)}</b><div class="r"><a href="${p.d}" download="madinati-${i+1}.jpg">⬇️ احفظها</a><button data-d>🗑️ احذفها</button><button data-c>✖ رجوع</button></div>`;ov.appendChild(v);
+      v.onclick=ev=>{if(ev.target.closest('[data-d]')){a.splice(i,1);albPut(a);v.remove();openAlbum()}else if(ev.target.closest('[data-c]')||ev.target===v)v.remove()}}}
+  // ٦ أهل المدينة يرحّبون بالطفل باسمه عند الدخول
+  setTimeout(()=>{if(!alive||V||sleeping||!kidN())return;const F=life.father&&life.father.visible?life.father:life.peds.find(P=>P.visible);if(F)life.say(F,'أهلًا'+yaN()+'! '+B('نوّرت','نوّرتِ')+' مدينتك 🌷',3.5,F.userData&&F.userData.u?F.userData.u.h:2.4)},2600);
   if(hosBtn){hosBtn.onclick=()=>{try{window.Bayt&&Bayt.sTap()}catch(e){}if(foc){cityView();return}if(V)return;openGo()};hosLbl()}
   setBar();const pn=prayerNow();if(window.City3D)City3D._A=A; // للتجربة فقط
   // (v13.8) تهنئة مرة في اليوم أيام رمضان والعيد
@@ -1713,7 +1945,7 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
       if(k>1.3){S.remove(s);s.geometry.dispose();s.material.dispose();return false}return true});
     drops=drops.filter(d=>{d.position.y-=dt*4;if(d.position.y<.1){S.remove(d);d.geometry.dispose();d.material.dispose();return false}return true});
     (S.userData.trees||[]).forEach(G=>{if(G&&G.userData.grow){G.userData.grow+=dt;const k=G.userData.grow-1;G.scale.setScalar(k<.6?1+Math.sin(k/.6*Math.PI)*.25:1.08);if(k>.6)G.userData.grow=0}});
-    try{salTick(dt)}catch(e){}
+    try{salTick(dt)}catch(e){}try{petTick(dt,t)}catch(e){}if((t*10|0)%5===0)try{heroTick()}catch(e){}
     if(fol){goal=null;const kp=kid.position,k=Math.min(1,dt*2.4);CC[0]+=(kp.x-CC[0])*k;CC[2]+=(kp.z-CC[2])*k;LK[0]+=(kp.x-LK[0])*k;LK[1]+=(1.2-LK[1])*k;LK[2]+=(kp.z-LK[2])*k;CC[1]+=(0-CC[1])*k;dist+=(34-dist)*k*.6;ph+=(Math.min(ph,1.05)-ph)*k}
     stepFly(dt);place();R.render(S,cam);requestAnimationFrame(loop)})();
   // عند وقت الأذان: الشخصية تذهب للجامع وحدها
@@ -1766,5 +1998,8 @@ function moveHouse(){const c=document.getElementById('openBayt'),h=document.quer
 moveHouse();addEventListener('load',moveHouse);
 // تستدعيها madina.js بعد كل تغيير في المدينة
 function refresh(){if(cur)try{cur.refresh()}catch(e){console.error(e)}}
+// (v15.9) ٩ الأعمال الصالحة خارج المدينة (صلاة، حفظ، تسبيح…) تُنبت وردًا في المدينة أيضًا
+function hookBloom(){if(window.Aamal&&Aamal.grow&&!Aamal._bh){const g=Aamal.grow;Aamal.grow=function(){if(!cur)bloomAdd();return g.apply(this,arguments)};Aamal._bh=1}}
+hookBloom();setTimeout(hookBloom,0);addEventListener('load',hookBloom);
 window.City3D={open,refresh,oldHouse};
 })();
