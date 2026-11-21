@@ -75,6 +75,9 @@ const XF=-2.95,XL=-14.4,HZ=3.55;
 const R0=2.1,S0=2.9,R1=4.1,S1=6.6,DX=S1-S0,LI=R1*.25,LO=R1*.75;
 function fX(x){const a=Math.abs(x),s=x<0?-1:1;return a<=R0?x*R1/R0:a<=S0?s*(R1+(a-R0)*(S1-R1)/(S0-R0)):s*(a+DX)}
 const fXd=x=>{const a=Math.abs(x);return a<R0?R1/R0:a<S0?(S1-R1)/(S0-R0):1};
+// (v16.3) 🚦 إشارات مرور حقيقية عند ممرّي المشاة (z=±4.6): دورة ٢٤ ثانية — أخضر للسيارات ١٢، أصفر ٢، ثم أحمر ١٠ (والمشاة: الرجل الأخضر)
+const SIGC=24;function sig(){const d=window.City3D&&City3D.debugSig;const u=d!=null?d:(Date.now()/1000)%SIGC;return u<12?'g':u<14?'y':'r'}
+const pedGo=()=>sig()==='r';const nearZeb=(x,z)=>Math.abs(Math.abs(z)-4.9)<1&&Math.abs(x)>1.6&&Math.abs(x)<3.4;
 const spF=(x,ux,uz)=>1/Math.max(.3,Math.hypot(ux*fXd(x),uz));
 // (v13.7) أماكن جديدة: النهر (RVZ) والجسر الخشبي (FBX)، السوق (MKX/MKT)، ساحة النافورة (PLZ)، بيوت الجيران (NBZ)
 // (v14.3) قرى قريبة: [x,z,الاسم]
@@ -300,16 +303,16 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   // مصابيح الشوارع: بالليل تضيء وتنير الطريق حولها
   const pole=M(0x4a4f5a),bulb=M(night?0xfff1b0:0xf1efe6,night?{emissive:0xffd860,emissiveIntensity:1.6}:{});
   const pool=new T.MeshBasicMaterial({color:0xffd870,transparent:true,opacity:.28,depthWrite:false});
-  const LAMPS=[[-2.8,-13],[2.5,-13],[-2.8,-7.5],[2.5,-7.5],[-2.8,-1.8],[2.5,-1.8],[-2.8,7.5],[2.5,7.5],[-2.8,13],[2.5,13],[-10,5.8],[10,5.8],[-10,-5.8],[10,-5.8]];
+  const LAMPS=[[-2.8,-13],[2.82,-13],[-2.8,-7.5],[2.82,-7.5],[-2.8,-1.8],[2.82,-1.8],[-2.8,7.5],[2.82,7.5],[-2.8,13],[2.82,13],[-10,5.8],[10,5.8],[-10,-5.8],[10,-5.8]];
   // (v13.5) رصيف حجري على جانبي الطريق الرئيسي داخل المدينة (الطفل يمشي على الأيسر)، وممرّات مشاة مخطّطة عند التقاطعين
   {const sw=M(night?0x9a958c:0xd8d3c8);[-1,1].forEach(k=>{const r=RDf(add(new T.PlaneGeometry(S1-R1,140),sw,k*(R1+S1)/2,.015,-2));r.rotation.x=-Math.PI/2;r.castShadow=false});
     const zb=M(0xffffff);[-4.6,4.6].forEach(z=>{for(let x=-R1+.45;x<=R1-.44;x+=.55){const s=RDf(add(new T.PlaneGeometry(.3,1.3),zb,x,.022,z));s.rotation.x=-Math.PI/2;s.castShadow=false}})
     // (v13.9) إشارة «🚸 عبور المشاة» على جانبي كل ممرّ
     const sp=M(0x4a4f5a);[-4.6,4.6].forEach(z=>[-1,1].forEach(k=>{const x=k*2.95,zz=z+k*.95;add(new T.CylinderGeometry(.04,.05,2,6),sp,x,1,zz);
       const s=textSprite(T,'🚸 عبور','rgba(30,90,200,.95)','#ffffff');s.scale.set(1.5,.33,1);s.position.set(x,2.15,zz);S.add(s)}))}
-  LAMPS.forEach(([x,z])=>{const s=x<0?1:-1;add(new T.CylinderGeometry(.07,.1,2.8,8),pole,x,1.4,z);add(new T.BoxGeometry(.6,.07,.07),pole,x+s*.28,2.78,z);
-    const b=add(new T.SphereGeometry(.17,12,8),bulb,x+s*.55,2.66,z);b.castShadow=false;
-    if(night){const p=new T.Mesh(new T.CircleGeometry(2.1,24),pool);p.rotation.x=-Math.PI/2;p.position.set(x+s*.55,.03,z);S.add(p)}});
+  LAMPS.forEach(([x,z])=>{const s=x<0?1:-1,LG=new T.Group();LG.position.set(x,0,z);S.add(LG);add(new T.CylinderGeometry(.07,.1,3.2,8),pole,0,1.6,0,LG);add(new T.BoxGeometry(.9,.07,.07),pole,s*.43,3.18,0,LG);
+    const b=add(new T.SphereGeometry(.19,12,8),bulb,s*.85,3.06,0,LG);b.castShadow=false;
+    if(night){const p=new T.Mesh(new T.CircleGeometry(2.3,24),pool);p.rotation.x=-Math.PI/2;p.position.set(s*.85,.03,0);LG.add(p)}});
   if(night)[[0,-10],[0,-1.8],[0,7.5],[-9,0],[9,0]].forEach(([x,z])=>{const l=new T.PointLight(0xffd27a,1.1,15,1.6);l.position.set(x,2.8,z);S.add(l)});
   const marks=[];const mark=(G,e,col,y,x,sc)=>{const s=markSprite(T,e,col,sc);s.position.set(x||0,y,0);s.userData.y=y;G.add(s);marks.push(s)};
 
@@ -330,7 +333,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
       box(.9,1.3,.06,M(0x2f7d5a),0,.65,bw/2+.04,G);
       for(let k=-1;k<=1;k+=2)box(.5,.7,.06,winM,k*bw*.3,bh*.6,bw/2+.03,G);
       let top=bh+bw*.38+.6;
-      (l===2?[1]:l===3?[1,-1]:[]).forEach(k=>{const x=k*(bw/2+.6),z=bw/2-.4,mh=bh*2.2;
+      (l===2?[1]:l===3?[1,-1]:[]).forEach(k=>{const x=k*(bw/2-.35),z=bw/2-.35,mh=bh*2.2; // (v16.3) المآذن على زوايا الجامع نفسه (كانت إحداها على الرصيف)
         add(new T.CylinderGeometry(.32,.4,mh,16),stone,x,mh/2,z,G);
         add(new T.CylinderGeometry(.5,.5,.18,16),stone,x,mh*.82,z,G);
         add(new T.ConeGeometry(.36,.9,16),dome,x,mh+.45,z,G)});
@@ -352,7 +355,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
       box(w,h,d,M(0xe9f5ec),0,h/2,0,G);box(w+.2,.35,d+.2,green,0,h+.17,0,G);
       box(1.1,1.4,.08,green,0,.7,d/2+.04,G);box(.75,1.2,.1,wood,0,.6,d/2+.06,G);
       [-1,1].forEach(k=>box(.7,.6,.06,winM,k*w*.3,h*.6,d/2+.03,G));
-      if(l===3){palm(-w/2-.8,d/2,G);palm(w/2+.8,d/2,G);box(w*.6,h*.6,d*.7,M(0xe9f5ec),0,h+.35+h*.3,0,G);box(w*.6+.2,.25,d*.7+.2,green,0,h+.35+h*.6+.12,0,G);return h*1.65+1.2}
+      if(l===3){palm(-w/2+.2,d/2+1,G);palm(w/2-.2,d/2+1,G);box(w*.6,h*.6,d*.7,M(0xe9f5ec),0,h+.35+h*.3,0,G);box(w*.6+.2,.25,d*.7+.2,green,0,h+.35+h*.6+.12,0,G);return h*1.65+1.2}
       return h+1.3},
     s(G,l){if(l===1){add(new T.CylinderGeometry(1.2,1.3,.2,20),M(0xa98a5e),0,.1,0,G);
         const pts=[[0,0],[.35,0],[.55,.3],[.6,.65],[.45,1],[.25,1.15],[.28,1.35],[0,1.35]].map(([a,b])=>new T.Vector2(a,b));
@@ -983,17 +986,40 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
         o.position.set(x,.07,z);o.scale.set(1.4,.35,1.4);o.updateMatrix();lv.setMatrixAt(i,o.matrix);i++}
       hd.count=lv.count=i;S.add(hd,lv);S.userData.bloomN=i}
     let k=0,i=0;sd=99;while(i<nt&&k<5000){k++;const a=rnd()*Math.PI*2,r=12+rnd()*30,x=Math.cos(a)*r,z=Math.sin(a)*r;if(bad(x,z)||Math.abs(x)<5)continue;tree(x,z,null,.75+((i*7)%4)*.08);i++}}
+  // 🚦 (v16.3) أعمدة الإشارات: لكل ممرّ عمودان (واحد لكل اتجاه) بذراع فوق الحارتين، وإشارة المشاة (رجل أحمر/أخضر) تواجه الطرف الآخر
+  {const pm=M(0x3a3f47,{metalness:.5,roughness:.4}),hm=M(0x15171a),L=[];
+    const lamp=(c,G,x,y,z)=>{const m=new T.MeshBasicMaterial({color:0x2a2a2a});m.userData.c=c;const b=new T.Mesh(new T.CylinderGeometry(.13,.13,.06,14),m);b.rotation.x=Math.PI/2;b.position.set(x,y,z);G.add(b);return m};
+    const man=(c,G,x,y,z,ry)=>{const cv=document.createElement('canvas');cv.width=cv.height=64;const g=cv.getContext('2d');g.fillStyle='#111';g.fillRect(0,0,64,64);g.font='44px system-ui';g.textAlign='center';g.textBaseline='middle';g.fillText('🚶',32,36);
+      const im=g.getImageData(0,0,64,64);for(let i=0;i<im.data.length;i+=4){if(im.data[i+3]>0&&(im.data[i]+im.data[i+1]+im.data[i+2])>60){im.data[i]=c[0];im.data[i+1]=c[1];im.data[i+2]=c[2]}}g.putImageData(im,0,0);
+      const m=new T.MeshBasicMaterial({map:new T.CanvasTexture(cv),color:0x444444});const pl=new T.Mesh(new T.PlaneGeometry(.34,.34),m);pl.position.set(x,y,z);pl.rotation.y=ry;G.add(pl);return m};
+    [-4.6,4.6].forEach(zc=>[1,-1].forEach(dir=>{const sx=dir*(R1+.45),sz=zc-dir*1.9,G=new T.Group();G.userData.rd=1;G.position.set(sx,0,sz);S.add(G);
+      box(.14,4.2,.14,pm,0,2.1,0,G);const arm=box(R1-.2,.12,.12,pm,-dir*(R1-.2)/2,4.05,0,G);arm.castShadow=false;
+      // رأس إشارة السيارات فوق منتصف الحارتين، يواجه السيارات القادمة
+      const hx=-dir*(R1*.5+.45),fz=-dir*.2;box(.42,1.2,.32,hm,hx,3.45,0,G);box(.5,.08,.4,hm,hx,4.08,0,G);
+      const r=lamp(0xff2a2a,G,hx,3.82,fz),y=lamp(0xffb020,G,hx,3.45,fz),gr=lamp(0x22dd55,G,hx,3.08,fz);
+      // إشارة أصغر على العمود نفسه
+      box(.3,.85,.24,hm,-dir*.25,2.4,0,G);const r2=lamp(0xff2a2a,G,-dir*.25,2.66,fz*.9),y2=lamp(0xffb020,G,-dir*.25,2.4,fz*.9),g2=lamp(0x22dd55,G,-dir*.25,2.14,fz*.9);
+      // إشارة المشاة تواجه الطرف الآخر من الشارع
+      box(.12,.85,.42,hm,-dir*.13,1.75,dir*.35,G);const pr=man([255,50,50],G,-dir*.2,1.96,dir*.35,dir>0?-Math.PI/2:Math.PI/2),pg=man([60,230,110],G,-dir*.2,1.56,dir*.35,dir>0?-Math.PI/2:Math.PI/2);
+      L.push({r,y,gr,r2,y2,g2,pr,pg})}));
+    // خطوط التوقّف البيضاء قبل كل ممرّ
+    [-4.6,4.6].forEach(zc=>[1,-1].forEach(dir=>{const l=add(new T.PlaneGeometry(R1-.2,.22),line,dir*R1/2,.023,zc-dir*1.3);l.rotation.x=-Math.PI/2;l.castShadow=false;l.userData.rd=1}));
+    const on=(m,k)=>{m.color.setHex(k?m.userData.c:0x2a2a2a)};
+    anim.push(t=>{const s=sig(),bl=Math.sin(t*8)>0;L.forEach(o=>{on(o.r,s==='r');on(o.y,s==='y');on(o.gr,s==='g');on(o.r2,s==='r');on(o.y2,s==='y');on(o.g2,s==='g');
+      const pg=s==='r',pr=!pg;o.pg.color.setHex(pg?0xffffff:0x333333);o.pr.color.setHex(pr?0xffffff:0x333333)})})}
   shiftScene(S);
   Object.assign(S.userData,{marks,trees,lit,cat});return S}
 // (v16.2) يزيح كل ما في المشهد حسب fX (ما عدا الشارع الجديد المعلَّم rd): الأشياء التي في جهة واحدة تُزاح، والمجموعات الممتدّة على الجهتين
 // يُزاح أبناؤها كلٌّ وحده، وزهور InstancedMesh كلّ زهرة وحدها، والأشياء الضيّقة فوق الشارع (لافتات، حبال زينة) تتّسع معه
 function shiftScene(S){const T=THREE,bx=new T.Box3();S.updateMatrixWorld(true);
   const one=(c,dep)=>{if(c.userData&&c.userData.rd)return;if(c.isLight){if(!c.isDirectionalLight&&!c.isHemisphereLight)c.position.x=fX(c.position.x);return}
+    // (v16.2b) مجموعة لها موضع (بناية، شجرة، نخلة، عمود…) تُزاح كلّها معًا حسب موضعها — لا تُفكَّك (كانت نخلة بناية المستوى ٣ تقع في الشارع)
+    if(!c.isMesh&&!c.isPoints&&Math.abs(c.position.x)>.3){c.position.x=fX(c.position.x);return}
     if(c.isInstancedMesh){const m=new T.Matrix4();for(let i=0;i<c.count;i++){c.getMatrixAt(i,m);m.elements[12]=fX(m.elements[12]);c.setMatrixAt(i,m)}c.instanceMatrix.needsUpdate=true;return}
     bx.setFromObject(c);if(bx.isEmpty())return;const a=bx.min.x,b=bx.max.x;
     if(a>-.2||b<.2){const cx=(a+b)/2;c.position.x+=fX(cx)-cx;return}
-    if(b-a>2*S0+2.5){if(dep<2&&c.children.length&&!c.isMesh)c.children.slice().forEach(k=>one(k,dep+1));return}
-    if(c.children.length&&!c.isMesh&&dep<2){c.children.slice().forEach(k=>one(k,dep+1));return}
+    if(c.children.length&&!c.isMesh&&dep<3&&c.scale.x===1&&!c.rotation.y){c.children.slice().forEach(k=>one(k,dep+1));return}
+    if(b-a>2*S0+2.5)return;
     if(c.isMesh&&!c.isSprite)c.scale.x*=R1/R0};
   S.children.slice().forEach(c=>one(c,0))}
 
@@ -1354,6 +1380,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       // (v14.7) 🚌 باص المدينة يقف عند الموقف ٧ ثوانٍ (من ٦ صباحًا إلى ١١ ليلًا): ينزل ركّاب ويصعد المنتظرون
       if(c.cb){const sc=c.st.z-2.1*c.dir;if(c.hold>0){c.hold-=dt;block=true}else if(!c.done&&!block&&h>=6&&h<23&&!o.sleep){const ah=(sc-c.z)*c.dir;if(ah>=0&&ah<=c.sp*dt*1.6+.05){c.z=sc;c.hold=7;c.done=1;block=true;busArrive(c)}}}
       if(c.dir<0&&phase&&c.z>=Z1&&cars.some(s=>s.v.visible&&s.v.position.z>530))block=true; // لا تدخل سيارة فوق الباص لحظة ظهوره
+      {const L=sig();if(L!=='g'&&!o.sleep)[-4.6,4.6].forEach(zc=>{const stop=zc-c.dir*1.35,front=c.z+c.dir*(c.cb?3:1.4),ah=(stop-front)*c.dir;if(ah>-.05&&ah<(L==='y'?2.2:3.2)&&!(L==='y'&&ah<.6))block=true})}
       if(!block)c.z+=c.dir*c.sp*(rush?.45:1)*dt;
       if(c.dir>0&&c.z>Z1||c.dir<0&&c.z<Z0){c.z=c.dir>0?Z0:Z1;c.done=0;if(c.ru){c.on=rush;c.v.visible=rush}}c.v.position.z=c.z});
     // (v14.5) الوالدان والجارة بالنهار، والأطفال يلعبون الكرة العصر
@@ -1380,7 +1407,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       if(u.gr<1){u.gr=Math.min(1,u.gr+dt*.9);setOp(P,u.gr)}else if(!P.visible)setOp(P,1);
       if(u.hold>0){u.hold-=dt;u.v=0;if(K)turn(P,Math.atan2(K.x-P.position.x,K.z-P.position.z),dt,5);P.position.y=0;return}
       if(u.greet>0){u.greet-=dt;u.v=Math.max(0,u.v-dt*2);P.position.y=Math.abs(Math.sin(t*2))*.04;if(u.greet<=0)endGreet(i);if(u.v<=0)return}
-      if(u.look>0){u.look-=dt;u.v=Math.max(0,u.v-dt*3);const q=u.pts[0];if(q)P.rotation.y=Math.atan2(q[0]-P.position.x,q[1]-P.position.z)+Math.sin(u.look*4.2)*1.05;P.position.y=0;return}
+      if(u.look>0){u.look-=dt;if(u.look<=0&&nearZeb(P.position.x,P.position.z)&&!pedGo())u.look=.25;u.v=Math.max(0,u.v-dt*3);const q=u.pts[0];if(q)P.rotation.y=Math.atan2(q[0]-P.position.x,q[1]-P.position.z)+Math.sin(u.look*4.2)*1.05;P.position.y=0;return}
       if(u.shep&&!u.pts.length){u.w-=dt;P.position.y=0;if(u.w<=0){u.pts=[[FLK[0]+(Math.random()-.5)*7,FLK[1]+(Math.random()-.5)*7]];u.w=2+Math.random()*4}return}
       if(!u.pts.length){ // وصل: يدخل الباب ويغيب، أو يبتعد في آخر الشارع
         u.fade+=dt*.9;const dr=dt*.45*(1-u.fade);P.position.x+=Math.sin(P.rotation.y)*dr;P.position.z+=Math.cos(P.rotation.y)*dr;setOp(P,1-u.fade);P.position.y=0;if(u.fade>=1){P.visible=false;if(u.bub)endGreet(i);u.trip=-1;u.gap=2+Math.random()*6}return}
@@ -1403,7 +1430,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
     parkTick(t,dt,o,h);
     walkers=walkers.filter(w=>{const P=w.P;if(w.grow!=null&&w.grow<1){w.grow=Math.min(1,w.grow+dt*1.1);P.scale.setScalar(P.userData.bs);setOp(P,Math.max(.02,w.grow))}
       if(!w.pts.length){if(w.end==='enter'||w.end==='gone'){w.k+=dt*1.1;const dr=dt*.5*(1-w.k);P.position.x+=Math.sin(P.rotation.y)*dr;P.position.z+=Math.cos(P.rotation.y)*dr;setOp(P,1-w.k);if(w.k>1){g.remove(P);P.traverse(x=>{x.geometry&&x.geometry.dispose();x.material&&x.material.dispose()});return false}}return true}
-      if(w.pause>0){w.pause-=dt;const [nx,nz]=w.pts[0];P.rotation.y=Math.atan2(nx-P.position.x,nz-P.position.z)+Math.sin(w.pause*4.5)*1.1;P.position.y=0;return true}
+      if(w.pause>0||w.sigW){w.pause-=dt;if(w.pause<=0){w.sigW=nearZeb(P.position.x,P.position.z)&&!pedGo();if(w.sigW)w.pause=.25}const [nx,nz]=w.pts[0];P.rotation.y=Math.atan2(nx-P.position.x,nz-P.position.z)+Math.sin(w.pause*4.5)*1.1;P.position.y=0;return true}
       const [tx,tz,wt]=w.pts[0],dx=tx-P.position.x,dz=tz-P.position.z,d=Math.hypot(dx,dz);w.v=(w.v||0)+(w.sp-(w.v||0))*Math.min(1,dt*2.2);const sp=w.v*dt*(d>1e-4?spF(P.position.x,dx/d,dz/d):1),cut=w.pts.length>1&&!wt?.4:0;
       if(d<=Math.max(sp,cut)){if(!cut){P.position.x=tx;P.position.z=tz}w.pts.shift();if(wt)w.pause=wt}else{P.position.x+=dx/d*sp;P.position.z+=dz/d*sp;turn(P,Math.atan2(dx,dz),dt,7)}
       P.position.y=Math.abs(Math.sin(t*6+P.id))*.05*Math.min(1,(w.v||0)/Math.max(.1,w.sp));return true});try{separate(o)}catch(e){}swing(dt)}
@@ -1977,7 +2004,7 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
     (S.userData.marks||[]).forEach((m,i)=>m.position.y=m.userData.y+Math.sin(t+i)*.18);
     const L=kid.userData;
     if(path.length&&lookT>0){// 🚸 يقف عند حافة الرصيف وينظر يمينًا ويسارًا قبل العبور
-      lookT-=dt;const [nx,nz]=path[0];kid.rotation.y=Math.atan2(nx-kid.position.x,nz-kid.position.z)+Math.sin((1.6-lookT)*4)*1.1;
+      lookT-=dt;if(lookT<=0&&nearZeb(kid.position.x,kid.position.z)&&!pedGo()){lookT=.3;if(!kid.userData.sw){kid.userData.sw=1;life.say(kid,'🚦 أنتظر الضوء الأخضر',3,2.4)}}else if(lookT<=0)kid.userData.sw=0;const [nx,nz]=path[0];kid.rotation.y=Math.atan2(nx-kid.position.x,nz-kid.position.z)+Math.sin((1.6-lookT)*4)*1.1;
       L.legs.forEach(l=>l.rotation.x*=.7);L.arms.forEach(a=>a.rotation.x*=.7);kid.position.y=0;still=0}
     else if(path.length){const [tx,tz,lk]=path[0],dx=tx-kid.position.x,dz=tz-kid.position.z,d=Math.hypot(dx,dz),sp=kidSp*dt*(fast&&!escort&&!fallEsc&&!carry?2.6:1)*(d>1e-4?spF(kid.position.x,dx/d,dz/d):1);
       if(d<=sp){kid.position.x=tx;kid.position.z=tz;path.shift();if(lk&&path.length)lookT=fast?.9:1.6;if(!path.length)fast=0;if(!path.length&&onArrive){const f=onArrive;onArrive=null;setTimeout(f,150)}}
