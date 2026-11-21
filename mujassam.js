@@ -1106,7 +1106,7 @@ function sickDay(){const d=window.City3D&&City3D.debugSick;if(d!=null)return !!d
 // وقت لعب الكرة: العصر، وصباح الجمعة والسبت أيضًا
 // (v16.4) طلب الشيخ: في العطل (الجمعة والسبت، الصيفية، نصف السنة، العيد والمناسبات السعيدة) يلعب الأطفال صباحًا وعصرًا، وفي باقي الأيام عصرًا فقط
 const footHol=()=>{try{return !!parkWhy()}catch(e){return false}};
-function footNow(){const h=hourNow(),M=maghribH()-.15;if(rainNow())return false;return footHol()?(h>=9&&h<12.5||h>=15&&h<M):(h>=15&&h<M)}
+function footNow(){const h=hourNow(),M=maghribH()-.15;if(rainNow())return false;return footHol()?(h>=8.5&&h<M):(h>=13.5&&h<M)} // (v16.5) الشيخ وجد الملعب فارغًا ظهر يوم عطلة: في العطل يلعبون من ٨:٣٠ صباحًا حتى المغرب بلا انقطاع، وفي باقي الأيام بعد المدرسة ١:٣٠ حتى المغرب
 // (v15.4) طلب الشيخ: 🎡 مدينة الألعاب يحضرها الأطفال الجمعة والسبت، والعطل (الصيفية ١٥ حزيران–آخر آب، ونصف السنة ٢٠ ك٢–٥ شباط)، والعيدين والمناسبات السعيدة.
 // مغلقة في أيام الحزن (محرّم…). تعمل من ٩ صباحًا حتى ٩ مساءً، ولا تعمل وقت المطر.
 function parkWhy(){const d=window.City3D&&City3D.debugPark;if(d!=null)return d?'🎉 يوم عطلة':null;const o=occNow();if(o&&o.k==='sad')return null;if(festNow()==='eid')return '🎉 اليوم عيد';if(o&&o.k==='joy')return o.t;
@@ -1791,7 +1791,7 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
       go(door('home'),()=>{const left=[['s','👋 السلام عليكم يا أمّي ويا أبي'],['b','🛍️ أحمل الأغراض عن أمّي'],['h','🤲 أقبّل يد أبي']].filter(x=>!br[x[0]]);
         if(!left.length){card(`👨‍👩‍👦 والداك يدعوان لك ويقولان: الله يحفظك 🤲<br><small>${B('برَرتَ','برَرتِ')} بهما اليوم، ${B('تعال','تعالي')} غدًا من جديد 🤍</small>`,[['الحمد لله',null]]);return}
         card(`👨‍👩‍👦 ${B('أبوك','أبوكِ')} و${B('أمّك','أمّكِ')} عند باب البيت… ${B('أمّك','أمّكِ')} تحمل أكياسًا ثقيلة 🛍️<br><small>ماذا ${B('تفعل','تفعلين')}؟</small>`,left.map(x=>[x[1],()=>act(x[0])]).concat([['لاحقًا',null,'sec']]))})},
-    football(){const D=day();if(night||sleeping||!footNow()){card(`⚽ الملعب فارغ الآن… يلعب أطفال الحيّ العصر${wDay()>=5?' وصباح العطلة':''} 🙂`);setTimeout(()=>card(''),2400);return}
+    football(){const D=day();if(night||sleeping||!footNow()){card(`⚽ الملعب فارغ الآن… ${rainNow()?'الجوّ ممطر اليوم 🌧️':'يلعب أطفال الحيّ بعد المدرسة حتى المغرب، وفي العطل من الصباح'} 🙂`);setTimeout(()=>card(''),2400);return}
       go({x:FB[0]-3.5,z:-18.5,via:null},()=>{try{life.fb.fall()}catch(e){}const help=()=>{try{life.fb.up()}catch(e){}const first=!D.fb;D.fb=1;dsv();if(first)jewels(2);else{joyT=1.1;burst()}
           card(`🤝 ${B('ساعدتَ','ساعدتِ')} اللاعب على النهوض، فقال: شكرًا يا ${B('صديقي','صديقتي')}!${first?' 💎 +٢':''}<br><b style="color:#1fa463;font-size:18px">🌟 هذا عمل صالح!</b><br><small>الروح الرياضية: نلعب بمحبّة، ونساعد من يقع، ولا نغضب إذا خسرنا 🤍</small>`,[['الحمد لله',null]])};
         card(`⚽ أطفال الحيّ يلعبون… فجأة وقع لاعبٌ من الفريق الآخر 🤕<br><small>ماذا ${B('تفعل','تفعلين')}؟</small>`,[['🤝 أساعده على النهوض',help],['أكمل اللعب وأسجّل هدفًا',()=>card(`🤍 الهدف يستطيع أن ينتظر… الأجمل أن ${B('تساعده','تساعديه')} أوّلًا`,[['🤝 أساعده',help]]),'sec']])})},
