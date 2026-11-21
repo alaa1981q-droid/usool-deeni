@@ -1104,7 +1104,9 @@ function sunsetBirds(){const h=hourNow(),m=maghribH();return h>=m-.9&&h<m+.2}
 // جار مريض: يوم من كل ثلاثة تقريبًا
 function sickDay(){const d=window.City3D&&City3D.debugSick;if(d!=null)return !!d;const n=new Date(),k=n.getFullYear()*372+n.getMonth()*31+n.getDate();return (k*40503>>>0)%3===0}
 // وقت لعب الكرة: العصر، وصباح الجمعة والسبت أيضًا
-function footNow(){const h=hourNow(),we=wDay()>=5;return !rainNow()&&(h>=15&&h<maghribH()-.15||we&&h>=9.5&&h<11.8)}
+// (v16.4) طلب الشيخ: في العطل (الجمعة والسبت، الصيفية، نصف السنة، العيد والمناسبات السعيدة) يلعب الأطفال صباحًا وعصرًا، وفي باقي الأيام عصرًا فقط
+const footHol=()=>{try{return !!parkWhy()}catch(e){return false}};
+function footNow(){const h=hourNow(),M=maghribH()-.15;if(rainNow())return false;return footHol()?(h>=9&&h<12.5||h>=15&&h<M):(h>=15&&h<M)}
 // (v15.4) طلب الشيخ: 🎡 مدينة الألعاب يحضرها الأطفال الجمعة والسبت، والعطل (الصيفية ١٥ حزيران–آخر آب، ونصف السنة ٢٠ ك٢–٥ شباط)، والعيدين والمناسبات السعيدة.
 // مغلقة في أيام الحزن (محرّم…). تعمل من ٩ صباحًا حتى ٩ مساءً، ولا تعمل وقت المطر.
 function parkWhy(){const d=window.City3D&&City3D.debugPark;if(d!=null)return d?'🎉 يوم عطلة':null;const o=occNow();if(o&&o.k==='sad')return null;if(festNow()==='eid')return '🎉 اليوم عيد';if(o&&o.k==='joy')return o.t;
@@ -1336,14 +1338,70 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
   // (v14.5) 👨‍👩‍👦 والدا الطفل عند باب البيت (بالنهار): الأمّ تحمل أكياسًا، والأب يستقبله
   const father=person('man',2),mother=person('woman',5);father.position.set(-3.15,0,-.35);mother.position.set(-3.15,0,2.35);[father,mother].forEach(P=>{P.rotation.y=Math.PI/2;P.userData.act='parents'});
   mother.userData.bags=[-1,1].map(k=>add(new T.BoxGeometry(.24,.28,.14),M(k<0?0xe9e2cf:0xd6e8f5),k*.36,.5,0,mother));
-  // ⚽ أطفال يلعبون الكرة العصر: فريق أحمر وفريق أزرق، والكرة تنتقل بينهم
-  const FBK=[],FBH=[[-1.6,-2.6],[1.4,-2.2],[0,-3.6],[-1.4,2.4],[1.5,2.6],[0,3.6]];
-  for(let i=0;i<6;i++){const p=person('kid',i<3?i*6:1+(i-3)*6);p.userData.bag.visible=false;p.userData.act='football';p.userData.fh=FBH[i];p.position.set(FB[0]+FBH[i][0],0,FB[1]+FBH[i][1]);FBK.push(p)}
+  // ⚽ (v16.4) مباراة حقيقية: فريق أحمر وفريق أزرق بحارسين (حارس أصفر وحارس أخضر). في العطل ٥ ضد ٥ ومتفرّجون، وفي الأيام العادية ٣ ضد ٣.
+  // اللاعب يراوغ بالكرة أمام قدميه، يمرّر لزميل متقدّم، يسدّد قرب المرمى، والحارس يصدّ أحيانًا؛ المنافس يلاحق ويخطف الكرة؛
+  // رمية تماس وضربة مرمى، والهدف: احتفال وصافرة ولوحة نتيجة، ثم ضربة بداية من الوسط
+  let life_fb=null;const FW=3.1,FL=4.5,TC=[0xd63b3b,0x2f6fd0],KC=[0xffc53a,0x3fbf6a],FBK=[];
+  const FORM={5:[[0,-4.1],[-1.5,-2.5],[1.5,-2.5],[-.9,-.4],[1,.7]],3:[[0,-4.1],[-1.2,-1.9],[1.1,-.1]]};
+  for(let i=0;i<10;i++){const tm=i<5?0:1,k=i%5,p=person('kid',i*3+1);if(p.userData.bag)p.userData.bag.visible=false;p.userData.act='football';
+    try{p.children[0].material.color.setHex(k?TC[tm]:KC[tm])}catch(e){}p.userData.fb={tm,k,v:0,st:0};p.visible=false;FBK.push(p)}
+  const FAN=['man','woman','kid','kid'].map((k,i)=>{const p=person(k,i+7);if(p.userData.bag)p.userData.bag.visible=false;p.position.set(FB[0]+FW+.9,0,FB[1]-1.8+i*1.2);p.rotation.y=-Math.PI/2;p.visible=false;return p});
   const ball=new T.Mesh(new T.SphereGeometry(.15,14,10),new T.MeshStandardMaterial({color:0xffffff,roughness:.5}));[[0,.15,0],[0,-.15,0],[.15,0,0],[-.15,0,0],[0,0,.15],[0,0,-.15]].forEach(q=>{const d=new T.Mesh(new T.SphereGeometry(.05,6,4),M(0x222222));d.position.set(...q);ball.add(d)});
-  ball.position.set(FB[0],.15,FB[1]);ball.userData.act='football';g.add(ball);const bl={from:null,to:null,k:1,who:0,wait:1};
+  ball.position.set(FB[0],.15,FB[1]);ball.userData.act='football';g.add(ball);
+  // لوحة النتيجة خلف المرمى
+  const sbc=document.createElement('canvas');sbc.width=256;sbc.height=96;const sbx=sbc.getContext('2d'),sbt=new T.CanvasTexture(sbc);
+  const SB=new T.Group();SB.position.set(FB[0],0,FB[1]-FL-1.1);g.add(SB);[-1,1].forEach(k=>{const p=new T.Mesh(new T.CylinderGeometry(.05,.05,1.9,6),M(0x555555));p.position.set(k*.9,.95,0);SB.add(p)});
+  const sbm=new T.Mesh(new T.PlaneGeometry(2,.75),new T.MeshBasicMaterial({map:sbt}));sbm.position.y=1.75;SB.add(sbm);SB.visible=false;
+  const FG={sc:[0,0],own:-1,last:0,st:'kick',tt:1.2,b:[0,0,.15],v:[0,0,0],dec:1,save:0,fall:-1,n:3,hold:0};
+  function sbDraw(){sbx.fillStyle='#1d2430';sbx.fillRect(0,0,256,96);sbx.strokeStyle='#ffc53a';sbx.lineWidth=5;sbx.strokeRect(3,3,250,90);sbx.font='900 52px system-ui';sbx.textAlign='center';sbx.textBaseline='middle';
+    sbx.fillStyle='#ff6b6b';sbx.fillText(String(FG.sc[0]),70,52);sbx.fillStyle='#fff';sbx.fillText('-',128,50);sbx.fillStyle='#6fa8ff';sbx.fillText(String(FG.sc[1]),186,52);
+    sbx.fillStyle='#d63b3b';sbx.fillRect(14,14,20,20);sbx.fillStyle='#2f6fd0';sbx.fillRect(222,14,20,20);sbt.needsUpdate=true}sbDraw();
+  const whistle=n=>{try{if(sndOn()&&typeof tone=='function')for(let i=0;i<n;i++)tone(2300,.16,'square',.025,i*.22)}catch(e){}};
   // 🔥 الجارة عند التنّور
   const baker=person('woman',6);baker.position.set(11.1,0,25.5);baker.rotation.y=-Math.PI*.7;baker.userData.act='tannour';
   let lastCycle=-1;
+  function football(t,dt){const n=footHol()?5:3,F=FORM[n];if(FG.n!==n){FG.n=n;FG.own=-1;FG.st='kick';FG.tt=1}
+    const act=FBK.filter(p=>p.userData.fb.k<n),L=p=>[p.position.x-FB[0],p.position.z-FB[1]],gz=tm=>tm?-FL:FL,dz=tm=>tm?-1:1,B=FG.b,V=FG.v;
+    FBK.forEach(p=>{const on=p.userData.fb.k<n;if(on&&!p.visible){const u=p.userData.fb,f=F[u.k],s=u.tm?-1:1;p.position.set(FB[0]+f[0]*s,0,FB[1]+f[1]*s);p.rotation.set(0,u.tm?Math.PI:0,0)}p.visible=on});
+    const mv=(p,x,z,sp)=>{x=Math.max(-FW+.15,Math.min(FW-.15,x));z=Math.max(-FL-.1,Math.min(FL+.1,z));return glide(p,p.userData.fb,FB[0]+x,FB[1]+z,sp,dt,t)};
+    const kick=(tx,tz,spd,lift)=>{const dx=tx-B[0],dz2=tz-B[1],d=Math.hypot(dx,dz2)||1;V[0]=dx/d*spd;V[1]=dz2/d*spd;V[2]=lift;FG.own=-1;FG.cool=.35};
+    const near=(tm,x,z,ex)=>{let bi=null,bd=1e9;act.forEach(p=>{const u=p.userData.fb;if(u.tm!==tm||p===ex||u.k===0&&tm!==null&&ex!=='gk')return;const [px,pz]=L(p),d=Math.hypot(px-x,pz-z);if(d<bd){bd=d;bi=p}});return [bi,bd]};
+    if(FG.fall>=0){const P=FBK[FG.fall];P.rotation.z=1.45;P.position.y=.18;act.forEach(p=>{if(p!==P){const [px,pz]=L(p);mv(p,px*.98,pz*.98,.6)}});return}
+    // الهدف: احتفال ثم ضربة بداية
+    if(FG.st==='goal'){FG.tt-=dt;act.forEach(p=>{const u=p.userData.fb,[px,pz]=L(p);if(u.tm===FG.last&&u.k){mv(p,px+(B[0]-px)*.02,pz+(B[1]-pz)*.02,1.2);p.position.y=Math.abs(Math.sin(t*7+u.k))*.35}else{const f=F[u.k],s=u.tm?-1:1;mv(p,f[0]*s,f[1]*s,1.3)}});
+      ball.position.set(FB[0]+B[0],.15,FB[1]+B[1]);if(FG.tt<=0){FG.st='kick';FG.tt=1.4;B[0]=0;B[1]=0;B[2]=.15;V[0]=V[1]=V[2]=0}return}
+    if(FG.st==='kick'){FG.tt-=dt;const kt=1-FG.last;act.forEach(p=>{const u=p.userData.fb,f=F[u.k],s=u.tm?-1:1;mv(p,u.tm===kt&&u.k===n-1?0:f[0]*s,u.tm===kt&&u.k===n-1?-.35*dz(kt):Math.min(-.6,f[1])*s,1.4)});
+      ball.position.set(FB[0],.15,FB[1]);if(FG.tt<=0){whistle(1);FG.st='play';FG.own=FBK.indexOf(act.find(p=>p.userData.fb.tm===kt&&p.userData.fb.k===n-1));FG.dec=.5}return}
+    // الكرة: مع لاعب أو حرّة (تتدحرج وتتباطأ، وترتفع وتسقط)
+    if(FG.cool>0)FG.cool-=dt;
+    if(FG.own>=0){const P=FBK[FG.own],u=P.userData.fb,[px,pz]=L(P),a=P.rotation.y;B[0]=px+Math.sin(a)*.34;B[1]=pz+Math.cos(a)*.34;B[2]=.15;V[0]=V[1]=V[2]=0;FG.last=u.tm;
+      if(FG.hold>0){FG.hold-=dt;if(FG.hold<=0){const [mt]=near(u.tm,0,dz(u.tm)*-1,P);if(mt){const [mx,mz]=L(mt);kick(mx,mz,Math.hypot(mx-B[0],mz-B[1])*1.5+2,1.6)}}}
+      else{FG.dec-=dt;const G2=gz(u.tm),dG=Math.abs(G2-pz);
+        if(u.k===0){FG.dec=Math.min(FG.dec,.4)}
+        if(FG.dec<=0){const [op,od]=near(1-u.tm,px,pz);
+          if(u.k&&dG<2.9&&od>.7&&Math.random()<.45){const ax=(Math.random()-.5)*3;FG.save=Math.random()<.68;kick(ax,G2+dz(u.tm)*.6,7+Math.random()*1.5,.6+Math.random()*1.8)}
+          else if(od<1.2||Math.random()<.5||u.k===0){let best=null,bs=-1e9;act.forEach(m=>{const mu=m.userData.fb;if(mu.tm!==u.tm||m===P||mu.k===0)return;const [mx,mz]=L(m),[,mo]=near(1-u.tm,mx,mz),sc2=mz*dz(u.tm)+Math.min(mo,2)*1.2-Math.hypot(mx-px,mz-pz)*.15;if(sc2>bs){bs=sc2;best=m}});
+            if(best){const [mx,mz]=L(best),ld=Math.hypot(mx-B[0],mz-B[1]);kick(mx+Math.sin(best.rotation.y)*.4,mz+Math.cos(best.rotation.y)*.4,ld*1.55+1.8,ld>3?2.4:.25)}}
+          FG.dec=.7+Math.random()*1.2}
+        if(FG.own>=0)mv(P,Math.max(-2.4,Math.min(2.4,px*.5+Math.sin(t*.8+u.k)*1.3)),G2-dz(u.tm)*.9,2.05)}}
+    else{B[0]+=V[0]*dt;B[1]+=V[1]*dt;V[2]-=9.8*dt;B[2]+=V[2]*dt;if(B[2]<.15){B[2]=.15;V[2]=Math.abs(V[2])>1.2?-V[2]*.45:0}const fr=Math.max(0,1-(B[2]>.2?.2:1.3)*dt);V[0]*=fr;V[1]*=fr;
+      ball.rotation.x+=V[1]*dt*5;ball.rotation.z-=V[0]*dt*5;
+      if(Math.abs(B[1])>FL){const side=B[1]>0?1:0;if(Math.abs(B[0])<.95&&B[2]<1.05){FG.sc[1-side]++;FG.last=1-side;sbDraw();whistle(2);FG.st='goal';FG.tt=3.2;
+          const sc=act.find(p=>p.userData.fb.tm===FG.last&&p.userData.fb.k===n-1);if(sc)say(sc,'⚽ هدف!',2.4,1.8);FAN.forEach((p,i)=>{if(p.visible&&i<2)say(p,'👏👏',2,2.2)});B[1]=Math.sign(B[1])*(FL+.3);V[0]=V[1]=V[2]=0;return}
+        const gk=act.find(p=>p.userData.fb.tm===(B[1]>0?1:0)&&p.userData.fb.k===0);B[1]=Math.sign(B[1])*(FL-.5);B[0]=0;V[0]=V[1]=V[2]=0;if(gk){FG.own=FBK.indexOf(gk);FG.hold=.9}}
+      else if(Math.abs(B[0])>FW){B[0]=Math.sign(B[0])*(FW-.1);V[0]=V[1]=V[2]=0;const [tk]=near(1-FG.last,B[0],B[1]);if(tk){FG.own=FBK.indexOf(tk);FG.hold=.8;tk.position.x=FB[0]+B[0];tk.position.z=FB[1]+B[1]}}}
+    ball.position.set(FB[0]+B[0],B[2],FB[1]+B[1]);
+    // اللاعبون: الأقرب من كل فريق يلاحق الكرة، والحارس يتحرّك على خطّه ويصدّ، والباقون يأخذون مواقعهم مع حركة اللعب
+    const free=FG.own<0,ow=FG.own>=0?FBK[FG.own]:null,owT=ow?ow.userData.fb.tm:-1,chs=[0,1].map(tm=>near(tm,B[0]+V[0]*.25,B[1]+V[1]*.25)[0]);
+    act.forEach(p=>{const u=p.userData.fb,[px,pz]=L(p),s=u.tm?-1:1;if(p===ow)return;
+      if(u.k===0){const gl=-gz(u.tm)+dz(u.tm)*.35,tx=Math.max(-.85,Math.min(.85,B[0]*.45));mv(p,tx,gl,1.9);
+        if(free&&FG.cool<=0&&Math.hypot(px-B[0],pz-B[1])<.75&&B[2]<1.2&&(Math.abs(B[1]+gz(u.tm))<1.6)&&(FG.save||Math.hypot(V[0],V[1])<4)){FG.own=FBK.indexOf(p);FG.hold=1;FG.save=0;say(p,'🧤',1.2,1.8)}return}
+      if(p===chs[u.tm]&&(free||owT!==u.tm)){mv(p,B[0],B[1],2.15);const d=Math.hypot(px-B[0],pz-B[1]);
+        if(free&&FG.cool<=0&&d<.4&&B[2]<.6){FG.own=FBK.indexOf(p);FG.dec=.4+Math.random()*.6}
+        else if(ow&&d<.45&&Math.random()<dt*2){FG.own=FBK.indexOf(p);FG.dec=.6;FG.cool=.4}return}
+      const f=F[u.k],atk=owT===u.tm?.9:owT>=0?-.5:0;mv(p,f[0]*s+B[0]*.25,Math.max(-FL+.6,Math.min(FL-.6,f[1]*s+B[1]*.55+atk*s)),1.5)})}
+  life_fb={fall(){const c=FBK.filter(p=>p.visible&&p.userData.fb.k);if(!c.length)return;const P=c[Math.floor(Math.random()*c.length)];FG.fall=FBK.indexOf(P);FG.own=-1},
+    up(){if(FG.fall<0)return;const P=FBK[FG.fall];P.rotation.z=0;P.position.y=0;FG.fall=-1;say(P,'شكرًا 🤍',2,1.8)}};
   function update(t,dt,o){const h=hourNow(),day=!night;
     // الساحة والحارس
     Object.values(sellers).forEach((P,i)=>{P.visible=day&&!o.sleep;P.rotation.y=-Math.PI/2+Math.sin(t*.3+i*2)*.35;P.position.y=Math.abs(Math.sin(t*.9+i))*.02});
@@ -1386,13 +1444,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
     // (v14.5) الوالدان والجارة بالنهار، والأطفال يلعبون الكرة العصر
     [father,mother].forEach(P=>{P.visible=day&&!o.sleep});mother.userData.bags.forEach(b=>b.visible=!o.bagsDone);baker.visible=day&&!o.sleep;
     if(baker.visible)baker.rotation.x=Math.max(0,Math.sin(t*.9))*.25;
-    const play=day&&!o.sleep&&footNow();ball.visible=play;FBK.forEach(p=>p.visible=play);
-    if(play){bl.wait-=dt;if(bl.k<1){bl.k=Math.min(1,bl.k+dt*1.2);const a=bl.from,b2=bl.to;ball.position.set(a.x+(b2.x-a.x)*bl.k,.15+Math.sin(bl.k*Math.PI)*.9,a.z+(b2.z-a.z)*bl.k);ball.rotation.x+=dt*8}
-      else if(bl.wait<=0){const tg=FBK[Math.floor(Math.random()*6)];bl.from=ball.position.clone();bl.to={x:tg.position.x,z:tg.position.z};bl.k=0;bl.wait=1.3+Math.random();bl.who=FBK.indexOf(tg)}
-      FBK.forEach((p,i)=>{const h0=p.userData.fh,chase=i===bl.who||Math.hypot(ball.position.x-p.position.x,ball.position.z-p.position.z)<1.6;
-        const tx=chase?ball.position.x:FB[0]+h0[0]+Math.sin(t*.4+i)*.8,tz=chase?ball.position.z:FB[1]+h0[1]+Math.cos(t*.3+i)*.6,dx=tx-p.position.x,dz=tz-p.position.z,d=Math.hypot(dx,dz);
-        if(d>.35){const sp=Math.min(d-.3,dt*(chase?2.4:1.2));p.position.x+=dx/d*sp;p.position.z+=dz/d*sp;p.rotation.y=Math.atan2(dx,dz);p.position.y=Math.abs(Math.sin(t*9+i))*.06}else{p.rotation.y=Math.atan2(ball.position.x-p.position.x,ball.position.z-p.position.z);p.position.y=0}
-        p.position.x=Math.max(FB[0]-2.9,Math.min(FB[0]+2.9,p.position.x));p.position.z=Math.max(FB[1]-4.3,Math.min(FB[1]+4.3,p.position.z))})}
+    {const play=day&&!o.sleep&&footNow();ball.visible=play;SB.visible=play;if(!play)FBK.forEach(p=>p.visible=false);FAN.forEach(p=>p.visible=play&&footHol());if(play)football(t,dt);}
     // (v14.7) 🚌 ناس يأتون إلى الموقف وينتظرون الباص (حتى ٤ في كل موقف)
     stops.forEach(st=>{st.t-=dt;if(st.t>0)return;st.t=6+Math.random()*8;if(h<6||h>=22.5||o.sleep||st.q.length>=4)return;
       const p=ppl();if(p.userData.bag)p.userData.bag.visible=false;const from=st.z+(Math.random()<.5?-1:1)*(18+Math.random()*12),i=st.q.length;
@@ -1439,7 +1491,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
   function separate(o){const L=[],add=(P,mv,ox,oz)=>L.push({P,mv,ox:ox||0,oz:oz||0,r:.27*(P.userData.bs||P.scale.x)});
     walkers.forEach(w=>{if(w.P.visible&&!(w.k>0))add(w.P,w.pause>0?.5:1)});
     peds.forEach(P=>{const u=P.userData.u;if(P.visible&&!u.fade&&!u.off)add(P,u.hold>0||u.greet>0?0:1)});
-    yard.forEach(p=>{if(p.visible&&!(p.userData.lv>0))add(p,1)});wand.forEach(P=>{if(P.visible)add(P,1,PKC[0],PKC[1])});
+    yard.forEach(p=>{if(p.visible&&!(p.userData.lv>0))add(p,1)});FBK.forEach(p=>{if(p.visible&&!p.rotation.z)add(p,.6)});wand.forEach(P=>{if(P.visible)add(P,1,PKC[0],PKC[1])});
     [father,mother,elder,baker,guard,faller].concat(Object.values(sellers)).forEach(P=>{if(P&&P.visible&&P.parent===g)add(P,0)});
     if(o.kid&&o.kidOn)L.push({K:o.kid,mv:0,ox:0,oz:0,r:.24});const n=L.length,X=i=>L[i].K?L[i].K.x:L[i].P.position.x+L[i].ox,Z=i=>L[i].K?L[i].K.z:L[i].P.position.z+L[i].oz;
     for(let i=0;i<n;i++){const a=L[i],ax=X(i),az=Z(i);for(let j=i+1;j<n;j++){const b=L[j];if(!a.mv&&!b.mv)continue;let dx=X(j)-ax,dz=Z(j)-az;const md=a.r+b.r+.08;
@@ -1525,7 +1577,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       for(let i=0;i<=n;i++){const kid2=i>0,P=person(kid2?'kid':Math.random()<.55?'man':'woman',Math.floor(Math.random()*12)),o2=(i-.5)*.32;
         let pts=src.map(q=>[q[0]+(Math.abs(q[0])<4?o2:0),q[1]]).concat([[L2+o2,GZ+.3*i],[GX,GZ+o2],[GX-2.4,GZ+o2*2]]);if(back)pts=pts.reverse();
         P.userData.bs=P.scale.x;if(back)P.scale.setScalar(.01);walk(P,pts,kid2?1.35:1.2,back?'gone':'enter');const w=walkers[walkers.length-1];w.pk=1;if(back)w.grow=0}}}}
-  return {g,update,setQuiet:q=>{quiet=q},stops,count:()=>walkers.length,peds,say,endGreet,traffic,sellers,elder,faller,fallMk,father,mother,baker,FBK}}
+  return {g,update,fb:life_fb,fbs:()=>FG,setQuiet:q=>{quiet=q},stops,count:()=>walkers.length,peds,say,endGreet,traffic,sellers,elder,faller,fallMk,father,mother,baker,FBK}}
 
 /* ---------- (v11.9) أصوات المدينة: نهارًا عصافير وحركة سير هادئة، وليلًا هدوء. تُصنع بالكود (بلا ملفات)، وتحترم كتم صوت التطبيق ---------- */
 const SKEY='usul5_m3snd';
@@ -1740,7 +1792,7 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
         if(!left.length){card(`👨‍👩‍👦 والداك يدعوان لك ويقولان: الله يحفظك 🤲<br><small>${B('برَرتَ','برَرتِ')} بهما اليوم، ${B('تعال','تعالي')} غدًا من جديد 🤍</small>`,[['الحمد لله',null]]);return}
         card(`👨‍👩‍👦 ${B('أبوك','أبوكِ')} و${B('أمّك','أمّكِ')} عند باب البيت… ${B('أمّك','أمّكِ')} تحمل أكياسًا ثقيلة 🛍️<br><small>ماذا ${B('تفعل','تفعلين')}؟</small>`,left.map(x=>[x[1],()=>act(x[0])]).concat([['لاحقًا',null,'sec']]))})},
     football(){const D=day();if(night||sleeping||!footNow()){card(`⚽ الملعب فارغ الآن… يلعب أطفال الحيّ العصر${wDay()>=5?' وصباح العطلة':''} 🙂`);setTimeout(()=>card(''),2400);return}
-      go({x:FB[0]-3.5,z:-18.5,via:null},()=>{const help=()=>{const first=!D.fb;D.fb=1;dsv();if(first)jewels(2);else{joyT=1.1;burst()}
+      go({x:FB[0]-3.5,z:-18.5,via:null},()=>{try{life.fb.fall()}catch(e){}const help=()=>{try{life.fb.up()}catch(e){}const first=!D.fb;D.fb=1;dsv();if(first)jewels(2);else{joyT=1.1;burst()}
           card(`🤝 ${B('ساعدتَ','ساعدتِ')} اللاعب على النهوض، فقال: شكرًا يا ${B('صديقي','صديقتي')}!${first?' 💎 +٢':''}<br><b style="color:#1fa463;font-size:18px">🌟 هذا عمل صالح!</b><br><small>الروح الرياضية: نلعب بمحبّة، ونساعد من يقع، ولا نغضب إذا خسرنا 🤍</small>`,[['الحمد لله',null]])};
         card(`⚽ أطفال الحيّ يلعبون… فجأة وقع لاعبٌ من الفريق الآخر 🤕<br><small>ماذا ${B('تفعل','تفعلين')}؟</small>`,[['🤝 أساعده على النهوض',help],['أكمل اللعب وأسجّل هدفًا',()=>card(`🤍 الهدف يستطيع أن ينتظر… الأجمل أن ${B('تساعده','تساعديه')} أوّلًا`,[['🤝 أساعده',help]]),'sec']])})},
     tannour(){const D=day();if(night||sleeping){card('🔥 التنّور بارد الآن… الجارة تخبز في النهار 🍞');setTimeout(()=>card(''),2200);return}
