@@ -1062,7 +1062,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
     Object.assign(u,{kind,h:kind==='kid'?1.7:2.3,trip:k,pts:pts.slice(1),sp:(kind==='kid'?1.15:1)*(.85+Math.random()*.35),v:0,bs:P.scale.x,gr:near(pts[0])?0:1,
       out:near(pts[pts.length-1])||TRIPS[k].end?1:0,fade:0,look:0,greet:0,hold:0,bub:null});P.userData.u=u;
     P.position.set(pts[0][0],0,pts[0][1]);const n=pts[1];P.rotation.y=Math.atan2(n[0]-pts[0][0],n[1]-pts[0][1]);P.scale.setScalar(u.bs*Math.max(.01,u.gr))}
-  let gT=5;
+  let gT=25,quiet=0; // (v15.8) طلب الشيخ: السلام كثير → جار واحد يسلّم كل دقيقة تقريبًا، وبعد ٥ سلامات في اليوم نادرًا (كل ٣–٤ دقائق)
   function endGreet(i){const u=peds[i]&&peds[i].userData.u;if(!u)return;u.greet=0;unsay(u.bub);u.bub=null}
   // (v12.1) 🚗 سيارات تمرّ طول اليوم في الاتجاهين، وتقف إذا كان الطفل أمامها في الطريق
   // ألوان سيارات حقيقية: أبيض، فضي، أسود، كحلي، أحمر، بيج، أخضر غامق، برتقالي
@@ -1196,7 +1196,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       else{P.position.x+=dx/d*st;P.position.z+=dz/d*st;turn(P,Math.atan2(dx,dz),dt)}
       if(!u.shep&&!last&&!q[2]&&Math.random()<dt*.012)u.look=.9+Math.random()*.8; // أحيانًا يقف لحظة ويتلفّت
       P.position.y=Math.abs(Math.sin(t*6.5+i))*.035*Math.min(1,u.v)});
-    gT-=dt;if(gT<=0){gT=9+Math.random()*7;if(!peds.some(P=>P.userData.u.greet>0||P.userData.u.hold>0)){const c=peds.filter(P=>{const u=P.userData.u;return P.visible&&u.gr>=1&&!u.fade&&u.pts.length>(u.shep?-1:1)&&Math.hypot(P.position.x,P.position.z)<30});
+    gT-=dt;if(gT<=0){gT=quiet?180+Math.random()*60:50+Math.random()*40;if(!peds.some(P=>P.userData.u.greet>0||P.userData.u.hold>0)){const c=peds.filter(P=>{const u=P.userData.u;return P.visible&&u.gr>=1&&!u.fade&&u.pts.length>(u.shep?-1:1)&&Math.hypot(P.position.x,P.position.z)<30});
       if(c.length){const P=c[Math.floor(Math.random()*c.length)],u=P.userData.u;u.greet=16;u.bub=say(P,'السلام عليكم 👋',1e9,u.h)}}}
     bubs.slice().forEach(b=>{b.k-=dt;b.s.position.set(b.o.position.x,b.o.position.y+b.h,b.o.position.z);if(b.k<=0)unsay(b)});
     // المصلّون وقت الصلاة (إذا بُني الجامع)
@@ -1292,7 +1292,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       for(let i=0;i<=n;i++){const kid2=i>0,P=person(kid2?'kid':Math.random()<.55?'man':'woman',Math.floor(Math.random()*12)),o2=(i-.5)*.32;
         let pts=src.map(q=>[q[0]+(Math.abs(q[0])<4?o2:0),q[1]]).concat([[L2+o2,GZ+.3*i],[GX,GZ+o2],[GX-2.4,GZ+o2*2]]);if(back)pts=pts.reverse();
         P.userData.bs=P.scale.x;if(back)P.scale.setScalar(.01);walk(P,pts,kid2?1.35:1.2,back?'gone':'enter');const w=walkers[walkers.length-1];w.pk=1;if(back)w.grow=0}}}}
-  return {g,update,stops,count:()=>walkers.length,peds,say,endGreet,traffic,sellers,elder,faller,fallMk,father,mother,baker,FBK}}
+  return {g,update,setQuiet:q=>{quiet=q},stops,count:()=>walkers.length,peds,say,endGreet,traffic,sellers,elder,faller,fallMk,father,mother,baker,FBK}}
 
 /* ---------- (v11.9) أصوات المدينة: نهارًا عصافير وحركة سير هادئة، وليلًا هدوء. تُصنع بالكود (بلا ملفات)، وتحترم كتم صوت التطبيق ---------- */
 const SKEY='usul5_m3snd';
@@ -1634,7 +1634,7 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
   // (v15.7) حين يسلّم جارٌ يظهر زر أخضر كبير «👋 ردّ السلام»: لمسة واحدة ويذهب الطفل إليه
   const salBtn=document.createElement('button');salBtn.className='m3sal';salBtn.hidden=true;ov.appendChild(salBtn);let salI=-1,salT=0;
   salBtn.onclick=()=>{try{window.Bayt&&Bayt.sTap()}catch(e){}const i=salI;salBtn.hidden=true;if(i<0||busy||path.length&&!wander)return;follow(()=>A.salam(i))};
-  function salTick(dt){salT-=dt;if(salT>0)return;salT=.3;let i=-1;if(!V&&!sleeping&&!busy&&!(path.length&&!wander)&&goBox.hidden&&!ui.card.classList.contains('on'))i=life.peds.findIndex(P=>P.visible&&P.userData.u.greet>0&&!(P.userData.u.hold>0));
+  function salTick(dt){salT-=dt;if(salT>0)return;salT=.3;try{life.setQuiet((day().sl|0)>=5)}catch(e){}let i=-1;if(!V&&!sleeping&&!busy&&!(path.length&&!wander)&&goBox.hidden&&!ui.card.classList.contains('on'))i=life.peds.findIndex(P=>P.visible&&P.userData.u.greet>0&&!(P.userData.u.hold>0));
     salI=i;if(i<0){salBtn.hidden=true;return}const u=life.peds[i].userData.u,she=u.kind==='woman',w=she?'جارتك تسلّم':u.kind==='kid'?B('صديقك يسلّم','صديقتك تسلّم'):'جارك يسلّم';
     salBtn.innerHTML=`👋 ${w} عليك… ${B('ردّ','ردّي')} السلام`;salBtn.hidden=false}
   if(hosBtn){hosBtn.onclick=()=>{try{window.Bayt&&Bayt.sTap()}catch(e){}if(foc){cityView();return}if(V)return;openGo()};hosLbl()}
