@@ -125,7 +125,7 @@ css.textContent=`
 .hher .rk{width:24px;text-align:center;font-weight:800}.hher .av{font-size:22px}.hher b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hher small{color:var(--muted);font-weight:700;white-space:nowrap}
 .hnote{font-size:13px;color:var(--muted);text-align:center;line-height:1.6;margin:2px 0}
 .aqhead{text-align:center;background:linear-gradient(160deg,#fff8e0,#fff);border:3px solid var(--gold);border-radius:26px;padding:12px}
-.aqhead .av{font-size:64px;line-height:1.1}.aqhead h2{margin:2px 0;font-size:22px}
+.aqhead .av{font-size:64px;line-height:1.1}.aqflag{border:0;background:#fff;border-radius:12px;padding:1px 7px;font-size:24px;line-height:1.3;vertical-align:middle;box-shadow:0 3px 0 #e3c56e,0 3px 8px #0002;cursor:pointer}.aqhead h2{margin:2px 0;font-size:22px}
 .aqlv{display:inline-block;background:#14794f;color:#fff;border-radius:16px;padding:0 12px;font-weight:800;font-size:16px}
 .aqtt{display:inline-block;margin-top:4px;background:#fff4d6;color:#7a5200;border:2px solid var(--gold);border-radius:14px;padding:0 10px;font-weight:800;font-size:14px}
 .aqsec{font-weight:800;color:var(--deep);margin:14px 0 6px;font-size:17px}
@@ -291,9 +291,9 @@ function publish(){const API=O();if(!API||!API.profile||!API.db)return;const s=s
   // ملخّص تقدّم الطفل للمدير (v8.2): يُنشر في profiles/$uid/sm
   const c=s.c,sm={st:c.stages|0,sr:c.stars|0,hz:c.hifz|0,pr:c.pray|0,sl:c.sal|0,ts:c.tas|0,wd:c.wird|0,ak:c.akhlaq|0,fq:c.fiqh|0,cu:c.cups|0,fl:c.floors|0,xp:s.x|0,
     j:window.Deco?Deco.j|0:0,dt:window.Aamal&&Aamal.dirt?Aamal.dirt():0,u:window.Binaa?Binaa.code():'',mq:window.Deco&&Deco.owns('d_mosque')?1:0,ttl:s.titles.length};
-  const key=[s.L,t&&t.id,md,wx,API.profile.nick,API.profile.av,JSON.stringify(sm)].join('|');if(key==pubKey)return;pubKey=key;
-  const tt=isAdm()?'👑 مدير جنّتي الصغيرة':t?`${t.e} ${t.n}`:'';Object.assign(API.profile,{lv:s.L,tt,md,sm});
-  API.db.ref('profiles/'+API.me).update({lv:s.L,tt,md,sm}).catch(()=>{});
+  const flg=window.Flag?Flag.get():'';const key=[s.L,t&&t.id,md,wx,API.profile.nick,API.profile.av,JSON.stringify(sm),flg].join('|');if(key==pubKey)return;pubKey=key;
+  const tt=isAdm()?'👑 مدير جنّتي الصغيرة':t?`${t.e} ${t.n}`:'';Object.assign(API.profile,{lv:s.L,tt,md,sm,flg});
+  API.db.ref('profiles/'+API.me).update({lv:s.L,tt,md,sm,flg}).catch(()=>{});
   // v8.6: المدير لا يدخل أبطال الأسبوع (طلب صاحب التطبيق)، ويُشال اسمه إذا كان موجودًا
   if(isAdm()){API.db.ref(`leader/${w}/${API.me}`).remove().catch(()=>{});return}
   if(wx>0)API.db.ref(`leader/${w}/${API.me}`).update({nick:API.profile.nick,av:API.profile.av,xp:wx,lv:s.L,tt}).catch(()=>{})}
@@ -351,7 +351,7 @@ let aqTab='m';
 const PAL=i=>['--c:#e6f8ec;--d:#a9e2bd','--c:#e5f1ff;--d:#a9c7ee','--c:#ffe9f2;--d:#f2b3cb','--c:#fff6d6;--d:#efd27a','--c:#f0eaff;--d:#c6b5ee','--c:#e2f7f5;--d:#9fd9d2'][i%6];
 function openProfile(){stopVc();aqBack=null;show('alqab');$('#aqTitle').textContent='🏅 ملفّي';const s=snap(),c=s.c,ln=lvName(s.L),t=shownTitle(s),f=(s.x-need(s.L))/(need(s.L+1)-need(s.L));
   const prof=O()&&O().profile;
-  $('#aqBody').innerHTML=`<div class="aqhead"><div class="av">${esc(myAv())}</div><h2>${nameTag(myName(),isAdm())}</h2>
+  $('#aqBody').innerHTML=`<div class="aqhead"><div class="av">${esc(myAv())}</div><h2>${nameTag(myName(),isAdm())} <button class="aqflag" id="aqFlag" aria-label="علم دولتي">${window.Flag?Flag.get():''}</button></h2>
     <span class="aqlv">${ln[1]} المستوى ${ar(s.L)} · ${ln[2]}</span><br>${t?`<span class="aqtt">${t.e} ${t.n}</span>`:''}
     <div class="xpbar" style="margin:8px 10px 2px;height:12px"><i style="width:${Math.round(f*100)}%"></i></div>
     <small style="color:var(--muted)">✨ ${ar(s.x)} نقطة · باقي ${ar(need(s.L+1)-s.x)} للمستوى ${ar(s.L+1)}</small>
@@ -377,6 +377,7 @@ function openProfile(){stopVc();aqBack=null;show('alqab');$('#aqTitle').textCont
     modal(`<div style="font-size:54px">${tr?TIERS[tr-1].e:''}${m.e}</div><h3 style="margin:4px 0">${m.n}</h3><p>${ar(c[m.k])} ${m.u}</p>
       <p style="font-size:15px">${m.at.map((x,k)=>`${TIERS[k].e} ${TIERS[k].n}: ${ar(x)}${c[m.k]>=x?' ✅':''}`).join('<br>')}</p>
       <div class="nav"><button class="btn gold" id="mGo">هيّا أعمل 💪</button><button class="btn sec" data-close>رجوع</button></div>`,()=>{$('#mGo').onclick=()=>{closeModal();goTo(m.go)}})});
+  {const fb=$('#aqFlag');if(fb)fb.onclick=()=>{stopVc();Flag.pick(()=>{publish();openProfile()})}}
   const on=$('#aqOn');if(on)on.onclick=()=>{stopVc();if(O()&&O().editProfile)O().editProfile(openProfile);else{window.onlineReturn=openProfile;openOnline()}};
   window.scrollTo(0,0)}
 function doBtns(){const a=Aamal,tp=window.Salah?Salah.todayPray().filter(Boolean).length:0;
@@ -465,4 +466,27 @@ if(window.Deco){const _dc=Deco.challenge,_fj=Deco.floorJewels;
 const _ce=window.celebrate;if(typeof _ce=='function')window.celebrate=function(){const r=_ce.apply(this,arguments);Aamal.grow('dars');return r};
 setInterval(()=>{if(pending&&!toastBusy())check()},4000);
 drawHome();setTimeout(check,1500);
+})();
+
+// ===== (v17.1) طلب الشيخ: علم دولة الطفل — يظهر في «ملفّي» وعلى مدرسته في المدينة. العراق أوّلًا، ثم الدول العربية، ثم الإسلامية =====
+(function(){const K='usul5_flag_v1';
+  const L=[['🇮🇶','العراق'],['🇸🇦','السعودية'],['🇰🇼','الكويت'],['🇧🇭','البحرين'],['🇶🇦','قطر'],['🇦🇪','الإمارات'],['🇴🇲','عُمان'],['🇾🇪','اليمن'],['🇯🇴','الأردن'],['🇸🇾','سوريا'],['🇱🇧','لبنان'],['🇵🇸','فلسطين'],['🇪🇬','مصر'],['🇸🇩','السودان'],['🇱🇾','ليبيا'],['🇹🇳','تونس'],['🇩🇿','الجزائر'],['🇲🇦','المغرب'],['🇲🇷','موريتانيا'],['🇸🇴','الصومال'],['🇩🇯','جيبوتي'],['🇰🇲','جزر القمر'],
+    ['🇮🇷','إيران'],['🇹🇷','تركيا'],['🇵🇰','باكستان'],['🇦🇫','أفغانستان'],['🇦🇿','أذربيجان'],['🇮🇩','إندونيسيا'],['🇲🇾','ماليزيا'],['🇧🇩','بنغلاديش'],['🇧🇳','بروناي'],['🇲🇻','المالديف'],['🇰🇿','كازاخستان'],['🇺🇿','أوزبكستان'],['🇹🇲','تركمانستان'],['🇹🇯','طاجيكستان'],['🇰🇬','قرغيزستان'],['🇦🇱','ألبانيا'],['🇧🇦','البوسنة والهرسك'],
+    ['🇳🇬','نيجيريا'],['🇸🇳','السنغال'],['🇲🇱','مالي'],['🇳🇪','النيجر'],['🇹🇩','تشاد'],['🇬🇳','غينيا'],['🇬🇲','غامبيا'],['🇧🇫','بوركينا فاسو'],['🇸🇱','سيراليون'],['🇨🇲','الكاميرون'],['🇺🇬','أوغندا'],['🇲🇿','موزمبيق'],['🇬🇦','الغابون'],['🇧🇯','بنين'],['🇹🇬','توغو'],['🇨🇮','ساحل العاج'],['🇬🇼','غينيا بيساو'],['🇸🇷','سورينام'],['🇬🇾','غيانا']];
+  const get=()=>{try{const v=localStorage.getItem(K);if(v&&L.some(f=>f[0]===v))return v}catch(e){}return '🇮🇶'};
+  const name=e=>(L.find(f=>f[0]===(e||get()))||L[0])[1];
+  const set=e=>{try{localStorage.setItem(K,e)}catch(x){}try{window.City3D&&City3D.refresh()}catch(x){}};
+  const st=document.createElement('style');st.textContent=`.flgov{position:fixed;inset:0;z-index:99990;background:#0007;display:flex;align-items:center;justify-content:center;padding:14px}
+.flgov .in{background:#fffdf5;border-radius:22px;padding:12px 10px;width:100%;max-width:440px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 6px 0 #d9c58a,0 10px 30px #0005}
+.flgov h4{margin:0 0 4px;text-align:center;font-size:19px;color:#5a3d00}.flgov p{margin:0 0 8px;text-align:center;font-size:13px;color:#7a6a3a;font-weight:700}
+.flgov .g{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;overflow:auto;padding:2px 2px 6px}
+.flgov .g button{border:0;border-radius:14px;padding:6px 2px;font:inherit;font-weight:900;font-size:12.5px;line-height:1.2;color:#2b3550;background:var(--c);box-shadow:0 4px 0 var(--d),0 4px 8px #0002,inset 0 2px 0 #fff9}
+.flgov .g button b{display:block;font-size:34px;line-height:1.2}.flgov .g button.on{outline:3px solid #1fa463}
+.flgov .x{margin:10px auto 0;border:0;border-radius:14px;padding:9px 26px;font:inherit;font-weight:900;font-size:15px;background:#e3ecf7;color:#1d4e9e;box-shadow:0 3px 0 #a9bcd6}`;document.head.appendChild(st);
+  function pick(done){const C=[['#dff5e3','#9fd3aa'],['#dcecff','#9dbde6'],['#ffe1ec','#e6a9bf'],['#fff3c4','#e3c56e'],['#ece3ff','#b9a6e6'],['#d9f5f1','#94d1c8']],cur=get();
+    const ov=document.createElement('div');ov.className='flgov';
+    ov.innerHTML=`<div class="in"><h4>🏳️ ${typeof B=='function'?B('اختر','اختاري'):'اختر'} علم دولتك</h4><p>يظهر في «ملفّي» وعلى مدرستك في المدينة</p><div class="g">${L.map((f,i)=>`<button data-i="${i}" class="${f[0]===cur?'on':''}" style="--c:${C[i%6][0]};--d:${C[i%6][1]}"><b>${f[0]}</b>${f[1]}</button>`).join('')}</div><button class="x">✖ إغلاق</button></div>`;
+    document.body.appendChild(ov);
+    ov.onclick=e=>{const b=e.target.closest('button');if(e.target===ov||b&&b.classList.contains('x')){ov.remove();return}if(!b)return;try{window.Bayt&&Bayt.sTap()}catch(x){}set(L[+b.dataset.i][0]);ov.remove();done&&done(L[+b.dataset.i][0])}}
+  window.Flag={get,set,name,pick,list:L};
 })();
