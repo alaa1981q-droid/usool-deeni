@@ -715,8 +715,11 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   {const D2=V?{}:day();
     // 🍂 الخريف: أوراق تتساقط حول الأشجار وأوراق على الأرض
     if(SEA==='au'){const lg=new T.PlaneGeometry(.2,.13),lm=[0xe0802c,0xf0c445,0xc9582a,0xd9a23a].map(c=>new T.MeshLambertMaterial({color:nC(c),side:T.DoubleSide}));
-      TREES.forEach(([x,z],ti)=>{for(let i=0;i<7;i++){const l=new T.Mesh(lg,lm[(ti+i)%4]);const ox=(Math.random()-.5)*2.4,oz=(Math.random()-.5)*2.4,y0=Math.random()*2.6,sp=.35+Math.random()*.3,ph=Math.random()*6;S.add(l);
-          anim.push(t=>{let y=2.6-((t*sp+y0)%2.6);l.position.set(fX(x+ox+Math.sin(t*1.3+ph)*.35),y+.05,z+oz+Math.cos(t*1.1+ph)*.25);l.rotation.set(t*2+ph,t*1.5,ph)})}
+      // (v17.5) الأوراق المتساقطة: ٤ قطع مكرّرة (InstancedMesh) بدل ورقة منفصلة لكل واحدة (كانت ≈٤٠ رسمة)
+      const FL=[[],[],[],[]];TREES.forEach(([x,z],ti)=>{for(let i=0;i<7;i++)FL[(ti+i)%4].push({x,z,ox:(Math.random()-.5)*2.4,oz:(Math.random()-.5)*2.4,y0:Math.random()*2.6,sp:.35+Math.random()*.3,ph:Math.random()*6})});
+      {const dm=new T.Object3D();FL.forEach((L,k)=>{if(!L.length)return;const IM=new T.InstancedMesh(lg,lm[k],L.length);IM.frustumCulled=false;IM.userData.rd=1;S.add(IM);
+        anim.push(t=>{L.forEach((q,i)=>{const y=2.6-((t*q.sp+q.y0)%2.6);dm.position.set(fX(q.x+q.ox+Math.sin(t*1.3+q.ph)*.35),y+.05,q.z+q.oz+Math.cos(t*1.1+q.ph)*.25);dm.rotation.set(t*2+q.ph,t*1.5,q.ph);dm.updateMatrix();IM.setMatrixAt(i,dm.matrix)});IM.instanceMatrix.needsUpdate=true})})}
+      TREES.forEach(([x,z],ti)=>{
         for(let i=0;i<9;i++){const a=i*.7+ti,r=.6+(i%3)*.55,g=new T.Mesh(lg,lm[(i+ti)%4]);g.rotation.set(-Math.PI/2,0,a);g.position.set(x+Math.cos(a)*r,.03+i*.001,z+Math.sin(a)*r);g.scale.setScalar(1.3);S.add(g)}})}
     // ☀️ الصيف: سراب يلمع على الشارع البعيد وقت الظهيرة
     if(SEA==='su'&&!night&&!RN){[-34,-52,-75,30,48].forEach((z,i)=>{const m=new T.Mesh(new T.PlaneGeometry(2.6,9),new T.MeshBasicMaterial({color:0xe8f4ff,transparent:true,opacity:0,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.set(0,.06,z);S.add(m);
@@ -1203,6 +1206,16 @@ function bakeMerge(L,mxOf){const T=THREE,P=[],N=[],Cc=[],col=!!L[0].geometry.att
   const M2=new T.Mesh(G,L[0].material);M2.castShadow=cs;M2.receiveShadow=rs;return M2}
 // (v17.4) دمج داخل سيارة أو شخص: لكل مجموعة (الجسم، الرأس، الذراعين، الساقين…) تُدمج قطعها المباشرة التي تشترك في نفس المادّة نفسها.
 // الحركة على مستوى المجموعات فتبقى كما هي، والقطعة الأولى في الجذر (الجسم/الثوب الذي يُلوَّن) لا تُمسّ، ولا ما يُشار إليه في userData.
+// (v17.5) مفتاح خصائص المادّة: قطعتان بمادّتين مختلفتين لكن متطابقتين في الخصائص تُدمجان معًا
+function matKey(a){if(!a||Array.isArray(a))return null;if(a.transparent||a.map||a.alphaMap||a.envMap||a.onBeforeCompile&&a.onBeforeCompile.toString().length>20)return null;
+  return [a.type,a.color&&a.color.getHex(),a.emissive&&a.emissive.getHex(),a.emissiveIntensity,a.roughness,a.metalness,a.side,a.flatShading,a.vertexColors,a.fog,a.depthWrite,a.depthTest,a.polygonOffset,a.polygonOffsetFactor,a.wireframe,a.toneMapped].join('/')}
+// (v17.5) مدينة الألعاب كانت ≈٣٩٠ رسمة في كل إطار (كل عمود وراية وحصان قطعة بمادّة خاصّة) لأنها خارج الدمج الثابت.
+// هنا: داخل كل مجموعة (ما عدا الأشخاص) تُدمج القطع المباشرة المتشابهة في الخصائص؛ الحركة على مستوى المجموعات (الدولاب، الدوّامة، الخيول، الميزان) تبقى كما هي.
+function mergeProps(G){const refs=new Set();G.traverse(o=>{const u=o.userData;if(u)Object.values(u).forEach(v=>(Array.isArray(v)?v:[v]).forEach(x=>{if(x&&x.isObject3D)refs.add(x)}))});
+  const XS=[];const walk=X=>{if(X.isLOD||(X!==G&&X.userData&&(X.userData.arms||X.userData.legs||X.userData.head)))return;if(X.children.length>1)XS.push(X);X.children.forEach(walk)};walk(G);
+  XS.forEach(X=>{const by=new Map();X.children.forEach(c=>{if(!c.isMesh||c.isInstancedMesh||c.children.length||refs.has(c)||!c.visible||Object.keys(c.userData).length)return;
+      const k0=matKey(c.material);if(!k0||!c.geometry||!c.geometry.attributes.position)return;const k=k0+(c.geometry.attributes.color?'c':'');if(!by.has(k))by.set(k,[]);by.get(k).push(c)});
+    by.forEach(L=>{if(L.length<2)return;L.forEach(m=>m.updateMatrix());X.add(bakeMerge(L,m=>m.matrix))})});return G}
 function mergeKids(G){const refs=new Set();G.traverse(o=>{const u=o.userData;if(u)Object.values(u).forEach(v=>(Array.isArray(v)?v:[v]).forEach(x=>{if(x&&x.isObject3D)refs.add(x)}))});
   const XS=[];G.traverse(X=>{if(!X.isLOD&&X.children.length>1)XS.push(X)});
   XS.forEach(X=>{const by=new Map();X.children.forEach((c,i)=>{if(!c.isMesh||c.isInstancedMesh||c.children.length||refs.has(c)||(X===G&&i===0)||!c.visible)return;const a=c.material;
@@ -1218,10 +1231,9 @@ function mergeStatic(S){if(window.City3D&&City3D.noMerge)return;const T=THREE,an
   [[.37,0],[1.13,13],[2.71,20],[5.9,5],[13.3,22.5],[29.7,12.5]].forEach(([tt,sg])=>{if(C3)C3.debugSig=sg;try{anim.forEach(f=>f(tt,.05))}catch(e){}S.updateMatrixWorld(true);MS.forEach((m,i)=>{if(!dyn.has(m)&&key(m)!==s0[i])dyn.add(m)})});
   if(C3){if(ds===undefined)delete C3.debugSig;else C3.debugSig=ds}
   const PK=o=>{const u=o.userData;return u&&(u.p||u.t!=null||u.l!=null||u.cat||u.ped||u.fk||u.act)};
-  const mk=a=>{if(!a||Array.isArray(a))return null;if(a.transparent||a.map||a.alphaMap||a.envMap||a.onBeforeCompile&&a.onBeforeCompile.toString().length>20)return null;
-    return [a.type,a.color&&a.color.getHex(),a.emissive&&a.emissive.getHex(),a.emissiveIntensity,a.roughness,a.metalness,a.side,a.flatShading,a.vertexColors,a.fog,a.depthWrite,a.depthTest,a.polygonOffset,a.polygonOffsetFactor,a.wireframe,a.toneMapped].join('/')};
+  const mk=matKey;
   const B=new Map();
-  MS.forEach(m=>{if(dyn.has(m)||skip.has(m)||!visOK(m)||Object.keys(m.userData).length||m.renderOrder||m.frustumCulled===false||m.morphTargetInfluences||m.onBeforeRender.toString().length>20||!mk(m.material))return;
+  MS.forEach(m=>{if(dyn.has(m)||skip.has(m)||!visOK(m)||Object.keys(m.userData).some(k=>k!=='rd')||m.renderOrder||m.frustumCulled===false||m.morphTargetInfluences||m.onBeforeRender.toString().length>20||!mk(m.material))return;
     const g=m.geometry;if(!g||!g.attributes.position)return;const k0=mk(m.material);if(!k0)return;
     let o=m.parent;while(o&&o!==S&&!PK(o))o=o.parent;if(!o)return;
     const k=o.uuid+'#'+k0+'#'+(g.attributes.color?1:0);if(!B.has(k))B.set(k,{o,L:[]});B.get(k).L.push(m)});
@@ -1793,7 +1805,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
   let pkF=0;const PKW=[[.5,.2],[-1,1.6],[5.2,.6],[-5.5,.8],[1.6,5.4],[-3.2,5.8],[5.6,-6],[-.6,-6],[-6,-6],[4.6,3.2],[0,2.6],[-2.5,2.2]],wand=[];
   for(let i=0;i<6;i++){const P=person(i<4?'kid':i===4?'woman':'man',i+1);PKG.add(P);const q=PKW[i*2%PKW.length];P.position.set(q[0],0,q[1]);P.userData.pk={t:PKW[(i*5+3)%PKW.length],w:Math.random()*3};pkPeople.push(P);wand.push(P)}
   {const P=person('woman',4);PKG.add(P);P.position.set(-5.4,0,3.3);pkPeople.push(P)}{const P=person('man',3);PKG.add(P);P.position.set(1.2,0,5.6);P.rotation.y=Math.PI;sit(P);P.position.y=-.05;pkPeople.push(P)}
-  const pkMk=markSprite(T,'🎡','#e2504a',1);pkMk.position.set(8.6,5.6,0);pkMk.visible=false;pkMk.userData.act='park';PKG.add(pkMk);
+  const pkMk=markSprite(T,'🎡','#e2504a',1);pkMk.position.set(8.6,5.6,0);pkMk.visible=false;pkMk.userData.act='park';PKG.add(pkMk);if(!(window.City3D&&City3D.noMerge))mergeProps(PKG);
   let pkSp=0,pkA=0,pkT=3;
   function parkTick(t,dt,o,h){const op=parkOpen(),day0=!night;pkSp+=((op?1:0)-pkSp)*Math.min(1,dt*.8);pkA+=pkSp*dt;
     WR.rotation.x=pkA*.22;cabs.forEach(({C})=>C.rotation.x=-WR.rotation.x);CR.userData.top.rotation.y=pkA*.9;horses.forEach((H,i)=>H.position.y=.9+Math.sin(pkA*3+i*1.3)*.22*pkSp);
@@ -2431,9 +2443,15 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
     if(fps<40&&PR>1){PR=Math.max(1,+(PR-.25).toFixed(2));R.setPixelRatio(PR);fpGood=0}else if(fps>55&&PR<PRM){if(++fpGood>=3){PR=Math.min(PRM,+(PR+.25).toFixed(2));R.setPixelRatio(PR);fpGood=0}}else fpGood=0}
   // الناس البعيدون جدًا عن الكاميرا (أكثر من ٥٥) لا يُرسمون (صغار جدًا لا يُرَون)، ويُعادون بعد الرسم
   const HV=[];
-  const RM=[];function rMap(){adapt();if(R.shadowMap.enabled&&++shF>=3){shF=0;R.shadowMap.needsUpdate=true}RM.length=0;HV.length=0;const g=life.g;for(const c of g.children){const x=c.position.x;RM.push(c,x);c.position.x=c.userData.lane!=null?(x<0?-1:1)*(c.userData.lane?LO:LI):fX(x)}
+  // (v17.5) «المناطق»: ما هو بعيد جدًّا عن الكاميرا (حسب حجمه) لا يُرسم، ويرجع حين تقترب. القائمة تُبنى مرّة لكل مشهد.
+  let ZS=null,ZN=[];const ZH=[],zsp=new T.Sphere(),zb=new T.Box3();
+  function zones(){if(ZS!==S){ZS=S;ZN=[];S.updateMatrixWorld(true);S.children.forEach(o=>{if(o===life.g||o===kid||o.isLight||o.isPoints||(o.userData&&o.userData.rd)||o.frustumCulled===false)return;
+      zb.setFromObject(o);if(zb.isEmpty())return;zb.getBoundingSphere(zsp);if(zsp.radius>22||zsp.radius<.01)return;ZN.push([o,zsp.center.clone(),zsp.radius])});
+      life.g.children.forEach(o=>{if(o.userData.act==='park'){zb.setFromObject(o);zb.getBoundingSphere(zsp);ZN.push([o,zsp.center.clone(),zsp.radius])}})}
+    ZH.length=0;const p=cam.position,F=LITE?95:125;for(const [o,c,r] of ZN){if(!o.visible)continue;const lim=F+r*6;if(c.distanceToSquared(p)>lim*lim){o.visible=false;ZH.push(o)}}}
+  const RM=[];function rMap(){zones();adapt();if(R.shadowMap.enabled&&++shF>=3){shF=0;R.shadowMap.needsUpdate=true}RM.length=0;HV.length=0;const g=life.g;for(const c of g.children){const x=c.position.x;RM.push(c,x);c.position.x=c.userData.lane!=null?(x<0?-1:1)*(c.userData.lane?LO:LI):fX(x)}
     {const cx=cam.position.x,cz=cam.position.z;for(const c of life.g.children){if(c.visible&&c.userData.arms){const dx=c.position.x-cx,dz=c.position.z-cz;if(dx*dx+dz*dz>3025){c.visible=false;HV.push(c)}}}}
-    RM.push(kid,kid.position.x);kid.position.x=fX(kid.position.x);R.render(S,cam);for(let i=0;i<RM.length;i+=2)RM[i].position.x=RM[i+1];for(const c of HV)c.visible=true}
+    RM.push(kid,kid.position.x);kid.position.x=fX(kid.position.x);R.render(S,cam);for(let i=0;i<RM.length;i+=2)RM[i].position.x=RM[i+1];for(const c of HV)c.visible=true;for(const o of ZH)o.visible=true}
   function lookPt(x,z){x=fX(x);fol=0;flyTo({c:[x,0,z],l:[x,.6,z],th,ph:Math.min(ph,.9),dist:20});foc='spot';hosLbl()}
   // ٩ وردة تنبت أمام الطفل مع كل عمل صالح
   function bloomPop(){try{const f=new T.Group(),a=Math.random()*Math.PI*2;f.position.set(fX(kid.position.x+Math.cos(a)*.9),0,kid.position.z+Math.sin(a)*.9);
@@ -2491,7 +2509,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
   // ٦ أهل المدينة يرحّبون بالطفل باسمه عند الدخول
   setTimeout(()=>{if(!alive||V||sleeping||!kidN())return;const F=life.father&&life.father.visible?life.father:life.peds.find(P=>P.visible);if(F)life.say(F,'أهلًا'+yaN()+'! '+B('نوّرت','نوّرتِ')+' مدينتك 🌷',3.5,F.userData&&F.userData.u?F.userData.u.h:2.4)},2600);
   if(hosBtn){hosBtn.onclick=()=>{try{window.Bayt&&Bayt.sTap()}catch(e){}if(foc){cityView();return}if(V)return;openGo()};hosLbl()}
-  setBar();const pn=prayerNow();if(window.City3D){City3D._A=A;City3D._info=()=>{let m=0,l=0;S.traverse(o=>{if(o.isMesh)m++;if(o.isLight)l++});life.g.traverse(o=>{if(o.isLight)l++});let lg=0,lgv=0,tr=0;life.g.traverse(o=>{if(o.isMesh){lg++;let v=true;for(let x=o;x;x=x.parent)if(!x.visible){v=false;break}if(v)lgv++}});life.traffic.forEach(c=>{if(c.v.visible)tr++});const top={};S.children.forEach(c=>{let n=0;c.traverse(o=>{if(o.isMesh)n++});const k=(c.userData&&(c.userData.act||c.userData.p))||c.type;top[k]=(top[k]||0)+n});return {calls:R.info.render.calls,tris:R.info.render.triangles,meshes:m,lights:l,lifeMeshes:lg,lifeVisible:lgv,trafficVisible:tr,top:Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,14)}};City3D._walk=(x,z)=>{const v=new T.Vector3(fX(x),0,z).project(cam),r=cv.getBoundingClientRect();groundTap(r.left+(v.x+1)/2*r.width,r.top+(1-v.y)/2*r.height)};City3D._probe=(x,y)=>{const r=cv.getBoundingClientRect();ray.setFromCamera(new T.Vector2((x-r.left)/r.width*2-1,-(y-r.top)/r.height*2+1),cam);return ray.intersectObjects(S.children,true).slice(0,4).map(h=>{const o=h.object;let a=o,path=[];while(a&&a!==S){path.push(a.type+(a.userData&&Object.keys(a.userData).length?JSON.stringify(a.userData).slice(0,30):''));a=a.parent}return {c:o.material&&o.material.color&&o.material.color.getHexString(),op:o.material&&o.material.opacity,tr:o.material&&o.material.transparent,geo:o.geometry&&o.geometry.type,pos:o.position.toArray().map(v=>+v.toFixed(2)),sc:o.scale.toArray().map(v=>+v.toFixed(2)),path:path.join('<')}})};City3D._st2=()=>({drv,x:+cS.x.toFixed(2),z:+cS.z.toFixed(2),n:cS.path.length,sig:sig()});City3D._st=()=>({path:path.map(q=>[+q[0].toFixed(2),+q[1].toFixed(2)]),kid:[+kid.position.x.toFixed(2),+kid.position.z.toFixed(2)],OB:(OB||[]).map(b=>b.slice(0,4).map(v=>+v.toFixed(1)).concat([b[4].p||b[4].act||b[4].fk])),near:nearBtn.hidden?'':nearBtn.textContent})} // للتجربة فقط
+  setBar();const pn=prayerNow();if(window.City3D){City3D._A=A;City3D._sc=()=>({S,cam,life,R});City3D._info=()=>{let m=0,l=0;S.traverse(o=>{if(o.isMesh)m++;if(o.isLight)l++});life.g.traverse(o=>{if(o.isLight)l++});let lg=0,lgv=0,tr=0;life.g.traverse(o=>{if(o.isMesh){lg++;let v=true;for(let x=o;x;x=x.parent)if(!x.visible){v=false;break}if(v)lgv++}});life.traffic.forEach(c=>{if(c.v.visible)tr++});const top={};S.children.forEach(c=>{let n=0;c.traverse(o=>{if(o.isMesh)n++});const k=(c.userData&&(c.userData.act||c.userData.p))||c.type;top[k]=(top[k]||0)+n});return {calls:R.info.render.calls,tris:R.info.render.triangles,meshes:m,lights:l,lifeMeshes:lg,lifeVisible:lgv,trafficVisible:tr,top:Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,14)}};City3D._walk=(x,z)=>{const v=new T.Vector3(fX(x),0,z).project(cam),r=cv.getBoundingClientRect();groundTap(r.left+(v.x+1)/2*r.width,r.top+(1-v.y)/2*r.height)};City3D._probe=(x,y)=>{const r=cv.getBoundingClientRect();ray.setFromCamera(new T.Vector2((x-r.left)/r.width*2-1,-(y-r.top)/r.height*2+1),cam);return ray.intersectObjects(S.children,true).slice(0,4).map(h=>{const o=h.object;let a=o,path=[];while(a&&a!==S){path.push(a.type+(a.userData&&Object.keys(a.userData).length?JSON.stringify(a.userData).slice(0,30):''));a=a.parent}return {c:o.material&&o.material.color&&o.material.color.getHexString(),op:o.material&&o.material.opacity,tr:o.material&&o.material.transparent,geo:o.geometry&&o.geometry.type,pos:o.position.toArray().map(v=>+v.toFixed(2)),sc:o.scale.toArray().map(v=>+v.toFixed(2)),path:path.join('<')}})};City3D._st2=()=>({drv,x:+cS.x.toFixed(2),z:+cS.z.toFixed(2),n:cS.path.length,sig:sig()});City3D._st=()=>({path:path.map(q=>[+q[0].toFixed(2),+q[1].toFixed(2)]),kid:[+kid.position.x.toFixed(2),+kid.position.z.toFixed(2)],OB:(OB||[]).map(b=>b.slice(0,4).map(v=>+v.toFixed(1)).concat([b[4].p||b[4].act||b[4].fk])),near:nearBtn.hidden?'':nearBtn.textContent})} // للتجربة فقط
   // (v13.8) تهنئة مرة في اليوم أيام رمضان والعيد
   {const oc=occNow(),D=day();if(oc&&!V&&D.oc!==oc.id&&!sleepNow()){D.oc=oc.id;D.fs=1;dsv();setTimeout(()=>card(`<b>${oc.t}</b><br><small>${oc.msg}</small><br><small>${oc.k==='sad'?'لبست '+B('مدينتك','مدينتكِ')+' السواد في هذه الأيام 🖤':'زُيّنت '+B('مدينتك','مدينتكِ')+' بالأضواء والفوانيس والبالونات ✨'}</small>`,[[oc.k==='sad'?'🤍 حسنًا':'🤍 الحمد لله',null]]),900)}}
   {const f=occNow()&&occNow().k==='sad'?null:festNow(),D=day();if(f&&!V&&!D.fs&&!sleepNow()){D.fs=1;dsv();setTimeout(()=>card(f==='ramadan'?`🌙 رمضان كريم! تقبّل الله صيامكم 🤲<br><small>زُيّنت ${B('مدينتك','مدينتكِ')} بالفوانيس والأضواء ✨</small>`:`🎉 عيد مبارك! كل عام ${B('وأنت','وأنتِ')} بخير 🤍<br><small>زُيّنت ${B('مدينتك','مدينتكِ')} بالبالونات والأضواء 🎈</small>`,[['🤍 آمين',null]]),900)}}
