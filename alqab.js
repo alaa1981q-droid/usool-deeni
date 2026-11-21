@@ -125,7 +125,7 @@ css.textContent=`
 .hher .rk{width:24px;text-align:center;font-weight:800}.hher .av{font-size:22px}.hher b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hher small{color:var(--muted);font-weight:700;white-space:nowrap}
 .hnote{font-size:13px;color:var(--muted);text-align:center;line-height:1.6;margin:2px 0}
 .aqhead{text-align:center;background:linear-gradient(160deg,#fff8e0,#fff);border:3px solid var(--gold);border-radius:26px;padding:12px}
-.aqhead .av{font-size:64px;line-height:1.1}.aqflag{border:0;background:#fff;border-radius:12px;padding:1px 7px;font-size:24px;line-height:1.3;vertical-align:middle;box-shadow:0 3px 0 #e3c56e,0 3px 8px #0002;cursor:pointer}.aqhead h2{margin:2px 0;font-size:22px}
+.aqhead .av{font-size:64px;line-height:1.1}.aqloc{display:inline-block;margin:4px 0 2px;border:0;border-radius:14px;padding:5px 12px;font:inherit;font-weight:900;font-size:14px;color:#1d4e9e;background:#eaf3ff;box-shadow:0 3px 0 #a9bcd6,0 3px 8px #0001;cursor:pointer}.aqloc i{font-style:normal;font-size:12px;color:#5a6b80;margin-inline-start:4px}.aqflag{border:0;background:#fff;border-radius:12px;padding:1px 7px;font-size:24px;line-height:1.3;vertical-align:middle;box-shadow:0 3px 0 #e3c56e,0 3px 8px #0002;cursor:pointer}.aqhead h2{margin:2px 0;font-size:22px}
 .aqlv{display:inline-block;background:#14794f;color:#fff;border-radius:16px;padding:0 12px;font-weight:800;font-size:16px}
 .aqtt{display:inline-block;margin-top:4px;background:#fff4d6;color:#7a5200;border:2px solid var(--gold);border-radius:14px;padding:0 10px;font-weight:800;font-size:14px}
 .aqsec{font-weight:800;color:var(--deep);margin:14px 0 6px;font-size:17px}
@@ -352,6 +352,7 @@ const PAL=i=>['--c:#e6f8ec;--d:#a9e2bd','--c:#e5f1ff;--d:#a9c7ee','--c:#ffe9f2;-
 function openProfile(){stopVc();aqBack=null;show('alqab');$('#aqTitle').textContent='🏅 ملفّي';const s=snap(),c=s.c,ln=lvName(s.L),t=shownTitle(s),f=(s.x-need(s.L))/(need(s.L+1)-need(s.L));
   const prof=O()&&O().profile;
   $('#aqBody').innerHTML=`<div class="aqhead"><div class="av">${esc(myAv())}</div><h2>${nameTag(myName(),isAdm())} <button class="aqflag" id="aqFlag" aria-label="علم دولتي">${window.Flag?Flag.get():''}</button></h2>
+    <button class="aqloc" id="aqLoc">📍 ${window.Flag?Flag.name():'العراق'} · ${window.Adhan&&Adhan.city?Adhan.city[1]:'بغداد'} <i>✏️ دولتي ومدينتي</i></button>
     <span class="aqlv">${ln[1]} المستوى ${ar(s.L)} · ${ln[2]}</span><br>${t?`<span class="aqtt">${t.e} ${t.n}</span>`:''}
     <div class="xpbar" style="margin:8px 10px 2px;height:12px"><i style="width:${Math.round(f*100)}%"></i></div>
     <small style="color:var(--muted)">✨ ${ar(s.x)} نقطة · باقي ${ar(need(s.L+1)-s.x)} للمستوى ${ar(s.L+1)}</small>
@@ -377,7 +378,9 @@ function openProfile(){stopVc();aqBack=null;show('alqab');$('#aqTitle').textCont
     modal(`<div style="font-size:54px">${tr?TIERS[tr-1].e:''}${m.e}</div><h3 style="margin:4px 0">${m.n}</h3><p>${ar(c[m.k])} ${m.u}</p>
       <p style="font-size:15px">${m.at.map((x,k)=>`${TIERS[k].e} ${TIERS[k].n}: ${ar(x)}${c[m.k]>=x?' ✅':''}`).join('<br>')}</p>
       <div class="nav"><button class="btn gold" id="mGo">هيّا أعمل 💪</button><button class="btn sec" data-close>رجوع</button></div>`,()=>{$('#mGo').onclick=()=>{closeModal();goTo(m.go)}})});
-  {const fb=$('#aqFlag');if(fb)fb.onclick=()=>{stopVc();Flag.pick(()=>{publish();openProfile()})}}
+  // (v17.2) الدولة ثم المدينة (للأذان والطقس)
+  const locPick=()=>{stopVc();Flag.pick(f=>{try{Adhan.fitCountry(f)}catch(e){}publish();if(window.Adhan&&Adhan.pickCity)Adhan.pickCity(()=>{publish();openProfile()});else openProfile()})};
+  {const fb=$('#aqFlag');if(fb)fb.onclick=locPick;const lb=$('#aqLoc');if(lb)lb.onclick=locPick}
   const on=$('#aqOn');if(on)on.onclick=()=>{stopVc();if(O()&&O().editProfile)O().editProfile(openProfile);else{window.onlineReturn=openProfile;openOnline()}};
   window.scrollTo(0,0)}
 function doBtns(){const a=Aamal,tp=window.Salah?Salah.todayPray().filter(Boolean).length:0;
