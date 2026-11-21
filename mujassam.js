@@ -1474,7 +1474,8 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
         u.fade+=dt*.9;const dr=dt*.45*(1-u.fade);P.position.x+=Math.sin(P.rotation.y)*dr;P.position.z+=Math.cos(P.rotation.y)*dr;setOp(P,1-u.fade);P.position.y=0;if(u.fade>=1){P.visible=false;if(u.bub)endGreet(i);u.trip=-1;u.gap=2+Math.random()*6}return}
       const q=u.pts[0],dx=q[0]-P.position.x,dz=q[1]-P.position.z,d=Math.hypot(dx,dz),last=u.pts.length===1;
       const want=u.sp*(last&&u.out?Math.min(1,.35+d/1.6):1);u.v+=(want-u.v)*Math.min(1,dt*1.8);const st=u.v*dt*(d>1e-4?spF(P.position.x,dx/d,dz/d):1);
-      if(d<=Math.max(st,last||q[2]?0:.45)){if(last||q[2]){P.position.x=q[0];P.position.z=q[1]}u.pts.shift();if(q[2])u.look=q[2]}
+      u.stk=d<.7?(u.stk||0)+dt:0;
+      if(d<=Math.max(st,last||q[2]?(u.stk>1.5?.32:0):.45)){u.stk=0;if(last||q[2]){P.position.x=q[0];P.position.z=q[1]}u.pts.shift();if(q[2])u.look=q[2]}
       else{const df=turn(P,Math.atan2(dx,dz),dt),k=tf(df);P.position.x+=dx/d*st*k;P.position.z+=dz/d*st*k;if(df>.5)u.v*=1-Math.min(1,dt*2)}
       if(!u.shep&&!last&&!q[2]&&Math.random()<dt*.012)u.look=.9+Math.random()*.8; // أحيانًا يقف لحظة ويتلفّت
       P.position.y=Math.abs(Math.sin(t*6.5+i))*.035*Math.min(1,u.v)});
@@ -1493,12 +1494,14 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       if(!w.pts.length){if(w.end==='enter'||w.end==='gone'){w.k+=dt*1.1;const dr=dt*.5*(1-w.k);P.position.x+=Math.sin(P.rotation.y)*dr;P.position.z+=Math.cos(P.rotation.y)*dr;setOp(P,1-w.k);if(w.k>1){g.remove(P);P.traverse(x=>{x.geometry&&x.geometry.dispose();x.material&&x.material.dispose()});return false}}return true}
       if(w.pause>0||w.sigW){w.pause-=dt;if(w.pause<=0){w.sigW=nearZeb(P.position.x,P.position.z)&&!pedGo();if(w.sigW)w.pause=.25}const [nx,nz]=w.pts[0];turn(P,Math.atan2(nx-P.position.x,nz-P.position.z),dt,4);w.lph=(w.lph||0)+dt*2.3;P.userData.hyT=Math.sin(w.lph);P.position.y=0;return true}
       const [tx,tz,wt]=w.pts[0],dx=tx-P.position.x,dz=tz-P.position.z,d=Math.hypot(dx,dz);w.v=(w.v||0)+(w.sp-(w.v||0))*Math.min(1,dt*2.2);const sp=w.v*dt*(d>1e-4?spF(P.position.x,dx/d,dz/d):1),cut=w.pts.length>1&&!wt?.4:0;
-      if(d<=Math.max(sp,cut)){if(!cut){P.position.x=tx;P.position.z=tz}w.pts.shift();if(wt)w.pause=wt}else{const df=turn(P,Math.atan2(dx,dz),dt,7),k=tf(df);P.position.x+=dx/d*sp*k;P.position.z+=dz/d*sp*k;if(df>.5)w.v*=1-Math.min(1,dt*2)}
+      // (v16.7) لا يعلق أحد: إذا تزاحم اثنان على نفس النقطة (مثلًا باب الباص) ودفع كلٌّ منهما الآخر، تُعدّ النقطة وصولًا
+      w.stk=d<.7?(w.stk||0)+dt:0;const tol=w.stk>1.5||(w.pts.length===1&&(w.end==='enter'||w.end==='gone'))?.32:0;
+      if(d<=Math.max(sp,cut,tol)){w.stk=0;if(!cut){P.position.x=tx;P.position.z=tz}w.pts.shift();if(wt)w.pause=wt}else{const df=turn(P,Math.atan2(dx,dz),dt,7),k=tf(df);P.position.x+=dx/d*sp*k;P.position.z+=dz/d*sp*k;if(df>.5)w.v*=1-Math.min(1,dt*2)}
       P.position.y=Math.abs(Math.sin(t*6+P.id))*.05*Math.min(1,(w.v||0)/Math.max(.1,w.sp));return true});try{separate(o)}catch(e){}swing(dt)}
   // (v16.1) طلب الشيخ: الناس كانوا يدخلون في بعض. الآن لكل شخص مساحة: إذا اقترب اثنان يتنحّى كلٌّ منهما قليلًا (ويميل لليمين)
   // فيمرّان بجانب بعض كما في الواقع. الواقفون (الباعة، الأب والأم، الحارس…) لا يتحرّكون، والآخرون يلتفّون حولهم. والطفل كذلك
   function separate(o){const L=[],add=(P,mv,ox,oz)=>L.push({P,mv,ox:ox||0,oz:oz||0,r:.27*(P.userData.bs||P.scale.x)});
-    walkers.forEach(w=>{if(w.P.visible&&!(w.k>0))add(w.P,w.pause>0?.5:1)});
+    walkers.forEach(w=>{if(w.P.visible&&!(w.k>0)&&!(w.end==='enter'&&w.pts.length<=1))add(w.P,w.pause>0?.5:1)});
     peds.forEach(P=>{const u=P.userData.u;if(P.visible&&!u.fade&&!u.off)add(P,u.hold>0||u.greet>0?0:1)});
     yard.forEach(p=>{if(p.visible&&!(p.userData.lv>0))add(p,1)});FBK.forEach(p=>{if(p.visible&&!p.rotation.z)add(p,.6)});wand.forEach(P=>{if(P.visible)add(P,1,PKC[0],PKC[1])});
     [father,mother,elder,baker,guard,faller].concat(Object.values(sellers)).forEach(P=>{if(P&&P.visible&&P.parent===g)add(P,0)});
