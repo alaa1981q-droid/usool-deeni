@@ -2535,7 +2535,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
     // الأشجار التي تكبر الآن تبقى بحجمها
     old.userData.trees.forEach((G,i)=>{if(G&&S.userData.trees[i])S.userData.trees[i].scale.copy(G.scale)});
     drops.concat(sparks).forEach(d=>{old.remove(d);S.add(d)});dispose(old);showJ()}
-  return {refresh,stop(){alive=false;try{sounds.stop()}catch(e){}Object.assign(cam0,foc?HOME:{th,ph,dist});removeEventListener('resize',rs);dispose(S);R.dispose();R.forceContextLoss&&R.forceContextLoss()}}}
+  return {refresh,act(k,a){if(V||!A[k])return;if(sleeping){sleepCard();return}try{goBox.hidden=true}catch(e){}follow(()=>A[k](a))},stop(){alive=false;try{sounds.stop()}catch(e){}Object.assign(cam0,foc?HOME:{th,ph,dist});removeEventListener('resize',rs);dispose(S);R.dispose();R.forceContextLoss&&R.forceContextLoss()}}}
 
 function dispose(S){S.traverse(o=>{o.geometry&&o.geometry.dispose();const m=o.material;if(m){(Array.isArray(m)?m:[m]).forEach(x=>{x.map&&x.map.dispose();x.dispose()})}})}
 
@@ -2583,5 +2583,7 @@ function refresh(){if(cur)try{cur.refresh()}catch(e){console.error(e)}}
 // (v15.9) ٩ الأعمال الصالحة خارج المدينة (صلاة، حفظ، تسبيح…) تُنبت وردًا في المدينة أيضًا
 function hookBloom(){if(window.Aamal&&Aamal.grow&&!Aamal._bh){const g=Aamal.grow;Aamal.grow=function(){if(!cur)bloomAdd();return g.apply(this,arguments)};Aamal._bh=1}}
 hookBloom();setTimeout(hookBloom,0);addEventListener('load',hookBloom);
-window.City3D={open,refresh,oldHouse};
+// (v17.3) البحث العامّ في التطبيق (wajiha.js) يفتح المدينة ويأخذ الطفل إلى المكان: City3D.goTo('police')
+let pendGo=null;function goTo(k,a){if(!webgl())return oldHouse();if(cur){try{cur.act(k,a)}catch(e){}return}pendGo=[k,a];open();const w=()=>{if(cur&&pendGo){const q=pendGo;pendGo=null;setTimeout(()=>{try{cur&&cur.act(q[0],q[1])}catch(e){}},1400)}else if(pendGo&&document.getElementById('m3d'))setTimeout(w,300)};setTimeout(w,300)}
+window.City3D={open,refresh,oldHouse,goTo};
 })();
