@@ -27,7 +27,7 @@ css.textContent=`body.m3on .modal{z-index:9100}body.m3on #confetti{z-index:9150}
 @keyframes m3fly{to{transform:translate(-50%,-90px);opacity:0}}
 #m3d .m3hp{position:absolute;top:12px;right:12px;z-index:2;display:flex;align-items:center;gap:6px;background:#fffffff2;border-radius:22px;padding:4px 12px 4px 8px;box-shadow:0 3px 0 #c9d6e3,0 3px 10px #0002;min-height:40px}#m3d .m3hp>b{font-size:18px!important;color:#1d4e9e!important}#m3d .m3hp>.e{font-size:24px!important}
 #m3d .m3wx{position:absolute;top:60px;right:12px;z-index:2;display:flex;align-items:center;gap:4px;border:0;background:#fffffff2;border-radius:18px;padding:3px 10px;font:inherit;font-weight:900;color:#1d4e9e;box-shadow:0 3px 0 #c9d6e3,0 3px 10px #0002}#m3d .m3wx[hidden]{display:none}#m3d .m3wx span{font-size:20px}#m3d .m3wx b{font-size:15px}
-#m3d .m3hos{position:absolute;left:12px;z-index:2;display:flex;align-items:center;gap:4px;border:0;border-radius:22px;padding:5px 12px 5px 9px;font:inherit;font-weight:900;font-size:14px;color:#b0262c;background:linear-gradient(160deg,#fff,#ffe9ea);box-shadow:0 3px 0 #e8b8bb,0 3px 10px #0002}#m3d .m3hos b{font-size:22px;line-height:1}#m3d .m3hos[hidden]{display:none}
+#m3d .m3hos{position:absolute;left:12px;z-index:2;display:flex;align-items:center;gap:4px;border:0;border-radius:22px;padding:5px 12px 5px 9px;font:inherit;font-weight:900;font-size:14px;color:#b0262c;background:linear-gradient(160deg,#fff,#ffe9ea);box-shadow:0 3px 0 #e8b8bb,0 3px 10px #0002}#m3d .m3hos b{font-size:22px;line-height:1}#m3d .m3hos.go{font-size:17px;padding:8px 16px 8px 12px;color:#6a4300;background:linear-gradient(160deg,#fff3b8,#ffc53a);box-shadow:0 4px 0 #c98a12,0 4px 12px #0003;animation:m3gob 1.6s ease-in-out infinite}#m3d .m3hos.go b{font-size:26px}@keyframes m3gob{50%{transform:scale(1.07)}}#m3d .m3go{position:absolute;inset:0;z-index:5;background:#0006;display:flex;align-items:center;justify-content:center;padding:14px}#m3d .m3go[hidden]{display:none}#m3d .m3go .in{background:#fffdf5;border-radius:22px;padding:12px 10px 10px;width:100%;max-width:440px;max-height:92%;overflow:auto;box-shadow:0 6px 0 #d9c58a,0 10px 30px #0005;animation:m3in .25s ease}#m3d .m3go h4{margin:0 0 10px;text-align:center;font-size:19px;color:#5a3d00}#m3d .m3go .g{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}#m3d .m3go .g button{border:0;border-radius:16px;padding:9px 2px 8px;font:inherit;font-weight:900;font-size:13.5px;line-height:1.25;color:#2b3550;background:var(--c);box-shadow:0 4px 0 var(--d),0 4px 8px #0002,inset 0 2px 0 #fff9}#m3d .m3go .g button b{display:block;font-size:30px;line-height:1.15;margin-bottom:2px}#m3d .m3go .g button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--d)}#m3d .m3go .x{display:block;margin:12px auto 0;border:0;border-radius:14px;padding:9px 26px;font:inherit;font-weight:900;font-size:15px;background:#e3ecf7;color:#1d4e9e;box-shadow:0 3px 0 #a9bcd6}#m3d .m3hos[hidden]{display:none}
 #m3d .m3snd{position:absolute;top:108px;left:12px;z-index:2;width:42px;height:42px;border-radius:50%;border:0;background:#fffd;font-size:20px;box-shadow:0 2px 6px #0003}
 #m3d .m3msg:empty{display:none}#m3d .m3hp:empty{display:none}#m3d .m3hp .e{font-size:30px;line-height:1}#m3d .m3hp .t{flex:1;min-width:0}#m3d .m3hp b{display:block;font-size:14.5px;color:#5a4a1a}#m3d .m3hp small{display:block;font-size:12px;font-weight:700;color:#7a6a3a}
 #m3d .m3hp .hb{height:9px;border-radius:6px;background:#efe6d2;overflow:hidden;margin-top:3px}#m3d .m3hp .hb i{display:block;height:100%;border-radius:6px;transition:width .6s}`;
@@ -1362,7 +1362,7 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
     U.sky.set(top,hor);if(S.fog)S.fog.color.copy(hor);if(S.background&&S.background.copy)S.background.copy(hor);if(U.sun){U.sun.color.setHex(sc);U.sun.intensity=si}
     const d=U.sunDisc;if(d){d.visible=!!disc&&disc.k>.05;if(disc)d.position.set(disc.x,disc.y,disc.z)}}
   if(window.City3D)City3D.applySky=()=>applySky();
-  let kidSp=4.2,escort=0,lookT=0,carry=0,fallEsc=0,fallT=25+Math.random()*40;const FALLP=[-3.4,11.2];
+  let kidSp=4.2,fol=0,fast=0,escort=0,lookT=0,carry=0,fallEsc=0,fallT=25+Math.random()*40;const FALLP=[-3.4,11.2];
   const hpLv=()=>{const c=window.Binaa?Binaa.code():'';return Math.max(0,Math.min(3,+c[5]||0))};
 const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),new T.MeshStandardMaterial({color:k<0?0xe9e2cf:0xd6e8f5,roughness:.8}));b.position.set(k*.34,.42,.06);b.visible=false;kid.add(b);return b});
   const sign=v=>v<0?-1:1;
@@ -1597,18 +1597,33 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
       ui.msg.textContent=""}});
   const BAR_ME=ui.bar.innerHTML,BAR_V=`<button data-a="back"><b>🏙️</b>مدينتي</button><button data-a="fhouse"><b>🏡</b>ادخل بيته</button><button data-a="friends"><b>👥</b>صديق آخر</button>`;
   function setBar(){ui.bar.innerHTML=V?BAR_V:BAR_ME;ui.bar.style.gridTemplateColumns=V?'repeat(3,1fr)':'';
-    ui.bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{try{window.Bayt&&Bayt.sTap()}catch(e){}if(sleeping&&b.dataset.a!=="back"){sleepCard();return}if(busy||path.length&&!wander)return;if(foc&&b.dataset.a!=='back')cityView();A[b.dataset.a]()});
+    ui.bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{try{window.Bayt&&Bayt.sTap()}catch(e){}if(sleeping&&b.dataset.a!=="back"){sleepCard();return}if(busy||path.length&&!wander)return;const a=b.dataset.a;if(a==='back'||a==='friends'){if(foc&&a!=='back')cityView();A[a]();return}follow(()=>A[a]())});
     const p=prayerNow();if(!V&&p&&!day().pr[p])ui.bar.querySelector('[data-a=mosque]').classList.add('hot');try{if(V&&foc)cityView();hosLbl()}catch(e){}}
   // (v15.3) 🏥 زر المستشفى (يسار الشاشة): الكاميرا تطير وتعرض المستشفى بعرض الشاشة من جهة الشارع، ومرة ثانية «🏙️ مدينتي» ترجع للمدينة كلها
   const hosBtn=ui.hos,HOME={th:cam0.th,ph:cam0.ph,dist:cam0.dist};
   // (v15.4) صار زر «📍 الأماكن»: المستشفى ومدينة الألعاب، كلٌّ يُعرض بعرض الشاشة
   const VIEWS={hp:{P:[HSP[0]-1,1.8,HSP[1]+.6],th:-1.2,ph:.95,w:15},pk:{P:[PKC[0]+.5,2.6,PKC[1]],th:1.2,ph:1,w:18}};
-  function viewAt(k){const v=VIEWS[k],hf=Math.atan(Math.tan(22.5*Math.PI/180)*cam.aspect),d=Math.max(24,Math.min(MAXD,v.w/(2*Math.tan(hf))));flyTo({c:v.P,l:v.P,th:v.th,ph:v.ph,dist:d});foc=k;hosLbl()}
+  function viewAt(k){const v=VIEWS[k],hf=Math.atan(Math.tan(22.5*Math.PI/180)*cam.aspect),d=Math.max(24,Math.min(MAXD,v.w/(2*Math.tan(hf))));fol=0;flyTo({c:v.P,l:v.P,th:v.th,ph:v.ph,dist:d});foc=k;hosLbl()}
   function hosView(){viewAt('hp')}
-  function cityView(){if(!foc)return;flyTo({c:C0,l:LK0,th:HOME.th,ph:HOME.ph,dist:HOME.dist});foc=null;hosLbl()}
-  function hosLbl(){if(!hosBtn)return;hosBtn.hidden=!!V;hosBtn.innerHTML=foc?'<b>🏙️</b>مدينتي':'<b>📍</b>الأماكن';const sb=ui.snd;hosBtn.style.top=(sb&&sb.offsetHeight?sb.offsetTop+sb.offsetHeight+10:160)+'px'}
-  if(hosBtn){hosBtn.onclick=()=>{try{window.Bayt&&Bayt.sTap()}catch(e){}if(foc){cityView();return}
-    card('📍 إلى أين '+B('تريد','تريدين')+' أن '+B('تذهب','تذهبي')+'؟',[['🏥 المستشفى',()=>viewAt('hp')],['🎡 مدينة الألعاب',()=>{viewAt('pk');A.park()}],['حسنًا',null,'sec']])};hosLbl()}
+  function cityView(){fol=0;if(!foc)return;flyTo({c:C0,l:LK0,th:HOME.th,ph:HOME.ph,dist:HOME.dist});foc=null;hosLbl()}
+  function hosLbl(){if(!hosBtn)return;hosBtn.hidden=!!V;hosBtn.innerHTML=foc?'<b>🏙️</b>مدينتي':'<b>🗺️</b>إلى أين؟';hosBtn.classList.toggle('go',!foc);const sb=ui.snd;hosBtn.style.top=(sb&&sb.offsetHeight?sb.offsetTop+sb.offsetHeight+10:160)+'px'}
+  // (v15.6) طلب الشيخ: الوصول إلى الأماكن صعب على الطفل → زر كبير «🗺️ إلى أين؟» يفتح لوحة صور لكل الأماكن،
+  // يلمس الطفل المكان فيمشي إليه وحده (أسرع في الرحلات) والكاميرا تتبعه، ثم يبدأ العمل الصالح هناك
+  function follow(f){if(busy)return;fol=1;fast=1;foc='kid';hosLbl();f();if(!path.length)fast=0}
+  const PLACES=()=>[['🏡','بيتي',()=>go({x:-3.4,z:1,via:null},()=>tap({p:'home'}))],['🕌','الجامع',()=>A.mosque()],['🎒','مدرستي',()=>A.mySchool()],
+    ['🏫','مدرسة القرآن',()=>A.school()],['📚','المكتبة',()=>A.library()],['🏥','المستشفى',()=>{if(hpLv()>0)A.hospital();else{hosView();setTimeout(()=>{try{Binaa.open('hp')}catch(e){}},700)}},1],
+    ['🎡','مدينة الألعاب',()=>A.park(),1],['🛒','السوق',()=>card('🛒 أيّ دكّان؟',[...MKT.map(m=>[m[4],()=>follow(()=>A.mk(m[0]))]),['لاحقًا',null,'sec']])],
+    ['🐄','المزرعة',()=>A.farm('any')],['🦆','البطّ في النهر',()=>A.ducks()],['🐑','المرعى',()=>A.sheep()],['⛲','النافورة',()=>A.plaza()],
+    ['🔥','التنّور',()=>A.tannour()],['⚽','الملعب',()=>A.football()],['🚌','موقف الباص',()=>A.busStop()]];
+  const goBox=document.createElement('div');goBox.className='m3go';goBox.hidden=true;ov.appendChild(goBox);
+  function openGo(){const L=PLACES(),C=[['#dff5e3','#9fd3aa'],['#dcecff','#9dbde6'],['#ffe1ec','#e6a9bf'],['#fff3c4','#e3c56e'],['#ece3ff','#b9a6e6'],['#d9f5f1','#94d1c8']];
+    goBox.innerHTML=`<div class="in"><h4>🗺️ إلى أين ${B('تذهب','تذهبين')}؟</h4><div class="g">${L.map((p,i)=>`<button data-i="${i}" style="--c:${C[i%6][0]};--d:${C[i%6][1]}"><b>${p[0]}</b>${p[1]}</button>`).join('')}</div><button class="x">✖ إغلاق</button></div>`;
+    goBox.hidden=false;card('');
+    goBox.onclick=e=>{const b=e.target.closest('button');if(e.target===goBox||b&&b.classList.contains('x')){goBox.hidden=true;return}if(!b)return;
+      try{window.Bayt&&Bayt.sTap()}catch(x){}goBox.hidden=true;const p=L[+b.dataset.i];if(sleeping){sleepCard();return}
+      if(busy||path.length&&!wander){card('🚶 '+B('انتظر','انتظري')+' قليلًا حتى '+B('تصل','تصلي')+' 🙂');setTimeout(()=>card(''),1600);return}
+      if(p[3]){p[2]();return}follow(p[2])}}
+  if(hosBtn){hosBtn.onclick=()=>{try{window.Bayt&&Bayt.sTap()}catch(e){}if(foc){cityView();return}if(V)return;openGo()};hosLbl()}
   setBar();const pn=prayerNow();if(window.City3D)City3D._A=A; // للتجربة فقط
   // (v13.8) تهنئة مرة في اليوم أيام رمضان والعيد
   {const oc=occNow(),D=day();if(oc&&!V&&D.oc!==oc.id&&!sleepNow()){D.oc=oc.id;D.fs=1;dsv();setTimeout(()=>card(`<b>${oc.t}</b><br><small>${oc.msg}</small><br><small>${oc.k==='sad'?'لبست '+B('مدينتك','مدينتكِ')+' السواد في هذه الأيام 🖤':'زُيّنت '+B('مدينتك','مدينتكِ')+' بالأضواء والفوانيس والبالونات ✨'}</small>`,[[oc.k==='sad'?'🤍 حسنًا':'🤍 الحمد لله',null]]),900)}}
@@ -1632,7 +1647,7 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
   cv.addEventListener('pointerdown',e=>{pts.set(e.pointerId,[e.clientX,e.clientY]);try{cv.setPointerCapture(e.pointerId)}catch(x){}
     if(pts.size===1){drag=[e.clientX,e.clientY];down=[e.clientX,e.clientY,Date.now()]}else{drag=null;pinch=0;down=null}});
   cv.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,[e.clientX,e.clientY]);
-    if(pts.size===1&&drag||pts.size===2)goal=null;
+    if(pts.size===1&&drag||pts.size===2){goal=null;fol=0}
     if(pts.size===1&&drag){th-=(e.clientX-drag[0])*.008;ph=Math.max(.25,Math.min(1.38,ph-(e.clientY-drag[1])*.006));drag=[e.clientX,e.clientY]}
     else if(pts.size===2){const [a,b]=[...pts.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]),mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;if(pinch)dist=Math.max(10,Math.min(MAXD,dist*pinch/d));pinch=d;
       // (v15.5) بإصبعين: تقريب/تبعيد، وسحب الإصبعين يحرّك المدينة (يمين/يسار/أمام/خلف) حتى يصل الطفل لأيّ مكان
@@ -1642,7 +1657,7 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
   const up=e=>{const was=pts.has(e.pointerId)&&pts.size===1;pts.delete(e.pointerId);pinch=0;mid=null;drag=pts.size===1?[...pts.values()][0]:null;
     if(was&&down&&e.type==='pointerup'&&Math.hypot(e.clientX-down[0],e.clientY-down[1])<10&&Date.now()-down[2]<600)tap(pick(e.clientX,e.clientY));down=null};
   cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
-  cv.addEventListener('wheel',e=>{e.preventDefault();goal=null;dist=Math.max(10,Math.min(MAXD,dist*(e.deltaY>0?1.1:.9)))},{passive:false});
+  cv.addEventListener('wheel',e=>{e.preventDefault();goal=null;fol=0;dist=Math.max(10,Math.min(MAXD,dist*(e.deltaY>0?1.1:.9)))},{passive:false});
   const rs=()=>{const w=innerWidth,h=innerHeight;cam.aspect=w/h;cam.updateProjectionMatrix();R.setSize(w,h)};addEventListener('resize',rs);
   // الحلقة
   let alive=true,idle=0,t=0,last=performance.now();(function loop(now){if(!alive)return;const dt=Math.min(.05,((now||performance.now())-last)/1000);last=now||performance.now();t+=dt*3;
@@ -1652,8 +1667,8 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
     if(path.length&&lookT>0){// 🚸 يقف عند حافة الرصيف وينظر يمينًا ويسارًا قبل العبور
       lookT-=dt;const [nx,nz]=path[0];kid.rotation.y=Math.atan2(nx-kid.position.x,nz-kid.position.z)+Math.sin((1.6-lookT)*4)*1.1;
       L.legs.forEach(l=>l.rotation.x*=.7);L.arms.forEach(a=>a.rotation.x*=.7);kid.position.y=0;still=0}
-    else if(path.length){const [tx,tz,lk]=path[0],dx=tx-kid.position.x,dz=tz-kid.position.z,d=Math.hypot(dx,dz),sp=kidSp*dt;
-      if(d<=sp){kid.position.x=tx;kid.position.z=tz;path.shift();if(lk&&path.length)lookT=1.6;if(!path.length&&onArrive){const f=onArrive;onArrive=null;setTimeout(f,150)}}
+    else if(path.length){const [tx,tz,lk]=path[0],dx=tx-kid.position.x,dz=tz-kid.position.z,d=Math.hypot(dx,dz),sp=kidSp*dt*(fast&&!escort&&!fallEsc&&!carry?2.6:1);
+      if(d<=sp){kid.position.x=tx;kid.position.z=tz;path.shift();if(lk&&path.length)lookT=fast?.9:1.6;if(!path.length)fast=0;if(!path.length&&onArrive){const f=onArrive;onArrive=null;setTimeout(f,150)}}
       else{kid.position.x+=dx/d*sp;kid.position.z+=dz/d*sp;kid.rotation.y=Math.atan2(dx,dz)}
       const sw=Math.sin(t*4)*.6;L.legs[0].rotation.x=sw;L.legs[1].rotation.x=-sw;L.arms[0].rotation.x=-sw;L.arms[1].rotation.x=sw;kid.position.y=Math.abs(Math.sin(t*4))*.06}
     else{L.legs.forEach(l=>l.rotation.x*=.8);L.arms.forEach(a=>a.rotation.x*=.8);still+=dt;waveT+=dt;
@@ -1684,6 +1699,7 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
       if(k>1.3){S.remove(s);s.geometry.dispose();s.material.dispose();return false}return true});
     drops=drops.filter(d=>{d.position.y-=dt*4;if(d.position.y<.1){S.remove(d);d.geometry.dispose();d.material.dispose();return false}return true});
     (S.userData.trees||[]).forEach(G=>{if(G&&G.userData.grow){G.userData.grow+=dt;const k=G.userData.grow-1;G.scale.setScalar(k<.6?1+Math.sin(k/.6*Math.PI)*.25:1.08);if(k>.6)G.userData.grow=0}});
+    if(fol){goal=null;const kp=kid.position,k=Math.min(1,dt*2.4);CC[0]+=(kp.x-CC[0])*k;CC[2]+=(kp.z-CC[2])*k;LK[0]+=(kp.x-LK[0])*k;LK[1]+=(1.2-LK[1])*k;LK[2]+=(kp.z-LK[2])*k;CC[1]+=(0-CC[1])*k;dist+=(34-dist)*k*.6;ph+=(Math.min(ph,1.05)-ph)*k}
     stepFly(dt);place();R.render(S,cam);requestAnimationFrame(loop)})();
   // عند وقت الأذان: الشخصية تذهب للجامع وحدها
   if(pn&&!day().pr[pn]&&window.Madina&&Madina.st.lv.m)setTimeout(()=>{if(alive&&!V&&!path.length&&!busy&&!sleeping){card(`🕌 الله أكبر! حان وقت صلاة ${PNAME[pn]}… هيّا إلى الجامع`);setTimeout(()=>A.mosque(),1200)}},1500);
