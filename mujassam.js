@@ -1351,6 +1351,9 @@ function iftarNow(){const d=window.City3D&&City3D.debugIftar;if(d!=null)return !
 function halaqaNow(){const d=window.City3D&&City3D.debugHalaqa;if(d!=null)return !!d;const h=hourNow(),m=maghribH();return h>=m+.1&&h<m+1.5}
 function qDay(){try{const L=QBANK.filter(q=>q.t==='mcq'&&q.o&&q.o.length>1||q.t==='tf');return L.length?L[seed()%L.length]:null}catch(e){return null}}
 function parkOpen(){const h=hourNow();return !!parkWhy()&&h>=9&&h<21&&!rainNow()&&!sleepNow()}
+// (v18.0) طلب الشيخ: «الطفل يداوم في المدرسة مثل الطلاب من ٨ إلى ١٢» — أيام الدوام = ليست عطلة (parkWhy)
+function schoolDay(){const d=window.City3D&&City3D.debugSchool;if(d!=null)return !!d;return parkWhy()==null}
+function schoolNow(){const h=hourNow();return schoolDay()&&h>=7.75&&h<12}
 function wDay(){const d=window.City3D&&City3D.debugWd;return d!=null?d:new Date().getDay()}
 function rushNow(){const h=hourNow();return wDay()<5&&(h>=7.5&&h<8.5||h>=11.75&&h<12.75)}
 function sleepNow(){const h=hourNow();let f=5;try{const d=new Date(+Adhan.times(new Date()).fajr);const x=d.getHours()+d.getMinutes()/60;if(x>3&&x<7)f=x}catch(e){}return h>=0&&h<f}
@@ -1934,11 +1937,23 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
     card(`🌙 الساعة ١٢ ليلًا… حان وقت النوم 😴<br><small>${B('تذهب','تذهبين')} إلى ${B('بيتك','بيتكِ')} ${B('لتنام','لتنامي')}</small>`)}
   function wake(){sleeping=false;zz.visible=false;at=door('home');kid.position.set(at.x,0,at.z);kid.visible=true;path=[];
     card(`☀️ صباح الخير! ${B('استيقظتَ','استيقظتِ')} لصلاة الفجر 🤲`);setTimeout(()=>{if(ui.card.textContent.includes('صباح الخير'))card('')},3500)}
+  // 🎒 الدوام: من ٧:٤٥ إلى ١٢ في أيام الدراسة يذهب الطفل إلى المدرسة ويبقى في الساحة مع زملائه، وفي ١٢ يرنّ الجرس ويخرج
+  let inSchool=false,schOK=0;const SCP={x:-6.6,z:-17.3};
+  const schoolCard=()=>card(`🎒 ${B('أنت','أنتِ')} الآن في الدوام مع ${B('زملائك','زميلاتك')} 📚<br><small>الدوام من الساعة ٨ صباحًا إلى ١٢ ظهرًا · ${B('تخرج','تخرجين')} مع الجرس 🔔</small>`,
+    [['📚 درس اليوم',()=>closeTo(()=>{const b=document.getElementById('wjDurBtn');b&&b.click()})],['⭐ '+B('احفظ','احفظي')+' سورة',()=>closeTo(()=>{const b=document.getElementById('openHifz');b&&b.click()}),'sec'],['حسنًا',null,'sec']]);
+  function inYard(){kid.position.set(SCP.x,0,SCP.z);kid.rotation.y=Math.PI;kid.visible=true;at=here();path=[];wander=false;
+    const D=day();if(!D.sch){D.sch=1;dsv();setTimeout(()=>{jewels(5);card(`🎒 ${B('وصلتَ','وصلتِ')} إلى المدرسة في وقت الدوام! 💎 +٥<br><small>طلب العلم من أجمل الأعمال · الدوام من ٨ إلى ١٢ 🔔</small>`,[['📚 درس اليوم',()=>closeTo(()=>{const b=document.getElementById('wjDurBtn');b&&b.click()})],['حسنًا',null,'sec']])},300)}else schoolCard()}
+  function startSchool(now){try{leaveCar(1)}catch(e){}inSchool=true;fol=1;foc='kid';
+    if(now){busy=0;inYard();return}
+    busy=0;path=[];wander=false;at=here();card(`🔔 صار وقت الدوام… ${B('هيّا إلى مدرستك','هيّا إلى مدرستكِ')} 🎒`);schOK=1;
+    go(door('sc'),()=>{schOK=0;let k=0;const x0=kid.position.x,z0=kid.position.z,s=setInterval(()=>{k++;const f=k/20;kid.position.set(x0+(SCP.x-x0)*f,0,z0+(SCP.z-z0)*f);kid.rotation.y=Math.atan2(SCP.x-x0,SCP.z-z0);if(k>=20){clearInterval(s);inYard()}},60)});schOK=0}
+  function endSchool(){inSchool=false;if(sleeping)return;card(`🔔 رنّ الجرس… انتهى الدوام! ${B('أحسنتَ','أحسنتِ')} 🌟<br><small>${B('تستطيع','تستطيعين')} الآن أن ${B('تتجوّل','تتجوّلي')} في المدينة</small>`);
+    setTimeout(()=>{if(ui.card.textContent.includes('رنّ الجرس'))card('')},3500);kid.position.set(-2.4,0,-17.6);at=here();path=[]}
   const WP=[{x:SW,z:-6},{x:SW,z:7},{x:SW,z:12},{x:SW,z:-12},{x:-5,z:4.05,via:4.6},{x:-10.3,z:4.05,via:4.6},{x:-5.5,z:-5.9,via:-4.6}];
   const here=()=>{const x=kid.position.x,z=kid.position.z;return {x,z,via:Math.abs(x)>2.6&&Math.abs(Math.abs(z)-4.6)<1.2?sign(z)*4.6:null}};
   // (v13.9) طلب الشيخ: الطفل يعبر الشارع الرئيسي من ممرّ المشاة فقط (z=±4.6)، ويقف عند الرصيف ينظر يمينًا ويسارًا (النقطة الثالثة =1)
   // الأماكن يمين الشارع بلا via يصلها عبر الممرّ الأقرب ثم الرصيف الأيمن (x=2.8)
-  function go(to,done,w){if(busy)return;if(drv)leaveCar(1);if(window.City3D&&City3D.debugTp&&!w){path=[];at=to;kid.position.set(to.x,0,to.z);card('');if(done)setTimeout(done,50);return} // للتجربة فقط: وصول فوري
+  function go(to,done,w){if(busy)return;if(inSchool&&!schOK){if(!w)schoolCard();return}if(drv)leaveCar(1);if(window.City3D&&City3D.debugTp&&!w){path=[];at=to;kid.position.set(to.x,0,to.z);card('');if(done)setTimeout(done,50);return} // للتجربة فقط: وصول فوري
 if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0?4.6:-4.6,rt=a=>a.via==null&&a.x>2.2;
     if(rt(at)&&rt(to)&&(at.z>=0)===(to.z>=0))p.push([R,at.z],[R,to.z],[to.x,to.z]);
     else{if(at.via!=null){p.push([at.x,at.via]);if(at.x>0)p.push([R,at.via,1])}
@@ -1988,7 +2003,12 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
       card(`🐱 شربت القطة وقالت: مياو! شكرًا 🤍<br><small>الرحمة بالحيوان من الأخلاق الجميلة</small>`,[['حسنًا',null,'sec']]);refresh()})},1200)})},
     school(){go(door('q'),()=>card(`🏫 مدرسة القرآن: هيّا ${B('احفظ','احفظي')} سورة مع الشيخ عبد الباسط ⭐`,[['⭐ أنا حافظ صغير',()=>closeTo(()=>{const b=document.getElementById('openHifz');b&&b.click()})],['لاحقًا',null,'sec']]))},
     // (v11.8) 🎒 مدرستي: الذهاب للمدرسة مرة في اليوم 💎5، ثم دعوة لدرس حقيقي من الكتاب
-    mySchool(){const D=day();go(door('sc'),()=>{
+    mySchool(){if(inSchool){schoolCard();return}const h=hourNow();
+      {const L=[['📚 دروس الكتاب',()=>closeTo(()=>{const b=document.getElementById('wjDurBtn');b&&b.click()})],['حسنًا',null,'sec']];
+       card(!schoolDay()?`🎒 اليوم عطلة، لا دوام في المدرسة 🌞<br><small>الدوام في أيام الدراسة من ٨ صباحًا إلى ١٢ ظهرًا · ${B('تعلّم','تعلّمي')} درسًا من البيت 📚</small>`
+         :h<7.75?`🎒 الدوام يبدأ الساعة ٨ صباحًا 🔔<br><small>${B('ستذهب','ستذهبين')} إلى المدرسة وحدك حين يحين الوقت</small>`
+         :`🎒 انتهى دوام اليوم 🔔<br><small>الدوام غدًا من ٨ صباحًا إلى ١٢ ظهرًا إن شاء الله · ${B('راجع','راجعي')} درسك الآن 📚</small>`,L);return}
+      const D=day();go(door('sc'),()=>{
       if(!D.sch){D.sch=1;dsv();enter(()=>{jewels(5);card(`🎒 ${B('وصلتَ','وصلتِ')} إلى ${B('مدرستك','مدرستكِ')}! 💎 +٥<br><small>طلب العلم من أجمل الأعمال، ${B('تعلّم','تعلّمي')} اليوم درسًا جديدًا 📚</small>`,
         [['📚 دروس الكتاب',()=>closeTo(()=>{const b=document.getElementById('wjDurBtn');b&&b.click()})],['حسنًا',null,'sec']])});return}
       card(`🎒 ${B('ذهبتَ','ذهبتِ')} إلى المدرسة اليوم ✔<br><small>${B('تعال','تعالي')} غدًا ${B('وخذ','وخذي')} 💎٥ مرة أخرى</small>`,[['📚 دروس الكتاب',()=>closeTo(()=>{const b=document.getElementById('wjDurBtn');b&&b.click()})],['حسنًا',null,'sec']])})},
@@ -2233,7 +2253,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
       ui.msg.textContent=""}});
   const BAR_ME=ui.bar.innerHTML,BAR_V=`<button data-a="back"><b>🏙️</b>مدينتي</button><button data-a="fhouse"><b>🏡</b>ادخل بيته</button><button data-a="friends"><b>👥</b>صديق آخر</button>`;
   function setBar(){ui.bar.innerHTML=V?BAR_V:BAR_ME;ui.bar.style.gridTemplateColumns=V?'repeat(3,1fr)':'';
-    ui.bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{try{window.Bayt&&Bayt.sTap()}catch(e){}if(sleeping&&b.dataset.a!=="back"){sleepCard();return}if(busy||path.length&&!wander)return;const a=b.dataset.a;if(a==='back'||a==='friends'){if(foc&&a!=='back')cityView();A[a]();return}follow(()=>A[a]())});
+    ui.bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{try{window.Bayt&&Bayt.sTap()}catch(e){}if(sleeping&&b.dataset.a!=="back"){sleepCard();return}if(inSchool&&!V&&b.dataset.a!=='school'){schoolCard();return}if(busy||path.length&&!wander)return;const a=b.dataset.a;if(a==='back'||a==='friends'){if(foc&&a!=='back')cityView();A[a]();return}follow(()=>A[a]())});
     const p=prayerNow();if(!V&&p&&!day().pr[p])ui.bar.querySelector('[data-a=mosque]').classList.add('hot');try{if(V&&foc)cityView();hosLbl()}catch(e){}}
   // (v15.3) 🏥 زر المستشفى (يسار الشاشة): الكاميرا تطير وتعرض المستشفى بعرض الشاشة من جهة الشارع، ومرة ثانية «🏙️ مدينتي» ترجع للمدينة كلها
   const hosBtn=ui.hos,HOME={th:cam0.th,ph:cam0.ph,dist:cam0.dist};
@@ -2287,7 +2307,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
       q.oninput=doS;q.onkeydown=e=>{if(e.key==='Enter'){const f=tiles.find(b=>!b.hidden)||tks.find(b=>!b.hidden);if(f&&q.value)f.click()}}}
     goBox.onclick=e=>{const b=e.target.closest('button');if(e.target===goBox||b&&b.classList.contains('x')){goBox.hidden=true;return}if(!b)return;
       if(b.classList.contains('lite')){try{localStorage.setItem(LKEY,liteOn()?'0':'1')}catch(x){}goBox.hidden=true;ui.close();setTimeout(()=>open(),120);return}
-      try{window.Bayt&&Bayt.sTap()}catch(x){}goBox.hidden=true;const p=b.dataset.t!=null?[0,0,TK[+b.dataset.t][4]]:L[+b.dataset.i];if(sleeping){sleepCard();return}
+      try{window.Bayt&&Bayt.sTap()}catch(x){}goBox.hidden=true;const p=b.dataset.t!=null?[0,0,TK[+b.dataset.t][4]]:L[+b.dataset.i];if(sleeping){sleepCard();return}if(inSchool&&!(p&&p[3])){schoolCard();return}
       if(busy||path.length&&!wander){card('🚶 '+B('انتظر','انتظري')+' قليلًا حتى '+B('تصل','تصلي')+' 🙂');setTimeout(()=>card(''),1600);return}
       if(p[3]){p[2]();return}follow(p[2])}}
   // ===== (v17.1) 🚗 سيارة الطفل: يتعلّم السياقة ← رخصة ← سيارة بشرط عمل صالح بصوته ← يسوقها في شوارع المدينة =====
@@ -2450,7 +2470,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
         px=x1;pz=z1}
       if(!ch)break}}
   const tgtM=new T.Mesh(new T.RingGeometry(.28,.46,24),new T.MeshBasicMaterial({color:0xffd23f,transparent:true,opacity:0,depthWrite:false}));tgtM.rotation.x=-Math.PI/2;tgtM.renderOrder=5;let tgtK=0;
-  function groundTap(cx,cy){if(V)return;if(sleeping){sleepCard();return}
+  function groundTap(cx,cy){if(V)return;if(sleeping){sleepCard();return}if(inSchool){schoolCard();return}
     if(drv){const r0=cv.getBoundingClientRect();ray.setFromCamera(new T.Vector2((cx-r0.left)/r0.width*2-1,-(cy-r0.top)/r0.height*2+1),cam);const v0=new T.Vector3();if(ray.ray.intersectPlane(new T.Plane(new T.Vector3(0,1,0),0),v0)){driveTo(fXi(v0.x),v0.z);fol=1;foc='kid';try{hosLbl()}catch(e){}}return}
     if(busy||escort||fallEsc||carry){card(`🙂 ${B('أكمل','أكملي')} ما ${B('تفعله','تفعلينه')} أوّلًا`);setTimeout(()=>card(''),1500);return}
     const r=cv.getBoundingClientRect();ray.setFromCamera(new T.Vector2((cx-r.left)/r.width*2-1,-(cy-r.top)/r.height*2+1),cam);const v=new T.Vector3();
@@ -2480,7 +2500,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
   nearBtn.onclick=()=>{const u=nearU;nearBtn.hidden=true;try{window.Bayt&&Bayt.sTap()}catch(e){}if(u)tap(u)};
   function nearTick(dt){if(tgtK>0){tgtK=Math.max(0,tgtK-dt*.7);tgtM.material.opacity=tgtK*.9;tgtM.scale.setScalar(1+(1-tgtK)*.6)}
     nearT-=dt;if(nearT>0)return;nearT=.3;let best=null,bd=1e9,lb='';
-    if(!drv&&!V&&!sleeping&&!busy&&!path.length&&goBox.hidden&&!ui.card.classList.contains('on')&&salBtn.hidden&&kid.visible){const kx=kid.position.x,kz=kid.position.z,D=day();
+    if(!drv&&!V&&!sleeping&&!inSchool&&!busy&&!path.length&&goBox.hidden&&!ui.card.classList.contains('on')&&salBtn.hidden&&kid.visible){const kx=kid.position.x,kz=kid.position.z,D=day();
       const cons=(u,d)=>{if(d>=bd||d>1.3)return;const l=nearLbl(u,D);if(l){bd=d;best=u;lb=l}};
       life.g.children.forEach(P=>{const u=P.userData;if(P.visible&&u.act&&u.act!=='pet')cons(u,Math.hypot(P.position.x-kx,P.position.z-kz)-1.2)});
       if(!OB)obst();S.children.forEach(o=>{const u=o.userData;if(!u||o===kid||o===life.g||o===tgtM||!(u.act||u.p||u.t!=null||u.l!=null||u.cat||u.fk))return;const b=OBm.get(u);
@@ -2489,7 +2509,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
   // (v15.7) حين يسلّم جارٌ يظهر زر أخضر كبير «👋 ردّ السلام»: لمسة واحدة ويذهب الطفل إليه
   const salBtn=document.createElement('button');salBtn.className='m3sal';salBtn.hidden=true;ov.appendChild(salBtn);let salI=-1,salT=0;
   salBtn.onclick=()=>{try{window.Bayt&&Bayt.sTap()}catch(e){}const i=salI;salBtn.hidden=true;if(i<0||busy||path.length&&!wander)return;follow(()=>A.salam(i))};
-  function salTick(dt){salT-=dt;if(salT>0)return;salT=.3;try{life.setQuiet((day().sl|0)>=5)}catch(e){}let i=-1;if(!V&&!drv&&!sleeping&&!busy&&!(path.length&&!wander)&&goBox.hidden&&!ui.card.classList.contains('on'))i=life.peds.findIndex(P=>P.visible&&P.userData.u.greet>0&&!(P.userData.u.hold>0));
+  function salTick(dt){salT-=dt;if(salT>0)return;salT=.3;try{life.setQuiet((day().sl|0)>=5)}catch(e){}let i=-1;if(!V&&!drv&&!sleeping&&!inSchool&&!busy&&!(path.length&&!wander)&&goBox.hidden&&!ui.card.classList.contains('on'))i=life.peds.findIndex(P=>P.visible&&P.userData.u.greet>0&&!(P.userData.u.hold>0));
     salI=i;if(i<0){salBtn.hidden=true;return}const u=life.peds[i].userData.u,she=u.kind==='woman',w=she?'جارتك تسلّم':u.kind==='kid'?B('صديقك يسلّم','صديقتك تسلّم'):'جارك يسلّم';
     salBtn.innerHTML=`👋 ${w} عليك… ${B('ردّ','ردّي')} السلام`;salBtn.hidden=false}
   // ===== (v15.9) «طفل يحبّ مدينته» =====
@@ -2576,7 +2596,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
   const cv=R.domElement,ray=new T.Raycaster();
   function pick(x,y){const r=cv.getBoundingClientRect();ray.setFromCamera(new T.Vector2((x-r.left)/r.width*2-1,-(y-r.top)/r.height*2+1),cam);
     for(const h of ray.intersectObjects(S.children,true)){let o=h.object;while(o&&!(o.userData&&(o.userData.p||o.userData.t!=null||o.userData.l!=null||o.userData.cat||o.userData.ped||o.userData.fk||o.userData.act)))o=o.parent;if(o)return o.userData}return null}
-  function tap(u){if(!u)return;try{window.Bayt&&Bayt.sTap()}catch(e){}if(sleeping){sleepCard();return}
+  function tap(u){if(!u)return;try{window.Bayt&&Bayt.sTap()}catch(e){}if(sleeping){sleepCard();return}if(inSchool&&!V&&u.p!=='sc'){schoolCard();return}
     if(u.ped){if(!busy&&(!path.length||wander))A.salam(u.ped-1);return}
     if(u.act){if(V&&u.act==='mycar'){card(`🚗 ${B('سيارتك','سيارتكِ')} واقفة قرب بيت ${V.nick}`,[['🏙️ ارجع لمدينتي',()=>A.back()],['لاحقًا',null,'sec']]);return}if(V){card('🤍 هذا في مدينة '+V.nick);setTimeout(()=>card(''),1600);return}if(!busy&&(!path.length||wander)){const a=u.act;if(a.indexOf('bn_')===0){try{Bayt.sTap()}catch(e){}if(window.Binaa)Binaa.open(a.slice(3));return}if(a.indexOf('mk_')===0)A.mk(a.slice(3));else if(A[a])A[a]()}return}
     if(u.fk){if(V){card(`🐄 مزرعة ${V.nick} 🤍`);setTimeout(()=>card(''),1800);return}if(!busy&&(!path.length||wander))A.farm(u.fk);return}
@@ -2622,7 +2642,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
       if(joyT>0){joyT-=dt;const k=1.1-joyT;kid.position.y=Math.abs(Math.sin(k*Math.PI*2.7))*.45;L.arms[0].rotation.z=-2.6;L.arms[1].rotation.z=2.6}
       else{kid.position.y=0;const w=waveT%6;L.arms[0].rotation.z*=.85;L.arms[1].rotation.z=w<1.4?2.5+Math.sin(w*12)*.35:L.arms[1].rotation.z*.85}
       // يتجوّل وحده إذا تُرك قليلًا
-      if(still>8&&!manual&&!busy&&!sleeping&&!ui.card.classList.contains('on')&&!document.querySelector('#modal.on')){still=0;go(WP[Math.floor(Math.random()*WP.length)],null,true)}}
+      if(still>8&&!manual&&!busy&&!sleeping&&!inSchool&&!ui.card.classList.contains('on')&&!document.querySelector('#modal.on')){still=0;go(WP[Math.floor(Math.random()*WP.length)],null,true)}}
     if(path.length){still=0;L.arms.forEach(a=>a.rotation.z*=.7)}
     // (v13.7) 👴 جدّو: بالنهار (٨–١٧) ينتظر عند السوق بكيسيه، وأثناء المساعدة يمشي بجانب الطفل، وبعدها يقف عند باب بيته
     {const E=life.elder,hh=hourNow();if(V||sleeping||night||hh<8||hh>=17){E.visible=false}else{E.visible=true;const DD=day(),bg=E.userData.bags;
@@ -2640,7 +2660,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
       if(lostS>0){lostS-=dt;Lk.visible=Lm.visible=lostS>0;Lk.userData.mk.visible=false;Lm.position.set(-5.3,0,-37.4);Lm.rotation.y=Math.PI/2;Lk.position.set(-4.75,0,-37.4);Lk.rotation.y=-Math.PI/2}
       else{const sh=!V&&!sleeping&&!night&&pkO&&!DD.lost;Lk.visible=sh;Lm.visible=false;Lk.userData.mk.visible=sh;if(sh){Lk.position.set(-4.7,Math.abs(Math.sin(t*5))*.03,-37.4);Lk.rotation.y=Math.PI/2+Math.sin(t*.6)*.5}}}
     (S.userData.anim||[]).forEach(f=>f(t,dt));
-    if(performance.now()-prAt>2000){prAt=performance.now();prC=prayerNow();const sl=sleepNow();if(sl&&!sleeping&&!V)startSleep(t<1);else if(!sl&&sleeping)wake()
+    if(performance.now()-prAt>2000){prAt=performance.now();prC=prayerNow();const sl=sleepNow();if(sl&&!sleeping&&!V)startSleep(t<1);else if(!sl&&sleeping)wake();{const sc=!sl&&!V&&schoolNow();if(sc&&!inSchool&&!sleeping)startSchool(t<1);else if(!sc&&inSchool)endSchool()}
       // (v13.8) إذا بدأ المطر أو توقّف أو ظهر قوس قزح أو بدأت المناسبة: يُعاد رسم المشهد، وتتلوّن السماء حسب الوقت
       {const bk=window.Binaa?Binaa.code()+'|'+(Binaa.job?Binaa.job.p+(Binaa.job.ready?'r':''):''):'';if(!V&&bk!==bKey){bKey=bk;refresh()}}wxFetch();showWx();const wk=rainNow()+'|'+rainbowNow()+'|'+festNow()+'|'+(occNow()||{}).id+'|'+winter()+'|'+cloudLv()+'|'+iftarNow()+'|'+halaqaNow()+'|'+poolOpen();wRain=rainNow();pkO=parkOpen();if(wk!==wKey){wKey=wk;refresh()}applySky();kidUmb.visible=wRain&&!night}
     if(zz.visible){zz.position.y=zz.userData.y+Math.sin(t*.8)*.25;zz.material.opacity=.75+Math.sin(t*1.3)*.25}
@@ -2653,12 +2673,12 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
     if(fol){goal=null;const kp=drv&&myCar?{x:fX(cS.x),z:cS.z}:{x:fX(kid.position.x),z:kid.position.z},k=Math.min(1,dt*2.4);CC[0]+=(kp.x-CC[0])*k;CC[2]+=(kp.z-CC[2])*k;LK[0]+=(kp.x-LK[0])*k;LK[1]+=(1.2-LK[1])*k;LK[2]+=(kp.z-LK[2])*k;CC[1]+=(0-CC[1])*k;dist+=(34-dist)*k*.6;ph+=(Math.min(ph,1.05)-ph)*k}
     stepFly(dt);place();if(drv&&camIn&&myCar)cockpit(dt);rMap();requestAnimationFrame(loop)})();
   // عند وقت الأذان: الشخصية تذهب للجامع وحدها
-  if(pn&&!day().pr[pn]&&window.Madina&&Madina.st.lv.m)setTimeout(()=>{if(alive&&!V&&!path.length&&!busy&&!sleeping){card(`🕌 الله أكبر! حان وقت صلاة ${PNAME[pn]}… هيّا إلى الجامع`);setTimeout(()=>A.mosque(),1200)}},1500);
+  if(pn&&!day().pr[pn]&&window.Madina&&Madina.st.lv.m)setTimeout(()=>{if(alive&&!V&&!path.length&&!busy&&!sleeping&&!inSchool){card(`🕌 الله أكبر! حان وقت صلاة ${PNAME[pn]}… هيّا إلى الجامع`);setTimeout(()=>A.mosque(),1200)}},1500);
   function refresh(){const old=S;old.remove(kid);old.remove(life.g);S=makeScene(night,V);S.add(kid);S.add(life.g);applySky();OB=null;
     // الأشجار التي تكبر الآن تبقى بحجمها
     old.userData.trees.forEach((G,i)=>{if(G&&S.userData.trees[i])S.userData.trees[i].scale.copy(G.scale)});
     drops.concat(sparks).forEach(d=>{old.remove(d);S.add(d)});dispose(old);showJ()}
-  return {refresh,act(k,a){if(V||!A[k])return;if(sleeping){sleepCard();return}try{goBox.hidden=true}catch(e){}follow(()=>A[k](a))},stop(){alive=false;try{sounds.stop()}catch(e){}Object.assign(cam0,foc?HOME:{th,ph,dist});removeEventListener('resize',rs);dispose(S);R.dispose();R.forceContextLoss&&R.forceContextLoss()}}}
+  return {refresh,act(k,a){if(V||!A[k])return;if(sleeping){sleepCard();return}if(inSchool){schoolCard();return}try{goBox.hidden=true}catch(e){}follow(()=>A[k](a))},stop(){alive=false;try{sounds.stop()}catch(e){}Object.assign(cam0,foc?HOME:{th,ph,dist});removeEventListener('resize',rs);dispose(S);R.dispose();R.forceContextLoss&&R.forceContextLoss()}}}
 
 function dispose(S){S.traverse(o=>{o.geometry&&o.geometry.dispose();const m=o.material;if(m){(Array.isArray(m)?m:[m]).forEach(x=>{x.map&&x.map.dispose();x.dispose()})}})}
 
