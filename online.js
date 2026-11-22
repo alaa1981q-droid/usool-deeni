@@ -74,9 +74,19 @@
   }
   function startPresence() {
     const pr = db.ref('presence/' + me);
+    // v17.7: الإدارة ترى «أونلاين» = داخل التطبيق الآن: profiles/$me/on = وقت آخر نبضة (كل ٤ دقائق والتطبيق ظاهر)،
+    // يُحذف عند إخفاء التطبيق أو انقطاع الاتصال
+    const onR = db.ref('profiles/' + me + '/on'), TS = () => firebase.database.ServerValue.TIMESTAMP;
+    const beat = () => { if (document.visibilityState !== 'hidden') onR.set(TS()).catch(() => {}); };
     db.ref('.info/connected').on('value', s => {
       if (!s.val()) return;
-      pr.onDisconnect().remove().then(() => pr.set({ on: true, t: firebase.database.ServerValue.TIMESTAMP }));
+      pr.onDisconnect().remove().then(() => pr.set({ on: true, t: TS() }));
+      onR.onDisconnect().remove().then(beat).catch(() => {});
+    });
+    setInterval(beat, 240000);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') onR.remove().catch(() => {});
+      else { beat(); db.ref('profiles/' + me).update({ seen: TS() }).catch(() => {}); }
     });
     listenInvites();
   }

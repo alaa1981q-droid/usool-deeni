@@ -211,6 +211,8 @@ async function openAdmin(){show('idara');body().innerHTML=`<div class="handoff">
 let lastV=0;
 // v10.8: «أونلاين» = يلعب مباراة أونلاين الآن (profiles.pl يكتبه تطبيق الطفل عند بدء المباراة)
 const plNow=p=>p.pl&&Date.now()-p.pl<20*60000;
+// v17.7: «أونلاين» = داخل التطبيق الآن (profiles.on نبضة كل ٤ دقائق، تُحذف عند الخروج) أو يلعب مباراة
+const onNow=p=>(p.on&&Date.now()-p.on<10*60000)||plNow(p);
 // v10.7: «الجديد» = سجّل خلال آخر ٢٤ ساعة فقط
 const fresh=p=>p.since>Math.max(lastV,Date.now()-864e5);
 const JOPT=[0,10,25,50,100,200,500,1000].map(n=>`<option value="${n}">${n?`💎 ${ar(n)} جوهرة`:'بلا جواهر'}</option>`).join('');
@@ -218,7 +220,7 @@ let all=null,heroes=null,tab='all',q='';
 const key=r=>Math.max(r.xp|0,(r.wins|0)*10);
 async function loadKids(API){
   if(!heroes){try{const s=(await API.db.ref('leader/'+API.week()).get()).val()||{};heroes=Object.entries(s).map(([id,v])=>({id,...v})).filter(r=>!r.adm&&r.id!=API.me).sort((a,b)=>key(b)-key(a)).slice(0,15)}catch(e){heroes=[]}}
-  if(!all){try{const s=(await API.db.ref('profiles').get()).val()||{};all=Object.entries(s).map(([id,v])=>({id,nick:v.nick||'؟',av:v.av||'❔',lv:v.lv|0,tt:v.tt||'',wins:v.wins|0,games:v.games|0,code:v.code||'',seen:+v.seen||0,acc:v.acc||{},md:v.md||'',hist:typeof v.hist=='string'?v.hist:'',nts:+v.nts||0,sx:v.sx||sexOf(v.av),since:+v.since||0,pl:+v.pl||0,hz:(v.sm&&v.sm.hz)|0,pr:(v.sm&&v.sm.pr)|0}))}catch(e){all=[]}}
+  if(!all){try{const s=(await API.db.ref('profiles').get()).val()||{};all=Object.entries(s).map(([id,v])=>({id,nick:v.nick||'؟',av:v.av||'❔',lv:v.lv|0,tt:v.tt||'',wins:v.wins|0,games:v.games|0,code:v.code||'',seen:+v.seen||0,acc:v.acc||{},md:v.md||'',hist:typeof v.hist=='string'?v.hist:'',nts:+v.nts||0,sx:v.sx||sexOf(v.av),since:+v.since||0,pl:+v.pl||0,on:+v.on||0,hz:(v.sm&&v.sm.hz)|0,pr:(v.sm&&v.sm.pr)|0}))}catch(e){all=[]}}
   try{bans=(await API.db.ref('bans').get()).val()||{}}catch(e){bans={}}}
 let bans={};
 // ولد أو بنت: من اختياره، وإلا من صورته
@@ -232,13 +234,13 @@ function ago(t){if(!t)return 'لم يُسجَّل بعد';const m=Math.round((Da
   const w=(n,one,two,few,many)=>n==1?one:n==2?two:n<=10?`${ar(n)} ${few}`:`${ar(n)} ${many}`;
   if(m<2)return 'الآن';if(m<60)return 'قبل '+w(m,'دقيقة','دقيقتين','دقائق','دقيقة');const h=Math.round(m/60);if(h<24)return 'قبل '+w(h,'ساعة','ساعتين','ساعات','ساعة');
   const d=Math.round(h/24);return d<30?'قبل '+w(d,'يوم','يومين','أيام','يومًا'):new Date(t).toLocaleDateString('ar-IQ')}
-function kidRow(r,i){const p=all&&all.find(x=>x.id==r.id)||{};const lv=r.lv||p.lv,tt=r.tt||p.tt,b=banOf(r.id),w=r.wins||p.wins,on=p.seen&&Date.now()-p.seen<180000;
+function kidRow(r,i){const p=all&&all.find(x=>x.id==r.id)||{};const lv=r.lv||p.lv,tt=r.tt||p.tt,b=banOf(r.id),w=r.wins||p.wins,on=onNow(p)||(p.seen&&Date.now()-p.seen<180000);
   const rk=i!=null?(['🥇','🥈','🥉'][i]||ar(i+1)):'';
   const sub=esc(tt||'');
   const st=[lv?`⭐ ${ar(lv)}`:'',r.xp?`✨ ${ar(r.xp)}`:'',w?`🏆 ${ar(w)}`:''].filter(Boolean).join('  ');
   const gn=gone(p);
   return `<div class="idk ${i!=null&&i<3?'top'+(i+1):''} ${gn?'gone':''}" data-k="${esc(r.id)}"><span class="rk">${rk}</span><span class="av">${esc(p.av||r.av)}${on?'<i class="on"></i>':''}</span>
-    <span class="nm"><b>${esc(p.nick||r.nick)}${b?' ⛔':''}${sus(p)?' ⚠️':''}${gn?' 💤':''}</b>${gn?`<small class="gn">💤 غائب منذ ${ar(goneDays(p))} يومًا</small>`:''}${tab=='pnow'&&p.pl?`<small class="gn" style="color:#14794f">🎮 يلعب الآن · بدأ ${ago(p.pl)}</small>`:''}${tab=='hz'?`<small class="gn" style="color:#14794f">📖 حفظ ${ar(p.hz)} ${p.hz>2&&p.hz<11?'سور':'سورة'}</small>`:''}${tab=='pr'?`<small class="gn" style="color:#14794f">🕌 ${ar(p.pr)} صلاة</small>`:''}${(tab=='new'||tab=='fresh')&&p.since?`<small class="gn" style="color:#14794f">🆕 سجّل ${ago(p.since)}</small>`:''}${tab=='names'&&p.hist?`<small class="gn">✏️ كان: ${esc(p.hist.split('|').join('، '))} · ${ago(p.nts)}</small>`:''}${st?`<small class="st1">${st}</small>`:''}${sub?`<small>${sub}</small>`:''}</span>
+    <span class="nm"><b>${esc(p.nick||r.nick)}${b?' ⛔':''}${sus(p)?' ⚠️':''}${gn?' 💤':''}</b>${gn?`<small class="gn">💤 غائب منذ ${ar(goneDays(p))} يومًا</small>`:''}${tab=='pnow'?(plNow(p)?`<small class="gn" style="color:#14794f">🎮 يلعب مباراة الآن · بدأ ${ago(p.pl)}</small>`:`<small class="gn" style="color:#14794f">🟢 داخل التطبيق الآن</small>`):''}${tab=='hz'?`<small class="gn" style="color:#14794f">📖 حفظ ${ar(p.hz)} ${p.hz>2&&p.hz<11?'سور':'سورة'}</small>`:''}${tab=='pr'?`<small class="gn" style="color:#14794f">🕌 ${ar(p.pr)} صلاة</small>`:''}${(tab=='new'||tab=='fresh')&&p.since?`<small class="gn" style="color:#14794f">🆕 سجّل ${ago(p.since)}</small>`:''}${tab=='names'&&p.hist?`<small class="gn">✏️ كان: ${esc(p.hist.split('|').join('، '))} · ${ago(p.nts)}</small>`:''}${st?`<small class="st1">${st}</small>`:''}${sub?`<small>${sub}</small>`:''}</span>
     <button class="gb" data-g="${esc(r.id)}" aria-label="جائزة">🎁</button></div>`}
 /* 📋 تفاصيل تقدّم الطفل للمدير: مربعات صغيرة مجسّمة */
 function kidDetails(sm,HL){const u=String((sm&&sm.u)||(HL&&HL.u)||'00000'),W=['لا يوجد','خشبي','حجري','رخامي'],G=['لم تُزرع','خضراء','ورود وممرّ','نافورة'];
@@ -378,7 +380,7 @@ async function panel(){const API=O();heroes=null;all=null;view='main';
   $('#tFind').onclick=()=>{if(!all)return;openKids();setTimeout(()=>{const i=$('#kQ');if(i)i.focus()},150)};
   $('#tMsg').onclick=()=>sendNews(API,0);$('#tPin').onclick=()=>sendNews(API,1);$('#tGift').onclick=()=>giftAll(API);$('#tRep').onclick=()=>report(API);
   await loadKids(API);{const c=$('#idCnt'),n=(all||[]).length,g=(all||[]).filter(gone).length,u=(all||[]).filter(x=>!x.seen).length;
-    const k=(i,v)=>{const e=$('#idK'+i);if(e)e.textContent=ar(v)};k(1,n);k(2,(all||[]).filter(p=>p.since&&Date.now()-p.since<864e5).length);k(3,(all||[]).filter(plNow).length);
+    const k=(i,v)=>{const e=$('#idK'+i);if(e)e.textContent=ar(v)};k(1,n);k(2,(all||[]).filter(p=>p.since&&Date.now()-p.since<864e5).length);k(3,(all||[]).filter(onNow).length);
     const fr=lastV?(all||[]).filter(fresh).length:0,nb=$('#idNew');
     if(nb&&fr){nb.hidden=false;nb.innerHTML=`<span class="bl">🔔</span> ${fr==1?'مشترك جديد واحد':fr==2?'مشتركان جديدان':ar(fr)+(fr<=10?' مشتركين جدد':' مشتركًا جديدًا')} من آخر مرة فتحت الإدارة ‹`;nb.onclick=()=>openKids('fresh')}
     if(c)c.innerHTML=`💤 غائبون شهرًا أو أكثر: ${ar(g)}${u?` · ❔ بلا تسجيل دخول: ${ar(u)}`:''}`;
@@ -429,8 +431,8 @@ let view='main',lim=40,dlSet=null;
 // الفلاتر التي تفتحها مربعات الإحصائيات
 const DAY=864e5,ago_=p=>p.seen?Date.now()-p.seen:Infinity,bySeen=(a,b)=>(b.seen||0)-(a.seen||0);
 const FL={b:['👦 الأولاد',p=>p.sx=='b',bySeen],g:['👧 البنات',p=>p.sx=='g',bySeen],nosx:['❔ لم يختاروا ولد أو بنت',p=>!p.sx,bySeen],
-  now:['🟢 داخلين الآن تقريبًا',p=>ago_(p)<180000,bySeen],d1:['☀️ دخلوا اليوم',p=>ago_(p)<DAY,bySeen],d7:['📅 دخلوا هذا الأسبوع',p=>ago_(p)<7*DAY,bySeen],
-  d30:['🗓️ دخلوا هذا الشهر',p=>ago_(p)<30*DAY,bySeen],pnow:['🎮 يلعبون أونلاين الآن',plNow,(a,b)=>b.pl-a.pl],hz:['📖 حفظوا سورًا (الأكثر حفظًا أولًا)',p=>p.hz>0,(a,b)=>b.hz-a.hz],pr:['🕌 سجّلوا صلواتهم (الأكثر أولًا)',p=>p.pr>0,(a,b)=>b.pr-a.pr],
+  now:['🟢 داخلين الآن',onNow,bySeen],d1:['☀️ دخلوا اليوم',p=>ago_(p)<DAY,bySeen],d7:['📅 دخلوا هذا الأسبوع',p=>ago_(p)<7*DAY,bySeen],
+  d30:['🗓️ دخلوا هذا الشهر',p=>ago_(p)<30*DAY,bySeen],pnow:['🟢 داخلون التطبيق الآن (🎮 = يلعب مباراة)',onNow,(a,b)=>(plNow(b)?1:0)-(plNow(a)?1:0)||(b.on||b.pl)-(a.on||a.pl)],hz:['📖 حفظوا سورًا (الأكثر حفظًا أولًا)',p=>p.hz>0,(a,b)=>b.hz-a.hz],pr:['🕌 سجّلوا صلواتهم (الأكثر أولًا)',p=>p.pr>0,(a,b)=>b.pr-a.pr],
   fresh:['🔔 الجدد اليوم من آخر مرة فتحت الإدارة',p=>lastV&&fresh(p),(a,b)=>b.since-a.since],new:['🆕 الجدد اليوم (آخر ٢٤ ساعة)',p=>p.since&&Date.now()-p.since<DAY,(a,b)=>b.since-a.since],
   play:['🎮 لعبوا أونلاين (الأكثر لعبًا أولًا)',p=>p.games>0,(a,b)=>b.games-a.games||b.wins-a.wins],
   lv:['⭐ كل الأطفال حسب المستوى',p=>true,(a,b)=>(b.lv-a.lv)||bySeen(a,b)],
@@ -452,7 +454,7 @@ function backMain(){view='main';window.scrollTo(0,0);panel()}
 async function stats(API){const el=$('#idStats');if(!el)return;const L=all||[],t=Date.now(),D1=864e5;
   const n=L.length,b=L.filter(p=>p.sx=='b').length,g=L.filter(p=>p.sx=='g').length;
   const d1=L.filter(p=>p.seen&&t-p.seen<D1).length,d7=L.filter(p=>p.seen&&t-p.seen<7*D1).length,d30=L.filter(p=>p.seen&&t-p.seen<30*D1).length;
-  const on=L.filter(p=>p.seen&&t-p.seen<180000).length;
+  const on=L.filter(onNow).length;
   const games=Math.round(L.reduce((a,p)=>a+(p.games|0),0)/2),players=L.filter(p=>p.games>0).length;
   const lvs=L.filter(p=>p.lv),avg=lvs.length?lvs.reduce((a,p)=>a+p.lv,0)/lvs.length:0,mx=lvs.reduce((m,p)=>p.lv>m.lv?p:m,{lv:0});
   const ren=L.filter(p=>p.hist).length,bn=Object.values(bans).filter(x=>x&&x.until>t).length,sus2=L.filter(sus).length;
