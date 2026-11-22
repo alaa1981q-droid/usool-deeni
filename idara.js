@@ -157,6 +157,10 @@ async function inbox(){const API=O();if(!API||!navigator.onLine)return;
   try{const p=(await API.db.ref('prizes/'+API.me).get()).val()||{};
     Object.entries(p).forEach(([id,v])=>{if(!v||d.newsSeen['p'+id])return;d.newsSeen['p'+id]=1;Aamal.save();
       const done=()=>API.db.ref(`prizes/${API.me}/${id}`).remove().catch(()=>{});
+      // (v18.4) أوامر المدير: cl = نظّف بيته عنه، bd = بناية هدية في مدينته، cr = تذكير بتنظيف البيت
+      if(v.cl){try{Aamal.cleanAll()}catch(e){}queue.push({em:'🧽',title:'🧽 نظّفت الإدارة بيتك هدية!',msg:(v.msg?v.msg+'\n':'')+B('حافظ','حافظي')+' على نظافته بأعمالك الصالحة كل يوم 🤍',j:Math.max(0,Math.min(1000,v.j|0)),done});return}
+      if(typeof v.bd=='string'&&window.Madina&&Madina.PARTS[v.bd]){const ok=Madina.giftLv(v.bd),P=Madina.PARTS[v.bd];queue.push({em:'🏗️',title:'🏗️ هدية من الإدارة لمدينتك!',msg:ok?`بنت لك الإدارة مستوى جديدًا من ${P.e} ${P.n} 🌟${v.msg?'\n'+v.msg:''}`:`${P.e} ${P.n} عندك كاملة، ${B('أحسنت','أحسنتِ')}! 🌟${v.msg?'\n'+v.msg:''}`,j:ok?0:Math.max(0,Math.min(1000,v.j|0))||30,done});return}
+      if(v.cr){queue.push({em:'🧹',title:v.title||'🧹 تذكير من الإدارة',msg:v.msg,done});return}
       if(typeof v.rn=='string'&&v.rn.trim().length>=2){renameMe(API,v.rn);queue.push({em:'✏️',title:'✏️ غيّرت الإدارة اسمك',msg:`اسمك الآن: «${v.rn.trim()}»${v.msg?'\n'+v.msg:''}`,done});return}
       const x=Math.max(-5000,Math.min(5000,v.x|0)),j=v.j|0;
       if(x||j<0){if(x){d.xpAdj=(d.xpAdj|0)+x;Aamal.save();try{Alqab.soon()}catch(e){}}
@@ -260,7 +264,7 @@ async function kidCard(id){const API=O();let p=(all||[]).find(x=>x.id==id);
   try{const v=(await API.db.ref('profiles/'+id).get()).val();if(v)p=Object.assign({id},p||{},{nick:v.nick,av:v.av,lv:v.lv|0,tt:v.tt||'',wins:v.wins|0,games:v.games|0,code:v.code||'',seen:+v.seen||0,acc:v.acc||{},md:v.md||'',hist:typeof v.hist=='string'?v.hist:'',nts:+v.nts||0,since:+v.since||0,sx:v.sx||sexOf(v.av)})}catch(e){}
   if(!p)return;let on=false;try{on=!!(await API.db.ref('presence/'+id).get()).val()}catch(e){}
   // v8.2: بيت الطفل كما يراه، وملخّص تقدّمه (sm)
-  let hv=null,sm=null;try{hv=(await API.db.ref('houses/'+id).get()).val()}catch(e){}try{sm=(await API.db.ref('profiles/'+id+'/sm').get()).val()}catch(e){}
+  let hv=null,sm=null,pf=null;try{pf=(await API.db.ref('profiles/'+id).get()).val()}catch(e){}try{hv=(await API.db.ref('houses/'+id).get()).val()}catch(e){}try{sm=(await API.db.ref('profiles/'+id+'/sm').get()).val()}catch(e){}
   const HL=hv&&window.Deco&&Deco.cleanLook?Deco.cleanLook(hv):null;
   const b=banOf(id),a=p.acc||{},ac=accOf(p);
   const md=String(p.md||'').split(',').filter(Boolean).map(x=>{const [k,t]=x.split(':');return `${['','🥉','🥈','🥇','💎'][t|0]||''}${{usul:'📚',pray:'🤲',fiqh:'🕌',hifz:'📖',tilawa:'🎤',sal:'💚',tas:'📿',champ:'⚔️',akhlaq:'🌷',wird:'🔥',banna:'🏡',garden:'🌱'}[k]||''}`}).join(' ');
@@ -278,15 +282,24 @@ async function kidCard(id){const API=O();let p=(all||[]).find(x=>x.id==id);
       ${p.hist?`<br>✏️ أسماؤه السابقة: <b>${esc(p.hist.split('|').join('، '))}</b>${p.nts?` (آخر تغيير ${ago(p.nts)})`:''}`:''}
       ${b?`<br>⛔ <b style="color:#c43d38">محظور حتى ${new Date(b.until).toLocaleString('ar-IQ',{weekday:'long',hour:'numeric',minute:'2-digit'})}</b>${b.why?` — ${esc(b.why)}`:''}`:''}
       ${sus(p)?`<br><b style="color:#b06a2c">⚠️ قد يتعمّد الإجابات الخاطئة</b>`:''}</div>
+    <div class="nav"><button class="btn" id="kCity" style="background:linear-gradient(135deg,#1fa463,#14794f);box-shadow:0 5px 0 #0c5a39;font-size:17px">🏙️ ادخل مدينته وشاهد بيته</button></div>
+    ${sm&&sm.dt?`<div class="nav"><button class="btn" id="kDirt" style="background:#8a5a2b;box-shadow:0 5px 0 #5e3b1a">🧹 نبّهه: بيته متّسخ (${ar(sm.dt)} من ٤)</button></div>`:''}
     <div class="nav"><button class="btn gold" id="kGift">🎁 جائزة</button><button class="btn" id="kWarn" style="background:#e57c1f;box-shadow:0 5px 0 #a8551a">⚠️ تنبيه</button></div>
     <div class="nav">${b?`<button class="btn" id="kUnban">✅ رفع الحظر</button>`:`<button class="btn" id="kBan1" style="background:#c43d38;box-shadow:0 5px 0 #8a2a26">⛔ حظر ٢٤ ساعة</button><button class="btn" id="kBan7" style="background:#7a1f1b;box-shadow:0 5px 0 #4a1210">⛔ حظر أسبوع</button>`}</div>
     <div class="nav"><button class="btn" id="kName" style="background:#2f6fd0;box-shadow:0 5px 0 #1d4e9e">✏️ غيّر اسمه</button><button class="btn" id="kAdj" style="background:#7c4dc4;box-shadow:0 5px 0 #4f2e86">💎 جواهر ونقاط</button></div>
+    <div class="nav"><button class="btn" id="kBuild" style="background:#0f8f86;box-shadow:0 5px 0 #0a6660">🏗️ ابنِ له بناية</button><button class="btn" id="kMsg" style="background:#d0569a;box-shadow:0 5px 0 #993c70">📩 رسالة خاصة</button></div>
+    <div class="nav"><button class="btn" id="kClean" style="background:#4e8fd6;box-shadow:0 5px 0 #2f63a0">🧽 نظّف بيته هدية</button><button class="btn" id="kCheer" style="background:#e3a21a;box-shadow:0 5px 0 #a8730c">🌟 شجّعه</button></div>
     <div class="nav"><button class="btn sec" id="kHero">🗑️ شيله من أبطال الأسبوع</button></div>
     <div class="nav"><button class="btn sec" data-close>رجوع</button></div>`,()=>{
     $('#kGift').onclick=()=>{closeModal();giftTo(id,p.nick,p.av)};
     $('#kWarn').onclick=()=>warnTo(id,p);
     $('#kName').onclick=()=>renameKid(id,p);
     $('#kAdj').onclick=()=>adjustKid(id,p);
+    const r={id,nick:p.nick,av:p.av,m:hv&&/^[0-3]{5}$/.test(hv.m||'')?hv.m:'',u:hv&&hv.u||'',f:hv?hv.f|0:1,h:hv,p:{nick:p.nick,av:p.av},flg:pf&&pf.flg,dt:sm?sm.dt|0:0,sm,lv:p.lv};
+    $('#kCity').onclick=()=>{closeModal();if(!(window.City3D&&City3D.adminVisit&&City3D.adminVisit(r)))API.toast('هذا الجهاز لا يعرض المدينة المجسّمة')};
+    const kd=$('#kDirt');if(kd)kd.onclick=()=>kidDo(id,'clean',p);
+    $('#kBuild').onclick=()=>buildFor(id,p,hv);$('#kMsg').onclick=()=>kidDo(id,'msg',p);
+    $('#kClean').onclick=()=>kidDo(id,'wash',p);$('#kCheer').onclick=()=>kidDo(id,'cheer',p);
     const ban=(h,label)=>modal(`<div style="font-size:50px">⛔</div><h3 style="margin:4px 0">حظر ${esc(p.nick)} ${label}؟</h3><p style="font-size:15px">يُمنع من اللعب أونلاين فقط، ويبقى يتعلّم ويبني بيته.</p>
       <input class="inp" id="bWhy" maxlength="80" placeholder="السبب (يراه الطفل)، مثل: تعمّد الإجابات الخاطئة" style="text-align:right;font-size:16px">
       <div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn" id="bYes" style="background:var(--bad)">حظر</button></div>`,()=>{
@@ -330,6 +343,25 @@ function warnTo(id,p){const API=O();
     <textarea class="inp" id="wMsg" maxlength="400" style="min-height:80px;text-align:right;font-size:16px">نرجو منك أن تلعب بصدق وأمانة، وأن تجيب بانتباه في التحديات. إذا تكرّر تعمّد الأخطاء سيتوقّف لعبك أونلاين 🤍</textarea>
     <div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn" id="wSend" style="background:#e57c1f">⚠️ أرسل التنبيه</button></div>`,()=>{
     $('#wSend').onclick=async()=>{const msg=$('#wMsg').value.trim();if(!msg)return;try{await API.db.ref('prizes/'+id).push({msg,j:0,w:1,ts:firebase.database.ServerValue.TIMESTAMP});closeModal();API.toast('أُرسل التنبيه ✓')}catch(e){API.toast('تعذّر الإرسال')}}})}
+/* (v18.4) صلاحيات أكثر للمدير على الطفل: تذكير بالتنظيف، رسالة خاصة، تشجيع، تنظيف البيت هدية، بناية هدية */
+const SEXK=p=>p&&(p.sx=='g'||sexOf&&sexOf(p.av)=='g');
+function kidDo(id,k,p){const API=O();p=p||{};const g=SEXK(p),G=(m,f)=>g?f:m,nm=esc(p.nick||'');
+  const T={clean:['🧹','تذكير بتنظيف البيت',`السلام عليكم يا ${nm} 🤍 زرتُ مدينتك فوجدت بيتك في الجنة ${G('متّسخًا','متّسخًا')}… ${G('صلِّ','صلّي')} ${G('واقرأ وردك وسبّح','واقرئي وردك وسبّحي')} لينظف بيتك ويلمع من جديد ✨`,{cr:1,title:'🧹 تذكير من الإدارة'}],
+    msg:['📩','رسالة خاصة','',{cr:1,title:'📩 رسالة من الإدارة'}],
+    cheer:['🌟','تشجيع',`ما شاء الله يا ${nm}! زرتُ مدينتك وأعجبتني أعمالك الصالحة، ${G('استمرّ يا بطل','استمرّي يا بطلة')} 🌟`,{j:20,title:'🌟 الإدارة فخورة بك!'}],
+    wash:['🧽','تنظيف بيته هدية',`${G('أهديناك','أهديناكِ')} تنظيف بيتك 🧽`,{cl:1}]}[k];if(!T)return;
+  modal(`<div style="font-size:50px">${T[0]}</div><h3 style="margin:4px 0">${T[1]} · ${nm}</h3>
+    <textarea class="inp" id="kdM" maxlength="400" placeholder="اكتب رسالتك" style="min-height:80px;text-align:right;font-size:16px">${T[2]}</textarea>
+    ${k=='cheer'?`<p style="font-size:14px;margin:4px 0">ومعها 💎 ٢٠ جوهرة</p>`:''}
+    <div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn gold" id="kdY">${T[0]} أرسل</button></div>`,()=>{
+    $('#kdY').onclick=async()=>{const msg=$('#kdM').value.trim();if(!msg&&k=='msg'){API.toast('اكتب الرسالة');return}$('#kdY').disabled=true;
+      try{await API.db.ref('prizes/'+id).push(Object.assign({msg,j:0,ts:firebase.database.ServerValue.TIMESTAMP},T[3]));closeModal();API.toast('أُرسل ✓ يصله عند فتح التطبيق')}catch(e){$('#kdY').disabled=false;API.toast('تعذّر الإرسال')}}})}
+function buildFor(id,p,hv){const API=O(),M=window.Madina;if(!M)return;const lv=M.fromCode(hv&&hv.m||'00000'),P=M.PARTS;
+  modal(`<div style="font-size:50px">🏗️</div><h3 style="margin:4px 0">ابنِ لـ${esc(p.nick)} بناية في مدينته</h3><p style="font-size:14px;margin:2px 0">ترتفع البناية مستوى واحدًا حين يفتح التطبيق</p>
+    <div class="idsts" style="margin:8px 0">${Object.keys(P).map(k=>`<button class="idst" data-bd="${k}" ${(lv[k]|0)>=3?'disabled style="opacity:.45"':''}><div><span>${P[k].e}</span><b>${'★'.repeat(lv[k]|0)||'—'}</b></div><small>${esc(P[k].n)}</small></button>`).join('')}</div>
+    <div class="nav"><button class="btn sec" data-close>رجوع</button></div>`,()=>{
+    document.querySelectorAll('[data-bd]').forEach(b=>b.onclick=async()=>{const k=b.dataset.bd;b.disabled=true;
+      try{await API.db.ref('prizes/'+id).push({msg:'',j:0,bd:k,ts:firebase.database.ServerValue.TIMESTAMP});closeModal();API.toast(`أُرسلت ${P[k].e} ${P[k].n} هدية ✓`)}catch(e){b.disabled=false;API.toast('تعذّر')}})})}
 function drawKids(){const el=$('#idKids');if(!el)return;let rows=[],num=false;
   const fl=FL[tab],hd=$('#kHd');if(hd)hd.remove();
   if(fl)el.insertAdjacentHTML('beforebegin',`<div id="kHd" class="idfh">${fl[0]}</div>`);
@@ -476,5 +508,5 @@ function welcome(nick){const d=D();if(d.welcomed)return;d.welcomed=Date.now();Aa
     msg:B('مرحبًا بك في «جنّتي الصغيرة»! سعداء بانضمامك إلينا.\nتعلّم أصول دينك، واحفظ، وصلِّ، وابنِ بيتك في الجنة بأعمالك الصالحة 🤍',
           'مرحبًا بكِ في «جنّتي الصغيرة»! سعداء بانضمامكِ إلينا.\nتعلّمي أصول دينكِ، واحفظي، وصلّي، وابني بيتكِ في الجنة بأعمالكِ الصالحة 🤍')});
   setTimeout(nextMsg,700)}
-window.Idara={welcome,gift:(id,n,a)=>giftTo(id,n,a),open:openAdmin,inbox,dayNight};
+window.Idara={card:id=>{show('idara');kidCard(id)},kidDo,welcome,gift:(id,n,a)=>giftTo(id,n,a),open:openAdmin,inbox,dayNight};
 })();

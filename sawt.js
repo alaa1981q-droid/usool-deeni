@@ -19,7 +19,7 @@ function dirtNow(){const idle=dayN()-(as.lastDeed||dayN()),want=Math.max(0,Math.
 function cleanOne(){const before=dirtNow();as.lastDeed=dayN();if(before>0){as.dirt=before-1;asave();setTimeout(()=>cleanBanner(as.dirt),900)}else asave()}
 function cleanBanner(left){const d=document.createElement('div');d.className='ctbanner b3';d.style.cssText='font-size:18px;top:24%;white-space:normal;max-width:90vw;text-align:center';
   d.textContent=left?`🧹 نظّفتَ جزءًا من بيتك! باقي ${ar(left)} حتى يلمع ✨`:'✨ بيتك صار نظيفًا ويلمع! أحسنت 🤍';document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
-window.Aamal={get d(){return as},save:asave,dirt:dirtNow,cleanOne,
+window.Aamal={get d(){return as},save:asave,dirt:dirtNow,cleanOne,cleanAll(){as.dirt=0;as.lastDeed=dayN();asave()},
   add(k,n){as[k]=(as[k]||0)+n;
     if(k=='sal'){as.salLog=as.salLog||{};as.salLog[dk()]=(as.salLog[dk()]||0)+n;const lim=Date.now()-40*864e5;Object.keys(as.salLog).forEach(d=>{const [y,m,dd]=d.split('-');if(new Date(+y,m-1,+dd).getTime()<lim)delete as.salLog[d]})}
     asave();window.Alqab&&Alqab.soon()},

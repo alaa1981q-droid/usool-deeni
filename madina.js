@@ -296,5 +296,7 @@ if(window.Deco&&Deco.menuHook){const orig=Deco.menuHook;Deco.menuHook=function(B
   at.insertAdjacentHTML('afterend',`<button class="mdbtn" id="mdOpen"><span class="e">🏙️</span><span><b>${B('مدينتي','مدينتي')}: ${stg[0]}</b><small>${j?(j.ready?'🎉 بناء جاهز للاستلام!':'👷 العمّال يبنون '+PARTS[j.p].n):'ابنِ جامعًا ومكتبةً ومدرسة قرآن وسبيلًا وحديقة 🤍'}</small></span><span class="go">‹</span></button>`);
   $('#mdOpen').onclick=()=>{try{Bayt.sTap()}catch(e){}openCity()}}}
 
-window.Madina={code,open:openCity,view,part:open,need:needFor,PARTS,friends:loadFriends,get st(){return st},stageOf,fromCode};
+// (v18.4) هدية من المدير: يرفع بناية مستوى واحدًا (حتى ٣)، ويلغي ورشتها إن كانت تُبنى
+function giftLv(p){if(!PARTS[p]||(st.lv[p]|0)>=3)return false;if(st.job&&st.job.p===p)st.job=null;st.lv[p]=(st.lv[p]|0)+1;sv();try{draw()}catch(e){}try{Deco.pub()}catch(e){}return true}
+window.Madina={giftLv,code,open:openCity,view,part:open,need:needFor,PARTS,friends:loadFriends,get st(){return st},stageOf,fromCode};
 })();
