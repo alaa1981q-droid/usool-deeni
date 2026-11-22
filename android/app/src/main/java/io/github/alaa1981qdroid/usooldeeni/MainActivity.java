@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.provider.Settings;
 import android.content.pm.PackageManager;
+import android.webkit.JavascriptInterface;
 import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
 import android.content.Intent;
@@ -74,6 +75,19 @@ public class MainActivity extends Activity {
                 });
             }
         });
+        // 🔔 التذكير اليومي: يناديه «للأهل» من صفحة التطبيق (window.JannahApp)
+        web.addJavascriptInterface(new Object() {
+            @JavascriptInterface
+            public void remind(int h, int m, String msgs) {
+                Reminder.schedule(getApplicationContext(), h, m, msgs);
+                if (Build.VERSION.SDK_INT >= 33) runOnUiThread(() -> {
+                    if (checkSelfPermission("android.permission.POST_NOTIFICATIONS") != PackageManager.PERMISSION_GRANTED)
+                        requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"}, 8);
+                });
+            }
+            @JavascriptInterface
+            public void cancelRemind() { Reminder.cancel(getApplicationContext()); }
+        }, "JannahApp");
         setContentView(web);
         if (state != null) web.restoreState(state); else web.loadUrl(START);
     }

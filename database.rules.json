@@ -149,6 +149,36 @@
           ".validate": "newData.val() === true"
         }
       }
+    },
+    "voices": {
+      ".read": "auth != null",
+      "$k": {
+        ".write": "auth != null && root.child('admins/' + auth.uid).val() === true",
+        ".validate": "!newData.exists() || (newData.child('a').isString() && newData.child('a').val().length < 250000 && newData.child('t').isNumber())"
+      }
+    },
+    "voicesIdx": {
+      ".read": "auth != null",
+      "$k": {
+        ".write": "auth != null && root.child('admins/' + auth.uid).val() === true",
+        ".validate": "!newData.exists() || newData.isNumber()"
+      }
+    },
+    "classes": {
+      "$c": {
+        ".read": "auth != null",
+        ".write": "auth != null && (data.exists() ? data.child('t').val() === auth.uid : newData.child('t').val() === auth.uid)",
+        ".validate": "!newData.exists() || ($c.length === 5 && newData.child('n').isString() && newData.child('n').val().length <= 40 && newData.child('t').isString())"
+      }
+    },
+    "classm": {
+      "$c": {
+        ".read": "auth != null",
+        "$uid": {
+          ".write": "auth != null && ((auth.uid === $uid && root.child('classes/' + $c).exists() && (!root.child('bans/' + auth.uid).exists() || root.child('bans/' + auth.uid + '/until').val() < now)) || root.child('classes/' + $c + '/t').val() === auth.uid)",
+          ".validate": "!newData.exists() || (newData.child('n').isString() && newData.child('n').val().length <= 40 && newData.child('x').isNumber())"
+        }
+      }
     }
   }
 }

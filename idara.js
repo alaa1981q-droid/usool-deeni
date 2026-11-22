@@ -371,6 +371,7 @@ async function panel(){const API=O();heroes=null;all=null;view='main';
       <button id="tFind"><span>🔍</span><b>ابحث عن طفل</b><small>بالاسم أو الرمز</small></button>
       <button id="tRep"><span>📋</span><b>تقرير التطبيق</b><small>انسخه أو شاركه</small></button>
       <button id="idSubs"><span>👥</span><b>المشتركون</b><small id="idSubsN">⏳</small></button>
+      <button id="tVoice" style="grid-column:1/-1"><span>🎙️</span><b>صوتي للأطفال</b><small>اقرأ العبارة بصوتك فيسمعها الأطفال عند كل إنجاز</small></button>
     </div>
     <div class="idbox"><h3>📊 إحصائيات التطبيق</h3><div id="idStats"><p class="tip">⏳</p></div></div>
     <div class="idbox"><h3>📜 آخر ما أرسلته</h3><div id="idNews"><p class="tip">⏳</p></div></div>
@@ -378,7 +379,7 @@ async function panel(){const API=O();heroes=null;all=null;view='main';
   body().querySelectorAll('[data-k0]').forEach(b=>b.onclick=()=>{if(all)openKids(b.dataset.k0)});
   $('#idSubs').onclick=()=>{if(all)openKids()};
   $('#tFind').onclick=()=>{if(!all)return;openKids();setTimeout(()=>{const i=$('#kQ');if(i)i.focus()},150)};
-  $('#tMsg').onclick=()=>sendNews(API,0);$('#tPin').onclick=()=>sendNews(API,1);$('#tGift').onclick=()=>giftAll(API);$('#tRep').onclick=()=>report(API);
+  $('#tMsg').onclick=()=>sendNews(API,0);$('#tPin').onclick=()=>sendNews(API,1);$('#tGift').onclick=()=>giftAll(API);$('#tRep').onclick=()=>report(API);$('#tVoice').onclick=()=>{if(window.Hamas)Hamas.recorder()};
   await loadKids(API);{const c=$('#idCnt'),n=(all||[]).length,g=(all||[]).filter(gone).length,u=(all||[]).filter(x=>!x.seen).length;
     const k=(i,v)=>{const e=$('#idK'+i);if(e)e.textContent=ar(v)};k(1,n);k(2,(all||[]).filter(p=>p.since&&Date.now()-p.since<864e5).length);k(3,(all||[]).filter(onNow).length);
     const fr=lastV?(all||[]).filter(fresh).length:0,nb=$('#idNew');

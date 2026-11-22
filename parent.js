@@ -69,8 +69,9 @@ function report(){
     <div class="prow"><span>أسئلة تنتظر المراجعة</span><b>${ar(d.miss)}</b></div>
     <div class="ptip">${tips(d).map(x=>'• '+x).join('<br>')}</div>
     <p style="font-size:12px;color:var(--muted);margin:4px 0">الأرقام محفوظة على هذا الجهاز فقط، وتبدأ من يوم تحديث التطبيق.</p>
+    <div class="nav"><button class="btn gold" id="pgTask">📝 مهمة لطفلي</button><button class="btn gold" id="pgRem">🔔 تذكير يومي</button></div>
     <div class="nav"><button class="btn gold" id="pgSend">📤 أرسل التقرير</button><button class="btn sec" data-close>إغلاق</button></div>`,
-    ()=>{$('#pgSend').onclick=()=>{const t=text(d);
+    ()=>{$('#pgTask').onclick=()=>{if(window.Hamas)Hamas.parentTask()};$('#pgRem').onclick=()=>{if(window.Hamas)Hamas.reminder()};$('#pgSend').onclick=()=>{const t=text(d);
       if(navigator.share)navigator.share({text:t}).catch(()=>{});else window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank')}})}
 function gate(){
   const a=6+Math.floor(Math.random()*4),b=6+Math.floor(Math.random()*4);
