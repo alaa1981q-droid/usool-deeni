@@ -186,9 +186,11 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   const water=M(0x5fb0e6,{roughness:.15,metalness:.1,emissive:night?0x1d4e7e:0x000000});
   // (v13.6) أشجار أكثر واقعية (طلب الشيخ): جذع متدرّج بلحاء وأغصان، وتاج من كتل أوراق متعرّجة بدرجات أخضر طبيعية.
   // ثلاثة أنواع حسب المكان: شجرة مستديرة، شجرة طويلة (كالكالبتوس)، وشجرة برتقال بثمارها. وقليل منها مزهر بالوردي.
-  const TG=[1,2.7,4.3].map(sd=>{const g=new T.IcosahedronGeometry(1,2),p=g.attributes.position,v=new T.Vector3();
+  const tgMk=dt=>[1,2.7,4.3].map(sd=>{const g=new T.IcosahedronGeometry(1,dt),p=g.attributes.position,v=new T.Vector3();
     for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i);v.multiplyScalar(1+.13*Math.sin(v.x*5.3+sd)*Math.cos(v.y*4.1+sd*2)+.07*Math.sin(v.z*9+sd));p.setXYZ(i,v.x,v.y,v.z)}
     g.computeVertexNormals();return g});
+  // (v17.8) فحص التعليق: أوراق الشجر كانت أثقل شيء في المدينة (٣٢٠ مثلثًا لكل كتلة، ×٢ للظل) ← الأشجار البعيدة والسياج بكتل أخفّ (٨٠)
+  const TG=tgMk(2),TGL=tgMk(1);
   const TRK=new T.CylinderGeometry(.13,.22,1,8),BRG=new T.CylinderGeometry(.045,.085,1,6),FRG=new T.SphereGeometry(.075,8,6);
   const bark=M(night?0x4a3626:0x6b4a2f,{roughness:1});
   const LVm=n=>({color:n,roughness:.85,flatShading:true});
@@ -203,11 +205,11 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
     [[.55,0],[-.5,2.2],[.45,4.1]].forEach(([lean,ry])=>{const b=new T.Group();b.position.set(0,th*.82,0);b.rotation.set(0,ry,0);G.add(b);const m=add(BRG,bark,0,.3,0,b);m.scale.set(1,.65,1);b.children[0].rotation.z=lean;m.position.x=-Math.sin(lean)*.3});
     const cl=tall?[[0,2.35,0,.72,1.35],[.32,1.85,.18,.58,1],[-.3,1.95,-.2,.58,1],[0,3.05,0,.48,.9],[.1,2.6,-.35,.45,.9]]
       :[[0,1.95,0,.95,.78],[.55,1.75,.2,.65,.72],[-.5,1.8,-.25,.7,.72],[.1,1.72,-.55,.6,.72],[-.15,1.78,.55,.6,.72],[.05,2.45,.05,.62,.72]];
-    cl.forEach(([a,b,c,r,sy],i)=>{const m=add(TG[(h+i)%3],i%2||(bl&&i>2)?m2:m1,a,b,c,G);m.scale.set(r,r*sy,r);m.rotation.y=i*1.3});
+    const tg=Math.hypot(x,z)>26?TGL:TG;cl.forEach(([a,b,c,r,sy],i)=>{const m=add(tg[(h+i)%3],i%2||(bl&&i>2)?m2:m1,a,b,c,G);m.scale.set(r,r*sy,r);m.rotation.y=i*1.3});
     if(kind===2&&!bl)for(let i=0;i<9;i++){const a=i*2.4+h,y=1.45+(i*37%10)/10*.95,r=Math.sqrt(Math.max(.05,1-((y-1.95)/.8)**2))*.98;add(FRG,FRT,Math.cos(a)*r,y,Math.sin(a)*r,G)}};
   const anim=[];S.userData.anim=anim;
   // (v13.6) نخلة واقعية: جذع منحنٍ بحلقات، وسعف متدلٍّ، وعذوق تمر
-  const PTG=new T.CylinderGeometry(.11,.14,.52,8),PRG=new T.TorusGeometry(.125,.025,5,10),FRDG=new T.SphereGeometry(1,10,6),DTG=new T.SphereGeometry(.06,6,5);
+  const PTG=new T.CylinderGeometry(.11,.14,.52,8),PRG=new T.TorusGeometry(.125,.025,3,8),FRDG=new T.SphereGeometry(1,8,3),DTG=new T.SphereGeometry(.06,5,3); // (v17.8) أخفّ: السعف مسطّح فلا تظهر الفروق
   const ptr=M(night?0x5a4630:0x8a6a45,{roughness:1}),frd=M(night?0x2d6b30:0x3f9a3c,{roughness:.8,side:T.DoubleSide}),frd2=M(night?0x3a7a35:0x5aac45,{roughness:.8,side:T.DoubleSide}),dtm=M(0xb5651d,{roughness:.6});
   const palm=(x,z,p)=>{const h=Math.abs(Math.round(x*11+z*5)),G=new T.Group();G.position.set(x,0,z);G.rotation.y=h*.9;(p||S).add(G);
     let px=0,py=0;for(let i=0;i<5;i++){const lx=.018*i*i,m=add(PTG,ptr,lx,py+.26,0,G);m.rotation.z=-.035*i;const r=add(PRG,ptr,lx,py+.5,0,G);r.rotation.x=Math.PI/2;px=lx;py+=.5}
@@ -227,7 +229,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   const NS=(x,z)=>{const h=(i,j)=>{const t=Math.sin(i*127.1+j*311.7)*43758.5453;return t-Math.floor(t)},xi=Math.floor(x),zi=Math.floor(z),fx=x-xi,fz=z-zi,
     u=fx*fx*(3-2*fx),v=fz*fz*(3-2*fz),a=h(xi,zi),b=h(xi+1,zi),c=h(xi,zi+1),d=h(xi+1,zi+1);return a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v};
   const FBM=(x,z,o)=>{let s=0,a=.5,f=1;for(let i=0;i<o;i++){s+=a*NS(x*f,z*f);a*=.5;f*=2.03}return s};
-  {const X0=-46,W=260,L=1200,g=new T.PlaneGeometry(W,L,92,240);g.rotateX(-Math.PI/2);g.translate(X0-W/2,0,-200);
+  {const X0=-46,W=260,L=1200,g=new T.PlaneGeometry(W,L,60,160);g.rotateX(-Math.PI/2);g.translate(X0-W/2,0,-200);
     const P=g.attributes.position,col=[],C=new T.Color(),cG=new T.Color(night?0x2f6a3a:0x5f9e4c),cG2=new T.Color(night?0x3a5a3a:0x8a9a5a),
       cR=new T.Color(night?0x55606e:0x8d8478),cR2=new T.Color(night?0x6a7280:0xa9a196),cS=new T.Color(night?0xdfe8f5:0xffffff),cH=new T.Color(night?0x2a3a6e:0xb8d8f0);
     for(let i=0;i<P.count;i++){const x=P.getX(i),z=P.getZ(i),d=X0-x,rise=Math.min(1,Math.max(0,d/55));
@@ -283,16 +285,16 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   // (v14.8) طلب الشيخ: شارع ممتد لا تُرى نهايته — يمتد ١٢٠٠ في كل اتجاه فيغيب في الضباب من الجهتين
   const RL=2400,RZ=0;
   const RDf=m=>{m.userData.rd=1;return m};const rd=RDf(add(new T.PlaneGeometry(2*R1,RL),road,0,.01,RZ));rd.rotation.x=-Math.PI/2;rd.castShadow=false;
-  {const cg=new T.BoxGeometry(.2,.14,1),n=RL,o=new T.Object3D(),cB=new T.Color(0x1c1c1c),cW=new T.Color(night?0xcfcfcf:0xffffff);
-    [-R1,R1].forEach(x=>{const im=RDf(new T.InstancedMesh(cg,M(0xffffff),n));for(let i=0;i<n;i++){o.position.set(x,.07,RZ-RL/2+.5+i);o.updateMatrix();im.setMatrixAt(i,o.matrix);im.setColorAt(i,i%2?cB:cW)}
-      im.instanceColor.needsUpdate=true;im.receiveShadow=true;S.add(im)})}
+  {const cg=new T.BoxGeometry(.2,.14,1),n=1400,o=new T.Object3D(),cB=new T.Color(0x1c1c1c),cW=new T.Color(night?0xcfcfcf:0xffffff);
+    [-R1,R1].forEach(x=>{const im=RDf(new T.InstancedMesh(cg,M(0xffffff),n));for(let i=0;i<n;i++){o.position.set(x,.07,RZ-n/2+.5+i);o.updateMatrix();im.setMatrixAt(i,o.matrix);im.setColorAt(i,i%2?cB:cW)}
+      im.instanceColor.needsUpdate=true;im.receiveShadow=true;im.frustumCulled=false;S.add(im)})}
   [-4.6,4.6].forEach(z=>{const r=RDf(add(new T.PlaneGeometry(28+2*DX,1.8),road,0,.012,z));r.rotation.x=-Math.PI/2});
   // (v16.2) أربع حارات: خط متقطّع بين حارتي كل اتجاه، وخطّان متصلان في الوسط
   {const lg=new T.PlaneGeometry(.16,1.4);lg.rotateX(-Math.PI/2);const n=Math.floor(RL/3);[-R1/2,R1/2].forEach(x=>{const im=RDf(new T.InstancedMesh(lg,line,n)),o=new T.Object3D();
     for(let i=0;i<n;i++){o.position.set(x,.02,RZ+RL/2-1-i*3);o.updateMatrix();im.setMatrixAt(i,o.matrix)}S.add(im)});
     [-.13,.13].forEach(x=>{const l=RDf(add(new T.PlaneGeometry(.09,RL),line,x,.021,RZ));l.rotation.x=-Math.PI/2;l.castShadow=false})}
   // زهور ملوّنة كثيرة على العشب
-  {const fl=[0xff5c8a,0xffd23f,0xb07cff,0xff8c42,0xffffff,0x4fc3ff,0xff4f4f],geo=new T.SphereGeometry(.13,8,6),im=new T.InstancedMesh(geo,new T.MeshStandardMaterial({roughness:.6}),240);
+  {const fl=[0xff5c8a,0xffd23f,0xb07cff,0xff8c42,0xffffff,0x4fc3ff,0xff4f4f],geo=new T.SphereGeometry(.13,6,4),im=new T.InstancedMesh(geo,new T.MeshStandardMaterial({roughness:.6}),240);
     const o=new T.Object3D(),col=new T.Color();let n=0,k=0;
     const bad=(x,z)=>x<-2.6&&x>XL-.4&&Math.abs(z)<HZ+.35||Math.abs(x)<2.8||x<-2.4&&x>-11.2&&z<-14.8&&z>-25||Math.abs(Math.abs(z)-4.6)<1.4&&Math.abs(x)<15||Object.values(SPOT).some(([a,b])=>Math.hypot(x-a,z-b)<3.9)||Math.hypot(x,z)>34||x>17||NOFL(x,z)||Math.abs(x-FARM[0])<3.6&&Math.abs(z-FARM[1])<3.8;
     while(n<240&&k<4000){k++;const a=Math.random()*Math.PI*2,r=3+Math.random()*31,x=Math.cos(a)*r,z=Math.sin(a)*r;if(bad(x,z))continue;
@@ -960,8 +962,8 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
     // البستان خلف البيت
     const GG=new T.Group();GG.userData.act='bn_g';S.add(GG);const GX0=XL+.3,GX1=-8.75,GCX=(GX0+GX1)/2,GW=GX1-GX0,GD=HZ*2-.4;
     const soil=new T.Mesh(new T.PlaneGeometry(GW,GD),M(gL?(night?0x3f7d3a:0x5cbf4f):0xb08a5c,{roughness:1}));soil.rotation.x=-Math.PI/2;soil.position.set(GCX,.03,0);soil.receiveShadow=true;GG.add(soil);
-    if(gL>=1){const hg=M(night?0x2f6a32:0x3f9a3e,{flatShading:true});for(let x=GX0+.3;x<GX1-.2;x+=.62)[-1,1].forEach(k=>{const b=add(TG[0],hg,x,.32,k*(HZ-.42),GG);b.scale.set(.36,.34,.3)});
-      for(let z=-HZ+.8;z<HZ-.7;z+=.62){const b=add(TG[1],hg,GX0+.15,.32,z,GG);b.scale.set(.3,.34,.36)}}
+    if(gL>=1){const hg=M(night?0x2f6a32:0x3f9a3e,{flatShading:true});for(let x=GX0+.3;x<GX1-.2;x+=.62)[-1,1].forEach(k=>{const b=add(TGL[0],hg,x,.32,k*(HZ-.42),GG);b.scale.set(.36,.34,.3)});
+      for(let z=-HZ+.8;z<HZ-.7;z+=.62){const b=add(TGL[1],hg,GX0+.15,.32,z,GG);b.scale.set(.3,.34,.36)}}
     if(gL>=2){const pv=M(night?0xa69c88:0xe2d6bd);for(let x=GX1-.4;x>GX0+1.4;x-=.55){const st=add(new T.CylinderGeometry(.24,.24,.05,10),pv,x,.05,0,GG);st.receiveShadow=true}
       const FC=[0xff5c8a,0xffd23f,0xff8c42,0xb07cff,0xffffff,0xe2504a];let k=0;[-1,1].forEach(s2=>{for(let x=GX0+.9;x<GX1-.5;x+=.32){for(let r=0;r<2;r++){const f=add(new T.SphereGeometry(.09,6,5),M(FC[k++%6]),x+(r?.16:0),.2,s2*(HZ-.95-r*.25),GG);f.castShadow=false;
             const st=add(new T.CylinderGeometry(.015,.015,.16,4),M(0x2f7d3a),x+(r?.16:0),.1,s2*(HZ-.95-r*.25),GG);st.castShadow=false}}})}
@@ -1521,7 +1523,8 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
     Object.assign(u,{kind,h:kind==='kid'?1.7:2.3,trip:k,pts:pts.slice(1),sp:(kind==='kid'?1.15:1)*(.85+Math.random()*.35),v:0,bs:P.scale.x,gr:near(pts[0])?0:1,
       out:near(pts[pts.length-1])||TRIPS[k].end?1:0,fade:0,look:0,greet:0,hold:0,bub:null});P.userData.u=u;
     P.position.set(pts[0][0],0,pts[0][1]);const n=pts[1];P.rotation.y=Math.atan2(n[0]-pts[0][0],n[1]-pts[0][1]);P.scale.setScalar(u.bs);setOp(P,Math.max(.02,u.gr))}
-  let gT=25,quiet=0; // (v15.8) طلب الشيخ: السلام كثير → جار واحد يسلّم كل دقيقة تقريبًا، وبعد ٥ سلامات في اليوم نادرًا (كل ٣–٤ دقائق)
+  let gT=120,quiet=0; // (v17.8) طلب الشيخ مرة ثانية: «السلام مبالغ بيه» → أول سلام بعد دقيقتين، ثم كل ٤–٦ دقائق، وبعد ٥ سلامات في اليوم لا سلام
+  // (v15.8) طلب الشيخ: السلام كثير → جار واحد يسلّم كل دقيقة تقريبًا، وبعد ٥ سلامات في اليوم نادرًا (كل ٣–٤ دقائق)
   function endGreet(i){const u=peds[i]&&peds[i].userData.u;if(!u)return;u.greet=0;unsay(u.bub);u.bub=null}
   // (v12.1) 🚗 سيارات تمرّ طول اليوم في الاتجاهين، وتقف إذا كان الطفل أمامها في الطريق
   // ألوان سيارات حقيقية: أبيض، فضي، أسود، كحلي، أحمر، بيج، أخضر غامق، برتقالي
@@ -1713,7 +1716,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       else{const df=turn(P,Math.atan2(dx,dz),dt),k=tf(df);P.position.x+=dx/d*st*k;P.position.z+=dz/d*st*k;if(df>.5)u.v*=1-Math.min(1,dt*2)}
       if(!u.shep&&!last&&!q[2]&&Math.random()<dt*.012)u.look=.9+Math.random()*.8; // أحيانًا يقف لحظة ويتلفّت
       P.position.y=Math.abs(Math.sin(t*6.5+i))*.035*Math.min(1,u.v)});
-    gT-=dt;if(gT<=0){gT=quiet?180+Math.random()*60:50+Math.random()*40;if(!peds.some(P=>P.userData.u.greet>0||P.userData.u.hold>0)){const c=peds.filter(P=>{const u=P.userData.u;return P.visible&&u.gr>=1&&!u.fade&&u.pts.length>(u.shep?-1:1)&&Math.hypot(P.position.x,P.position.z)<30});
+    gT-=dt;if(gT<=0){gT=240+Math.random()*120;if(!quiet&&!peds.some(P=>P.userData.u.greet>0||P.userData.u.hold>0)){const c=peds.filter(P=>{const u=P.userData.u;return P.visible&&u.gr>=1&&!u.fade&&u.pts.length>(u.shep?-1:1)&&Math.hypot(P.position.x,P.position.z)<30});
       if(c.length){const P=c[Math.floor(Math.random()*c.length)],u=P.userData.u;u.greet=16;u.bub=say(P,'السلام عليكم'+yaN()+' 👋',1e9,u.h)}}}
     bubs.slice().forEach(b=>{b.k-=dt;b.s.position.set(b.o.position.x,b.o.position.y+b.h,b.o.position.z);if(b.k<=0)unsay(b)});
     // المصلّون وقت الصلاة (إذا بُني الجامع)
@@ -2479,7 +2482,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
     nearT-=dt;if(nearT>0)return;nearT=.3;let best=null,bd=1e9,lb='';
     if(!drv&&!V&&!sleeping&&!busy&&!path.length&&goBox.hidden&&!ui.card.classList.contains('on')&&salBtn.hidden&&kid.visible){const kx=kid.position.x,kz=kid.position.z,D=day();
       const cons=(u,d)=>{if(d>=bd||d>1.3)return;const l=nearLbl(u,D);if(l){bd=d;best=u;lb=l}};
-      life.g.children.forEach(P=>{const u=P.userData;if(P.visible&&(u.act||u.ped))cons(u,Math.hypot(P.position.x-kx,P.position.z-kz)-1.2)});
+      life.g.children.forEach(P=>{const u=P.userData;if(P.visible&&u.act&&u.act!=='pet')cons(u,Math.hypot(P.position.x-kx,P.position.z-kz)-1.2)});
       if(!OB)obst();S.children.forEach(o=>{const u=o.userData;if(!u||o===kid||o===life.g||o===tgtM||!(u.act||u.p||u.t!=null||u.l!=null||u.cat||u.fk))return;const b=OBm.get(u);
         if(b)cons(u,Math.hypot(Math.max(b[0]-kx,0,kx-b[1]),Math.max(b[2]-kz,0,kz-b[3]))-.4);else cons(u,Math.hypot(fXi(o.position.x)-kx,o.position.z-kz)-(u.p?.4:1.2))})}
     if(best){if(nearU!==best||nearBtn.hidden){nearU=best;nearBtn.textContent=lb}nearBtn.hidden=false}else{nearBtn.hidden=true;nearU=null}}
