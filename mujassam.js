@@ -2725,6 +2725,8 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
     const dx=tx-petG.position.x,dz=tz-petG.position.z,d=Math.hypot(dx,dz),b=petG.userData.body;if(d>14){petG.position.x=tx;petG.position.z=tz}
     if(d>.12){const sp=Math.min(d,Math.max(1.2,d*2.4)*dt);petG.position.x+=dx/d*sp;petG.position.z+=dz/d*sp;let da=Math.atan2(dx,dz)-petG.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));petG.rotation.y+=da*Math.min(1,dt*6)}
     else{const ta=Math.atan2(cam.position.x-petG.position.x,cam.position.z-petG.position.z);let da=ta-petG.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));petG.rotation.y+=da*Math.min(1,dt*2)}
+    // (v19.2) طلب الشيخ: الحيوان لا ينزل الشارع — يبقى على الرصيف (جهة الطفل)، ولا يعبر إلا عند ممرّ المشاة
+    if(k!=='bird'&&Math.abs(petG.position.x)<2.22&&Math.abs(Math.abs(petG.position.z)-4.6)>1.1){const sx=Math.abs(tx)>.3?(tx<0?-1:1):(petG.position.x<0?-1:1);petG.position.x=sx*2.22}
     const mv=d>.12;if(k==='bird'){petG.position.y=1.5+Math.sin(t*3)*.15;const w=petG.userData.wings,f=Math.sin(t*(mv?22:9))*.7;w[0].rotation.z=f;w[1].rotation.z=-f}
     else if(k==='rab'){b.position.y=mv?Math.abs(Math.sin(t*9))*.22:0}else{b.position.y=mv?Math.abs(Math.sin(t*12))*.04:0;if(petG.userData.tail)petG.userData.tail.rotation.z=Math.sin(t*3)*.4}}
   // ١١ بطل المدينة اليوم: يكمل السقي والسلام (٥) والتنظيف ← الجيران يصفّقون، تاج نجمة فوق الطفل، 💎10
