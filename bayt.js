@@ -559,10 +559,15 @@ function menu(){G=null;clearTimeout(autoT);const B=$('#byBody');
   <div class="blvg">${LEVELS.map((l,i)=>{const why=lockWhy(i),dn=i<bs.done;
     return `<button class="blv ${why?'locked':''}" data-lv="${i}"><span class="ic" style="background:${l.color}">${why?'🔒':l.icon}</span>
     <span><b>${l.floor}</b><small>${l.name}</small></span>
-    <span class="mk">${dn?'⭐'.repeat(bs.stars[i]||1):why?'🔒':'▶️'}</span></button>`}).join('')}</div>
+    <span class="mk">${dn?'⭐'.repeat(bs.stars[i]||1):why?'🔒':'▶️'}</span></button>`}).join('')}${(()=>{const ok=bs.done>=LEVELS.length||(window.isAdm&&isAdm()),qd=window.Qasr&&Qasr.done;
+    return `<button class="blv ${ok?'':'locked'}" id="byQt"><span class="ic" style="background:linear-gradient(135deg,#f6c945,#e0a10f)">${ok?'👑':'🔒'}</span>
+    <span><b>المرحلة السادسة</b><small>${qd?'قصرك في مدينتك':'حوّل بيتك إلى قصر'}</small></span>
+    <span class="mk">${qd?'👑':ok?'▶️':'🔒'}</span></button>`})()}</div>
   <button class="link-btn" id="byHow" style="align-self:center;margin-top:10px">❓ كيف ألعب؟</button>`;
   $('#byHow').onclick=()=>modal(`<div style="font-size:46px">🏡</div><h3 style="margin:4px 0">كيف ألعب؟</h3><p class="bcap" style="text-align:right;line-height:1.9">المس الكلمة <b>التالية</b> بالترتيب قبل أن ينتهي الوقت ⏱️<br>الصحيح المتتابع يضاعف نقاطك 🔥 والنجمة الذهبية ⭐ تعطيك وقتًا إضافيًا.<br>الخطأ أو ترك الكلمة الصحيحة تسقط يهدم من بيتك!<br>🏆 كل نجمة جديدة تربحها في طابق = كأس.<br>▶️ زر «أكمل الطوابق» يأخذك إلى الطابق الذي لم تبنِه بعد.<br>واجمع كؤوسًا أكثر من «اختبر نفسك» و«مسابقة الأبطال».</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`);
   {const q=$('#byQasr');if(q)q.onclick=()=>{try{City3D.goTo('palace')}catch(e){}}}
+  // (v19.8) طلب الشيخ: مربّع «المرحلة السادسة: القصر» مع الطوابق — مقفول حتى تكتمل الطوابق الخمسة
+  {const q=$('#byQt');if(q)q.onclick=()=>{sTap();if(q.classList.contains('locked')){tone(200,.15,'square',.08);modal(`<div style="font-size:50px">👑</div><h3 style="margin:4px 0">المرحلة السادسة: القصر</h3><p>أكمل طوابق بيتك الخمسة أولًا (عندك ${ar(bs.done)} من ${ar(LEVELS.length)})، ثم حوّل بيتك إلى قصر بصلواتك وتسبيحك واختبار صغير 🤍</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`);return}try{City3D.goTo('palace')}catch(e){}}}
   {const r=$('#byRace');if(r)r.onclick=()=>{const t=B.querySelector('[data-lv="'+bs.done+'"]');if(t)t.click()}}
   if(window.Deco)Deco.menuHook(B);
   // v8.2: لا نُميل الصورة هنا حتى يلمس الطفل كلّ جزء من بيته وحده (السور، الحديقة، الأشجار)
