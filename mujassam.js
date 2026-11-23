@@ -15,6 +15,8 @@ const css=document.createElement('style');
 css.textContent=`body.m3on .modal{z-index:9100}body.m3on #confetti{z-index:9150}body.m3on .ctbanner{z-index:9200}
 #m3d .m3bar{position:absolute;left:8px;right:8px;bottom:max(10px,env(safe-area-inset-bottom));z-index:2;display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
 #m3d .m3bar button{border:0;border-radius:16px;padding:7px 2px 6px;font:inherit;font-weight:800;font-size:11px;line-height:1.2;background:#fff;color:#1d4e9e;box-shadow:0 4px 0 #9fb7d8}
+#m3d .m3bar.vone{left:50%;right:auto;transform:translateX(-50%);display:block}#m3d .m3bar.vone button{display:flex;align-items:center;gap:6px;padding:7px 16px;font-size:13.5px;border-radius:20px}#m3d .m3bar.vone button b{display:inline;font-size:18px}
+#m3d .m3vt{position:absolute;z-index:3;left:50%;top:150px;max-width:90%;text-align:center;transform:translateX(-50%);background:#fff;border-radius:16px;padding:6px 14px;font-size:13px;font-weight:800;color:#1d7a4a;box-shadow:0 3px 0 #bfe3cc,0 6px 14px #0002;pointer-events:none;transition:opacity .6s}
 #m3d .m3bar button b{display:block;font-size:22px}#m3d .m3bar button:active{transform:translateY(3px);box-shadow:0 1px 0 #9fb7d8}
 #m3d .m3bar button.hot{background:linear-gradient(135deg,#ffe48a,#ffc53a);color:#6a4300;box-shadow:0 4px 0 #c98a12;animation:m3hot 1s ease-in-out infinite alternate}
 @keyframes m3hot{to{transform:scale(1.06)}}
@@ -2365,11 +2367,12 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
       ui.card.querySelector('.row').style.flexWrap='wrap'},
     visit(r,byCar){if(drv&&carTrip){carTrip=0;carAway(r);return}carTrip=0;adm=null;vr=r;V={lv:Madina.fromCode(r.m||'00000'),f:r.f,u:r.u||'',nick:short(r.nick),flg:r.p&&r.p.flg,pq:!!(r.h&&r.h.q),sx:r.p&&r.p.sx};
       at=byCar?(PALZ?{x:-12,z:-3.9,via:-4.6}:{x:-10.2,z:3.9,via:4.6}):{x:0,z:-15,via:null};kid.position.set(at.x,0,at.z);kid.visible=true;path=[];refresh();setBar();
-      ui.msg.textContent=`🏙️ ${B('أنت','أنتِ')} الآن في مدينة ${V.nick} 🤍`;
+      ui.msg.textContent=`🏙️ ${B('أنت','أنتِ')} الآن في مدينة ${V.nick} 🤍`;{const mt=ui.msg.textContent;setTimeout(()=>{if(ui.msg.textContent===mt)ui.msg.textContent=''},4000)}
+      // (v19.7) طلب الشيخ: لا بطاقة كبيرة تغطّي المدينة — سطر صغير يظهر ثم يختفي وحده
       go({x:-2.6,z:1,via:null},()=>{const v=fv();
         const give=!v[r.id]&&Object.keys(v).length<FV_MAX;if(give){v[r.id]=1;dsv();jewels(FV_J)}
-        card(`🤝 ${B('زرتَ','زرتِ')} ${V.nick} في ${B('مدينته','مدينته')}${give?` 💎 +${arn(FV_J)}`:''}<br><small>زيارة الصديق والجار وصلة الأرحام من الأخلاق الجميلة 🤍${!give&&v[r.id]?'<br>('+B('أخذتَ','أخذتِ')+' جواهر هذه الزيارة اليوم)':''}</small>`,
-          [['🏡 ادخل بيته',()=>A.fhouse()],['🏙️ ارجع لمدينتي',()=>A.back()]])})},
+        const tt=document.createElement('div');tt.className='m3vt';tt.innerHTML=`🤝 ${B('زرتَ','زرتِ')} ${V.nick.replace(/[<>&]/g,'')}${give?' 💎 +'+arn(FV_J):''}<br><small style="font-weight:700;color:#557">زيارة الصديق من الأخلاق الجميلة 🤍</small>`;ov.appendChild(tt);
+        setTimeout(()=>{tt.style.opacity=0;setTimeout(()=>tt.remove(),700)},4000)})},
     fhouse(){const r=vr;if(!r)return;closeTo(()=>{if(window.Deco&&Deco.visit)Deco.visit({id:r.id,h:r.h,p:r.p},()=>{show('bayt');Bayt.menu()})})},
     // (v18.7) 👑 مرحلة القصر (بعد الطوابق الخمسة): صلاة على النبي ٣٣ بالصوت + تسبيح ٣٣ بالصوت + اختبار ١٠ أسئلة (النجاح ٨)،
     // ثم يبني العمّال القصر. الرسوب: إعادة بعد ٣ دقائق. المدير قصره جاهز دائمًا.
@@ -2409,9 +2412,9 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
     aBack(){const id=adm&&adm.id;adm=null;V=null;vr=null;try{ui.close()}catch(e){}if(id&&window.Idara&&Idara.card)setTimeout(()=>Idara.card(id),200)},
     back(){V=null;vr=null;adm=null;at={x:-3.4,z:1,via:null};kid.position.set(-3.4,0,1);path=[];refresh();setBar();card('');
       ui.msg.textContent=""}});
-  const BAR_ME=ui.bar.innerHTML,BAR_V=`<button data-a="back"><b>🏙️</b>مدينتي</button><button data-a="fhouse"><b>🏡</b>ادخل بيته</button><button data-a="friends"><b>👥</b>صديق آخر</button>`;
+  const BAR_ME=ui.bar.innerHTML,BAR_V=`<button data-a="back"><b>🏙️</b>ارجع لمدينتي</button>`; // (v19.7) طلب الشيخ: زر واحد صغير فقط حتى لا يُشغل الطفل عن المشاهدة
   const BAR_A=`<button data-a="aBack"><b>🛡️</b>الإدارة</button><button data-a="aInfo"><b>📋</b>إنجازاته</button><button data-a="fhouse"><b>🏡</b>بيته</button>`;
-  function setBar(){ui.bar.innerHTML=adm?BAR_A:V?BAR_V:BAR_ME;ui.bar.style.gridTemplateColumns=V?'repeat(3,1fr)':'';
+  function setBar(){ui.bar.innerHTML=adm?BAR_A:V?BAR_V:BAR_ME;ui.bar.style.gridTemplateColumns='';ui.bar.classList.toggle('vone',!!V&&!adm);
     ui.bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{try{window.Bayt&&Bayt.sTap()}catch(e){}if(sleeping&&b.dataset.a!=="back"&&!adm){sleepCard();return}if(inSchool&&!V&&b.dataset.a!=='school'){schoolCard();return}const a=b.dataset.a;if(adm){A[a]();return}if(busy||path.length&&!wander)return;if(a==='back'||a==='friends'){if(foc&&a!=='back')cityView();A[a]();return}follow(()=>A[a]())});
     const p=prayerNow();if(!V&&p&&!day().pr[p])ui.bar.querySelector('[data-a=mosque]').classList.add('hot');try{if(V&&foc)cityView();hosLbl()}catch(e){}}
   // (v15.3) 🏥 زر المستشفى (يسار الشاشة): الكاميرا تطير وتعرض المستشفى بعرض الشاشة من جهة الشارع، ومرة ثانية «🏙️ مدينتي» ترجع للمدينة كلها
