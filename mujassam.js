@@ -1892,8 +1892,12 @@ function makeSounds(night){if(night)return {tick(){},stop(){},quiet:true};
 function run(ov,ui){const T=THREE,night=document.body.classList.contains('night');
   const W=innerWidth,H=innerHeight;
   const LITE=liteOn(),R=new T.WebGLRenderer({antialias:!LITE,logarithmicDepthBuffer:true}); // (v15.3) يمنع الوميض (تداخل الأسطح) أثناء تقليب المدينة
-  const PRM=LITE?1:Math.min(2,devicePixelRatio||1);let PR=PRM;R.setPixelRatio(PR);R.setSize(W,H);
-  R.shadowMap.enabled=!LITE;R.shadowMap.type=T.PCFSoftShadowMap;
+  // (v18.5) طلب الشيخ «اللعبة بدأت تعلق»: الجودة تنزل وحدها على الأجهزة الضعيفة وتُحفظ ٣ أيام (usul5_m3q {q,t}):
+  // q1 = بلا ظلال، q2 = + دقّة ٠٫٧٥. والظلال صارت PCF العادية (أخفّ من الناعمة).
+  let QL=0;try{const q=JSON.parse(localStorage.getItem('usul5_m3q')||'null');if(q&&Date.now()-q.t<3*864e5)QL=q.q|0}catch(e){}
+  const qSet=v=>{QL=Math.max(QL,v);try{localStorage.setItem('usul5_m3q',JSON.stringify({q:QL,t:Date.now()}))}catch(e){}};
+  const PRM=LITE?1:Math.min(2,devicePixelRatio||1);let PR=QL>=2?.75:QL>=1?1:PRM;R.setPixelRatio(PR);R.setSize(W,H);
+  R.shadowMap.enabled=!LITE&&QL<1;R.shadowMap.type=T.PCFShadowMap;
   ov.insertBefore(R.domElement,ov.firstChild);R.domElement.style.display='block';R.domElement.style.touchAction='none';
   const cam=new T.PerspectiveCamera(45,W/H,.5,950);let S=makeScene(night);
   if(!cam0.dist)cam0.dist=Math.min(92,Math.max(48,40/(W/H))); // (v15.5) طلب الشيخ: الكاميرا أبعد قليلًا لتُرى المدينة أكثر، والطفل يقرّب بإصبعيه
@@ -2555,8 +2559,10 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
   // (v17.4) الظلال تُرسم كل ثالث إطار (الشمس ثابتة، والفرق لا يُرى) — كانت تضاعف الرسم في كل إطار
   R.shadowMap.autoUpdate=false;R.shadowMap.needsUpdate=true;let shF=0;
   // (v17.4) دقّة تتكيّف وحدها: إذا بطؤ الجهاز (أقلّ من ٤٠ إطارًا/ث) تنزل الدقّة قليلًا، وإذا ارتاح (فوق ٥٥) ترجع
-  let fpN=0,fpT=performance.now(),fpGood=0;function adapt(){fpN++;const n=performance.now();if(n-fpT<2500)return;const fps=fpN*1000/(n-fpT);fpN=0;fpT=n;
-    if(fps<40&&PR>1){PR=Math.max(1,+(PR-.25).toFixed(2));R.setPixelRatio(PR);fpGood=0}else if(fps>55&&PR<PRM){if(++fpGood>=3){PR=Math.min(PRM,+(PR+.25).toFixed(2));R.setPixelRatio(PR);fpGood=0}}else fpGood=0}
+  let fpN=0,fpT=performance.now(),fpGood=0,fpBad=0;function adapt(){fpN++;const n=performance.now();if(n-fpT<2500)return;const fps=fpN*1000/(n-fpT);fpN=0;fpT=n;
+    if(document.hidden||n-(adapt.t0||(adapt.t0=n))<4000)return; // أول ثوانٍ بعد الفتح فيها تحميل، لا نحكم عليها
+    if(fps<40&&PR>1){PR=Math.max(1,+(PR-.25).toFixed(2));R.setPixelRatio(PR);fpGood=0}
+    else if(fps<(LITE?22:28)&&PR<=1){if(++fpBad>=2){fpBad=0;if(R.shadowMap.enabled){R.shadowMap.enabled=false;const mu=o=>{const m=o.material;if(m)(Array.isArray(m)?m:[m]).forEach(x=>x.needsUpdate=true)};S.traverse(mu);life.g.traverse(mu);kid.traverse(mu);qSet(1)}else if(PR>.75){PR=.75;R.setPixelRatio(PR);qSet(2)}}}else if(fps>55&&PR<PRM){if(++fpGood>=3){PR=Math.min(PRM,+(PR+.25).toFixed(2));R.setPixelRatio(PR);fpGood=0}fpBad=0}else{fpGood=0;fpBad=0}}
   // الناس البعيدون جدًا عن الكاميرا (أكثر من ٥٥) لا يُرسمون (صغار جدًا لا يُرَون)، ويُعادون بعد الرسم
   const HV=[];
   // (v17.5) «المناطق»: ما هو بعيد جدًّا عن الكاميرا (حسب حجمه) لا يُرسم، ويرجع حين تقترب. القائمة تُبنى مرّة لكل مشهد.
