@@ -496,12 +496,15 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();farmAt(V?!!V.p
   // (v18.7) 👑 القصر: بناء أبيض بطابقين وأشرطة ذهبية، قبّة ذهبية كبيرة، ٤ أبراج بقباب خضراء، رواق بأعمدة،
   // وأمامه حديقة كبيرة بنافورة وممرّ وأحواض ورد ونخيل، وعلى جانبيه بستان أشجار مثمرة. الحرّاس في makeLife (palG).
   // الإحداثيات محلية لمجموعة البيت (x=-6، بلا تكبير): القصر من -7.6 إلى -2.2، والحديقة من -2.2 إلى البوابة (3).
-  function palace(G0){const G=new T.Group();G.position.z=PZC();G0.add(G);const SW2=(HZNc+3.55)/2,GC0=PALZ?4.6-PZC():1.05;const wh=M(night?0xd6cfc0:0xfbf6ea,{roughness:.45}),cr=M(night?0xbfa97f:0xf1dfb6),gd=M(0xf0bf2a,{metalness:.25,roughness:.35,emissive:0x6a4a00,emissiveIntensity:.35}),
+  function palace(G0){const G=new T.Group();G.position.z=PZC();G0.add(G);const SW2=(HZNc+3.55)/2,GC0=PALZ?4.6-PZC():1.05;
+    // (v19.5) طلب الشيخ: قصر مثل قصور الحكايات مع القبّة الذهبية — أبراج بقبّعات مدبّبة وأعلام، وممشى ورود. البنت: وردي وكريمي، الولد: أزرق وذهبي
+    const girl=V?V.sx==='g':!boy(),RF=M(girl?(night?0xb0507a:0xf06fa0):(night?0x2f5f9e:0x3f86e0),{roughness:.5}),AC=M(girl?(night?0xc98aa4:0xffb3cf):(night?0x7f9fc4:0xa9d0f7),{roughness:.6}),FLC=girl?0xff4f8f:0x2f6fd0;
+    const wh=M(night?0xd6c9b4:0xfdf1dd,{roughness:.45}),cr=M(night?0xbfa97f:0xf6e3c2),gd=M(0xf0bf2a,{metalness:.25,roughness:.35,emissive:0x6a4a00,emissiveIntensity:.35}),
       gl=M(0x7fb7d9,{metalness:.3,roughness:.15,emissive:night?0xffcf6a:0x000000,emissiveIntensity:night?.9:0}),stn=M(night?0x8a8070:0xc8bca2),gdm=M(0x2fa37a,{metalness:.35,roughness:.35}),wd=M(0x6b3f1f);
     // (v18.8) طلب الشيخ: القصر أكبر مبنى في المدينة — ٣ طوابق بعرض الأرض كلها، قبّة ذهبية ضخمة، ٤ أبراج و٢ منارتان عاليتان
     const BX=-8,BW=7.2,BD=5.6,fh=1.75,NF=3,top=.35+fh*NF,FX=BX+BW/2;
-    box(BW+.5,.35,BD+.4,stn,BX,.17,0,G);box(BW,fh*NF,BD,wh,BX,.35+fh*NF/2,0,G);
-    for(let i=1;i<=NF;i++)box(BW+.12,.1,BD+.12,gd,BX,.35+fh*i,0,G);
+    box(BW+.5,.35,BD+.4,AC,BX,.17,0,G);box(BW,fh*NF,BD,wh,BX,.35+fh*NF/2,0,G);
+    for(let i=1;i<=NF;i++){box(BW+.12,.14,BD+.12,AC,BX,.35+fh*i,0,G);box(BW+.14,.04,BD+.14,gd,BX,.35+fh*i+.08,0,G)}
     for(let f=0;f<NF;f++){const y=.35+fh*f+.85;
       [-2.5,-1.75,-1.0,1.0,1.75,2.5].concat(f?[-.3,.3]:[]).forEach(z=>{box(.05,.8,.45,gl,FX+.02,y,z,G);box(.06,.07,.54,gd,FX+.03,y-.43,z,G);const a=add(new T.CircleGeometry(.225,12,0,Math.PI),gl,FX+.03,y+.4,z,G);a.rotation.y=Math.PI/2});
       [-2.7,-1.8,-.9,0,.9,1.8,2.7].forEach(x=>[-1,1].forEach(k=>{box(.45,.8,.05,gl,BX+x,y,k*(BD/2+.02),G);const a=add(new T.CircleGeometry(.225,12,0,Math.PI),gl,BX+x,y+.4,k*(BD/2+.03),G);if(k<0)a.rotation.y=Math.PI}))}
@@ -509,24 +512,33 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();farmAt(V?!!V.p
     box(.08,1.6,1.1,wd,FX+.03,.35+.8,0,G);const ar=new T.Mesh(new T.TorusGeometry(.6,.07,8,18,Math.PI),gd);ar.position.set(FX+.06,1.55,0);ar.rotation.y=Math.PI/2;G.add(ar);
     [-1.9,-1.15,-.4,.4,1.15,1.9].forEach(z=>{add(new T.CylinderGeometry(.13,.16,fh*2,12),cr,FX+.95,.35+fh,z,G);box(.36,.1,.36,gd,FX+.95,.4+fh*2,z,G)});
     box(1.3,.18,4.5,cr,FX+.7,.45+fh*2,0,G);box(1.34,.08,4.54,gd,FX+.7,.58+fh*2,0,G);
-    const ped=add(new T.ConeGeometry(1.6,.8,3),cr,FX+.7,.95+fh*2,0,G);ped.rotation.set(0,0,0);ped.scale.set(.5,1,1.4);
+    const ped=add(new T.ConeGeometry(1.6,.8,3),RF,FX+.7,.95+fh*2,0,G);ped.rotation.set(0,0,0);ped.scale.set(.5,1,1.4);
     [0,1,2].forEach(i=>box(.35,.12,2.4,stn,FX+1.25+i*.33,.3-i*.1,0,G));
     // السطح: أرضية، شرفات، قبّة ذهبية ضخمة على رقبة بنوافذ، وهلال
     box(BW-.05,.06,BD-.05,M(night?0xb8ad98:0xece2cc),BX,top+.03,0,G);
     for(let x=-BW/2+.2;x<=BW/2-.2;x+=.45)[-1,1].forEach(k=>box(.24,.26,.13,cr,BX+x,top+.13,k*(BD/2-.07),G));
     for(let z=-BD/2+.2;z<=BD/2-.2;z+=.45)[-1,1].forEach(k=>box(.13,.26,.24,cr,BX+k*(BW/2-.07),top+.13,z,G));
-    add(new T.CylinderGeometry(1.9,1.95,1.0,28),cr,BX,top+.5,0,G);box(.01,.01,.01,gd,BX,top,0,G);add(new T.CylinderGeometry(1.97,1.97,.1,28),gd,BX,top+1.0,0,G);
+    add(new T.CylinderGeometry(1.9,1.95,1.0,28),wh,BX,top+.5,0,G);add(new T.CylinderGeometry(1.96,1.96,.14,28),AC,BX,top+.12,0,G);box(.01,.01,.01,gd,BX,top,0,G);add(new T.CylinderGeometry(1.97,1.97,.1,28),gd,BX,top+1.0,0,G);
     for(let k=0;k<10;k++){const a=k/10*Math.PI*2,w=add(new T.BoxGeometry(.08,.5,.3),gl,BX+Math.cos(a)*1.92,top+.5,Math.sin(a)*1.92,G);w.rotation.y=-a}
     add(new T.SphereGeometry(2.05,32,18,0,Math.PI*2,0,Math.PI/2),gd,BX,top+1.05,0,G);add(new T.SphereGeometry(.22,12,8),gd,BX,top+3.15,0,G);add(new T.ConeGeometry(.12,1.3,8),gd,BX,top+3.9,0,G); // (v18.9) رأس ذهبي مدبّب بدل الهلال (القصر ليس جامعًا)
-    // ٤ أبراج على الزوايا بقباب خضراء
+    const flag=(x,y,z,k)=>{add(new T.CylinderGeometry(.02,.02,.75,5),M(0x8a8a8a),x,y+.37,z,G);const F=new T.Group();F.position.set(x,y+.6,z);G.add(F);
+      const fg=new T.Mesh(new T.PlaneGeometry(.55*k,.3*k),new T.MeshStandardMaterial({color:FLC,side:T.DoubleSide,roughness:.7}));fg.position.x=.28*k;F.add(fg);anim.push(t=>{F.rotation.y=Math.sin(t*2.2+x+z)*.5;fg.rotation.y=Math.sin(t*5+x)*.25})};
+    // ٤ أبراج على الزوايا بقبّعات مدبّبة وأعلام
     [[-1,-1],[-1,1],[1,-1],[1,1]].forEach(([a,b])=>{const x=BX+a*BW/2,z=b*BD/2,H=top+3.0;add(new T.CylinderGeometry(.6,.66,H,16),wh,x,H/2,z,G);
       [top*.5,top+.25,top+1.6].forEach(y=>add(new T.CylinderGeometry(.68,.68,.1,16),gd,x,y,z,G));
       for(let k=0;k<8;k++){const a2=k/8*Math.PI*2;box(.18,.24,.18,cr,x+Math.cos(a2)*.62,H+.12,z+Math.sin(a2)*.62,G)}
-      add(new T.ConeGeometry(.72,1.6,16),gdm,x,H+.85,z,G);add(new T.SphereGeometry(.1,8,6),gd,x,H+1.7,z,G);
+      add(new T.CylinderGeometry(.76,.76,.1,16),gd,x,H+.3,z,G);add(new T.ConeGeometry(.8,2.3,16),RF,x,H+1.45,z,G);add(new T.SphereGeometry(.1,8,6),gd,x,H+2.6,z,G);flag(x,H+2.6,z,1);
       [0,1,2,3].forEach(k=>{const w=add(new T.BoxGeometry(.06,.55,.26),gl,x+Math.cos(k*Math.PI/2)*.61,top+1.0,z+Math.sin(k*Math.PI/2)*.61,G);w.rotation.y=-k*Math.PI/2;const w2=add(new T.BoxGeometry(.06,.5,.24),gl,x+Math.cos(k*Math.PI/2)*.61,top+2.3,z+Math.sin(k*Math.PI/2)*.61,G);w2.rotation.y=-k*Math.PI/2})});
+    // أبراج صغيرة على السطح بين القبّة والأبراج الكبيرة
+    [[-1,-1],[-1,1],[1,-1],[1,1]].forEach(([a,b])=>{const x=BX+a*BW/4,z=b*(BD/2-.25),H=1.5;add(new T.CylinderGeometry(.3,.32,H,12),wh,x,top+H/2,z,G);add(new T.CylinderGeometry(.34,.34,.08,12),AC,x,top+H-.1,z,G);
+      const w=add(new T.BoxGeometry(.05,.4,.18),gl,x+.3,top+.85,z,G);add(new T.ConeGeometry(.4,1.2,12),RF,x,top+H+.6,z,G);flag(x,top+H+1.2,z,.75)});
+    // ممشى الورود من درج القصر إلى البوابة
+    {const rb=M(night?0x2a5a2c:0x2f8a3a,{flatShading:true}),RC=[0xff4f8f,0xe0234e,0xff8fb8,0xff4f8f];let j=0;
+      for(let x=-3.2;x<=2.6;x+=.5){if(Math.abs(x)<1.45)continue;[-1,1].forEach(k=>{const z=k*1.0;const b=add(TGL[0],rb,x,.2,z,G);b.scale.set(.24,.2,.2);
+        for(let q=0;q<3;q++){const a=q*2.1+j;add(new T.SphereGeometry(.075,7,5),M(RC[(j+q)%4],{roughness:.6}),x+Math.cos(a)*.13,.36+(q%2)*.05,z+Math.sin(a)*.12,G)}j++})}}
     // الحديقة الأمامية الكبيرة (من درج القصر إلى البوابة)
     const grass=M(night?0x3f7d3a:0x5cbf4f,{roughness:1}),lawn=new T.Mesh(new T.PlaneGeometry(18.6,SW2*2-.15),grass);lawn.rotation.x=-Math.PI/2;lawn.position.set(-6.45,.022,0);lawn.receiveShadow=true;G.add(lawn);
-    const pv=M(night?0xa69c88:0xe9dcc0);[[-1.6,0,1.6,1.4],[2.1,GC0/2,1.9,Math.abs(GC0)+1.4],[-14.6,0,2.4,1.0]].forEach(([x,z,w,d])=>{const q=new T.Mesh(new T.PlaneGeometry(w,d),pv);q.rotation.x=-Math.PI/2;q.position.set(x,.035,z);G.add(q)});
+    const pv=M(night?0xa08a6c:0xe6c99c);[[-1.6,0,1.6,1.4],[2.1,GC0/2,1.9,Math.abs(GC0)+1.4],[-14.6,0,2.4,1.0]].forEach(([x,z,w,d])=>{const q=new T.Mesh(new T.PlaneGeometry(w,d),pv);q.rotation.x=-Math.PI/2;q.position.set(x,.035,z);G.add(q)});
     const ring=new T.Mesh(new T.CircleGeometry(1.25,28),pv);ring.rotation.x=-Math.PI/2;ring.position.set(0,.034,0);G.add(ring);
     const wtr=new T.MeshStandardMaterial({color:0x5fb8ee,roughness:.1,metalness:.2,transparent:true,opacity:.85}),mb=M(0xf3efe6);
     const fountain=(fx,fz,k)=>{add(new T.CylinderGeometry(.9*k,1.0*k,.38,24),mb,fx,.19,fz,G);const wv=add(new T.CircleGeometry(.8*k,24),wtr,fx,.39,fz,G);wv.rotation.x=-Math.PI/2;
@@ -2350,7 +2362,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
       card(`👥 ${B('اختر','اختاري')} صديقًا ${B('لتزور','لتزوري')} مدينته<br><small>كل زيارة لصديق جديد اليوم 💎${arn(FV_J)} (حتى ${arn(FV_MAX)} أصدقاء)</small>`,
         f.slice(0,6).map(r=>[`${v[r.id]?'✔':n<FV_MAX?'💎':'🏙️'} ${short(r.nick)}`,()=>A.visit(r)]).concat([['إلغاء',null,'sec']]));
       ui.card.querySelector('.row').style.flexWrap='wrap'},
-    visit(r,byCar){if(drv&&carTrip){carTrip=0;carAway(r);return}carTrip=0;adm=null;vr=r;V={lv:Madina.fromCode(r.m||'00000'),f:r.f,u:r.u||'',nick:short(r.nick),flg:r.p&&r.p.flg,pq:!!(r.h&&r.h.q)};
+    visit(r,byCar){if(drv&&carTrip){carTrip=0;carAway(r);return}carTrip=0;adm=null;vr=r;V={lv:Madina.fromCode(r.m||'00000'),f:r.f,u:r.u||'',nick:short(r.nick),flg:r.p&&r.p.flg,pq:!!(r.h&&r.h.q),sx:r.p&&r.p.sx};
       at=byCar?(PALZ?{x:-12,z:-3.9,via:-4.6}:{x:-10.2,z:3.9,via:4.6}):{x:0,z:-15,via:null};kid.position.set(at.x,0,at.z);kid.visible=true;path=[];refresh();setBar();
       ui.msg.textContent=`🏙️ ${B('أنت','أنتِ')} الآن في مدينة ${V.nick} 🤍`;
       go({x:-2.6,z:1,via:null},()=>{const v=fv();
@@ -2383,7 +2395,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
         card(`🎉 <b>مبارك! صار ${B('بيتك','بيتكِ')} قصرًا في الجنة 👑</b><br><small>فيه بستان وحديقة كبيرة بنافورة، وحرّاس يحرسونه 💂 · 💎 +٥٠</small>`,[['الحمد لله',null]])}},900)},
     guards(){const g=life.palG&&life.palG[0];if(g)life.say(g,'وعليكم السلام'+yaN()+' 💂',3,2.4);card(`💂 حرّاس ${V?'قصر '+V.nick:B('قصرك','قصركِ')} يحرسونه ليلًا ونهارًا 🤍`);setTimeout(()=>card(''),2200)},
     // (v18.4) 👑 المدير يدخل مدينة أي مشترك: يرى بناياته وبيته وسوره وحديقته ووسخ بيته، بلا جواهر ولا مهمّات
-    aVisit(r){if(drv)leaveCar(1);card('');inSchool=false;adm=r;vr={id:r.id,h:r.h,p:r.p,nick:r.nick};V={lv:Madina.fromCode(r.m||'00000'),f:r.f|0||1,u:r.u||'',nick:short(r.nick),flg:r.flg,dt:r.dt|0,pq:!!(r.h&&r.h.q)};
+    aVisit(r){if(drv)leaveCar(1);card('');inSchool=false;adm=r;vr={id:r.id,h:r.h,p:r.p,nick:r.nick};V={lv:Madina.fromCode(r.m||'00000'),f:r.f|0||1,u:r.u||'',nick:short(r.nick),flg:r.flg,dt:r.dt|0,pq:!!(r.h&&r.h.q),sx:r.sx||(r.p&&r.p.sx)};
       at={x:-2.6,z:6,via:null};kid.position.set(at.x,0,at.z);kid.visible=true;path=[];busy=0;refresh();setBar();try{cityView()}catch(e){}
       // (v18.6) طلب الشيخ: لا تفتح بطاقة الإنجازات وحدها عند الدخول (تغطّي المدينة)؛ تُفتح من زر «📋 إنجازاته» فقط، وسطر الاسم يختفي بعد ٤ ثوانٍ
       ui.msg.textContent=`👑 مدينة ${V.nick} · ${B('أنت','أنتِ')} تشاهدها كمدير`;const mt=ui.msg.textContent;setTimeout(()=>{if(ui.msg.textContent===mt)ui.msg.textContent=''},4000)},
