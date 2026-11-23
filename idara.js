@@ -130,8 +130,11 @@ body.night .bhouse::before{content:'🌙';position:absolute;right:3%;top:1%;widt
 .idmsg .em{font-size:60px;line-height:1.2}.idmsg p{white-space:pre-wrap;text-align:right;line-height:1.9}
 `;
 document.head.appendChild(css);
-function dayNight(){const h=new Date().getHours(),n=h>=18||h<5;document.body.classList.toggle('night',n);return n}
-dayNight();setInterval(dayNight,5*60000);
+// (v19.4) طلب الشيخ: الليل والنهار حسب الوقت الحقيقي لمدينة الطفل — الليل من المغرب إلى الفجر (يتغيّر مع الفصول)، لا ساعات ثابتة
+function dayNight(){const now=new Date(),h=now.getHours()+now.getMinutes()/60;let f=5,m=18;
+  try{const t=Adhan.times(now),a=new Date(+t.fajr),b=new Date(+t.maghrib),x=a.getHours()+a.getMinutes()/60,y=b.getHours()+b.getMinutes()/60;if(x>2&&x<8)f=x;if(y>15&&y<21.5)m=y}catch(e){}
+  const n=h>=m||h<f;document.body.classList.toggle('night',n);return n}
+dayNight();setInterval(dayNight,60000);
 // عرض البيت ثلاثي الأبعاد يبدأ ليليًّا في الليل
 new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(n=>{if(n.classList&&n.classList.contains('v3ov')&&dayNight()){n.classList.add('night');const b=n.querySelector('#v3n');if(b)b.textContent='☀️'}}))).observe(document.body,{childList:true});
 

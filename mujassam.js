@@ -2852,7 +2852,9 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
       if(lostS>0){lostS-=dt;Lk.visible=Lm.visible=lostS>0;Lk.userData.mk.visible=false;Lm.position.set(-5.3,0,-37.4);Lm.rotation.y=Math.PI/2;Lk.position.set(-4.75,0,-37.4);Lk.rotation.y=-Math.PI/2}
       else{const sh=!V&&!sleeping&&!night&&pkO&&!DD.lost;Lk.visible=sh;Lm.visible=false;Lk.userData.mk.visible=sh;if(sh){Lk.position.set(-4.7,Math.abs(Math.sin(t*5))*.03,-37.4);Lk.rotation.y=Math.PI/2+Math.sin(t*.6)*.5}}}
     (S.userData.anim||[]).forEach(f=>f(t,dt));
-    if(performance.now()-prAt>2000){prAt=performance.now();prC=prayerNow();const sl=sleepNow();if(sl&&!sleeping&&!V)startSleep(t<1);else if(!sl&&sleeping)wake();{const sc=!sl&&!V&&schoolNow();if(sc&&!inSchool&&!sleeping)startSchool(t<1);else if(!sc&&inSchool)endSchool()}
+    if(performance.now()-prAt>2000){prAt=performance.now();
+      // (v19.4) حلّ الليل أو طلع النهار والمدينة مفتوحة → تُفتح من جديد بالإضاءة الصحيحة (ليس أثناء بطاقة أو زيارة أو قيادة)
+      try{if(window.Idara&&Idara.dayNight)Idara.dayNight()}catch(e){}if(document.body.classList.contains('night')!==night&&!V&&!drv&&!ui.card.classList.contains('on')&&!document.querySelector('#modal.on')&&goBox.hidden){ui.close();setTimeout(()=>open(),150);return}prC=prayerNow();const sl=sleepNow();if(sl&&!sleeping&&!V)startSleep(t<1);else if(!sl&&sleeping)wake();{const sc=!sl&&!V&&schoolNow();if(sc&&!inSchool&&!sleeping)startSchool(t<1);else if(!sc&&inSchool)endSchool()}
       // (v13.8) إذا بدأ المطر أو توقّف أو ظهر قوس قزح أو بدأت المناسبة: يُعاد رسم المشهد، وتتلوّن السماء حسب الوقت
       {const bk=(window.Binaa?Binaa.code()+'|'+(Binaa.job?Binaa.job.p+(Binaa.job.ready?'r':''):''):'')+'|'+dirtLv();if(!V&&bk!==bKey){bKey=bk;refresh()}}wxFetch();showWx();const wk=rainNow()+'|'+rainbowNow()+'|'+festNow()+'|'+(occNow()||{}).id+'|'+winter()+'|'+cloudLv()+'|'+iftarNow()+'|'+halaqaNow()+'|'+poolOpen();wRain=rainNow();pkO=parkOpen();if(wk!==wKey){wKey=wk;refresh()}applySky();kidUmb.visible=wRain&&!night}
     if(zz.visible){zz.position.y=zz.userData.y+Math.sin(t*.8)*.25;zz.material.opacity=.75+Math.sin(t*1.3)*.25}
