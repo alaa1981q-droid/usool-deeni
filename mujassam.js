@@ -1507,7 +1507,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
     if(kind==='shep'){add(new T.CylinderGeometry(.025,.025,1.9,6),M(0x6b4423),.34,.95,.12,P);add(new T.TorusGeometry(.1,.025,5,10,Math.PI),M(0x6b4423),.44,1.9,.12,P)}
     if(kind==='guard'){add(new T.CylinderGeometry(.22,.22,.14,12),M(0x152a4f),0,hy+.13,0,P);add(new T.BoxGeometry(.3,.03,.18),M(0x101010),0,hy+.07,.17,P);
       add(new T.SphereGeometry(.11,10,8),new T.MeshStandardMaterial({color:0xfff1b0,emissive:0xffd860,emissiveIntensity:1.6}),.32,.8,.15,P);
-      const pl=new T.PointLight(0xffd27a,1.2,9,1.4);pl.position.set(.32,1,.3);P.add(pl)}
+      if(night){const pl=new T.PointLight(0xffd27a,1.2,9,1.4);pl.position.set(.32,1,.3);P.add(pl);P.userData.lamp=pl}} // (v19.6) ضوء الفانوس فقط بالليل
     if(kid)s=.62;P.userData.lp=null;P.userData.ph=Math.random()*6;
     mergeKids(P);P.scale.setScalar(s*1.35*PS);g.add(P);return P}
   // (v14.0) تأرجح اليدين (والرجلين للأطفال) حين يتحرّك الشخص، ويسكنان حين يقف
@@ -1694,7 +1694,8 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
   // (v18.9) طلب الشيخ: الحرّاس يتحرّكون — ٢ يذرعان البوابة، ٢ يطوفان حول القصر، ٢ يذرعان أمام بابه. بزيّ أحمر وخوذة وحزام ودرع ذهبية ورمح (×١٫٤٥)
   const PGW=[[[-3.6,-1.4],[-4.5,-1.4]],[[-3.6,3.15],[-4.5,3.15]],[[-8.4,3.15],[-18.3,3.15],[-18.3,-3.15],[-8.4,-3.15]],[[-18.3,-3.15],[-8.4,-3.15],[-8.4,3.15],[-18.3,3.15]],[[-8.0,1.3],[-8.0,2.5]],[[-8.0,-1.3],[-8.0,-2.5]]];let pgZ=null; // تُزاح حسب مكان القصر والبوابة (pgFit)
   function pgFit(){const zc=PZC();if(pgZ===zc)return;pgZ=zc;const G1=PALZ?2.35:-1.4,G2=PALZ?6.85:3.15;palG.forEach((P,i)=>{const w=PGW[i].map(q=>[q[0],i<2?(i?G2:G1):q[1]+zc]);P.userData.pw.w=w;P.userData.pw.k=1;P.position.set(w[0][0],0,w[0][1])})}
-  const palG=PGW.map((w,i)=>{const P=person('guard',i);P.position.set(w[0][0],0,w[0][1]);P.rotation.y=Math.PI/2;P.userData.act='guards';P.userData.pw={w,k:1,p:Math.random()*2};
+  const palG=PGW.map((w,i)=>{const P=person('guard',i);if(P.userData.lamp){P.userData.lamp.parent.remove(P.userData.lamp);delete P.userData.lamp}P.position.set(w[0][0],0,w[0][1]); // (v19.6) حرّاس القصر بلا ضوء حقيقي (٦ أضواء كانت تثقل المدينة)
+    P.rotation.y=Math.PI/2;P.userData.act='guards';P.userData.pw={w,k:1,p:Math.random()*2};
     try{P.children[0].material=M(0xb3202a)}catch(e){}const gold=new T.MeshStandardMaterial({color:0xf0bf2a,metalness:.3,roughness:.35,emissive:0x5a3e00,emissiveIntensity:.3});
     add(new T.CylinderGeometry(.27,.29,.08,14),gold,0,.85,0,P);add(new T.SphereGeometry(.22,12,8,0,Math.PI*2,0,Math.PI/2),gold,0,1.66,0,P);add(new T.ConeGeometry(.06,.3,6),M(0xe2232a),0,1.95,-.02,P);
     add(new T.CylinderGeometry(.025,.025,2.2,6),M(0x6b4423),.36,1.1,.05,P);add(new T.ConeGeometry(.075,.26,6),gold,.36,2.32,.05,P);
@@ -1955,7 +1956,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
   const sheikh=person('man',4);sheikh.userData.act='sheikh';sheikh.position.set(SHK[0],0,SHK[1]);sheikh.rotation.y=Math.PI/2;
   {sheikh.children[0].material.color.setHex(0x5a4632);add(new T.SphereGeometry(.15,10,8),M(0xf4f4f4),0,1.33,.1,sheikh);add(new T.BoxGeometry(.22,.28,.06),M(0x1f6b45),.18,.95,.2,sheikh);
     const mk=markSprite(T,'📜','#8a5a00',.85);mk.position.set(0,2.35,0);mk.userData.act='sheikh';sheikh.add(mk);sheikh.userData.mk=mk}
-  const police=person('guard',2);police.userData.act='police';police.position.set(POL[0]-2.5,0,POL[1]-1.1);police.rotation.y=-Math.PI/2;
+  const police=person('guard',2);if(police.userData.lamp){police.userData.lamp.parent.remove(police.userData.lamp);delete police.userData.lamp}police.userData.act='police';police.position.set(POL[0]-2.5,0,POL[1]-1.1);police.rotation.y=-Math.PI/2;
   {const mk=markSprite(T,'👛','#c98a12',.8);mk.position.set(0,2.3,0);mk.visible=false;police.add(mk);police.userData.mk=mk}
   const lostKid=person('kid',4);lostKid.userData.act='lost';lostKid.visible=false;if(lostKid.userData.bag)lostKid.userData.bag.visible=false;
   {const mk=markSprite(T,'😢','#3b9be0',.8);mk.position.set(0,1.9,0);mk.userData.act='lost';lostKid.add(mk);lostKid.userData.mk=mk}
