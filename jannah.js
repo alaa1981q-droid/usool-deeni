@@ -474,7 +474,8 @@ const ready=()=>O()&&O().db&&O().me&&O().profile;
 let pubT=0;
 function publishSoon(){clearTimeout(pubT);pubT=setTimeout(publish,1200)}
 function publish(){if(!ready())return;const A=O(),L=Deco.myLook();
-  A.db.ref('houses/'+A.me).set({f:Bayt.done,c:Bayt.cups,p:L.p,w:L.w,i:L.i,g:L.g||'',u:L.u||'',m:window.Madina?Madina.code():'',q:window.Qasr&&Qasr.done?1:0,n:A.profile.nick,a:A.profile.av,t:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{})}
+  const AF=ADM(); // (v19.9) مدينة المدير مكتملة دائمًا، فيُنشر بيته مكتملًا (٥ طوابق، قصر، كل المباني) ليراه الأصدقاء كما يراه هو
+  A.db.ref('houses/'+A.me).set({f:AF?5:Bayt.done,c:Bayt.cups,p:L.p,w:L.w,i:L.i,g:L.g||'',u:AF?'333333':L.u||'',m:AF?'33333':window.Madina?Madina.code():'',q:AF||window.Qasr&&Qasr.done?1:0,n:A.profile.nick,a:A.profile.av,t:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{})}
 const clean=h=>({w:WALLS.some(w=>w.id==(h&&h.w))?h.w:'cream',f:Math.max(0,Math.min(5,h&&h.f|0)),c:Math.max(0,+(h&&h.c)||0),p:PT[h&&h.p]?h.p:'sand',i:lookItems({i:h&&h.i}).join(','),g:cleanG(h&&h.g),u:/^[0-3]{5,6}$/.test(h&&h.u||'')?h.u:''});
 
 async function friends(){show('jannah');backTo=null;$('#jTitle').textContent='👥 بيوت أصدقائي';updJ();const B=$('#jBody');

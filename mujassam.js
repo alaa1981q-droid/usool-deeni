@@ -2365,7 +2365,8 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
       card(`👥 ${B('اختر','اختاري')} صديقًا ${B('لتزور','لتزوري')} مدينته<br><small>كل زيارة لصديق جديد اليوم 💎${arn(FV_J)} (حتى ${arn(FV_MAX)} أصدقاء)</small>`,
         f.slice(0,6).map(r=>[`${v[r.id]?'✔':n<FV_MAX?'💎':'🏙️'} ${short(r.nick)}`,()=>A.visit(r)]).concat([['إلغاء',null,'sec']]));
       ui.card.querySelector('.row').style.flexWrap='wrap'},
-    visit(r,byCar){if(drv&&carTrip){carTrip=0;carAway(r);return}carTrip=0;adm=null;vr=r;V={lv:Madina.fromCode(r.m||'00000'),f:r.f,u:r.u||'',nick:short(r.nick),flg:r.p&&r.p.flg,pq:!!(r.h&&r.h.q),sx:r.p&&r.p.sx};
+    visit(r,byCar){if(drv&&carTrip){carTrip=0;carAway(r);return}carTrip=0;adm=null;vr=r;const AF=!!(r.adm||r.p&&r.p.adm||r.h&&r.h.adm); // (v19.9) مدينة المدير تظهر للزائر مكتملة كما يراها هو
+      V={lv:Madina.fromCode(AF?'33333':r.m||'00000'),f:AF?5:r.f,u:AF?'333333':r.u||'',nick:short(r.nick),flg:r.p&&r.p.flg,pq:AF||!!(r.h&&r.h.q),sx:r.p&&r.p.sx,dt:0};
       at=byCar?(PALZ?{x:-12,z:-3.9,via:-4.6}:{x:-10.2,z:3.9,via:4.6}):{x:0,z:-15,via:null};kid.position.set(at.x,0,at.z);kid.visible=true;path=[];refresh();setBar();
       ui.msg.textContent=`🏙️ ${B('أنت','أنتِ')} الآن في مدينة ${V.nick} 🤍`;{const mt=ui.msg.textContent;setTimeout(()=>{if(ui.msg.textContent===mt)ui.msg.textContent=''},4000)}
       // (v19.7) طلب الشيخ: لا بطاقة كبيرة تغطّي المدينة — سطر صغير يظهر ثم يختفي وحده
