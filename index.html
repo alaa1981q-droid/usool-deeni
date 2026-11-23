@@ -7,8 +7,18 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="جنّتي الصغيرة">
-<title>جنّتي الصغيرة</title>
-<meta name="description" content="جنّتي الصغيرة — أصول ديني الخمسة: تطبيق تفاعلي للأطفال، تصميم الشيخ علاء المطوري">
+<title>جنّتي الصغيرة — تطبيق أصول ديني الخمسة للأطفال</title>
+<meta name="description" content="جنّتي الصغيرة: تطبيق إسلامي مجاني للأطفال مع كتاب «أصول ديني الخمسة» للشيخ علاء المطوري — دروس مصوّرة وأسئلة ومسابقات، الوضوء والصلاة، حفظ قصار السور بالصوت، وبيتي في الجنة. يعمل على الهاتف بدون تحميل ملفات.">
+<link rel="canonical" href="https://alaa1981q-droid.github.io/usool-deeni/">
+<meta name="robots" content="index,follow">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ar_IQ">
+<meta property="og:site_name" content="جنّتي الصغيرة">
+<meta property="og:title" content="جنّتي الصغيرة — تطبيق أصول ديني الخمسة للأطفال">
+<meta property="og:description" content="تطبيق إسلامي مجاني للأطفال: دروس وأسئلة ومسابقات، الوضوء والصلاة، وحفظ القرآن — تصميم الشيخ علاء المطوري">
+<meta property="og:url" content="https://alaa1981q-droid.github.io/usool-deeni/">
+<meta property="og:image" content="https://alaa1981q-droid.github.io/usool-deeni/icon-512.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"جنّتي الصغيرة","alternateName":["أصول ديني الخمسة","جنتي الصغيرة"],"url":"https://alaa1981q-droid.github.io/usool-deeni/","inLanguage":"ar","applicationCategory":"EducationalApplication","operatingSystem":"Android, iOS, Windows","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"الشيخ علاء المطوري"},"description":"تطبيق إسلامي مجاني للأطفال مع كتاب «أصول ديني الخمسة»: دروس مصوّرة وأسئلة ومسابقات والوضوء والصلاة وحفظ قصار السور."}</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -492,7 +502,7 @@ body.night .hero.kid p{background:rgba(255,255,255,.9)}
 <div class="celebrate" id="celebrate" role="dialog" aria-live="assertive"><div class="in" id="celebIn"></div></div>
 <div class="modal" id="modal"><div class="in" id="modalIn"></div></div>
 
-<script src="questions.js?v=19.8"></script><!-- غيّر ?v= مع APP_VER حتى لا يأخذ المتصفح نسخة قديمة -->
+<script src="questions.js?v=19.9"></script><!-- غيّر ?v= مع APP_VER حتى لا يأخذ المتصفح نسخة قديمة -->
 <script>
 /* ---------- helpers ---------- */
 const AR='٠١٢٣٤٥٦٧٨٩';
@@ -1233,31 +1243,52 @@ document.addEventListener('keydown',e=>{if($('#zoomv').classList.contains('on'))
   if(!$('#reader').classList.contains('on'))return;
   if(e.key=='ArrowLeft')rGo(rCur+1);else if(e.key=='ArrowRight')rGo(rCur-1);else if(e.key=='Escape')closeReader()});
 
-const APP_VER='19.8';
+const APP_VER='19.9';
 $('#verLine').textContent=`الإصدار ${ar(APP_VER).replace('.','٫')} · ${ar(ALLQ.length)} سؤالًا`;
 renderHome();
 if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
-<script src="online.js?v=19.8"></script>
-<script src="bayt.js?v=19.8"></script>
-<script src="nafsak.js?v=19.8"></script>
-<script src="hifz.js?v=19.8"></script>
-<script src="jannah.js?v=19.8"></script>
-<script src="baytrace.js?v=19.8"></script>
-<script src="wird.js?v=19.8"></script>
-<script src="sawt.js?v=19.8"></script>
-<script src="salah.js?v=19.8"></script>
-<script src="adhan.js?v=19.8"></script>
-<script src="alqab.js?v=19.8"></script>
-<script src="binaa.js?v=19.8"></script>
-<script src="madina.js?v=19.8"></script>
-<script src="mujassam.js?v=19.8"></script>
-<script src="idara.js?v=19.8"></script>
-<script src="parent.js?v=19.8"></script>
-<script src="qisas.js?v=19.8"></script>
-<script src="bookdl.js?v=19.8"></script>
-<script src="ramz.js?v=19.8"></script>
-<script src="wajiha.js?v=19.8"></script>
-<script src="hamas.js?v=19.8"></script>
+<script src="online.js?v=19.9"></script>
+<script src="bayt.js?v=19.9"></script>
+<script src="nafsak.js?v=19.9"></script>
+<script src="hifz.js?v=19.9"></script>
+<script src="jannah.js?v=19.9"></script>
+<script src="baytrace.js?v=19.9"></script>
+<script src="wird.js?v=19.9"></script>
+<script src="sawt.js?v=19.9"></script>
+<script src="salah.js?v=19.9"></script>
+<script src="adhan.js?v=19.9"></script>
+<script src="alqab.js?v=19.9"></script>
+<script src="binaa.js?v=19.9"></script>
+<script src="madina.js?v=19.9"></script>
+<script src="mujassam.js?v=19.9"></script>
+<script src="idara.js?v=19.9"></script>
+<script src="parent.js?v=19.9"></script>
+<script src="qisas.js?v=19.9"></script>
+<script src="bookdl.js?v=19.9"></script>
+<script src="ramz.js?v=19.9"></script>
+<script src="wajiha.js?v=19.9"></script>
+<script src="hamas.js?v=19.9"></script>
+<script>/* زر «ثبّت التطبيق»: يظهر في المتصفح فقط (لا في تطبيق APK ولا بعد التثبيت) */
+(function(){
+  var ua=navigator.userAgent,standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+  if(standalone||/; wv\)|usooldeeni/i.test(ua))return;
+  var ios=/iphone|ipad|ipod/i.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1),deferred=null;
+  var css=document.createElement('style');css.textContent='#instCard{grid-column:1/-1;box-sizing:border-box;display:flex;align-items:center;gap:12px;width:100%;margin:10px 0;padding:14px 16px;border:0;border-radius:20px;background:linear-gradient(135deg,#1f9d63,#14794f);color:#fff;font:inherit;text-align:right;box-shadow:0 5px 0 #0e5a3a;cursor:pointer}#instCard .ic{font-size:34px}#instCard b{display:block;font-size:19px}#instCard small{font-size:14px;opacity:.92}#instHelp{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center}#instHelp>div{background:#fff;color:#1d3b2c;border-radius:22px 22px 0 0;padding:20px 22px 30px;max-width:520px;width:100%;font-size:18px;line-height:1.9}#instHelp button{margin-top:10px;width:100%;padding:12px;border:0;border-radius:14px;background:#14794f;color:#fff;font:inherit;font-size:18px}';
+  document.head.appendChild(css);
+  function help(){var h=document.createElement('div');h.id='instHelp';
+    h.innerHTML='<div><b>📲 حتى يصير التطبيق على شاشتك:</b><br>'+(ios?'١. دوس زر المشاركة <b>⬆️</b> بأسفل Safari<br>٢. اختر «<b>إضافة إلى الشاشة الرئيسية</b>»<br>٣. دوس «<b>إضافة</b>»':'١. دوس النقاط الثلاث <b>⋮</b> بأعلى Chrome<br>٢. اختر «<b>تثبيت التطبيق</b>» أو «<b>إضافة إلى الشاشة الرئيسية</b>»<br>٣. دوس «<b>تثبيت</b>»')+'<br>✅ بدون تحميل ملفات وبدون تحذيرات.<button>فهمت</button></div>';
+    h.onclick=function(e){if(e.target===h||e.target.tagName=='BUTTON')h.remove()};document.body.appendChild(h)}
+  function show(){if(document.getElementById('instCard'))return;var hero=document.querySelector('#home .hero');if(!hero)return;
+    var b=document.createElement('button');b.id='instCard';
+    b.innerHTML='<span class="ic">📲</span><span><b>ثبّت التطبيق على هاتفك</b><small>أيقونة على الشاشة مثل أي تطبيق — بدون تحميل ملفات</small></span>';
+    b.onclick=function(){if(deferred){deferred.prompt();deferred.userChoice.then(function(r){if(r.outcome=='accepted')b.remove();deferred=null})}else help()};
+    hero.insertAdjacentElement('afterend',b)}
+  addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferred=e;show()});
+  addEventListener('appinstalled',function(){var b=document.getElementById('instCard');if(b)b.remove()});
+  /* أندرويد قد لا يطلق الحدث فورًا، والآيفون لا يطلقه أبدًا: نُظهر الزر مع التعليمات */
+  addEventListener('load',function(){setTimeout(show,ios?500:4000)});
+})();
+</script>
 </body>
 </html>
