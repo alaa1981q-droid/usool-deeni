@@ -19,6 +19,7 @@ css.textContent=`
 .prow{display:flex;justify-content:space-between;gap:8px;padding:9px 4px;border-bottom:1px dashed var(--line);font-size:16px}.prow b{color:var(--ink);direction:rtl;unicode-bidi:isolate}
 .pbars{display:flex;gap:5px;justify-content:center;align-items:flex-end;height:70px;margin:8px 0 2px}.pbars span{flex:1;max-width:34px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;font-size:11px;color:var(--muted);height:100%}
 .pbars i{display:block;width:100%;border-radius:8px 8px 3px 3px;background:#c9d8cf;min-height:4px}.pbars span.on i{background:linear-gradient(#3fbf6f,#14794f)}
+.pyt{display:block;margin:10px 0 4px;padding:11px 12px;border-radius:16px;background:linear-gradient(180deg,#ff5a4f,#e2231a);color:#fff;font-weight:900;font-size:17px;text-decoration:none;text-align:center;box-shadow:0 4px 0 #a5140e,0 8px 14px #0002,inset 0 2px 0 #ffffff55}.pyt small{display:block;font-size:12.5px;font-weight:700;opacity:.92}.pyt:active{transform:translateY(3px);box-shadow:0 1px 0 #a5140e}
 .ptip{background:#fff8e6;border:2px solid #f2d88a;border-radius:16px;padding:10px 12px;margin:10px 0;font-size:15px;line-height:1.8;text-align:right}
 `;
 document.head.appendChild(css);
@@ -70,6 +71,7 @@ function report(){
     <div class="ptip">${tips(d).map(x=>'• '+x).join('<br>')}</div>
     <p style="font-size:12px;color:var(--muted);margin:4px 0">الأرقام محفوظة على هذا الجهاز فقط، وتبدأ من يوم تحديث التطبيق.</p>
     <div class="nav"><button class="btn gold" id="pgTask">📝 مهمة لطفلي</button><button class="btn gold" id="pgRem">🔔 تذكير يومي</button></div>
+    <a class="pyt" href="https://www.youtube.com/@jannati-kids" target="_blank" rel="noopener">📺 قناتنا على YouTube<small>شرح التطبيق ودروس من الكتاب</small></a>
     <div class="nav"><button class="btn gold" id="pgSend">📤 أرسل التقرير</button><button class="btn sec" data-close>إغلاق</button></div>`,
     ()=>{$('#pgTask').onclick=()=>{if(window.Hamas)Hamas.parentTask()};$('#pgRem').onclick=()=>{if(window.Hamas)Hamas.reminder()};$('#pgSend').onclick=()=>{const t=text(d);
       if(navigator.share)navigator.share({text:t}).catch(()=>{});else window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank')}})}
