@@ -1647,7 +1647,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
   function busArrive(c){const st=c.st,dx=st.dir*2.05;
     const n=Math.floor(Math.random()*4);for(let i=0;i<n;i++)setTimeout(()=>{const p=ppl();if(p.userData.bag)p.userData.bag.visible=false;p.userData.bs=p.scale.x;p.scale.setScalar(.01);
         const away=st.z+(Math.random()<.5?-1:1)*(16+Math.random()*14),o=(Math.random()-.5)*.5;walk(p,[[dx,st.z+.3],[st.sx,st.z+.3+o],[st.sx,away]],1.3+Math.random()*.3,'gone');walkers[walkers.length-1].grow=0},400+i*750);
-    st.q.forEach((w,i)=>setTimeout(()=>{w.pts=[[st.sx,st.z+.3],[dx,st.z+.3]];w.end='enter';w.sp=1.5},900+i*650));st.q=[]}
+    st.q.forEach((w,i)=>{w.bus=c;setTimeout(()=>{w.pts=[[st.sx,st.z+.3],[dx,st.z+.3]];w.end='enter';w.sp=1.5},900+i*650)});st.q=[]}
 
   // مشاة (طلاب ينزلون/يصعدون، ومصلّون)
   let walkers=[];
@@ -1780,13 +1780,14 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
     const K=o.kid,KCV={visible:true,userData:{lane:1}};traffic.forEach(c=>{let block=false;
       if(K&&Math.abs(K.x-c.dir)<1&&o.kidOn){const ah=(K.z-c.z)*c.dir;if(ah>0&&ah<3.2)block=true}
       // (v13.9) تقف للمشاة على ممرّ العبور أو الواقفين عند حافته (ومنهم الطفل إذا وقف ينظر يمينًا ويسارًا)
-      const yz=(x,z,wait)=>{if(Math.abs(Math.abs(z)-4.8)>.8)return;if(!wait&&Math.abs(x-c.dir)>1.3)return;const ah=(z-c.z)*c.dir;if(wait?ah>1.5&&ah<7:ah>-.2&&ah<4)block=true};
+      const yz=(x,z,wait)=>{if(Math.abs(Math.abs(z)-4.8)>.8)return;if(wait&&!pedGo())return; // (v19.2) لا تقف السيارة في الضوء الأخضر لمن ينتظر على الرصيف
+        if(!wait&&Math.abs(x-c.dir)>1.3)return;const ah=(z-c.z)*c.dir;if(wait?ah>1.5&&ah<7:ah>-.2&&ah<4)block=true};
       walkers.forEach(w=>{if(w.cross&&w.P.visible&&(Math.abs(w.P.position.x)<2.2||w.pause>0))yz(w.P.position.x,w.P.position.z,w.pause>0)});
       peds.forEach(P=>{const u=P.userData.u;if(P.visible&&(Math.abs(P.position.x)<2.2||u.look>0))yz(P.position.x,P.position.z,u.look>0)});
       if(K&&o.kidWait)yz(K.x,K.z,true);
       traffic.concat(c.dir<0?cars.filter(s=>s.v.visible).map(s=>({dir:-1,z:s.v.position.z,v:s.v})):[]).concat(o.kcar&&o.kcar.on?[{dir:o.kcar.dir,z:o.kcar.z,v:KCV}]:[]).forEach(d=>{if(d!==c&&d.dir===c.dir&&d.v.visible&&(d.v.userData.lane|0)===(c.v.userData.lane|0)){const gp=(d.z-c.z)*c.dir;if(gp>0&&gp<(c.cb?3:1.4)+(d.cb?3:d.v===cars[0].v?2.3:1.4)+.8)block=true}});
       // (v14.7) 🚌 باص المدينة يقف عند الموقف ٧ ثوانٍ (من ٦ صباحًا إلى ١١ ليلًا): ينزل ركّاب ويصعد المنتظرون
-      if(c.cb){const sc=c.st.z-2.1*c.dir;if(c.hold>0){c.hold-=dt;block=true}else if(!c.done&&!block&&h>=6&&h<23&&!o.sleep){const ah=(sc-c.z)*c.dir;if(ah>=0&&ah<=c.sp*dt*1.6+.05){c.z=sc;c.hold=7;c.done=1;block=true;busArrive(c)}}}
+      if(c.cb){const sc=c.st.z-2.1*c.dir;if(c.hold>0||c.hold>-8&&walkers.some(w=>w.bus===c&&g.children.includes(w.P))){c.hold-=dt;block=true}else if(!c.done&&!block&&h>=6&&h<23&&!o.sleep){const ah=(sc-c.z)*c.dir;if(ah>=0&&ah<=c.sp*dt*1.6+.05){c.z=sc;c.hold=6;c.done=1;block=true;busArrive(c)}}}
       if(c.dir<0&&phase&&c.z>=Z1&&cars.some(s=>s.v.visible&&s.v.position.z>530))block=true; // لا تدخل سيارة فوق الباص لحظة ظهوره
       {const L=sig();if(L!=='g'&&!o.sleep)[-4.6,4.6].forEach(zc=>{const stop=zc-c.dir*1.35,front=c.z+c.dir*(c.cb?3:1.4),ah=(stop-front)*c.dir;if(ah>-.05&&ah<(L==='y'?2.2:3.2)&&!(L==='y'&&ah<.6))block=true})}
       if(!block)c.z+=c.dir*c.sp*(rush?.45:1)*dt;
@@ -1842,7 +1843,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       P.position.y=Math.abs(Math.sin(t*6+P.id))*.05*Math.min(1,(w.v||0)/Math.max(.1,w.sp));return true});try{separate(o)}catch(e){}swing(dt)}
   // (v16.1) طلب الشيخ: الناس كانوا يدخلون في بعض. الآن لكل شخص مساحة: إذا اقترب اثنان يتنحّى كلٌّ منهما قليلًا (ويميل لليمين)
   // فيمرّان بجانب بعض كما في الواقع. الواقفون (الباعة، الأب والأم، الحارس…) لا يتحرّكون، والآخرون يلتفّون حولهم. والطفل كذلك
-  function separate(o){const L=[],add=(P,mv,ox,oz)=>L.push({P,mv,ox:ox||0,oz:oz||0,r:.27*(P.userData.bs||P.scale.x)});
+  function separate(o){const L=[],add=(P,mv,ox,oz)=>L.push({P,mv,ox:ox||0,oz:oz||0,r:.27*(P.userData.bs||P.scale.x),x0:P.position.x});
     walkers.forEach(w=>{if(w.P.visible&&!(w.k>0)&&!(w.end==='enter'&&w.pts.length<=1))add(w.P,w.pause>0?.5:1)});
     peds.forEach(P=>{const u=P.userData.u;if(P.visible&&!u.fade&&!u.off)add(P,u.hold>0||u.greet>0?0:1)});
     yard.forEach(p=>{if(p.visible&&!(p.userData.lv>0))add(p,1)});FBK.forEach(p=>{if(p.visible&&!p.rotation.z)add(p,.6)});wand.forEach(P=>{if(P.visible)add(P,1,PKC[0],PKC[1])});
@@ -1851,7 +1852,9 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
     for(let i=0;i<n;i++){const a=L[i],ax=X(i),az=Z(i);for(let j=i+1;j<n;j++){const b=L[j];if(!a.mv&&!b.mv)continue;let dx=X(j)-ax,dz=Z(j)-az;const md=a.r+b.r+.08;
       if(Math.abs(dx)>md||Math.abs(dz)>md)continue;let d=Math.hypot(dx,dz);if(d>=md)continue;if(d<1e-3){dx=Math.random()-.5;dz=Math.random()-.5;d=Math.hypot(dx,dz)}
       const ux=dx/d,uz=dz/d,ov=(md-d),k=Math.min(1,ov),sx=(ux+uz*.45)*k,sz=(uz-ux*.45)*k,wa=a.mv/(a.mv+b.mv),wb=b.mv/(a.mv+b.mv),f=.35;
-      if(a.P){a.P.position.x-=sx*wa*f;a.P.position.z-=sz*wa*f}if(b.P){b.P.position.x+=sx*wb*f;b.P.position.z+=sz*wb*f}}}}
+      if(a.P){a.P.position.x-=sx*wa*f;a.P.position.z-=sz*wa*f}if(b.P){b.P.position.x+=sx*wb*f;b.P.position.z+=sz*wb*f}}}
+    // (v19.2) الدفع لا يُنزل أحدًا من الرصيف إلى الشارع (إلا عند ممرّ المشاة)
+    for(const a of L){if(!a.P||!a.mv||a.ox)continue;const P=a.P,x0=Math.abs(a.x0);if(x0>=2.16&&x0<3.2&&Math.abs(P.position.x)<2.16&&Math.abs(Math.abs(P.position.z)-4.9)>1)P.position.x=(a.x0<0?-1:1)*2.16}}
   // ================= (v15.4) 🎡 مدينة الألعاب =================
   // دولاب هواء كبير، دوّامة بخيول، زحليقة، ميزان (سيسو)، كشك غزل البنات، أعلام ملوّنة وبالونات عند البوابة.
   // يوم الفتح: الألعاب تدور والأطفال يركبون ويلعبون، وعائلات تأتي من الطريق والقرية وتدخل، وأخرى تخرج. غير ذلك: متوقفة ولوحة «مغلقة».
@@ -1945,7 +1948,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
   const lostKid=person('kid',4);lostKid.userData.act='lost';lostKid.visible=false;if(lostKid.userData.bag)lostKid.userData.bag.visible=false;
   {const mk=markSprite(T,'😢','#3b9be0',.8);mk.position.set(0,1.9,0);mk.userData.act='lost';lostKid.add(mk);lostKid.userData.mk=mk}
   const lostMom=person('woman',2);lostMom.visible=false;
-  return {g,palG,update,mkCar,sheikh,police,lostKid,lostMom,fb:life_fb,fbs:()=>FG,setQuiet:q=>{quiet=q},stops,count:()=>walkers.length,peds,say,endGreet,traffic,sellers,elder,faller,fallMk,father,mother,baker,FBK}}
+  return {g,palG,update,mkCar,sheikh,police,lostKid,lostMom,fb:life_fb,fbs:()=>FG,setQuiet:q=>{quiet=q},stops,count:()=>walkers.length,get walkers(){return walkers},peds,say,endGreet,traffic,sellers,elder,faller,fallMk,father,mother,baker,FBK}}
 
 /* ---------- (v11.9) أصوات المدينة: نهارًا عصافير وحركة سير هادئة، وليلًا هدوء. تُصنع بالكود (بلا ملفات)، وتحترم كتم صوت التطبيق ---------- */
 const SKEY='usul5_m3snd';
