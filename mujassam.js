@@ -1965,7 +1965,7 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
     if(now){busy=0;inYard();return}
     busy=0;path=[];wander=false;at=here();card(`🔔 صار وقت الدوام… ${B('هيّا إلى مدرستك','هيّا إلى مدرستكِ')} 🎒`);schOK=1;
     go(door('sc'),()=>{schOK=0;let k=0;const x0=kid.position.x,z0=kid.position.z,s=setInterval(()=>{k++;const f=k/20;kid.position.set(x0+(SCP.x-x0)*f,0,z0+(SCP.z-z0)*f);kid.rotation.y=Math.atan2(SCP.x-x0,SCP.z-z0);if(k>=20){clearInterval(s);inYard()}},60)});schOK=0}
-  function endSchool(){inSchool=false;if(sleeping)return;card(`🔔 رنّ الجرس… انتهى الدوام! ${B('أحسنتَ','أحسنتِ')} 🌟<br><small>${B('تستطيع','تستطيعين')} الآن أن ${B('تتجوّل','تتجوّلي')} في المدينة</small>`);
+  function endSchool(){inSchool=false;if(sleeping||V)return;card(`🔔 رنّ الجرس… انتهى الدوام! ${B('أحسنتَ','أحسنتِ')} 🌟<br><small>${B('تستطيع','تستطيعين')} الآن أن ${B('تتجوّل','تتجوّلي')} في المدينة</small>`);
     setTimeout(()=>{if(ui.card.textContent.includes('رنّ الجرس'))card('')},3500);kid.position.set(-2.4,0,-17.6);at=here();path=[]}
   const WP=[{x:SW,z:-6},{x:SW,z:7},{x:SW,z:12},{x:SW,z:-12},{x:-5,z:4.05,via:4.6},{x:-10.3,z:4.05,via:4.6},{x:-5.5,z:-5.9,via:-4.6}];
   const here=()=>{const x=kid.position.x,z=kid.position.z;return {x,z,via:Math.abs(x)>2.6&&Math.abs(Math.abs(z)-4.6)<1.2?sign(z)*4.6:null}};
@@ -2268,14 +2268,15 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
           [['🏡 ادخل بيته',()=>A.fhouse()],['🏙️ ارجع لمدينتي',()=>A.back()]])})},
     fhouse(){const r=vr;if(!r)return;closeTo(()=>{if(window.Deco&&Deco.visit)Deco.visit({id:r.id,h:r.h,p:r.p},()=>{show('bayt');Bayt.menu()})})},
     // (v18.4) 👑 المدير يدخل مدينة أي مشترك: يرى بناياته وبيته وسوره وحديقته ووسخ بيته، بلا جواهر ولا مهمّات
-    aVisit(r){if(drv)leaveCar(1);adm=r;vr={id:r.id,h:r.h,p:r.p,nick:r.nick};V={lv:Madina.fromCode(r.m||'00000'),f:r.f|0||1,u:r.u||'',nick:short(r.nick),flg:r.flg,dt:r.dt|0};
+    aVisit(r){if(drv)leaveCar(1);card('');inSchool=false;adm=r;vr={id:r.id,h:r.h,p:r.p,nick:r.nick};V={lv:Madina.fromCode(r.m||'00000'),f:r.f|0||1,u:r.u||'',nick:short(r.nick),flg:r.flg,dt:r.dt|0};
       at={x:-2.6,z:6,via:null};kid.position.set(at.x,0,at.z);kid.visible=true;path=[];busy=0;refresh();setBar();try{cityView()}catch(e){}
-      ui.msg.textContent=`👑 مدينة ${V.nick} · ${B('أنت','أنتِ')} تشاهدها كمدير`;setTimeout(()=>A.aInfo(),700)},
+      // (v18.6) طلب الشيخ: لا تفتح بطاقة الإنجازات وحدها عند الدخول (تغطّي المدينة)؛ تُفتح من زر «📋 إنجازاته» فقط، وسطر الاسم يختفي بعد ٤ ثوانٍ
+      ui.msg.textContent=`👑 مدينة ${V.nick} · ${B('أنت','أنتِ')} تشاهدها كمدير`;const mt=ui.msg.textContent;setTimeout(()=>{if(ui.msg.textContent===mt)ui.msg.textContent=''},4000)},
     aInfo(){const r=adm;if(!r||!V)return;const s=r.sm||{},lv=V.lv,P=Madina.PARTS,u=String(V.u||''),n=x=>arn(x|0),st=Madina.stageOf?Madina.stageOf(lv):null;
       const bl=Object.keys(P).map(k=>`${P[k].e}${(lv[k]|0)?'★'.repeat(lv[k]|0):'—'}`).join(' '),W=['لا سور','سور خشبي','سور حجري','سور رخامي'],G=['بلا حديقة','حديقة خضراء','ورود وممرّ','نافورة'],tr=[2,3,4].filter(i=>+u[i]>0).length,hp=+u[5]||0;
       card(`<b>👑 مدينة ${V.nick}</b>${st?` <small>· ${st[1]} ${st[0]}</small>`:''}<br><small style="line-height:1.8">${bl}${hp?` 🏥${'★'.repeat(hp)}`:''}<br>🏠 ${n(V.f)} ${V.f>2&&V.f<11?'طوابق':'طابق'} · 🧱 ${W[+u[0]||0]} · 🌳 ${G[+u[1]||0]} · 🍎 ${n(tr)}/٣
         ${r.sm?`<br>⭐ ${n(r.lv)} · 📚 ${n(s.st)}/٦ · 📖 ${n(s.hz)} سورة · 🤲 ${n(s.pr)} صلاة · 💎 ${n(s.j)}`:''}<br>${V.dt?`<b style="color:#8a5a2b">🧹 بيته متّسخ (${n(V.dt)} من ٤) — ${V.dt>=3?'منذ أيام بلا عمل صالح':'قلّت أعماله'}</b>`:'<b style="color:#1fa463">✨ بيته نظيف</b>'}</small>`,
-        [V.dt?['🧹 نبّهه ينظّف',()=>{try{Idara.kidDo(r.id,'clean',r)}catch(e){}}]:['🌟 شجّعه',()=>{try{Idara.kidDo(r.id,'cheer',r)}catch(e){}}],['🎁 جائزة',()=>{try{Idara.gift(r.id,r.nick,r.av)}catch(e){}}],['🏡 بيته',()=>A.fhouse()],['🛡️ الإدارة',()=>A.aBack(),'sec']]);
+        [V.dt?['🧹 نبّهه ينظّف',()=>{try{Idara.kidDo(r.id,'clean',r)}catch(e){}}]:['🌟 شجّعه',()=>{try{Idara.kidDo(r.id,'cheer',r)}catch(e){}}],['🎁 جائزة',()=>{try{Idara.gift(r.id,r.nick,r.av)}catch(e){}}],['🏡 بيته',()=>A.fhouse()],['👀 أكمل المشاهدة',null,'sec']]);
       ui.card.querySelector('.row').style.flexWrap='wrap'},
     aBack(){const id=adm&&adm.id;adm=null;V=null;vr=null;try{ui.close()}catch(e){}if(id&&window.Idara&&Idara.card)setTimeout(()=>Idara.card(id),200)},
     back(){V=null;vr=null;adm=null;at={x:-3.4,z:1,via:null};kid.position.set(-3.4,0,1);path=[];refresh();setBar();card('');
