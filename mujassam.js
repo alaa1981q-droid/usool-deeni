@@ -78,6 +78,8 @@ const seed=()=>{let h=0;for(const c of today())h=(h*31+c.charCodeAt(0))>>>0;retu
 const TREES=[[-23.4,-3],[-23.4,6.2],[12,-3],[12,4],[-2.8,-25.6],[3.6,12.9],[-13,12],[13,-12],[-13,-12],[13,12],[-23.6,0],[16.5,-8]];
 // (v15.0) المزرعة أُبعدت يسارًا لتتّسع حديقة البيت وسوره
 const FARM=[-17.8,0],FARM_IN={x:-17.8,z:2.2,via:4.6};
+// (v18.9) أرض القصر أوسع: تمتدّ خلفًا إلى XLP، والمزرعة تنتقل خلفها (farmAt يُستدعى أول makeScene)
+const XLP=-21.8;let XLc=-14.4;function farmAt(pal){FARM[0]=pal?-29:-17.8;FARM[1]=pal?-1.5:0;FARM_IN.x=FARM[0];FARM_IN.z=FARM[1]+2.2;XLc=pal?XLP:-14.4}
 // (v15.0) أرض البيت: من السور الأمامي XF إلى الخلفي XL، وعرضها ±HZ
 const XF=-2.95,XL=-14.4,HZ=3.55;
 // (v16.2) طلب الشيخ: «كبّر الشارع، والرصيف صغير، واجعل الشارع أربع سايدات». كل إحداثيات المدينة والمنطق بقيت كما هي (القديمة)،
@@ -166,7 +168,7 @@ function flagTex(e){const T=THREE,a=document.createElement('canvas');a.width=a.h
   const c=document.createElement('canvas');c.width=256;c.height=160;const y=c.getContext('2d');y.fillStyle='#fff';y.fillRect(0,0,256,160);
   if(X1-X0>40&&Y1-Y0>20)y.drawImage(a,X0+3,Y0+3,X1-X0-6,Y1-Y0-6,0,0,256,160);else{y.font='120px sans-serif';y.textAlign='center';y.textBaseline='middle';y.fillText(e,128,84)}
   const t=new T.CanvasTexture(c);return t}
-function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
+function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();farmAt(V?!!V.pq:palaceMe());
   const Md=window.Madina,lv=V?V.lv:mLvs(),job=V||ADMF()?null:(Md?Md.st.job:null),need=(p,l)=>Md&&Md.need?Md.need(p,l):'';
   const LV=p=>Math.max(0,Math.min(3,lv[p]|0));
   const floors=Math.max(1,Math.min(4,(V?V.f:bFl())|0||1));
@@ -296,7 +298,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   // زهور ملوّنة كثيرة على العشب
   {const fl=[0xff5c8a,0xffd23f,0xb07cff,0xff8c42,0xffffff,0x4fc3ff,0xff4f4f],geo=new T.SphereGeometry(.13,6,4),im=new T.InstancedMesh(geo,new T.MeshStandardMaterial({roughness:.6}),240);
     const o=new T.Object3D(),col=new T.Color();let n=0,k=0;
-    const bad=(x,z)=>x<-2.6&&x>XL-.4&&Math.abs(z)<HZ+.35||Math.abs(x)<2.8||x<-2.4&&x>-11.2&&z<-14.8&&z>-25||Math.abs(Math.abs(z)-4.6)<1.4&&Math.abs(x)<15||Object.values(SPOT).some(([a,b])=>Math.hypot(x-a,z-b)<3.9)||Math.hypot(x,z)>34||x>17||NOFL(x,z)||Math.abs(x-FARM[0])<3.6&&Math.abs(z-FARM[1])<3.8;
+    const bad=(x,z)=>x<-2.6&&x>XLc-.4&&Math.abs(z)<HZ+.35||Math.abs(x)<2.8||x<-2.4&&x>-11.2&&z<-14.8&&z>-25||Math.abs(Math.abs(z)-4.6)<1.4&&Math.abs(x)<15||Object.values(SPOT).some(([a,b])=>Math.hypot(x-a,z-b)<3.9)||Math.hypot(x,z)>34||x>17||NOFL(x,z)||Math.abs(x-FARM[0])<3.6&&Math.abs(z-FARM[1])<3.8;
     while(n<240&&k<4000){k++;const a=Math.random()*Math.PI*2,r=3+Math.random()*31,x=Math.cos(a)*r,z=Math.sin(a)*r;if(bad(x,z))continue;
       o.position.set(x,.09,z);o.scale.setScalar(.7+Math.random()*.6);o.updateMatrix();im.setMatrixAt(n,o.matrix);im.setColorAt(n,col.setHex(fl[n%fl.length]));n++}
     im.count=n;S.add(im)}
@@ -492,7 +494,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   function palace(G){const wh=M(night?0xd6cfc0:0xfbf6ea,{roughness:.45}),cr=M(night?0xbfa97f:0xf1dfb6),gd=M(0xf0bf2a,{metalness:.25,roughness:.35,emissive:0x6a4a00,emissiveIntensity:.35}),
       gl=M(0x7fb7d9,{metalness:.3,roughness:.15,emissive:night?0xffcf6a:0x000000,emissiveIntensity:night?.9:0}),stn=M(night?0x8a8070:0xc8bca2),gdm=M(0x2fa37a,{metalness:.35,roughness:.35}),wd=M(0x6b3f1f);
     // (v18.8) طلب الشيخ: القصر أكبر مبنى في المدينة — ٣ طوابق بعرض الأرض كلها، قبّة ذهبية ضخمة، ٤ أبراج و٢ منارتان عاليتان
-    const BX=-4.6,BW=7.2,BD=6.0,fh=1.75,NF=3,top=.35+fh*NF,FX=BX+BW/2;
+    const BX=-8,BW=7.2,BD=5.6,fh=1.75,NF=3,top=.35+fh*NF,FX=BX+BW/2;
     box(BW+.5,.35,BD+.4,stn,BX,.17,0,G);box(BW,fh*NF,BD,wh,BX,.35+fh*NF/2,0,G);
     for(let i=1;i<=NF;i++)box(BW+.12,.1,BD+.12,gd,BX,.35+fh*i,0,G);
     for(let f=0;f<NF;f++){const y=.35+fh*f+.85;
@@ -510,35 +512,34 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
     for(let z=-BD/2+.2;z<=BD/2-.2;z+=.45)[-1,1].forEach(k=>box(.13,.26,.24,cr,BX+k*(BW/2-.07),top+.13,z,G));
     add(new T.CylinderGeometry(1.9,1.95,1.0,28),cr,BX,top+.5,0,G);box(.01,.01,.01,gd,BX,top,0,G);add(new T.CylinderGeometry(1.97,1.97,.1,28),gd,BX,top+1.0,0,G);
     for(let k=0;k<10;k++){const a=k/10*Math.PI*2,w=add(new T.BoxGeometry(.08,.5,.3),gl,BX+Math.cos(a)*1.92,top+.5,Math.sin(a)*1.92,G);w.rotation.y=-a}
-    add(new T.SphereGeometry(2.05,32,18,0,Math.PI*2,0,Math.PI/2),gd,BX,top+1.05,0,G);add(new T.CylinderGeometry(.04,.04,.9,6),gd,BX,top+3.5,0,G);add(new T.SphereGeometry(.14,10,8),gd,BX,top+3.25,0,G);
-    const cres=new T.Mesh(new T.TorusGeometry(.26,.055,6,16,Math.PI*1.4),gd);cres.position.set(BX,top+4.05,0);cres.rotation.set(0,Math.PI/2,-Math.PI*.2);G.add(cres);
+    add(new T.SphereGeometry(2.05,32,18,0,Math.PI*2,0,Math.PI/2),gd,BX,top+1.05,0,G);add(new T.SphereGeometry(.22,12,8),gd,BX,top+3.15,0,G);add(new T.ConeGeometry(.12,1.3,8),gd,BX,top+3.9,0,G); // (v18.9) رأس ذهبي مدبّب بدل الهلال (القصر ليس جامعًا)
     // ٤ أبراج على الزوايا بقباب خضراء
-    [[-1,-1],[-1,1],[1,-1],[1,1]].forEach(([a,b])=>{const x=BX+a*BW/2,z=b*BD/2,H=top+1.9;add(new T.CylinderGeometry(.6,.66,H,16),wh,x,H/2,z,G);
-      [top*.5,top+.25,H].forEach(y=>add(new T.CylinderGeometry(.68,.68,.1,16),gd,x,y,z,G));
-      add(new T.SphereGeometry(.63,16,10,0,Math.PI*2,0,Math.PI/2),gdm,x,H+.02,z,G);add(new T.ConeGeometry(.07,.5,6),gd,x,H+.85,z,G);
-      [0,1,2,3].forEach(k=>{const w=add(new T.BoxGeometry(.06,.55,.26),gl,x+Math.cos(k*Math.PI/2)*.61,top+1.0,z+Math.sin(k*Math.PI/2)*.61,G);w.rotation.y=-k*Math.PI/2})});
-    // منارتان عاليتان خلف القصر (أعلى نقطة في المدينة)
-    [-1,1].forEach(b=>{const x=BX-BW/2+.2,z=b*(BD/2-1.1),H=top+7.2;add(new T.CylinderGeometry(.34,.42,H,14),wh,x,H/2,z,G);
-      [top+1.6,top+4.6].forEach(y=>{add(new T.CylinderGeometry(.6,.45,.18,14),gd,x,y,z,G);add(new T.CylinderGeometry(.6,.6,.25,14,1,true),cr,x,y+.2,z,G)});
-      add(new T.ConeGeometry(.4,1.2,14),gdm,x,H+.6,z,G);add(new T.SphereGeometry(.1,8,6),gd,x,H+1.3,z,G)});
-    // الحديقة الأمامية الكبيرة (من الرواق إلى البوابة)
-    const lawn=new T.Mesh(new T.PlaneGeometry(4.3,6.9),M(night?0x3f7d3a:0x5cbf4f,{roughness:1}));lawn.rotation.x=-Math.PI/2;lawn.position.set(.9,.025,0);lawn.receiveShadow=true;G.add(lawn);
-    const pv=M(night?0xa69c88:0xe9dcc0);[[.0,0,1.6,1.3],[2.4,.5,1.4,1.7]].forEach(([x,z,w,d])=>{const q=new T.Mesh(new T.PlaneGeometry(w,d),pv);q.rotation.x=-Math.PI/2;q.position.set(x,.035,z);G.add(q)});
-    const ring=new T.Mesh(new T.CircleGeometry(1.2,28),pv);ring.rotation.x=-Math.PI/2;ring.position.set(1.05,.034,0);G.add(ring);
+    [[-1,-1],[-1,1],[1,-1],[1,1]].forEach(([a,b])=>{const x=BX+a*BW/2,z=b*BD/2,H=top+3.0;add(new T.CylinderGeometry(.6,.66,H,16),wh,x,H/2,z,G);
+      [top*.5,top+.25,top+1.6].forEach(y=>add(new T.CylinderGeometry(.68,.68,.1,16),gd,x,y,z,G));
+      for(let k=0;k<8;k++){const a2=k/8*Math.PI*2;box(.18,.24,.18,cr,x+Math.cos(a2)*.62,H+.12,z+Math.sin(a2)*.62,G)}
+      add(new T.ConeGeometry(.72,1.6,16),gdm,x,H+.85,z,G);add(new T.SphereGeometry(.1,8,6),gd,x,H+1.7,z,G);
+      [0,1,2,3].forEach(k=>{const w=add(new T.BoxGeometry(.06,.55,.26),gl,x+Math.cos(k*Math.PI/2)*.61,top+1.0,z+Math.sin(k*Math.PI/2)*.61,G);w.rotation.y=-k*Math.PI/2;const w2=add(new T.BoxGeometry(.06,.5,.24),gl,x+Math.cos(k*Math.PI/2)*.61,top+2.3,z+Math.sin(k*Math.PI/2)*.61,G);w2.rotation.y=-k*Math.PI/2})});
+    // الحديقة الأمامية الكبيرة (من درج القصر إلى البوابة)
+    const grass=M(night?0x3f7d3a:0x5cbf4f,{roughness:1}),lawn=new T.Mesh(new T.PlaneGeometry(18.6,6.9),grass);lawn.rotation.x=-Math.PI/2;lawn.position.set(-6.45,.022,0);lawn.receiveShadow=true;G.add(lawn);
+    const pv=M(night?0xa69c88:0xe9dcc0);[[-1.6,0,1.6,1.4],[2.1,.5,1.9,1.7],[-14.6,0,2.4,1.0]].forEach(([x,z,w,d])=>{const q=new T.Mesh(new T.PlaneGeometry(w,d),pv);q.rotation.x=-Math.PI/2;q.position.set(x,.035,z);G.add(q)});
+    const ring=new T.Mesh(new T.CircleGeometry(1.25,28),pv);ring.rotation.x=-Math.PI/2;ring.position.set(0,.034,0);G.add(ring);
     const wtr=new T.MeshStandardMaterial({color:0x5fb8ee,roughness:.1,metalness:.2,transparent:true,opacity:.85}),mb=M(0xf3efe6);
-    add(new T.CylinderGeometry(.85,.95,.38,24),mb,1.05,.19,0,G);const wv=add(new T.CircleGeometry(.76,24),wtr,1.05,.39,0,G);wv.rotation.x=-Math.PI/2;
-    add(new T.CylinderGeometry(.12,.17,.8,10),mb,1.05,.6,0,G);add(new T.CylinderGeometry(.36,.26,.12,14),gd,1.05,1.0,0,G);
-    const jet=add(new T.ConeGeometry(.09,.55,8),wtr,1.05,1.32,0,G);anim.push(t=>{jet.scale.y=.8+Math.sin(t*6)*.2;wv.material.opacity=.75+Math.sin(t*2)*.1});
+    const fountain=(fx,fz,k)=>{add(new T.CylinderGeometry(.9*k,1.0*k,.38,24),mb,fx,.19,fz,G);const wv=add(new T.CircleGeometry(.8*k,24),wtr,fx,.39,fz,G);wv.rotation.x=-Math.PI/2;
+      add(new T.CylinderGeometry(.12,.17,.8,10),mb,fx,.6,fz,G);add(new T.CylinderGeometry(.38*k,.27*k,.12,14),gd,fx,1.0,fz,G);
+      const jet=add(new T.ConeGeometry(.09,.55,8),wtr,fx,1.32,fz,G);anim.push(t=>{jet.scale.y=.8+Math.sin(t*6+fx)*.2;wv.material.opacity=.75+Math.sin(t*2)*.1})};
+    fountain(0,0,1);fountain(-14.2,0,.75);
     const FC=[0xff5c8a,0xffd23f,0xff8c42,0xb07cff,0xffffff,0xe2504a],hg=M(night?0x2f6a32:0x3f9a3e,{flatShading:true});
-    [[.0,-2.2],[.0,2.2],[2.4,-2.4],[2.4,2.6]].forEach(([x,z],j)=>{add(new T.CylinderGeometry(.55,.6,.16,16),M(0x8a6a44),x,.08,z,G);
-      for(let k=0;k<8;k++){const a=k*.8+j,r=.14+(k%3)*.14;add(new T.SphereGeometry(.09,6,5),M(FC[(k+j)%6]),x+Math.cos(a)*r,.22,z+Math.sin(a)*r,G)}});
-    for(let x=-.9;x<2.9;x+=.5)[-1,1].forEach(k=>{const b=add(TGL[0],hg,x,.28,k*3.2,G);b.scale.set(.32,.3,.28)});
-    [-.6,1.5].forEach(x=>[-1,1].forEach(k=>palm(x,k*2.95,G)));
-    // البستان: أشجار مثمرة بين الحديقة والسور
-    const FR=[0xd8282d,0xff9a1f,0x9e1b32];[[.6,-3.05],[.6,3.05],[2.6,-1.3],[2.6,1.55]].forEach(([x,z],i)=>{const tg=new T.Group();tg.position.set(x,0,z);G.add(tg);tree(0,0,tg,.4);
-      for(let q=0;q<6;q++){const a=q*1.05+i;add(new T.SphereGeometry(.08,7,5),M(FR[i%3],{roughness:.4}),Math.cos(a)*.36,.72+(q%2)*.14,Math.sin(a)*.36,tg)}});
-    const lmp=M(0xfff1b0,{emissive:0xffd860,emissiveIntensity:night?1.8:.3});[[-.3,-.85],[-.3,.85],[2.1,-.6],[2.1,1.6]].forEach(([x,z])=>{add(new T.CylinderGeometry(.04,.05,1.1,6),gd,x,.55,z,G);add(new T.SphereGeometry(.12,10,8),lmp,x,1.17,z,G)});
-    return top+4.4}
+    const bed=(x,z,j)=>{add(new T.CylinderGeometry(.55,.6,.16,16),M(0x8a6a44),x,.08,z,G);for(let k=0;k<8;k++){const a=k*.8+j,r=.14+(k%3)*.14;add(new T.SphereGeometry(.09,6,5),M(FC[(k+j)%6]),x+Math.cos(a)*r,.22,z+Math.sin(a)*r,G)}};
+    [[-1.0,-2.2],[-1.0,2.2],[2.1,-2.5],[1.0,2.2]].forEach(([x,z],j)=>bed(x,z,j));
+    // سياج أخضر وورود على جانبي القصر
+    for(let x=-15.7;x<2.9;x+=.55)[-1,1].forEach(k=>{if(x>-2.3&&x<-.2)return;const b=add(TGL[0],hg,x,.22,k*3.42,G);b.scale.set(.3,.24,.16)});
+    [.7,-.8].forEach(x=>[-1,1].forEach(k=>palm(x,k*2.95,G)));
+    // البستان الخلفي: صفوف أشجار مثمرة ونخلتان
+    const FR=[0xd8282d,0xff9a1f,0x9e1b32];[[-13.1,-1.5],[-13.1,1.5],[-15.3,-1.5],[-15.3,1.5],[-14.2,-2.75],[-14.2,2.75],[2.6,-1.6],[2.6,2.0]].forEach(([x,z],i)=>{const tg=new T.Group();tg.position.set(x,0,z);G.add(tg);tree(0,0,tg,.42);
+      for(let q=0;q<6;q++){const a=q*1.05+i;add(new T.SphereGeometry(.08,7,5),M(FR[i%3],{roughness:.4}),Math.cos(a)*.37,.74+(q%2)*.14,Math.sin(a)*.37,tg)}});
+    [-1,1].forEach(k=>palm(-15.4,k*3.0,G));
+    const lmp=M(0xfff1b0,{emissive:0xffd860,emissiveIntensity:night?1.8:.3});[[-1.9,-.9],[-1.9,.9],[1.3,-.5],[2.6,.5],[-15.5,-.75],[-15.5,.75]].forEach(([x,z])=>{add(new T.CylinderGeometry(.04,.05,1.1,6),gd,x,.55,z,G);add(new T.SphereGeometry(.12,10,8),lmp,x,1.17,z,G)});
+    return top+5.0}
   const P=Md&&Md.PARTS||{};
   Object.keys(SPOT).forEach(p=>{const G=new T.Group();G.position.set(SPOT[p][0],0,SPOT[p][1]);G.userData.p=p;S.add(G);let top,lb;
     if(p==='sc'){top=school(G);lb=textSprite(T,V?'🎒 المدرسة':'🎒 مدرستي','rgba(255,255,255,.92)','#5a4a1a')}
@@ -556,7 +557,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
       const gl=new T.PointLight(0x7dffb0,1.6,16,1.5);gl.position.set(0,top,0);G.add(gl);hs.visible=gl.visible=false;let ck=-9,on=false;
       anim.push(t=>{if(t-ck>4){ck=t;on=adhanGlow()}hs.visible=gl.visible=on;if(on){const k=.75+Math.sin(t*2.2)*.25;hs.scale.set(5*k+1,5*k+1,1);gl.intensity=1.2+k}})}
     lb.position.set(0,top+.7,0);if(V||!(p==='home'||p==='m'&&LV('m')>0||p==='sc'))G.add(lb); // (v15.5) طلب الشيخ: لا نكتب أسماء الأشياء الواضحة (بيتي، الجامع، مدرستي)
-   G.scale.setScalar(p==='m'?mScale(LV('m')||1):p==='home'&&PAL?1:(BS[p]||1));if(p==='sc'){const k=BS.sc-1;G.position.x-=k*4.6;G.position.z-=k*4.4}if(p==='home'&&PAL)G.scale.set(1,1.12,1)});
+   G.scale.setScalar(p==='m'?mScale(LV('m')||1):p==='home'&&PAL?1:(BS[p]||1));if(p==='sc'){const k=BS.sc-1;G.position.x-=k*4.6;G.position.z-=k*4.4}if(p==='home'&&PAL)G.scale.set(1,1.2,1)});
   // أشجار المدينة (العطشى عليها 💧)
   const th=thirsty(),trees=[];
   TREES.forEach(([x,z],i)=>{const G=new T.Group();G.position.set(x,0,z);G.userData.t=i;S.add(G);tree(0,0,G);trees[i]=G;
@@ -1013,7 +1014,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   {const uc=V?String(V.u||''):bCode(),BL=k=>Math.max(0,Math.min(3,+uc[k]||0)),wL=BL(0),gL=BL(1),tL=[BL(2),BL(3),BL(4)];
     const job=V?null:bJob();
     const WG=new T.Group();WG.userData.act='bn_w';S.add(WG);
-    const segs=[[XF,-HZ,XF,-.8],[XF,2.9,XF,HZ],[XF,HZ,XL,HZ],[XF,-HZ,XL,-HZ],[XL,-HZ,XL,HZ]],pil=[[XF,-HZ],[XF,-.8],[XF,2.9],[XF,HZ],[XL,HZ],[XL,-HZ],[XL,0],[-8.7,HZ],[-8.7,-HZ]];
+    const segs=[[XF,-HZ,XF,-.8],[XF,2.9,XF,HZ],[XF,HZ,XLc,HZ],[XF,-HZ,XLc,-HZ],[XLc,-HZ,XLc,HZ]],pil=[[XF,-HZ],[XF,-.8],[XF,2.9],[XF,HZ],[XLc,HZ],[XLc,-HZ],[XLc,0],[-8.7,HZ],[-8.7,-HZ]];
     const along=(a,b,f)=>{const dx=b[0]-a[0],dz=b[1]-a[1],L=Math.hypot(dx,dz);f((a[0]+b[0])/2,(a[1]+b[1])/2,L,Math.abs(dx)>Math.abs(dz)?'x':'z',dx,dz)};
     if(wL===1){const wd=M(0xb98552),wd2=M(0x8f6238);segs.forEach(([x1,z1,x2,z2])=>along([x1,z1],[x2,z2],(cx,cz,L,ax,dx,dz)=>{
         const n=Math.max(1,Math.round(L/.26));for(let i=0;i<=n;i++){const u=i/n,x=x1+dx*u,z=z1+dz*u;box(.08,.72,.08,wd,x,.36,z,WG);const tp=add(new T.ConeGeometry(.06,.1,4),wd,x,.77,z,WG)}
@@ -1229,7 +1230,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
     [-1,1].forEach(k=>{const l=ell(.11,1.3,.6,.6,rb,k*.1,.54,0,G);l.rotation.z=k*.5});anim.push(t=>{G.position.y=Math.max(0,Math.sin(t*2.2))*.06;G.rotation.y=.5+Math.sin(t*.8)*.15})}
   // 🌷 (v15.9) ٩ المدينة تزهر بأعمال الطفل: وردة لكل عمل صالح (حتى ٤٠٠) وشجرة صغيرة لكل ١٠ أعمال (حتى ٣٠)
   {const n=V?0:Math.min(400,BLOOM.n|0),nt=V?0:Math.min(30,Math.floor((BLOOM.n|0)/10));let sd=7;const rnd=()=>{sd=(sd*16807)%2147483647;return sd/2147483647};
-    const bad=(x,z)=>x<-2.6&&x>XL-.4&&Math.abs(z)<HZ+.35||Math.abs(x)<3||x<-2.4&&x>-11.2&&z<-14.8&&z>-25||Math.abs(Math.abs(z)-4.6)<1.4&&Math.abs(x)<16||Object.values(SPOT).some(([a,b])=>Math.hypot(x-a,z-b)<3.9)||x>17.5||NOFL(x,z)||Math.abs(x-FARM[0])<3.8&&Math.abs(z-FARM[1])<4||x<-3&&x>-21&&z>32&&z<41||Math.hypot(x-PKC[0],z-PKC[1])<9||Math.hypot(x-HSP[0],z-HSP[1])<6||Math.hypot(x-FLK[0],z-FLK[1])<6||Math.abs(z-NBZ)<3&&Math.abs(Math.abs(x)-7)<3;
+    const bad=(x,z)=>x<-2.6&&x>XLc-.4&&Math.abs(z)<HZ+.35||Math.abs(x)<3||x<-2.4&&x>-11.2&&z<-14.8&&z>-25||Math.abs(Math.abs(z)-4.6)<1.4&&Math.abs(x)<16||Object.values(SPOT).some(([a,b])=>Math.hypot(x-a,z-b)<3.9)||x>17.5||NOFL(x,z)||Math.abs(x-FARM[0])<3.8&&Math.abs(z-FARM[1])<4||x<-3&&x>-21&&z>32&&z<41||Math.hypot(x-PKC[0],z-PKC[1])<9||Math.hypot(x-HSP[0],z-HSP[1])<6||Math.hypot(x-FLK[0],z-FLK[1])<6||Math.abs(z-NBZ)<3&&Math.abs(Math.abs(x)-7)<3;
     if(n){const fl=[0xff4f7a,0xffd23f,0xc58bff,0xff8c42,0xffffff,0xff6fb5,0x4fc3ff],hd=new T.InstancedMesh(new T.SphereGeometry(.15,8,6),new T.MeshStandardMaterial({roughness:.5}),n),
         lv=new T.InstancedMesh(new T.SphereGeometry(.2,6,4),M(0x3f9a3e),n),o=new T.Object3D(),col=new T.Color();let k=0,i=0;
       while(i<n&&k<20000){k++;const a=rnd()*Math.PI*2,r=4+rnd()*36,x=Math.cos(a)*r,z=Math.sin(a)*r;if(bad(x,z))continue;
@@ -1665,8 +1666,9 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
   // (v14.5) 👨‍👩‍👦 والدا الطفل عند باب البيت (بالنهار): الأمّ تحمل أكياسًا، والأب يستقبله
   const father=person('man',2),mother=person('woman',5);father.position.set(-3.15,0,-.35);mother.position.set(-3.15,0,2.35);[father,mother].forEach(P=>{P.rotation.y=Math.PI/2;P.userData.act='parents'});
   // (v18.7) 💂 حرّاس القصر: اثنان عند البوابة واثنان عند باب القصر، بأيديهم رماح ذهبية الرأس (يظهرون حين يكون البيت قصرًا)
-  // (v18.8) أكبر ×١٫٤٥، بزيّ أحمر وحزام ذهبي وخوذة ذهبية بريشة حمراء حتى يُرَوا بوضوح
-  const palG=[[-3.55,-1.2],[-3.55,3.25],[-5.85,-2.05],[-5.85,2.05]].map(([x,z],i)=>{const P=person('guard',i);P.position.set(x,0,z);P.rotation.y=Math.PI/2;P.userData.act='guards';
+  // (v18.9) طلب الشيخ: الحرّاس يتحرّكون — ٢ يذرعان البوابة، ٢ يطوفان حول القصر، ٢ يذرعان أمام بابه. بزيّ أحمر وخوذة وحزام ودرع ذهبية ورمح (×١٫٤٥)
+  const PGW=[[[-3.6,-1.4],[-4.5,-1.4]],[[-3.6,3.15],[-4.5,3.15]],[[-8.4,3.15],[-18.3,3.15],[-18.3,-3.15],[-8.4,-3.15]],[[-18.3,-3.15],[-8.4,-3.15],[-8.4,3.15],[-18.3,3.15]],[[-8.0,1.3],[-8.0,2.5]],[[-8.0,-1.3],[-8.0,-2.5]]];
+  const palG=PGW.map((w,i)=>{const P=person('guard',i);P.position.set(w[0][0],0,w[0][1]);P.rotation.y=Math.PI/2;P.userData.act='guards';P.userData.pw={w,k:1,p:Math.random()*2};
     try{P.children[0].material=M(0xb3202a)}catch(e){}const gold=new T.MeshStandardMaterial({color:0xf0bf2a,metalness:.3,roughness:.35,emissive:0x5a3e00,emissiveIntensity:.3});
     add(new T.CylinderGeometry(.27,.29,.08,14),gold,0,.85,0,P);add(new T.SphereGeometry(.22,12,8,0,Math.PI*2,0,Math.PI/2),gold,0,1.66,0,P);add(new T.ConeGeometry(.06,.3,6),M(0xe2232a),0,1.95,-.02,P);
     add(new T.CylinderGeometry(.025,.025,2.2,6),M(0x6b4423),.36,1.1,.05,P);add(new T.ConeGeometry(.075,.26,6),gold,.36,2.32,.05,P);
@@ -1776,7 +1778,8 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       if(!block)c.z+=c.dir*c.sp*(rush?.45:1)*dt;
       if(c.dir>0&&c.z>Z1||c.dir<0&&c.z<Z0){c.z=c.dir>0?Z0:Z1;c.done=0;if(c.ru){c.on=rush;c.v.visible=rush}}c.v.position.z=c.z});
     // (v14.5) الوالدان والجارة بالنهار، والأطفال يلعبون الكرة العصر
-    [father,mother].forEach(P=>{P.visible=day&&!o.sleep});palG.forEach((P,i)=>{P.visible=!!o.pal;if(P.visible){P.rotation.y=Math.PI/2+Math.sin(t*.25+i*1.7)*.15;P.userData.hyT=Math.sin(t*.4+i*2)*.5}});mother.userData.bags.forEach(b=>b.visible=!o.bagsDone);baker.visible=day&&!o.sleep;
+    [father,mother].forEach(P=>{P.visible=day&&!o.sleep});palG.forEach((P,i)=>{P.visible=!!o.pal;if(!P.visible)return;const q=P.userData.pw,u=P.userData;if(q.p>0){q.p-=dt;u.hyT=Math.sin(t*.6+i)*.7;return}
+      const tg=q.w[q.k];if(glide(P,u,tg[0],tg[1],i<2||i>3?.55:.75,dt,t)){q.k=(q.k+1)%q.w.length;q.p=i<2||i>3?1.6+Math.random()*1.8:(q.k%2?.6:1.4)}});mother.userData.bags.forEach(b=>b.visible=!o.bagsDone);baker.visible=day&&!o.sleep;
     if(baker.visible)baker.rotation.x=Math.max(0,Math.sin(t*.9))*.25;
     {const play=day&&!o.sleep&&footNow();ball.visible=play;SB.visible=play;if(!play)FBK.forEach(p=>p.visible=false);FAN.forEach(p=>p.visible=play&&footHol());if(play)football(t,dt);}
     // (v14.7) 🚌 ناس يأتون إلى الموقف وينتظرون الباص (حتى ٤ في كل موقف)
