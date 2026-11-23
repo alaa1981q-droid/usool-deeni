@@ -1,0 +1,23 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>جنّتي الصغيرة</title><style>body{margin:0;height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif;background:#eef7f1;color:#0e5a3a;font-size:20px;font-weight:700;text-align:center}</style></head>
+<body><div>🌱<br>لحظة… نجهّز جنّتك الصغيرة</div>
+<script>
+/* (v20.1) تطبيق الأندرويد صار يفتح الموقع مباشرة. هذه الصفحة تنقل بيانات الطفل (تقدّمه وحسابه)
+   من النسخة القديمة داخل التطبيق إلى الموقع مرة واحدة، ثم تفتح التطبيق. في المتصفح العادي تفتح التطبيق فورًا. */
+(function(){
+  function go(){location.replace('./')}
+  var A=window.JannahApp,s=null;
+  try{s=A&&A.migGet?A.migGet():null}catch(e){}
+  if(!s){go();return}
+  var d;try{d=JSON.parse(s)}catch(e){go();return}
+  try{var ls=d.ls||{};Object.keys(ls).forEach(function(k){localStorage.setItem(k,ls[k])})}catch(e){}
+  function done(){try{A.migDone()}catch(e){}go()}
+  var fb=d.fb||[];if(!fb.length||!window.indexedDB){done();return}
+  try{var rq=indexedDB.open('firebaseLocalStorageDb',1);
+    rq.onupgradeneeded=function(){var db=rq.result;if(!db.objectStoreNames.contains('firebaseLocalStorage'))db.createObjectStore('firebaseLocalStorage',{keyPath:'fbase_key'})};
+    rq.onsuccess=function(){try{var db=rq.result,tx=db.transaction('firebaseLocalStorage','readwrite'),st=tx.objectStore('firebaseLocalStorage');
+      fb.forEach(function(r){try{st.put(r)}catch(e){}});tx.oncomplete=function(){db.close();done()};tx.onerror=function(){done()}}catch(e){done()}};
+    rq.onerror=function(){done()}}catch(e){done()}
+  setTimeout(done,6000);
+})();
+</script></body></html>
