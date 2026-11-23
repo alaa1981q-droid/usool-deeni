@@ -167,9 +167,9 @@ function flagTex(e){const T=THREE,a=document.createElement('canvas');a.width=a.h
   if(X1-X0>40&&Y1-Y0>20)y.drawImage(a,X0+3,Y0+3,X1-X0-6,Y1-Y0-6,0,0,256,160);else{y.font='120px sans-serif';y.textAlign='center';y.textBaseline='middle';y.fillText(e,128,84)}
   const t=new T.CanvasTexture(c);return t}
 function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
-  const Md=window.Madina,lv=V?V.lv:(Md?Md.st.lv:{}),job=V?null:(Md?Md.st.job:null),need=(p,l)=>Md&&Md.need?Md.need(p,l):'';
+  const Md=window.Madina,lv=V?V.lv:mLvs(),job=V||ADMF()?null:(Md?Md.st.job:null),need=(p,l)=>Md&&Md.need?Md.need(p,l):'';
   const LV=p=>Math.max(0,Math.min(3,lv[p]|0));
-  const floors=Math.max(1,Math.min(4,(V?V.f:(window.Bayt&&Bayt.done))|0||1));
+  const floors=Math.max(1,Math.min(4,(V?V.f:bFl())|0||1));
   const RN=rainNow(),RBW=rainbowNow(),OC=occNow(),FEST=OC&&OC.k==='sad'?null:festNow(),JOY=!FEST&&OC&&OC.k==='joy'?OC:null;
   // (v11.4) ألوان أزهى: أرض خضراء حتى الأفق، تلال، زهور، فراشات وطيور بالنهار، يراعات بالليل
   const WN=winter();S.background=new T.Color(night?0x1a2a5e:WN?0xb7c4d0:0x9fdcff);S.fog=new T.Fog(night?0x1a2a5e:WN?0xc9d3dc:0xc8ecff,night?110:130,night?480:560);
@@ -475,7 +475,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
     return top+1.9}
   // (v18.4) 🧹 وسخ البيت يظهر في المدينة: أكياس نفايات وعلب وأوراق وبقع وذباب حسب الدرجة (١–٤)،
   // للطفل في مدينته، وللمدير حين يدخل مدينة أي طفل (V.dt). الأصدقاء لا يرونه.
-  const DL=Math.max(0,Math.min(4,V?(V.dt|0):dirtLv()));
+  const DL=Math.max(0,Math.min(4,V?(V.dt|0):ADMF()?0:dirtLv())),PAL=V?!!V.pq:palaceMe();
   function dirtHome(G,n,top){const bag=M(0x2b2b2b,{roughness:.6}),bag2=M(0x3d4a3a,{roughness:.6}),tie=M(0xd9c24a),can=M(0xb33a2a,{metalness:.4,roughness:.4}),can2=M(0x2f6fd0,{metalness:.4,roughness:.4}),pap=M(0xf2efe6),brn=M(0x6b5536,{roughness:1}),fly=new T.MeshBasicMaterial({color:0x111111});
     const SP=[[2.32,1.6],[2.32,-1.7],[1.2,2.6],[-1,-2.6],[2.32,-.95],[-2.6,1.4],[.3,2.62],[1.6,-2.6],[-2.6,-1.5],[2.32,1],[-1.8,2.6],[-.2,-2.62]],k=Math.min(SP.length,n*3),fl=[];
     for(let i=0;i<k;i++){const [x,z]=SP[i],t=i%4;
@@ -486,10 +486,58 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
     if(n>=3){const st=M(0x5a4630,{transparent:true,opacity:.35,depthWrite:false});[[2.11,.9,1.3],[2.11,1.2,-1.5],[2.11,2.4,.2]].slice(0,n-1).forEach(([x,y,z])=>{const q=add(new T.CircleGeometry(.45,9),st,x,y,z,G);q.rotation.y=Math.PI/2;q.castShadow=false})}
     fl.slice(0,3).forEach(([x,z],j)=>{for(let q=0;q<2;q++){const f=add(new T.SphereGeometry(.035,4,3),fly,x,.7,z,G),ph=j*2.1+q*3.3;f.castShadow=false;anim.push(t=>{f.position.set(x+Math.cos(t*4+ph)*.3,.62+Math.sin(t*6+ph)*.1,z+Math.sin(t*4+ph)*.3)})}});
     mark(G,'🧹','#8a6dd6',top+1.3,0,1)}
+  // (v18.7) 👑 القصر: بناء أبيض بطابقين وأشرطة ذهبية، قبّة ذهبية كبيرة، ٤ أبراج بقباب خضراء، رواق بأعمدة،
+  // وأمامه حديقة كبيرة بنافورة وممرّ وأحواض ورد ونخيل، وعلى جانبيه بستان أشجار مثمرة. الحرّاس في makeLife (palG).
+  // الإحداثيات محلية لمجموعة البيت (x=-6، بلا تكبير): القصر من -7.6 إلى -2.2، والحديقة من -2.2 إلى البوابة (3).
+  function palace(G){const wh=M(night?0xd6cfc0:0xfbf6ea,{roughness:.45}),cr=M(night?0xbfa97f:0xf1dfb6),gd=M(0xf0bf2a,{metalness:.25,roughness:.35,emissive:0x6a4a00,emissiveIntensity:.35}),
+      gl=M(0x7fb7d9,{metalness:.3,roughness:.15,emissive:night?0xffcf6a:0x000000,emissiveIntensity:night?.9:0}),stn=M(night?0x8a8070:0xc8bca2),gdm=M(0x2fa37a,{metalness:.35,roughness:.35}),wd=M(0x6b3f1f);
+    const BX=-4.9,BW=5.4,BD=4.6,fh=1.5,top=.3+fh*2,FX=BX+BW/2;
+    box(BW+.5,.3,BD+.5,stn,BX,.15,0,G);box(BW,fh*2,BD,wh,BX,.3+fh,0,G);
+    [1,2].forEach(i=>box(BW+.1,.09,BD+.1,gd,BX,.3+fh*i,0,G));
+    for(let f=0;f<2;f++){const y=.3+fh*f+.75;
+      [-1.75,-1.05,1.05,1.75].concat(f?[-.35,.35]:[]).forEach(z=>{box(.05,.7,.4,gl,FX+.02,y,z,G);box(.06,.06,.48,gd,FX+.03,y-.38,z,G);const a=add(new T.CircleGeometry(.2,12,0,Math.PI),gl,FX+.03,y+.35,z,G);a.rotation.y=Math.PI/2});
+      [-2,-1,0,1,2].forEach(x=>[-1,1].forEach(k=>{box(.4,.7,.05,gl,BX+x,y,k*(BD/2+.02),G);const a=add(new T.CircleGeometry(.2,12,0,Math.PI),gl,BX+x,y+.35,k*(BD/2+.03),G);if(k<0)a.rotation.y=Math.PI}))}
+    // المدخل: باب خشبي بقوس ذهبي، رواق بأربعة أعمدة، درج
+    box(.08,1.25,.9,wd,FX+.03,.3+.62,0,G);const ar=new T.Mesh(new T.TorusGeometry(.48,.06,8,18,Math.PI),gd);ar.position.set(FX+.06,1.2,0);ar.rotation.y=Math.PI/2;G.add(ar);
+    [-1.2,-.45,.45,1.2].forEach(z=>{add(new T.CylinderGeometry(.11,.13,fh,12),cr,FX+.75,.3+fh/2,z,G);box(.3,.08,.3,gd,FX+.75,.34+fh,z,G)});
+    box(1.0,.14,3.0,cr,FX+.55,.37+fh,0,G);box(1.04,.06,3.04,gd,FX+.55,.47+fh,0,G);
+    [0,1,2].forEach(i=>box(.32,.1,1.6,stn,FX+.9+i*.3,.25-i*.09,0,G));
+    // السطح: شرفات صغيرة، قبّة ذهبية كبيرة على رقبة، هلال
+    box(BW-.05,.06,BD-.05,M(night?0xb8ad98:0xece2cc),BX,top+.03,0,G);
+    for(let x=-BW/2+.2;x<=BW/2-.2;x+=.45)[-1,1].forEach(k=>box(.22,.22,.12,cr,BX+x,top+.11,k*(BD/2-.06),G));
+    for(let z=-BD/2+.2;z<=BD/2-.2;z+=.45)[-1,1].forEach(k=>box(.12,.22,.22,cr,BX+k*(BW/2-.06),top+.11,z,G));
+    add(new T.CylinderGeometry(1.15,1.2,.55,24),cr,BX,top+.27,0,G);box(.01,.01,.01,gd,BX,top,0,G);
+    add(new T.SphereGeometry(1.25,28,16,0,Math.PI*2,0,Math.PI/2),gd,BX,top+.55,0,G);add(new T.CylinderGeometry(.03,.03,.6,6),gd,BX,top+2.05,0,G);
+    const cres=new T.Mesh(new T.TorusGeometry(.18,.04,6,16,Math.PI*1.4),gd);cres.position.set(BX,top+2.45,0);cres.rotation.set(0,Math.PI/2,-Math.PI*.2);G.add(cres);
+    // الأبراج الأربعة
+    [[-1,-1],[-1,1],[1,-1],[1,1]].forEach(([a,b])=>{const x=BX+a*BW/2,z=b*BD/2;add(new T.CylinderGeometry(.48,.52,top+1.3,16),wh,x,(top+1.3)/2,z,G);
+      box(.01,.01,.01,gd,x,0,z,G);add(new T.CylinderGeometry(.53,.53,.09,16),gd,x,top+.2,z,G);add(new T.CylinderGeometry(.55,.55,.09,16),gd,x,top+1.3,z,G);
+      add(new T.SphereGeometry(.5,16,10,0,Math.PI*2,0,Math.PI/2),gdm,x,top+1.32,z,G);add(new T.ConeGeometry(.06,.4,6),gd,x,top+2,z,G);
+      [0,1,2,3].forEach(k=>{const w=add(new T.BoxGeometry(.06,.45,.22),gl,x+Math.cos(k*Math.PI/2)*.49,top+.75,z+Math.sin(k*Math.PI/2)*.49,G);w.rotation.y=-k*Math.PI/2})});
+    // الحديقة الأمامية الكبيرة
+    const lawn=new T.Mesh(new T.PlaneGeometry(5.6,6.9),M(night?0x3f7d3a:0x5cbf4f,{roughness:1}));lawn.rotation.x=-Math.PI/2;lawn.position.set(.35,.025,0);lawn.receiveShadow=true;G.add(lawn);
+    const pv=M(night?0xa69c88:0xe9dcc0);[[-.95,0,2.5,1.1],[2.3,.5,1.5,1.7]].forEach(([x,z,w,d])=>{const q=new T.Mesh(new T.PlaneGeometry(w,d),pv);q.rotation.x=-Math.PI/2;q.position.set(x,.035,z);G.add(q)});
+    const ring=new T.Mesh(new T.CircleGeometry(1.35,28),pv);ring.rotation.x=-Math.PI/2;ring.position.set(.75,.034,0);G.add(ring);
+    const wtr=new T.MeshStandardMaterial({color:0x5fb8ee,roughness:.1,metalness:.2,transparent:true,opacity:.85}),mb=M(0xf3efe6);
+    add(new T.CylinderGeometry(.95,1.05,.38,24),mb,.75,.19,0,G);const wv=add(new T.CircleGeometry(.85,24),wtr,.75,.39,0,G);wv.rotation.x=-Math.PI/2;
+    add(new T.CylinderGeometry(.13,.18,.8,10),mb,.75,.6,0,G);add(new T.CylinderGeometry(.4,.28,.12,14),gd,.75,1.0,0,G);
+    const jet=add(new T.ConeGeometry(.09,.55,8),wtr,.75,1.32,0,G);anim.push(t=>{jet.scale.y=.8+Math.sin(t*6)*.2;wv.material.opacity=.75+Math.sin(t*2)*.1});
+    const FC=[0xff5c8a,0xffd23f,0xff8c42,0xb07cff,0xffffff,0xe2504a],hg=M(night?0x2f6a32:0x3f9a3e,{flatShading:true});
+    [[-1.3,-1.9],[-1.3,1.9],[2.2,-2.1],[2.2,2.4]].forEach(([x,z],j)=>{const bed=add(new T.CylinderGeometry(.62,.66,.16,16),M(0x8a6a44),x,.08,z,G);
+      for(let k=0;k<9;k++){const a=k*.7+j,r=.15+(k%3)*.16;add(new T.SphereGeometry(.09,6,5),M(FC[(k+j)%6]),x+Math.cos(a)*r,.22,z+Math.sin(a)*r,G)}});
+    for(let x=-2;x<2.8;x+=.5)[-1,1].forEach(k=>{const b=add(TGL[0],hg,x,.28,k*3.15,G);b.scale.set(.32,.3,.28)});
+    [-1.6,.2,2.2].forEach(x=>[-1,1].forEach(k=>palm(x,k*2.75,G)));
+    // البستان: أشجار مثمرة على جانبي القصر
+    const FR=[0xd8282d,0xff9a1f,0x9e1b32];[-7.2,-5.6,-4,-2.6].forEach((x,i)=>[-1,1].forEach(k=>{const tg=new T.Group();tg.position.set(x,0,k*3);G.add(tg);tree(0,0,tg,.42);
+      for(let q=0;q<6;q++){const a=q*1.05+i;add(new T.SphereGeometry(.08,7,5),M(FR[i%3],{roughness:.4}),Math.cos(a)*.38,.75+(q%2)*.14,Math.sin(a)*.38,tg)}}));
+    // فوانيس ذهبية على الممرّ
+    const lmp=M(0xfff1b0,{emissive:0xffd860,emissiveIntensity:night?1.8:.3});[[-.2,-.75],[-.2,.75],[1.9,-.6],[1.9,1.6]].forEach(([x,z])=>{add(new T.CylinderGeometry(.04,.05,1.1,6),gd,x,.55,z,G);add(new T.SphereGeometry(.12,10,8),lmp,x,1.17,z,G)});
+    return top+2.7}
   const P=Md&&Md.PARTS||{};
   Object.keys(SPOT).forEach(p=>{const G=new T.Group();G.position.set(SPOT[p][0],0,SPOT[p][1]);G.userData.p=p;S.add(G);let top,lb;
     if(p==='sc'){top=school(G);lb=textSprite(T,V?'🎒 المدرسة':'🎒 مدرستي','rgba(255,255,255,.92)','#5a4a1a')}
-    else if(p==='home'){top=home(G);if(DL)dirtHome(G,DL,top);lb=textSprite(T,V?'🏡 بيت '+V.nick:'🏡 بيتي','rgba(255,255,255,.92)','#5a4a1a')}
+    else if(p==='home'){top=PAL?palace(G):home(G);if(DL)dirtHome(G,DL,top);lb=textSprite(T,PAL?(V?'👑 قصر '+V.nick:'👑 قصري'):(V?'🏡 بيت '+V.nick:'🏡 بيتي'),'rgba(255,255,255,.92)','#5a4a1a');
+      if(!V&&!PAL&&bFl()>=5)mark(G,'👑','#d4a520',top+1.3,DL?1.6:0,1)}
     else{const l=LV(p);let mk=null;
       if(job&&job.p===p){if(job.ready){top=DRAW[p](G,job.to);mk=['✔','#1fa463']}else{top=scaffold(G);mk=['👷','#2f6fd0']}}
       else if(l>0){top=DRAW[p](G,l);if(l<3&&!job&&!need(p,l))mk=['⬆','#f0a020']}
@@ -502,7 +550,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
       const gl=new T.PointLight(0x7dffb0,1.6,16,1.5);gl.position.set(0,top,0);G.add(gl);hs.visible=gl.visible=false;let ck=-9,on=false;
       anim.push(t=>{if(t-ck>4){ck=t;on=adhanGlow()}hs.visible=gl.visible=on;if(on){const k=.75+Math.sin(t*2.2)*.25;hs.scale.set(5*k+1,5*k+1,1);gl.intensity=1.2+k}})}
     lb.position.set(0,top+.7,0);if(V||!(p==='home'||p==='m'&&LV('m')>0||p==='sc'))G.add(lb); // (v15.5) طلب الشيخ: لا نكتب أسماء الأشياء الواضحة (بيتي، الجامع، مدرستي)
-   G.scale.setScalar(p==='m'?mScale(LV('m')||1):(BS[p]||1));if(p==='sc'){const k=BS.sc-1;G.position.x-=k*4.6;G.position.z-=k*4.4}});
+   G.scale.setScalar(p==='m'?mScale(LV('m')||1):p==='home'&&PAL?1:(BS[p]||1));if(p==='sc'){const k=BS.sc-1;G.position.x-=k*4.6;G.position.z-=k*4.4}});
   // أشجار المدينة (العطشى عليها 💧)
   const th=thirsty(),trees=[];
   TREES.forEach(([x,z],i)=>{const G=new T.Group();G.position.set(x,0,z);G.userData.t=i;S.add(G);tree(0,0,G);trees[i]=G;
@@ -919,7 +967,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
     });
   // ---- 🏥 (v15.2) طلب الشيخ: مستشفى المدينة. يُبنى بثلاث مراحل من binaa.js (الجزء hp): ٠ أرض فارغة بلوحة «هنا يُبنى» ← ١ مستوصف ← ٢ مستشفى بطابقين ← ٣ مستشفى كبير بسيارة إسعاف.
   // واجهته (محليًا +z) تُدار نحو الطريق (−x). المس الأرض الفارغة لتبنيه، والمستشفى المبني لتزور المرضى (A.hospital).
-  const hpL=(()=>{const uc=V?String(V.u||''):(window.Binaa?Binaa.code():'');return Math.max(0,Math.min(3,+uc[5]||0))})(),hpJob=!V&&window.Binaa&&Binaa.job&&Binaa.job.p==='hp';
+  const hpL=(()=>{const uc=V?String(V.u||''):bCode();return Math.max(0,Math.min(3,+uc[5]||0))})(),hpJob=!V&&!!bJob()&&bJob().p==='hp';
   const HG=new T.Group();HG.position.set(HSP[0],0,HSP[1]);HG.rotation.y=-Math.PI/2;HG.userData.act=hpL&&!hpJob?'hospital':'bn_hp';S.add(HG);let hpTop=2.4;
   {const G=HG,wh=M(night?0xd9dde2:0xf7f8fa,{roughness:.6}),bl=M(0x7fc4e8),gr=M(0x1fa463),rd=M(0xd8282d),dk=M(0x2b3440),
       gl=new T.MeshStandardMaterial({color:night?0xffe6a0:0x9ccbe6,roughness:.15,metalness:.3,emissive:night?0xffd27a:0x000000,emissiveIntensity:night?.9:0});
@@ -956,8 +1004,8 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
   // ---- 🧱🌳 (v15.0) سور البيت وبستانه وأشجاره الثلاث، كلٌّ بثلاث مراحل (binaa.js: نفس مستويات البيت القديم) ----
   // السور: ١ خشبي ← ٢ حجر ← ٣ رخام أبيض بحافة ذهبية وفوانيس. البستان خلف البيت: ١ عشب وسياج شجيرات ← ٢ ورود وممرّ حجري ← ٣ نافورة وفوانيس.
   // الأشجار: ١ شتلة ← ٢ شجرة ← ٣ شجرة مثمرة (تفّاح، رمّان، برتقال). المس أيّ جزء لتبنيه أو تطوّره (Binaa.open).
-  {const uc=V?String(V.u||''):(window.Binaa?Binaa.code():''),BL=k=>Math.max(0,Math.min(3,+uc[k]||0)),wL=BL(0),gL=BL(1),tL=[BL(2),BL(3),BL(4)];
-    const job=V||!window.Binaa?null:Binaa.job;
+  {const uc=V?String(V.u||''):bCode(),BL=k=>Math.max(0,Math.min(3,+uc[k]||0)),wL=BL(0),gL=BL(1),tL=[BL(2),BL(3),BL(4)];
+    const job=V?null:bJob();
     const WG=new T.Group();WG.userData.act='bn_w';S.add(WG);
     const segs=[[XF,-HZ,XF,-.8],[XF,2.9,XF,HZ],[XF,HZ,XL,HZ],[XF,-HZ,XL,-HZ],[XL,-HZ,XL,HZ]],pil=[[XF,-HZ],[XF,-.8],[XF,2.9],[XF,HZ],[XL,HZ],[XL,-HZ],[XL,0],[-8.7,HZ],[-8.7,-HZ]];
     const along=(a,b,f)=>{const dx=b[0]-a[0],dz=b[1]-a[1],L=Math.hypot(dx,dz);f((a[0]+b[0])/2,(a[1]+b[1])/2,L,Math.abs(dx)>Math.abs(dz)?'x':'z',dx,dz)};
@@ -973,7 +1021,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
       const ar=new T.Mesh(new T.TorusGeometry(1.85,.09,8,28,Math.PI),gd);ar.position.set(XF,1.25,1.05);ar.rotation.y=Math.PI/2;WG.add(ar)}
     if(wL===0){[[XF,-.8],[XF,2.9]].forEach(([x,z])=>box(.14,.5,.14,M(0xb98552),x,.25,z,WG));const pg=add(new T.PlaneGeometry(.04,.04),M(0xffffff),XF,.01,1,WG)}
     // البستان خلف البيت
-    const GG=new T.Group();GG.userData.act='bn_g';S.add(GG);const GX0=XL+.3,GX1=-8.75,GCX=(GX0+GX1)/2,GW=GX1-GX0,GD=HZ*2-.4;
+    const GG=new T.Group();GG.userData.act='bn_g';if(!PAL)S.add(GG);const GX0=XL+.3,GX1=-8.75,GCX=(GX0+GX1)/2,GW=GX1-GX0,GD=HZ*2-.4;
     const soil=new T.Mesh(new T.PlaneGeometry(GW,GD),M(gL?(night?0x3f7d3a:0x5cbf4f):0xb08a5c,{roughness:1}));soil.rotation.x=-Math.PI/2;soil.position.set(GCX,.03,0);soil.receiveShadow=true;GG.add(soil);
     if(gL>=1){const hg=M(night?0x2f6a32:0x3f9a3e,{flatShading:true});for(let x=GX0+.3;x<GX1-.2;x+=.62)[-1,1].forEach(k=>{const b=add(TGL[0],hg,x,.32,k*(HZ-.42),GG);b.scale.set(.36,.34,.3)});
       for(let z=-HZ+.8;z<HZ-.7;z+=.62){const b=add(TGL[1],hg,GX0+.15,.32,z,GG);b.scale.set(.3,.34,.36)}}
@@ -987,15 +1035,15 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();
       const lmp=M(0xfff1b0,{emissive:0xffd860,emissiveIntensity:night?1.8:.3});[[GX0+.7,-HZ+.7],[GX0+.7,HZ-.7],[GX1-.6,-HZ+.7],[GX1-.6,HZ-.7]].forEach(([x,z])=>{add(new T.CylinderGeometry(.04,.05,1.1,8),M(0x2b2b2b),x,.55,z,GG);add(new T.SphereGeometry(.12,10,8),lmp,x,1.15,z,GG)})}
     // الأشجار الثلاث
     const TZ=[-2.1,0,2.1],FRC=[0xd8282d,0x9e1b32,0xff9a1f],TGs=[];
-    tL.forEach((L,i)=>{const G=new T.Group();G.position.set(XL+1.15,0,TZ[i]);G.userData.act='bn_t'+i;S.add(G);TGs.push(G);
+    tL.forEach((L,i)=>{const G=new T.Group();G.position.set(XL+1.15,0,TZ[i]);G.userData.act='bn_t'+i;if(!PAL)S.add(G);TGs.push(G);
       if(!gL||!L){const m=add(new T.CircleGeometry(.4,14),M(0x8a6a44),0,.04,0,G);m.rotation.x=-Math.PI/2;return}
       if(L===1){add(new T.CylinderGeometry(.03,.04,.7,6),bark,0,.35,0,G);const b=add(TG[i%3],LF2[i%4],0,.8,0,G);b.scale.setScalar(.28);add(new T.CylinderGeometry(.015,.015,.8,4),M(0xc9a26a),.12,.4,0,G)}
       else{tree(0,0,G,L===2?.8:1);if(L>=3)for(let k=0;k<12;k++){const a=k*2.4+i,y=1.55+(k%4)*.18,r=.88;const f=add(new T.SphereGeometry(.09,8,6),M(FRC[i],{roughness:.4}),Math.cos(a)*r,y,Math.sin(a)*r,G);f.castShadow=false}}});
     // علامات الورشة: 👷 أثناء البناء، ✔ عند الاستلام، و⬆/+ على الجزء المقترح التالي
-    if(!V&&window.Binaa){const gp={w:[WG,XF,1.6,1],g:[GG,GCX,1.4,0],t0:[TGs[0],0,2.6,0],t1:[TGs[1],0,2.6,0],t2:[TGs[2],0,2.6,0],hp:[HG,0,hpTop,0]},mk=(p,e,c)=>{const [G2,x,y,z]=gp[p];const sp=markSprite(T,e,c,1.1);
+    if(!V&&window.Binaa){const gp={w:[WG,XF,1.6,1],g:[GG,GCX,1.4,0],t0:[TGs[0],0,2.6,0],t1:[TGs[1],0,2.6,0],t2:[TGs[2],0,2.6,0],hp:[HG,0,hpTop,0]},mk=(p,e,c)=>{if(PAL&&/^[gt]/.test(p))return;const [G2,x,y,z]=gp[p];const sp=markSprite(T,e,c,1.1);
         if(G2===WG||G2===GG){const H=new T.Group();H.position.set(x,0,p==='w'?1.05:0);G2.add(H);sp.position.set(0,y,0);sp.userData.y=y;H.add(sp)}else{sp.position.set(0,y,0);sp.userData.y=y;G2.add(sp)}marks.push(sp)};
       if(job){mk(job.p,job.ready?'✔':'👷',job.ready?'#1fa463':'#2f6fd0');
-        const [G2,x]=gp[job.p];if(!job.ready){const wk=new T.Group();wk.position.set(G2===HG?HSP[0]-6:G2===WG?XF-.7:G2===GG?GCX:G2.position.x+.8,0,G2===HG?HSP[1]+2.2:G2===WG?-1.8:G2===GG?1.2:G2.position.z+.6);S.add(wk);
+        const [G2,x]=gp[job.p];if(!job.ready&&!(PAL&&/^[gt]/.test(job.p))){const wk=new T.Group();wk.position.set(G2===HG?HSP[0]-6:G2===WG?XF-.7:G2===GG?GCX:G2.position.x+.8,0,G2===HG?HSP[1]+2.2:G2===WG?-1.8:G2===GG?1.2:G2.position.z+.6);S.add(wk);
           add(new T.CylinderGeometry(.16,.2,.6,10),M(0xff8c1a),0,.5,0,wk);add(new T.SphereGeometry(.14,10,8),M(0xe8b48a),0,.95,0,wk);add(new T.SphereGeometry(.15,10,6,0,Math.PI*2,0,Math.PI/2),M(0xffd23f),0,1.0,0,wk);
           const hm=new T.Group();hm.position.set(.2,.7,0);wk.add(hm);add(new T.CylinderGeometry(.02,.02,.35,5),M(0x6b4423),0,.17,0,hm);box(.12,.07,.07,M(0x555555),0,.35,0,hm);anim.push(t=>{hm.rotation.z=-.4+Math.sin(t*9)*.7;wk.position.y=Math.abs(Math.sin(t*4.5))*.04})}}
       else{const L={w:wL,g:gL,t0:tL[0],t1:tL[1],t2:tL[2]},ok=p=>L[p]<3&&(p==='w'||(p==='g'?wL>=1:gL>=1));const cand=['w','g','t0','t1','t2'].filter(ok).sort((a,b)=>L[a]-L[b]);
@@ -1331,6 +1379,16 @@ const OCC=[[1,1,9,'sad','🖤 أيام محرّم الحرام','🖤 أيام �
 function occNow(){const d=window.City3D&&City3D.debugOcc;let h;if(d!=null){if(!d)return null;h=d}else h=hijri();if(!h)return null;
   const o=OCC.find(o=>o[0]===h.m&&h.d>=o[1]&&h.d<=o[2]);return o?{k:o[3],b:o[4],t:o[5],msg:o[6],id:o[0]+'-'+o[1]}:null}
 function winter(){const d=window.City3D&&City3D.debugSnow;if(d!=null)return !!d;const w=wxNow();if(w)return wSnowy(w);return [11,0,1].includes(new Date().getMonth())}
+// (v18.7) 👑 مرحلة القصر (usul5_qasr_v1 {sal,tas,test,tt,done}) + مدينة المدير مكتملة دائمًا بلا عمل (ADMF)
+const QK='usul5_qasr_v1';let QS={};try{QS=JSON.parse(localStorage.getItem(QK)||'{}')||{}}catch(e){QS={}}
+const qsv=()=>{try{localStorage.setItem(QK,JSON.stringify(QS))}catch(e){}};
+function ADMF(){try{return !!(window.isAdm&&isAdm())}catch(e){return false}}
+function mLvs(){return ADMF()?{m:3,k:3,q:3,s:3,h:3}:(window.Madina?Madina.st.lv:{})}
+function bCode(){return ADMF()?'333333':(window.Binaa?Binaa.code():'')}
+function bJob(){return ADMF()?null:(window.Binaa?Binaa.job:null)}
+function bFl(){return ADMF()?5:(window.Bayt?Bayt.done|0:0)}
+function palaceMe(){return ADMF()||!!QS.done}
+window.Qasr={get done(){return palaceMe()}};
 function dirtLv(){try{return window.Aamal&&Aamal.dirt?Aamal.dirt()|0:0}catch(e){return 0}}
 function hourNow(){const d=window.City3D&&City3D.debugHour;if(d!=null)return d;const n=new Date();return n.getHours()+n.getMinutes()/60}
 // (v13.5) وقت النوم: من ١٢ ليلًا حتى أذان الفجر (أو ٥ صباحًا إن لم يُعرف)
@@ -1600,6 +1658,9 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
     walk(p,pts,1.4+Math.random()*.4,back?'gone':'enter');const w=walkers[walkers.length-1];w.wor=1;if(left)w.cross=1;if(back)w.grow=0;prN++}
   // (v14.5) 👨‍👩‍👦 والدا الطفل عند باب البيت (بالنهار): الأمّ تحمل أكياسًا، والأب يستقبله
   const father=person('man',2),mother=person('woman',5);father.position.set(-3.15,0,-.35);mother.position.set(-3.15,0,2.35);[father,mother].forEach(P=>{P.rotation.y=Math.PI/2;P.userData.act='parents'});
+  // (v18.7) 💂 حرّاس القصر: اثنان عند البوابة واثنان عند باب القصر، بأيديهم رماح ذهبية الرأس (يظهرون حين يكون البيت قصرًا)
+  const palG=[[-3.5,-1.15],[-3.5,3.2],[-6.75,-1.7],[-6.75,1.7]].map(([x,z],i)=>{const P=person('guard',i);P.position.set(x,0,z);P.rotation.y=Math.PI/2;P.userData.act='guards';
+    add(new T.CylinderGeometry(.025,.025,1.9,6),M(0x6b4423),.34,.95,.05,P);add(new T.ConeGeometry(.06,.2,6),new T.MeshStandardMaterial({color:0xd4a520,metalness:.7,roughness:.3}),.34,1.98,.05,P);P.visible=false;return P});
   mother.userData.bags=[-1,1].map(k=>add(new T.BoxGeometry(.24,.28,.14),M(k<0?0xe9e2cf:0xd6e8f5),k*.36,.5,0,mother));
   // ⚽ (v16.4) مباراة حقيقية: فريق أحمر وفريق أزرق بحارسين (حارس أصفر وحارس أخضر). في العطل ٥ ضد ٥ ومتفرّجون، وفي الأيام العادية ٣ ضد ٣.
   // اللاعب يراوغ بالكرة أمام قدميه، يمرّر لزميل متقدّم، يسدّد قرب المرمى، والحارس يصدّ أحيانًا؛ المنافس يلاحق ويخطف الكرة؛
@@ -1705,7 +1766,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       if(!block)c.z+=c.dir*c.sp*(rush?.45:1)*dt;
       if(c.dir>0&&c.z>Z1||c.dir<0&&c.z<Z0){c.z=c.dir>0?Z0:Z1;c.done=0;if(c.ru){c.on=rush;c.v.visible=rush}}c.v.position.z=c.z});
     // (v14.5) الوالدان والجارة بالنهار، والأطفال يلعبون الكرة العصر
-    [father,mother].forEach(P=>{P.visible=day&&!o.sleep});mother.userData.bags.forEach(b=>b.visible=!o.bagsDone);baker.visible=day&&!o.sleep;
+    [father,mother].forEach(P=>{P.visible=day&&!o.sleep});palG.forEach((P,i)=>{P.visible=!!o.pal;if(P.visible){P.rotation.y=Math.PI/2+Math.sin(t*.25+i*1.7)*.15;P.userData.hyT=Math.sin(t*.4+i*2)*.5}});mother.userData.bags.forEach(b=>b.visible=!o.bagsDone);baker.visible=day&&!o.sleep;
     if(baker.visible)baker.rotation.x=Math.max(0,Math.sin(t*.9))*.25;
     {const play=day&&!o.sleep&&footNow();ball.visible=play;SB.visible=play;if(!play)FBK.forEach(p=>p.visible=false);FAN.forEach(p=>p.visible=play&&footHol());if(play)football(t,dt);}
     // (v14.7) 🚌 ناس يأتون إلى الموقف وينتظرون الباص (حتى ٤ في كل موقف)
@@ -1857,7 +1918,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
   const lostKid=person('kid',4);lostKid.userData.act='lost';lostKid.visible=false;if(lostKid.userData.bag)lostKid.userData.bag.visible=false;
   {const mk=markSprite(T,'😢','#3b9be0',.8);mk.position.set(0,1.9,0);mk.userData.act='lost';lostKid.add(mk);lostKid.userData.mk=mk}
   const lostMom=person('woman',2);lostMom.visible=false;
-  return {g,update,mkCar,sheikh,police,lostKid,lostMom,fb:life_fb,fbs:()=>FG,setQuiet:q=>{quiet=q},stops,count:()=>walkers.length,peds,say,endGreet,traffic,sellers,elder,faller,fallMk,father,mother,baker,FBK}}
+  return {g,palG,update,mkCar,sheikh,police,lostKid,lostMom,fb:life_fb,fbs:()=>FG,setQuiet:q=>{quiet=q},stops,count:()=>walkers.length,peds,say,endGreet,traffic,sellers,elder,faller,fallMk,father,mother,baker,FBK}}
 
 /* ---------- (v11.9) أصوات المدينة: نهارًا عصافير وحركة سير هادئة، وليلًا هدوء. تُصنع بالكود (بلا ملفات)، وتحترم كتم صوت التطبيق ---------- */
 const SKEY='usul5_m3snd';
@@ -1932,7 +1993,7 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
     const d=U.sunDisc;if(d){d.visible=!!disc&&disc.k>.05;if(disc)d.position.set(disc.x,disc.y,disc.z)}}
   if(window.City3D)City3D.applySky=()=>applySky();
   let lostS=0,pkO=parkOpen(),kidSp=4.2,fol=0,fast=0,escort=0,lookT=0,carry=0,fallEsc=0,fallT=25+Math.random()*40;const FALLP=[-3.4,11.2];
-  const hpLv=()=>{const c=window.Binaa?Binaa.code():'';return Math.max(0,Math.min(3,+c[5]||0))};
+  const hpLv=()=>{const c=bCode();return Math.max(0,Math.min(3,+c[5]||0))};
 const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),new T.MeshStandardMaterial({color:k<0?0xe9e2cf:0xd6e8f5,roughness:.8}));b.position.set(k*.34,.42,.06);b.visible=false;kid.add(b);return b});
   const sign=v=>v<0?-1:1;
   const door=p=>{if(p==='sc')return {x:-2.4,z:-17.6,via:null};if(p==='m')return {x:6,z:3.95,via:4.6};const [x,z]=SPOT[p];return {x:x-sign(x)*(2.2+(BS[p]||1)),z:z+1,via:null}};
@@ -2003,7 +2064,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
   // الأعمال
   const A={
     mosque(){const p=prayerNow(),D=day();go(door('m'),()=>{
-      if(!(window.Madina&&Madina.st.lv.m)){card(`🕌 هنا أرض الجامع. ${B('ابنِ','ابني')} الجامع أولًا ${B('بصلاتك','بصلاتكِ')} الحقيقية لتدخله 🤍`,[['ابنِ الجامع',()=>Madina.part('m')],['حسنًا',null,'sec']]);return}
+      if(!(mLvs().m)){card(`🕌 هنا أرض الجامع. ${B('ابنِ','ابني')} الجامع أولًا ${B('بصلاتك','بصلاتكِ')} الحقيقية لتدخله 🤍`,[['ابنِ الجامع',()=>Madina.part('m')],['حسنًا',null,'sec']]);return}
       if(p&&!D.pr[p]){D.pr[p]=1;dsv();enter(()=>{jewels(10);card(`🕌 حان وقت صلاة ${PNAME[p]}! ${B('دخلتَ','دخلتِ')} الجامع 💎 +١٠<br><small>الآن ${B('قم وصلِّ','قومي وصلّي')} صلاتك الحقيقية، ثم ${B('سجّلها','سجّليها')} 🤲</small>`,[['🤲 '+B('سأصلّي الآن','سأصلّي الآن'),()=>closeTo(()=>window.Salah&&Salah.openPray())],['لاحقًا',null,'sec']])});return}
       if(p){card(`🕌 ${B('زرتَ','زرتِ')} الجامع في صلاة ${PNAME[p]} ✔<br><small>هل ${B('صلّيتَ','صلّيتِ')}؟ ${B('سجّل','سجّلي')} صلاتك في «وضوئي وصلاتي»</small>`,[['🤲 سجلّ صلاتي',()=>closeTo(()=>window.Salah&&Salah.openPray())],['حسنًا',null,'sec']]);return}
       const n=nextPrayer();card(`🕌 الجامع ينتظرك${n?`<br><small>الأذان القادم: صلاة ${PNAME[n.p]} الساعة ${hm(n.t)} ⏰<br>${B('تعال','تعالي')} وقت الأذان ${B('وخذ','وخذي')} 💎١٠</small>`:''}`,[['حسنًا',null,'sec']])})},
@@ -2206,7 +2267,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
       go({x:-3.3,z:3.1,via:null},()=>{const right=()=>{const f=!D.stg;D.stg=1;dsv();if(f)jewels(2);else{joyT=1.1;burst()}
           card(`✨ سبحان اللَّه! اللَّهُ الواحد خلق النجوم والقمر والسماء كلّها${f?' 💎 +٢':''}<br><small>كلّ شيء في الكون يدلّ على خالقٍ عظيمٍ واحد، وهذا هو التوحيد: أوّل أصول ديننا 🤍</small>`,[['سبحان اللَّه 🤍',refresh]])};
         card(`🔭 ${B('تنظر','تنظرين')} في المنظار… نجوم كثيرة لا نستطيع عدّها، وقمر منير ✨<br><small>مَن خلق هذه النجوم وزيّن بها السماء؟</small>`,[['🤲 اللَّهُ تعالى',right],['خلقت نفسها',()=>card('🤍 لا شيء يخلق نفسه… حتى البيت الصغير له بانٍ بناه',[['🤲 إذن خلقها اللَّه',right]]),'sec'],['صنعها الناس',()=>card('🤍 الناس لا يستطيعون أن يصنعوا نجمة واحدة!',[['🤲 إذن خلقها اللَّه',right]]),'sec']])})},
-    halaqa(){const D=day();if(!(window.Madina&&Madina.st.lv.m)){card(`📖 حلقة القرآن تكون في الجامع… ${B('ابنِ','ابني')} الجامع أوّلًا 🕌`);setTimeout(()=>card(''),2400);return}
+    halaqa(){const D=day();if(!(mLvs().m)){card(`📖 حلقة القرآن تكون في الجامع… ${B('ابنِ','ابني')} الجامع أوّلًا 🕌`);setTimeout(()=>card(''),2400);return}
       if(!halaqaNow()){card(`📖 حلقة القرآن في الجامع كلّ يوم بعد صلاة المغرب… ${B('تعال','تعالي')} وقتها 🕌`);setTimeout(()=>card(''),2600);return}
       go(door('m'),()=>{const f=!D.hq;if(f){D.hq=1;dsv();jewels(3)}
         card(`📖 ${B('جلستَ','جلستِ')} في حلقة القرآن مع أطفال الحيّ بعد صلاة المغرب 🕌${f?' 💎 +٣':''}<br><small>الشيخ يقول: ${B('اقرأ','اقرئي')} معنا بصوتك، ومَن يحفظ آيةً يفرح بها 🤍</small>`,[['📖 أقرأ وأحفظ معهم',()=>closeTo(()=>{const b=document.getElementById('openHifz');b&&b.click()})],['لاحقًا',f?refresh:null,'sec']])})},
@@ -2259,7 +2320,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
       card(`👥 ${B('اختر','اختاري')} صديقًا ${B('لتزور','لتزوري')} مدينته<br><small>كل زيارة لصديق جديد اليوم 💎${arn(FV_J)} (حتى ${arn(FV_MAX)} أصدقاء)</small>`,
         f.slice(0,6).map(r=>[`${v[r.id]?'✔':n<FV_MAX?'💎':'🏙️'} ${short(r.nick)}`,()=>A.visit(r)]).concat([['إلغاء',null,'sec']]));
       ui.card.querySelector('.row').style.flexWrap='wrap'},
-    visit(r,byCar){if(drv&&carTrip){carTrip=0;carAway(r);return}carTrip=0;adm=null;vr=r;V={lv:Madina.fromCode(r.m||'00000'),f:r.f,u:r.u||'',nick:short(r.nick),flg:r.p&&r.p.flg};
+    visit(r,byCar){if(drv&&carTrip){carTrip=0;carAway(r);return}carTrip=0;adm=null;vr=r;V={lv:Madina.fromCode(r.m||'00000'),f:r.f,u:r.u||'',nick:short(r.nick),flg:r.p&&r.p.flg,pq:!!(r.h&&r.h.q)};
       at=byCar?{x:-10.2,z:3.9,via:4.6}:{x:0,z:-15,via:null};kid.position.set(at.x,0,at.z);kid.visible=true;path=[];refresh();setBar();
       ui.msg.textContent=`🏙️ ${B('أنت','أنتِ')} الآن في مدينة ${V.nick} 🤍`;
       go({x:-2.6,z:1,via:null},()=>{const v=fv();
@@ -2267,8 +2328,32 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
         card(`🤝 ${B('زرتَ','زرتِ')} ${V.nick} في ${B('مدينته','مدينته')}${give?` 💎 +${arn(FV_J)}`:''}<br><small>زيارة الصديق والجار وصلة الأرحام من الأخلاق الجميلة 🤍${!give&&v[r.id]?'<br>('+B('أخذتَ','أخذتِ')+' جواهر هذه الزيارة اليوم)':''}</small>`,
           [['🏡 ادخل بيته',()=>A.fhouse()],['🏙️ ارجع لمدينتي',()=>A.back()]])})},
     fhouse(){const r=vr;if(!r)return;closeTo(()=>{if(window.Deco&&Deco.visit)Deco.visit({id:r.id,h:r.h,p:r.p},()=>{show('bayt');Bayt.menu()})})},
+    // (v18.7) 👑 مرحلة القصر (بعد الطوابق الخمسة): صلاة على النبي ٣٣ بالصوت + تسبيح ٣٣ بالصوت + اختبار ١٠ أسئلة (النجاح ٨)،
+    // ثم يبني العمّال القصر. الرسوب: إعادة بعد ٣ دقائق. المدير قصره جاهز دائمًا.
+    palace(){if(palaceMe()){card(`👑 <b>${B('قصرك','قصركِ')} في الجنة!</b><br><small>بستان وحديقة كبيرة بنافورة وحرّاس يحرسونه 💂 · ${B('زيّنه','زيّنيه')} ${B('وادخله','وادخليه')} 🤍</small>`,[['🎨 '+B('زيّن','زيّني')+' '+B('وادخل','وادخلي'),()=>closeTo(()=>oldHouse('deco'))],['حسنًا',null,'sec']]);return}
+      if(bFl()<5){card(`👑 <b>حوّل بيتك إلى قصر!</b><br><small>${B('أكمل','أكملي')} طوابق بيتك الخمسة أولًا في «🏗️ لعبة طوابق البيت» (عندك ${arn(bFl())} من ٥) 🤍</small>`,[['🏗️ لعبة الطوابق',()=>closeTo(()=>oldHouse('game'))],['لاحقًا',null,'sec']]);return}
+      const st=[[QS.sal,'💚 الصلاة على محمد وآل محمد ٣٣ مرة بصوتك'],[QS.tas,'📿 سبحان اللَّه ٣٣ مرة بصوتك'],[QS.test,'📝 اختبار القصر: ٨ صحيحة من ١٠']],nx=st.findIndex(x=>!x[0]);
+      const go1=nx===0?()=>voiceDeed(VSAL,33,'👑 القصر · الخطوة الأولى',()=>{QS.sal=1;qsv();jewels(5);A.palace()}):nx===1?()=>voiceDeed(VTAS,33,'👑 القصر · الخطوة الثانية',()=>{QS.tas=1;qsv();jewels(5);A.palace()}):()=>A.qTest();
+      const wait=nx===2&&QS.tt&&Date.now()-QS.tt<180e3;
+      card(`👑 <b>المرحلة السادسة: حوّل بيتك إلى قصر!</b><br><small>قصر كبير فيه بستان وحديقة بنافورة وحرّاس 💂</small><br><small style="line-height:1.9;display:block;text-align:right">${st.map(x=>(x[0]?'✅ ':'⬜ ')+x[1]).join('<br>')}</small>${wait?`<small style="color:#a0522d">⏳ ${B('راجع','راجعي')} دروسك… ${B('تستطيع','تستطيعين')} الاختبار بعد ${arn(Math.ceil((180e3-(Date.now()-QS.tt))/60e3))} دقيقة</small>`:''}`,
+        (wait?[]:[[nx===2?'📝 ابدأ الاختبار':'🎙️ ابدأ الخطوة '+['الأولى','الثانية'][nx],go1]]).concat([['لاحقًا',null,'sec']]))},
+    qTest(){let L=[];try{L=QBANK.filter(q=>(q.t==='mcq'&&q.o&&q.o.length>1&&q.o.length<=4||q.t==='tf')&&String(q.q).length<150)}catch(e){}
+      if(L.length<10){QS.test=1;qsv();A.qBuild();return}for(let i=L.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[L[i],L[j]]=[L[j],L[i]]}L=L.slice(0,10);let i=0,sc=0;
+      const ask=()=>{if(i>=10)return fin();const q=L[i],hd=`📝 اختبار القصر · السؤال ${arn(i+1)} من ١٠ · ✔ ${arn(sc)}<br>`;
+        const ok=()=>{sc++;i++;card(hd+'<b style="color:#1fa463">✔ صحيح! أحسنت</b>');setTimeout(ask,900)},no=c=>{i++;card(hd+`<b style="color:#c43d38">✖ الجواب الصحيح:</b> ${c}`,[['التالي ⬅️',ask]])};
+        let op;if(q.t==='tf')op=[['✔ صحيح',q.a===true?ok:()=>no('صحيح')],['✖ خطأ',q.a===false?ok:()=>no('خطأ')]];
+        else{const ord=q.o.map((o,k)=>k).sort(()=>Math.random()-.5);op=ord.map(k=>[q.o[k],k===q.a?ok:()=>no(q.o[q.a])])}
+        card(hd+`<b style="font-size:16.5px">${q.q}</b>${q.t==='tf'?'<br><small>(صحيح أم خطأ؟)</small>':''}`,op);const r=ui.card.querySelector('.row');if(r)r.style.flexWrap='wrap'};
+      const fin=()=>{if(sc>=8){QS.test=1;qsv();card(`🎉 <b>نجحت!</b> ${arn(sc)} من ١٠ ✔<br><small>هيّا نبني ${B('قصرك','قصركِ')}…</small>`,[['👷 ابدأ البناء',()=>A.qBuild()]])}
+        else{QS.tt=Date.now();qsv();card(`🤍 ${arn(sc)} من ١٠ · ${B('تحتاج','تحتاجين')} ٨ للنجاح<br><small>${B('راجع','راجعي')} «📚 دروس الكتاب» ثم ${B('حاول','حاولي')} بعد ٣ دقائق 💪</small>`,[['📚 دروس الكتاب',()=>closeTo(()=>{try{document.querySelector('#wjDur')?show('wjDur'):show('home')}catch(e){}})],['حسنًا',null,'sec']])}};
+      ask()},
+    qBuild(){busy=1;let k=0;try{lookPt(SPOT.home[0]-2,SPOT.home[1])}catch(e){}card('👷 العمّال يبنون '+B('قصرك','قصركِ')+'… 🔨');
+      const tk=setInterval(()=>{k++;card(`👷 العمّال يبنون ${B('قصرك','قصركِ')}… ${'🧱'.repeat(k)}`);try{tone(440+k*60,.08,'square',.05)}catch(e){}if(k>=6){clearInterval(tk);busy=0;QS.done=Date.now();qsv();refresh();try{Deco.pub()}catch(e){}
+        jewels(50);try{confetti()}catch(e){}try{Aamal.grow('akhlaq')}catch(e){}
+        card(`🎉 <b>مبارك! صار ${B('بيتك','بيتكِ')} قصرًا في الجنة 👑</b><br><small>فيه بستان وحديقة كبيرة بنافورة، وحرّاس يحرسونه 💂 · 💎 +٥٠</small>`,[['الحمد لله',null]])}},900)},
+    guards(){const g=life.palG&&life.palG[0];if(g)life.say(g,'وعليكم السلام'+yaN()+' 💂',3,2.4);card(`💂 حرّاس ${V?'قصر '+V.nick:B('قصرك','قصركِ')} يحرسونه ليلًا ونهارًا 🤍`);setTimeout(()=>card(''),2200)},
     // (v18.4) 👑 المدير يدخل مدينة أي مشترك: يرى بناياته وبيته وسوره وحديقته ووسخ بيته، بلا جواهر ولا مهمّات
-    aVisit(r){if(drv)leaveCar(1);card('');inSchool=false;adm=r;vr={id:r.id,h:r.h,p:r.p,nick:r.nick};V={lv:Madina.fromCode(r.m||'00000'),f:r.f|0||1,u:r.u||'',nick:short(r.nick),flg:r.flg,dt:r.dt|0};
+    aVisit(r){if(drv)leaveCar(1);card('');inSchool=false;adm=r;vr={id:r.id,h:r.h,p:r.p,nick:r.nick};V={lv:Madina.fromCode(r.m||'00000'),f:r.f|0||1,u:r.u||'',nick:short(r.nick),flg:r.flg,dt:r.dt|0,pq:!!(r.h&&r.h.q)};
       at={x:-2.6,z:6,via:null};kid.position.set(at.x,0,at.z);kid.visible=true;path=[];busy=0;refresh();setBar();try{cityView()}catch(e){}
       // (v18.6) طلب الشيخ: لا تفتح بطاقة الإنجازات وحدها عند الدخول (تغطّي المدينة)؛ تُفتح من زر «📋 إنجازاته» فقط، وسطر الاسم يختفي بعد ٤ ثوانٍ
       ui.msg.textContent=`👑 مدينة ${V.nick} · ${B('أنت','أنتِ')} تشاهدها كمدير`;const mt=ui.msg.textContent;setTimeout(()=>{if(ui.msg.textContent===mt)ui.msg.textContent=''},4000)},
@@ -2534,10 +2619,14 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
   srBtn.onclick=()=>{try{window.Bayt&&Bayt.sTap()}catch(e){}if(sleeping){sleepCard();return}openGo();const q=goBox.querySelector('.srch');if(q)setTimeout(()=>q.focus(),60)};
   {const r2=ov.querySelector('.m3r2');r2?r2.prepend(srBtn):ov.appendChild(srBtn)}
   // زرّ «قريب منك»: يظهر حين يقف الطفل قرب مكان أو شخص
-  const NL={sheikh:'📜 اسأل الشيخ',police:'👮 سلّم على الشرطي',power:'⚡ محطة الكهرباء',leak:'🚰 أغلق الحنفية',wallet:'👛 خذ المحفظة',lost:'🤝 ساعد الطفل الضائع',grandpa:'👴 زر جدّو',stars:'🔭 انظر إلى النجوم',iftar:'🌴 وزّع التمر',halaqa:'📖 حلقة القرآن',elder:'🤝 ساعد جدّو',parents:'❤️ بِرّ والديك',tannour:'🔥 التنّور',sadaqa:'💝 صندوق الصدقات',birds:'🐦 أطعم العصافير',busStop:'🚌 موقف الباص',park:'🎡 مدينة الألعاب',hospital:'🏥 المستشفى',fall:'🤕 ساعده على النهوض',sick:'🤒 زر الجار المريض',cafe:'☕ سلّم على الكبار',ducks:'🦆 أطعم البطّ',plaza:'⛲ النافورة',football:'⚽ الملعب',sheep:'🐑 المرعى',clock:'🕰️ برج الساعة',gift:'🎁 افتح الهدية',pet:'🐾 حيواني',drvs:'🚦 مدرسة تعليم السياقة',showroom:'🚗 معرض السيارات',poolB:'🏊 مسبح الأولاد',poolG:'🧕 مسبح البنات',mycar:'🚗 اركب سيارتك'};
-  function nearLbl(u,D){if(u.ped)return '👋 سلّم على جارك';if(u.t!=null)return thirsty().includes(u.t)&&!D.tr[u.t]?'💧 اسقِ الشجرة':'';if(u.l!=null)return '🧹 نظّف الطريق';if(u.cat)return '🐱 القطّة';if(u.fk)return '🐄 المزرعة';
+  const NL={guards:'💂 سلّم على الحرّاس',sheikh:'📜 اسأل الشيخ',police:'👮 سلّم على الشرطي',power:'⚡ محطة الكهرباء',leak:'🚰 أغلق الحنفية',wallet:'👛 خذ المحفظة',lost:'🤝 ساعد الطفل الضائع',grandpa:'👴 زر جدّو',stars:'🔭 انظر إلى النجوم',iftar:'🌴 وزّع التمر',halaqa:'📖 حلقة القرآن',elder:'🤝 ساعد جدّو',parents:'❤️ بِرّ والديك',tannour:'🔥 التنّور',sadaqa:'💝 صندوق الصدقات',birds:'🐦 أطعم العصافير',busStop:'🚌 موقف الباص',park:'🎡 مدينة الألعاب',hospital:'🏥 المستشفى',fall:'🤕 ساعده على النهوض',sick:'🤒 زر الجار المريض',cafe:'☕ سلّم على الكبار',ducks:'🦆 أطعم البطّ',plaza:'⛲ النافورة',football:'⚽ الملعب',sheep:'🐑 المرعى',clock:'🕰️ برج الساعة',gift:'🎁 افتح الهدية',pet:'🐾 حيواني',drvs:'🚦 مدرسة تعليم السياقة',showroom:'🚗 معرض السيارات',poolB:'🏊 مسبح الأولاد',poolG:'🧕 مسبح البنات',mycar:'🚗 اركب سيارتك'};
+  const DK={sheikh:'shq',power:'pw',leak:'lk',lost:'lost',stars:'stg',iftar:'ift',halaqa:'hq',elder:'eld',tannour:'tn',sadaqa:'sdq',birds:'bf',busStop:'bs',park:'pk',hospital:'hv',fall:'fall',sick:'sick',cafe:'cf',ducks:'duck',football:'fb',gift:'gf',poolB:'pool',poolG:'pool',grandpa:'gp'};
+  function doneToday(a,D){if(DK[a])return !!D[DK[a]];if(a==='police')return !!D.pol&&!(D.wlc&&!D.wl);if(a==='wallet')return !!(D.wlc||D.wl);
+    if(a==='parents'){const b=D.br||{};return !!(b.s&&b.b&&b.h)}if(a.indexOf('mk_')===0)return !!(D.mk&&D.mk[a.slice(3)]);return false}
+  function nearLbl(u,D){if(u.ped)return '👋 سلّم على جارك';if(u.t!=null)return thirsty().includes(u.t)&&!D.tr[u.t]?'💧 اسقِ الشجرة':'';if(u.l!=null)return '🧹 نظّف الطريق';if(u.cat)return '🐱 القطّة';if(u.fk){const f=D.fm||{};return f.cow&&f.hen&&f.wat?'':'🐄 المزرعة'}
     if(u.p)return ''; // (v18.1) طلب الشيخ: لا زر أزرق باسم البيت/البنايات (كان يظهر «🏡 بيتي» دائمًا) — البنايات تُلمس مباشرة أو من «إلى أين؟»
-    const a=u.act||'';if(a.indexOf('mk_')===0)return '🛒 الدكّان';if(a.indexOf('bn_')===0)return '🔨 ابنِ هنا';return NL[a]||''}
+    const a=u.act||'';if(doneToday(a,D))return ''; // (v18.7) طلب الشيخ: ما أنجزه الطفل اليوم لا يُطلب منه مرة ثانية
+    if(a.indexOf('mk_')===0)return '🛒 الدكّان';if(a.indexOf('bn_')===0)return '🔨 ابنِ هنا';return NL[a]||''}
   const nearBtn=document.createElement('button');nearBtn.className='m3sal m3near';nearBtn.hidden=true;ov.appendChild(nearBtn);let nearU=null,nearT=0;
   nearBtn.onclick=()=>{const u=nearU;nearBtn.hidden=true;try{window.Bayt&&Bayt.sTap()}catch(e){}if(u)tap(u)};
   function nearTick(dt){if(tgtK>0){tgtK=Math.max(0,tgtK-dt*.7);tgtM.material.opacity=tgtK*.9;tgtM.scale.setScalar(1+(1-tgtK)*.6)}
@@ -2642,7 +2731,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
     for(const h of ray.intersectObjects(S.children,true)){let o=h.object;while(o&&!(o.userData&&(o.userData.p||o.userData.t!=null||o.userData.l!=null||o.userData.cat||o.userData.ped||o.userData.fk||o.userData.act)))o=o.parent;if(o)return o.userData}return null}
   function tap(u){if(!u)return;try{window.Bayt&&Bayt.sTap()}catch(e){}if(sleeping&&!adm){sleepCard();return}if(inSchool&&!V&&u.p!=='sc'){schoolCard();return}
     if(u.ped){if(!busy&&(!path.length||wander))A.salam(u.ped-1);return}
-    if(u.act){if(V&&u.act==='mycar'){card(`🚗 ${B('سيارتك','سيارتكِ')} واقفة قرب بيت ${V.nick}`,[['🏙️ ارجع لمدينتي',()=>A.back()],['لاحقًا',null,'sec']]);return}if(V){card('🤍 هذا في مدينة '+V.nick);setTimeout(()=>card(''),1600);return}if(!busy&&(!path.length||wander)){const a=u.act;if(a.indexOf('bn_')===0){try{Bayt.sTap()}catch(e){}if(window.Binaa)Binaa.open(a.slice(3));return}if(a.indexOf('mk_')===0)A.mk(a.slice(3));else if(A[a])A[a]()}return}
+    if(u.act){if(V&&u.act==='mycar'){card(`🚗 ${B('سيارتك','سيارتكِ')} واقفة قرب بيت ${V.nick}`,[['🏙️ ارجع لمدينتي',()=>A.back()],['لاحقًا',null,'sec']]);return}if(V&&u.act==='guards'){A.guards();return}if(V){card('🤍 هذا في مدينة '+V.nick);setTimeout(()=>card(''),1600);return}if(!busy&&(!path.length||wander)){const a=u.act;if(a.indexOf('bn_')===0&&ADMF()){card('👑 ★★★ مكتمل · مدينة المدير مثالية دائمًا ✨');setTimeout(()=>card(''),2000);return}if(a.indexOf('bn_')===0){try{Bayt.sTap()}catch(e){}if(window.Binaa)Binaa.open(a.slice(3));return}if(a.indexOf('mk_')===0)A.mk(a.slice(3));else if(A[a])A[a]()}return}
     if(u.fk){if(V){card(`🐄 مزرعة ${V.nick} 🤍`);setTimeout(()=>card(''),1800);return}if(!busy&&(!path.length||wander))A.farm(u.fk);return}
     if(adm&&u.p==='home'){A.aInfo();return}
     if(V){if(u.p==='home')card(`🏡 بيت ${V.nick}`,[['🏡 ادخل بيته',()=>A.fhouse()],['حسنًا',null,'sec']]);
@@ -2651,7 +2740,9 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
     if(u.l!=null){if(!busy&&(!path.length||wander))A.litter(u.l);return}
     if(u.cat){if(!busy&&(!path.length||wander))A.cat();return}
     if(u.p==='sc'){if(!busy&&(!path.length||wander))A.mySchool();return}
-    if(u.p==='home'){const dl=dirtLv();card(dl?`🧹 <b style="color:#8a5a2b">${B('بيتك','بيتكِ')} اتّسخ!</b><br><small>كل عمل صالح (صلاة، ورد، تسبيح، حفظ…) ينظّف جزءًا منه ✨</small>`:`🏡 هذا ${B('بيتك','بيتكِ')} في الجنة · ${B('ابنِ','ابني')} طوابقه بالأعمال الصالحة 🤍`,[['🎨 '+B('زيّن','زيّني')+' بيتك '+B('وادخله','وادخليه'),()=>closeTo(()=>oldHouse('deco'))],['حسنًا',null,'sec']]);return}
+    if(u.p==='home'&&(palaceMe()||bFl()>=5)&&!dirtLv()){A.palace();return}
+    if(u.p==='home'){const dl=dirtLv();card(dl?`🧹 <b style="color:#8a5a2b">${B('بيتك','بيتكِ')} اتّسخ!</b><br><small>كل عمل صالح (صلاة، ورد، تسبيح، حفظ…) ينظّف جزءًا منه ✨</small>`:`🏡 هذا ${B('بيتك','بيتكِ')} في الجنة · ${B('ابنِ','ابني')} طوابقه بالأعمال الصالحة 🤍`,[['🎨 '+B('زيّن','زيّني')+' بيتك '+B('وادخله','وادخليه'),()=>closeTo(()=>oldHouse('deco'))]].concat(palaceMe()||bFl()>=5?[['👑 '+(palaceMe()?'قصري':'حوّله إلى قصر'),()=>A.palace()]]:[]).concat([['حسنًا',null,'sec']]));return}
+    if(ADMF()){const pr=(Madina.PARTS||{})[u.p];card(`${pr?pr.e+' '+pr.n:'✨'} · ★★★ مكتمل 👑<br><small>${B('مدينتك','مدينتكِ')} كمدير مكتملة دائمًا</small>`);setTimeout(()=>card(''),2200);return}
     window.Madina&&Madina.part&&Madina.part(u.p)}
   // (v18.2) طلب الشيخ: التحكم بالأصابع مثل الألعاب، لا بالأزرار:
   //  إصبع واحد يسحب الأرض (يتجوّل في المدينة) · إصبعان: قرصة = تقريب/تبعيد نحو مكان الإصبعين، لفّ الإصبعين = تدوير،
@@ -2732,7 +2823,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
       // (v13.8) إذا بدأ المطر أو توقّف أو ظهر قوس قزح أو بدأت المناسبة: يُعاد رسم المشهد، وتتلوّن السماء حسب الوقت
       {const bk=(window.Binaa?Binaa.code()+'|'+(Binaa.job?Binaa.job.p+(Binaa.job.ready?'r':''):''):'')+'|'+dirtLv();if(!V&&bk!==bKey){bKey=bk;refresh()}}wxFetch();showWx();const wk=rainNow()+'|'+rainbowNow()+'|'+festNow()+'|'+(occNow()||{}).id+'|'+winter()+'|'+cloudLv()+'|'+iftarNow()+'|'+halaqaNow()+'|'+poolOpen();wRain=rainNow();pkO=parkOpen();if(wk!==wKey){wKey=wk;refresh()}applySky();kidUmb.visible=wRain&&!night}
     if(zz.visible){zz.position.y=zz.userData.y+Math.sin(t*.8)*.25;zz.material.opacity=.75+Math.sin(t*1.3)*.25}
-    life.update(t,dt,{kcar:KC,v:!!V,pkDone:!!day().pk,hosp:V?0:hpLv(),prayer:sleeping?null:prC,mosque:V?(V.lv.m|0):(window.Madina?Madina.st.lv.m|0:0),kid:kid.position,kidOn:kid.visible,kidWait:lookT>0,sleep:sleeping,rain:wRain&&!night,bagsDone:!!(day().br&&day().br.b)});sounds&&sounds.tick(dt);
+    life.update(t,dt,{pal:V?!!V.pq:palaceMe(),kcar:KC,v:!!V,pkDone:!!day().pk,hosp:V?0:hpLv(),prayer:sleeping?null:prC,mosque:V?(V.lv.m|0):(mLvs().m|0),kid:kid.position,kidOn:kid.visible,kidWait:lookT>0,sleep:sleeping,rain:wRain&&!night,bagsDone:!!(day().br&&day().br.b)});sounds&&sounds.tick(dt);
     sparks=sparks.filter(s=>{s.userData.k+=dt;const k=s.userData.k;s.position.addScaledVector(s.userData.v,dt);s.rotation.y+=dt*6;s.material.opacity=Math.max(0,1-k/1.3);
       if(k>1.3){S.remove(s);s.geometry.dispose();s.material.dispose();return false}return true});
     drops=drops.filter(d=>{d.position.y-=dt*4;if(d.position.y<.1){S.remove(d);d.geometry.dispose();d.material.dispose();return false}return true});
@@ -2741,7 +2832,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
     if(fol){goal=null;const kp=drv&&myCar?{x:fX(cS.x),z:cS.z}:{x:fX(kid.position.x),z:kid.position.z},k=Math.min(1,dt*2.4);CC[0]+=(kp.x-CC[0])*k;CC[2]+=(kp.z-CC[2])*k;LK[0]+=(kp.x-LK[0])*k;LK[1]+=(1.2-LK[1])*k;LK[2]+=(kp.z-LK[2])*k;CC[1]+=(0-CC[1])*k;dist+=(34-dist)*k*.6;ph+=(Math.min(ph,1.05)-ph)*k}
     stepFly(dt);place();if(drv&&camIn&&myCar)cockpit(dt);rMap();requestAnimationFrame(loop)})();
   // عند وقت الأذان: الشخصية تذهب للجامع وحدها
-  if(pn&&!day().pr[pn]&&window.Madina&&Madina.st.lv.m)setTimeout(()=>{if(alive&&!V&&!path.length&&!busy&&!sleeping&&!inSchool){card(`🕌 الله أكبر! حان وقت صلاة ${PNAME[pn]}… هيّا إلى الجامع`);setTimeout(()=>A.mosque(),1200)}},1500);
+  if(pn&&!day().pr[pn]&&mLvs().m)setTimeout(()=>{if(alive&&!V&&!path.length&&!busy&&!sleeping&&!inSchool){card(`🕌 الله أكبر! حان وقت صلاة ${PNAME[pn]}… هيّا إلى الجامع`);setTimeout(()=>A.mosque(),1200)}},1500);
   function refresh(){const old=S;old.remove(kid);old.remove(life.g);S=makeScene(night,V);S.add(kid);S.add(life.g);applySky();OB=null;
     // الأشجار التي تكبر الآن تبقى بحجمها
     old.userData.trees.forEach((G,i)=>{if(G&&S.userData.trees[i])S.userData.trees[i].scale.copy(G.scale)});

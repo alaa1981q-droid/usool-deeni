@@ -555,13 +555,14 @@ function menu(){G=null;clearTimeout(autoT);const B=$('#byBody');
   B.innerHTML=`<div class="bhouse">${houseSVG(bs.done,-1,0,true,false,window.Deco?Object.assign(Deco.myLook(),{ed:1}):undefined)}</div>
   ${rankBox()}
   <div class="bbest"><div><b>${ar(bs.done)} / ${ar(LEVELS.length)}</b><span>طوابق بيتك</span></div><div><b>${ar(bs.best)}</b><span>أفضل نتيجة ⭐</span></div></div>
-  ${bs.done<LEVELS.length?`<button class="btn gold brace" id="byRace">▶️ ${bs.done?'أكمل الطوابق: '+LEVELS[bs.done].floor:'ابدأ '+LEVELS[0].floor}</button>`:''}
+  ${bs.done<LEVELS.length?`<button class="btn gold brace" id="byRace">▶️ ${bs.done?'أكمل الطوابق: '+LEVELS[bs.done].floor:'ابدأ '+LEVELS[0].floor}</button>`:`<button class="btn gold brace" id="byQasr">👑 ${window.Qasr&&Qasr.done?'شاهد قصرك في مدينتك':'المرحلة السادسة: حوّل بيتك إلى قصر'}</button>`}
   <div class="blvg">${LEVELS.map((l,i)=>{const why=lockWhy(i),dn=i<bs.done;
     return `<button class="blv ${why?'locked':''}" data-lv="${i}"><span class="ic" style="background:${l.color}">${why?'🔒':l.icon}</span>
     <span><b>${l.floor}</b><small>${l.name}</small></span>
     <span class="mk">${dn?'⭐'.repeat(bs.stars[i]||1):why?'🔒':'▶️'}</span></button>`}).join('')}</div>
   <button class="link-btn" id="byHow" style="align-self:center;margin-top:10px">❓ كيف ألعب؟</button>`;
   $('#byHow').onclick=()=>modal(`<div style="font-size:46px">🏡</div><h3 style="margin:4px 0">كيف ألعب؟</h3><p class="bcap" style="text-align:right;line-height:1.9">المس الكلمة <b>التالية</b> بالترتيب قبل أن ينتهي الوقت ⏱️<br>الصحيح المتتابع يضاعف نقاطك 🔥 والنجمة الذهبية ⭐ تعطيك وقتًا إضافيًا.<br>الخطأ أو ترك الكلمة الصحيحة تسقط يهدم من بيتك!<br>🏆 كل نجمة جديدة تربحها في طابق = كأس.<br>▶️ زر «أكمل الطوابق» يأخذك إلى الطابق الذي لم تبنِه بعد.<br>واجمع كؤوسًا أكثر من «اختبر نفسك» و«مسابقة الأبطال».</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`);
+  {const q=$('#byQasr');if(q)q.onclick=()=>{try{City3D.goTo('palace')}catch(e){}}}
   {const r=$('#byRace');if(r)r.onclick=()=>{const t=B.querySelector('[data-lv="'+bs.done+'"]');if(t)t.click()}}
   if(window.Deco)Deco.menuHook(B);
   // v8.2: لا نُميل الصورة هنا حتى يلمس الطفل كلّ جزء من بيته وحده (السور، الحديقة، الأشجار)
