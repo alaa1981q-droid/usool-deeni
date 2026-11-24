@@ -554,10 +554,10 @@ async function stats(API){const el=$('#idStats');if(!el)return;const L=all||[],t
   // v7.1: مربعات صغيرة (الأيقونة والرقم في سطر واحد) وكتابة أوضح، حتى لا تطول الصفحة
   const tile=(e,v,l,f)=>`<button class="idst" data-f="${f}"><div><span>${e}</span><b>${v}</b></div><small>${l}</small></button>`;
   const grp=(h,tiles)=>`<div class="idgrp"><div class="gh">${h}</div><div class="idsts">${tiles}</div></div>`;
-  el.innerHTML=grp('👥 المشتركون',`${tile('👦',ar(b),'أولاد','b')}${tile('👧',ar(g),'بنات','g')}${n-b-g>0?tile('❔',ar(n-b-g),'لم يحدّد','nosx'):tile('✏️',ar(ren),'غيّروا أسماءهم','names')}`)
-    +grp('📅 الحضور',`${tile('🟢',ar(on),'داخلين الآن','now')}${tile('☀️',ar(d1),'دخلوا اليوم','d1')}${tile('📅',ar(d7),'هذا الأسبوع','d7')}${tile('🗓️',ar(d30),'هذا الشهر','d30')}${tile('🏅',ar((heroes||[]).length),'أبطال الأسبوع','heroes')}${tile('📥',dl,'نزّلوا الكتاب','dl')}`)
-    +grp('🌟 التعلّم والأعمال',`${tile('📖',ar(L.filter(p=>p.hz>0).length),'حفظوا سورًا','hz')}${tile('🕌',ar(L.filter(p=>p.pr>0).length),'سجّلوا صلواتهم','pr')}${tile('⭐',avg?ar(Math.round(avg*10)/10):'—','متوسط المستوى','lv')}`)
-    +grp('🎮 أونلاين والأمان',`${tile('⚔️',ar(games),'مباراة','play')}${tile('🎮',ar(players),'لعبوا أونلاين','play')}${tile('👑',mx.lv?ar(mx.lv):'—',mx.lv?esc(mx.nick):'أعلى مستوى','max')}${n-b-g>0?tile('✏️',ar(ren),'غيّروا أسماءهم','names'):''}${tile('⚠️',ar(sus2),'يتعمّدون الغلط','sus')}${tile('🔢',ar(ch2),'غيّروا أرقامهم','cheat')}${tile('⛔',ar(bn),'محظورون','ban')}`)
+  el.innerHTML=grp('👥 المشتركون',`${tile('👦',ar(b),'أولاد','b')}${tile('👧',ar(g),'بنات','g')}${n-b-g>0?tile('❔',ar(n-b-g),'لم يحدّد ولد أو بنت','nosx'):tile('✏️',ar(ren),'غيّروا أسماءهم','names')}`)
+    +grp('📅 الحضور',`${tile('🟢',ar(on),'داخلين الآن','now')}${tile('☀️',ar(d1),'دخلوا اليوم','d1')}${tile('📅',ar(d7),'دخلوا هذا الأسبوع','d7')}${tile('🗓️',ar(d30),'دخلوا هذا الشهر','d30')}${tile('🏅',ar((heroes||[]).length),'أبطال الأسبوع','heroes')}${tile('📥',dl,'مرّة نُزّل الكتاب','dl')}`)
+    +grp('🌟 التعلّم والأعمال',`${tile('📖',ar(L.filter(p=>p.hz>0).length),'حفظوا سورًا','hz')}${tile('🕌',ar(L.filter(p=>p.pr>0).length),'سجّلوا صلواتهم','pr')}${tile('⭐',avg?ar(Math.round(avg*10)/10):'—','متوسط مستوى الأطفال','lv')}`)
+    +grp('🎮 أونلاين والأمان',`${tile('⚔️',ar(games),'مباراة لُعبت','play')}${tile('🎮',ar(players),'طفل لعبوا أونلاين','play')}${tile('👑',mx.lv?ar(mx.lv):'—',mx.lv?'👑 الأعلى مستوى:<br>«'+esc(mx.nick)+'»':'أعلى مستوى','max')}${n-b-g>0?tile('✏️',ar(ren),'غيّروا أسماءهم','names'):''}${tile('⚠️',ar(sus2),'يتعمّدون الغلط','sus')}${tile('🔢',ar(ch2),'غيّروا أرقامهم (غش)','cheat')}${tile('⛔',ar(bn),'محظورون الآن','ban')}`)
     +`<p class="tip" style="margin:6px 0 0">👆 اضغط على أي مربع لترى أسماء أصحابه</p>`;
   el.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{const f=b.dataset.f;
     if(f=='max'){if(mx.id)kidCard(mx.id);return}openKids(f)})}
