@@ -473,9 +473,26 @@ function tapPaint(p){const k='p_'+p.id;
 const ready=()=>O()&&O().db&&O().me&&O().profile;
 let pubT=0;
 function publishSoon(){clearTimeout(pubT);pubT=setTimeout(publish,1200)}
-function publish(){if(!ready())return;const A=O(),L=Deco.myLook();
-  const AF=ADM(); // (v19.9) مدينة المدير مكتملة دائمًا، فيُنشر بيته مكتملًا (٥ طوابق، قصر، كل المباني) ليراه الأصدقاء كما يراه هو
-  A.db.ref('houses/'+A.me).set({f:AF?5:Bayt.done,c:Bayt.cups,p:L.p,w:L.w,i:L.i,g:L.g||'',u:AF?'333333':L.u||'',m:AF?'33333':window.Madina?Madina.code():'',q:AF||window.Qasr&&Qasr.done?1:0,n:A.profile.nick,a:A.profile.av,t:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{})}
+// (v20.8) آخر ما نُشر فعلًا (بصمة + وقت): إن تغيّر البيت ولم يُنشر (بلا إنترنت أو قبل الاتصال) يُنشر وحده لاحقًا
+const HPK='usul5_hpub_v1';
+const houseData=A=>{const L=Deco.myLook(),AF=ADM(); // (v19.9) مدينة المدير مكتملة دائمًا، فيُنشر بيته مكتملًا (٥ طوابق، قصر، كل المباني) ليراه الأصدقاء كما يراه هو
+  return {f:AF?5:Bayt.done,c:Bayt.cups,p:L.p,w:L.w,i:L.i,g:L.g||'',u:AF?'333333':L.u||'',m:AF?'33333':window.Madina?Madina.code():'',q:AF||window.Qasr&&Qasr.done?1:0,n:A.profile.nick,a:A.profile.av}};
+function publish(){if(!ready())return;const A=O();
+  const d=houseData(A);
+  const sig=A.me+'|'+JSON.stringify(d);
+  A.db.ref('houses/'+A.me).set(Object.assign({},d,{t:firebase.database.ServerValue.TIMESTAMP})).then(()=>{try{localStorage.setItem(HPK,JSON.stringify({s:sig,t:Date.now()}))}catch(e){}}).catch(()=>{})}
+// (v20.8) مزامنة تلقائية: الصديق كان يرى بيتًا قديمًا (مثلًا ٥ طوابق بدل القصر) لأن النشر كان يحدث فقط عند فتح شاشات معيّنة.
+// الآن: عند فتح التطبيق، وكل ٥ دقائق، وعند رجوع الإنترنت — يُنشر البيت إن تغيّر شيء منذ آخر نشر ناجح (أو مضى ٦ ساعات).
+async function syncHouse(){try{const A=O();if(!A||!navigator.onLine||!window.Bayt||!window.Deco)return;
+  if(!ready()){if(!state.online)return;await A.init();if(!ready())return}
+  const d=houseData(A);
+  let last={};try{last=JSON.parse(localStorage.getItem(HPK)||'{}')||{}}catch(e){}
+  if(last.s===A.me+'|'+JSON.stringify(d)&&Date.now()-(last.t||0)<6*3600e3)return;
+  publish()}catch(e){}}
+setTimeout(syncHouse,8000);
+setInterval(()=>{if(document.visibilityState=='visible')syncHouse()},5*60000);
+window.addEventListener('online',()=>setTimeout(syncHouse,3000));
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState=='visible')setTimeout(syncHouse,2000)});
 const clean=h=>({w:WALLS.some(w=>w.id==(h&&h.w))?h.w:'cream',f:Math.max(0,Math.min(5,h&&h.f|0)),c:Math.max(0,+(h&&h.c)||0),p:PT[h&&h.p]?h.p:'sand',i:lookItems({i:h&&h.i}).join(','),g:cleanG(h&&h.g),u:/^[0-3]{5,6}$/.test(h&&h.u||'')?h.u:''});
 
 async function friends(){show('jannah');backTo=null;$('#jTitle').textContent='👥 بيوت أصدقائي';updJ();const B=$('#jBody');
