@@ -228,7 +228,12 @@ const key=r=>Math.max(r.xp|0,(r.wins|0)*10);
 async function loadKids(API){
   if(!heroes){try{const s=(await API.db.ref('leader/'+API.week()).get()).val()||{};heroes=Object.entries(s).map(([id,v])=>({id,...v})).filter(r=>!r.adm&&r.id!=API.me).sort((a,b)=>key(b)-key(a)).slice(0,15)}catch(e){heroes=[]}}
   if(!all){try{const s=(await API.db.ref('profiles').get()).val()||{};all=Object.entries(s).map(([id,v])=>({id,nick:v.nick||'؟',av:v.av||'❔',lv:v.lv|0,tt:v.tt||'',wins:v.wins|0,games:v.games|0,code:v.code||'',seen:+v.seen||0,acc:v.acc||{},md:v.md||'',hist:typeof v.hist=='string'?v.hist:'',nts:+v.nts||0,sx:v.sx||sexOf(v.av),since:+v.since||0,pl:+v.pl||0,on:+v.on||0,hz:(v.sm&&v.sm.hz)|0,pr:(v.sm&&v.sm.pr)|0}))}catch(e){all=[]}}
-  try{bans=(await API.db.ref('bans').get()).val()||{}}catch(e){bans={}}}
+  try{bans=(await API.db.ref('bans').get()).val()||{}}catch(e){bans={}}
+  try{reps=(await API.db.ref('reports').get()).val()||{}}catch(e){reps={}}}
+// 🚩 بلاغات الأسماء (v20.7): reports/{الطفل}/{المبلِّغ} = {n: الاسم وقت البلاغ, t}
+let reps={};const repN=id=>Object.keys(reps[id]||{}).length;
+async function clearReps(id){await O().db.ref('reports/'+id).remove();delete reps[id];const c=$('#idRepN');if(c)c.textContent=repSum()}
+const repSum=()=>{const n=Object.keys(reps).filter(repN).length;return n?`🔴 ${ar(n)} ${n==1?'اسم':n==2?'اسمان':n<=10?'أسماء':'اسمًا'} تنتظرك`:'لا توجد بلاغات 👍'};
 let bans={};
 // ولد أو بنت: من اختياره، وإلا من صورته
 const sexOf=av=>/👧|🧕|👩/.test(av||'')?'g':/👦|🧒|👨/.test(av||'')?'b':'';
@@ -247,7 +252,7 @@ function kidRow(r,i){const p=all&&all.find(x=>x.id==r.id)||{};const lv=r.lv||p.l
   const st=[lv?`⭐ ${ar(lv)}`:'',r.xp?`✨ ${ar(r.xp)}`:'',w?`🏆 ${ar(w)}`:''].filter(Boolean).join('  ');
   const gn=gone(p);
   return `<div class="idk ${i!=null&&i<3?'top'+(i+1):''} ${gn?'gone':''}" data-k="${esc(r.id)}"><span class="rk">${rk}</span><span class="av">${esc(p.av||r.av)}${on?'<i class="on"></i>':''}</span>
-    <span class="nm"><b>${esc(p.nick||r.nick)}${b?' ⛔':''}${sus(p)?' ⚠️':''}${gn?' 💤':''}</b>${gn?`<small class="gn">💤 غائب منذ ${ar(goneDays(p))} يومًا</small>`:''}${tab=='pnow'?(plNow(p)?`<small class="gn" style="color:#14794f">🎮 يلعب مباراة الآن · بدأ ${ago(p.pl)}</small>`:`<small class="gn" style="color:#14794f">🟢 داخل التطبيق الآن</small>`):''}${tab=='hz'?`<small class="gn" style="color:#14794f">📖 حفظ ${ar(p.hz)} ${p.hz>2&&p.hz<11?'سور':'سورة'}</small>`:''}${tab=='pr'?`<small class="gn" style="color:#14794f">🕌 ${ar(p.pr)} صلاة</small>`:''}${(tab=='new'||tab=='fresh')&&p.since?`<small class="gn" style="color:#14794f">🆕 سجّل ${ago(p.since)}</small>`:''}${tab=='names'&&p.hist?`<small class="gn">✏️ كان: ${esc(p.hist.split('|').join('، '))} · ${ago(p.nts)}</small>`:''}${st?`<small class="st1">${st}</small>`:''}${sub?`<small>${sub}</small>`:''}</span>
+    <span class="nm"><b>${esc(p.nick||r.nick)}${b?' ⛔':''}${sus(p)?' ⚠️':''}${gn?' 💤':''}</b>${gn?`<small class="gn">💤 غائب منذ ${ar(goneDays(p))} يومًا</small>`:''}${tab=='pnow'?(plNow(p)?`<small class="gn" style="color:#14794f">🎮 يلعب مباراة الآن · بدأ ${ago(p.pl)}</small>`:`<small class="gn" style="color:#14794f">🟢 داخل التطبيق الآن</small>`):''}${tab=='hz'?`<small class="gn" style="color:#14794f">📖 حفظ ${ar(p.hz)} ${p.hz>2&&p.hz<11?'سور':'سورة'}</small>`:''}${tab=='pr'?`<small class="gn" style="color:#14794f">🕌 ${ar(p.pr)} صلاة</small>`:''}${(tab=='new'||tab=='fresh')&&p.since?`<small class="gn" style="color:#14794f">🆕 سجّل ${ago(p.since)}</small>`:''}${repN(r.id)?`<small class="gn" style="color:#c43d38">🚩 بلّغ عن اسمه ${ar(repN(r.id))}</small>`:''}${tab=='names'&&p.hist?`<small class="gn">✏️ كان: ${esc(p.hist.split('|').join('، '))} · ${ago(p.nts)}</small>`:''}${st?`<small class="st1">${st}</small>`:''}${sub?`<small>${sub}</small>`:''}</span>
     <button class="gb" data-g="${esc(r.id)}" aria-label="جائزة">🎁</button></div>`}
 /* 📋 تفاصيل تقدّم الطفل للمدير: مربعات صغيرة مجسّمة */
 function kidDetails(sm,HL){const u=String((sm&&sm.u)||(HL&&HL.u)||'00000'),W=['لا يوجد','خشبي','حجري','رخامي'],G=['لم تُزرع','خضراء','ورود وممرّ','نافورة'];
@@ -285,6 +290,10 @@ async function kidCard(id){const API=O();let p=(all||[]).find(x=>x.id==id);
       ${p.hist?`<br>✏️ أسماؤه السابقة: <b>${esc(p.hist.split('|').join('، '))}</b>${p.nts?` (آخر تغيير ${ago(p.nts)})`:''}`:''}
       ${b?`<br>⛔ <b style="color:#c43d38">محظور حتى ${new Date(b.until).toLocaleString('ar-IQ',{weekday:'long',hour:'numeric',minute:'2-digit'})}</b>${b.why?` — ${esc(b.why)}`:''}`:''}
       ${sus(p)?`<br><b style="color:#b06a2c">⚠️ قد يتعمّد الإجابات الخاطئة</b>`:''}</div>
+    ${repN(id)?`<div style="text-align:right;font-size:15px;line-height:1.8;background:#fdecea;border:2px solid #e2504a;border-radius:14px;padding:6px 10px;margin-top:6px">
+      🚩 <b style="color:#c43d38">بلّغ عن اسمه ${repN(id)==1?'طفل واحد':repN(id)==2?'طفلان':ar(repN(id))+(repN(id)<=10?' أطفال':' طفلًا')}</b><br>
+      <small>الاسم وقت البلاغ: <b>${esc([...new Set(Object.values(reps[id]).map(v=>v&&v.n).filter(Boolean))].join('، ')||p.nick)}</b> · آخر بلاغ ${ago(Math.max(...Object.values(reps[id]).map(v=>+(v&&v.t)||0)))}</small>
+      <div class="nav" style="margin-top:4px"><button class="btn" id="kRepName" style="background:#2f6fd0;box-shadow:0 5px 0 #1d4e9e">✏️ غيّر اسمه</button><button class="btn sec" id="kRepOk">✓ الاسم عادي</button></div></div>`:''}
     <div class="nav"><button class="btn" id="kCity" style="background:linear-gradient(135deg,#1fa463,#14794f);box-shadow:0 5px 0 #0c5a39;font-size:17px">🏙️ ادخل مدينته وشاهد بيته</button></div>
     ${sm&&sm.dt?`<div class="nav"><button class="btn" id="kDirt" style="background:#8a5a2b;box-shadow:0 5px 0 #5e3b1a">🧹 نبّهه: بيته متّسخ (${ar(sm.dt)} من ٤)</button></div>`:''}
     <div class="nav"><button class="btn gold" id="kGift">🎁 جائزة</button><button class="btn" id="kWarn" style="background:#e57c1f;box-shadow:0 5px 0 #a8551a">⚠️ تنبيه</button></div>
@@ -297,6 +306,8 @@ async function kidCard(id){const API=O();let p=(all||[]).find(x=>x.id==id);
     $('#kGift').onclick=()=>{closeModal();giftTo(id,p.nick,p.av)};
     $('#kWarn').onclick=()=>warnTo(id,p);
     $('#kName').onclick=()=>renameKid(id,p);
+    const rn=$('#kRepName');if(rn)rn.onclick=()=>renameKid(id,p);
+    const ro=$('#kRepOk');if(ro)ro.onclick=async()=>{try{await clearReps(id);closeModal();API.toast('حُذف البلاغ ✓');drawKids()}catch(e){API.toast('تعذّر')}};
     $('#kAdj').onclick=()=>adjustKid(id,p);
     const r={id,nick:p.nick,av:p.av,m:hv&&/^[0-3]{5}$/.test(hv.m||'')?hv.m:'',u:hv&&hv.u||'',f:hv?hv.f|0:1,h:hv,p:{nick:p.nick,av:p.av},flg:pf&&pf.flg,dt:sm?sm.dt|0:0,sm,lv:p.lv};
     $('#kCity').onclick=()=>{closeModal();if(!(window.City3D&&City3D.adminVisit&&City3D.adminVisit(r)))API.toast('هذا الجهاز لا يعرض المدينة المجسّمة')};
@@ -322,6 +333,7 @@ function renameKid(id,p){const API=O();
     $('#rnY').onclick=async()=>{const n=$('#rnN').value.trim().replace(/\s+/g,' ');if(n.length<2){API.toast('اكتب الاسم');return}$('#rnY').disabled=true;
       try{await API.db.ref('prizes/'+id).push({msg:'',j:0,rn:n,ts:firebase.database.ServerValue.TIMESTAMP});
         const lr=API.db.ref(`leader/${API.week()}/${id}`);try{if((await lr.get()).exists())await lr.update({nick:n})}catch(e){}
+        await clearReps(id).catch(()=>{});   // تغيّر الاسم ← البلاغ انتهى
         [all,heroes].forEach(L=>(L||[]).forEach(x=>{if(x.id==id){x.hist=[x.nick].concat(String(x.hist||'').split('|').filter(Boolean)).slice(0,5).join('|');x.nick=n;x.nts=Date.now()}}));
         closeModal();API.toast(`تغيّر الاسم إلى ${n} ✓`);drawKids()}catch(e){$('#rnY').disabled=false;API.toast('تعذّر')}}})}
 /* 💎✨ زيادة أو خصم الجواهر والنقاط */
@@ -376,10 +388,11 @@ function drawKids(){const el=$('#idKids');if(!el)return;let rows=[],num=false;
   else if(tab=='sus'){rows=(all||[]).filter(p=>sus(p)||banOf(p.id)).sort((a,b)=>(accOf(a)||0)-(accOf(b)||0))}
   else if(tab=='gone'){rows=(all||[]).filter(gone).sort((a,b)=>a.seen-b.seen)}
   else if(tab=='names'){rows=(all||[]).filter(p=>p.hist).sort((a,b)=>b.nts-a.nts)}
+  else if(tab=='rep'){rows=(all||[]).filter(p=>repN(p.id)).sort((a,b)=>repN(b.id)-repN(a.id))}
   else if(tab=='recent'){rows=(all||[]).filter(p=>p.seen).sort((a,b)=>b.seen-a.seen).slice(0,30)}
   else{const t=q.trim().replace(/[أإآ]/g,'ا');rows=(all||[]).filter(r=>!t||String(r.nick).replace(/[أإآ]/g,'ا').includes(t)||String(r.code).toUpperCase()==t.toUpperCase()).sort((a,b)=>(b.seen||0)-(a.seen||0))}
   const total=rows.length;rows=rows.slice(0,lim);
-  el.innerHTML=rows.length?'<div class="idkg">'+rows.map((r,i)=>kidRow(r,num?i:null)).join('')+'</div>'+(total>rows.length?`<button class="btn sec" id="kMore" style="flex:none;width:100%;margin-top:8px">⬇️ عرض المزيد (باقي ${ar(total-rows.length)})</button>`:'')+(tab=='all'?`<p class="tip" style="margin:4px 0">${q.trim()?`النتائج: ${ar(total)}`:`كل المشتركين: ${ar(total)} · الأحدث دخولًا أولًا`}</p>`:''):`<p class="tip">${tab=='all'?(q?'لا يوجد طفل بهذا الاسم':`عدد الأطفال: ${ar((all||[]).length)} — اكتب اسمًا للبحث`):tab=='sus'?'لا أحد مشبوه 👍':tab=='gone'?'لا أحد غائب أكثر من شهر 👍':tab=='names'?'لم يغيّر أحد اسمه بعد':'لا أحد بعد'}</p>`;
+  el.innerHTML=rows.length?'<div class="idkg">'+rows.map((r,i)=>kidRow(r,num?i:null)).join('')+'</div>'+(total>rows.length?`<button class="btn sec" id="kMore" style="flex:none;width:100%;margin-top:8px">⬇️ عرض المزيد (باقي ${ar(total-rows.length)})</button>`:'')+(tab=='all'?`<p class="tip" style="margin:4px 0">${q.trim()?`النتائج: ${ar(total)}`:`كل المشتركين: ${ar(total)} · الأحدث دخولًا أولًا`}</p>`:''):`<p class="tip">${tab=='all'?(q?'لا يوجد طفل بهذا الاسم':`عدد الأطفال: ${ar((all||[]).length)} — اكتب اسمًا للبحث`):tab=='sus'?'لا أحد مشبوه 👍':tab=='gone'?'لا أحد غائب أكثر من شهر 👍':tab=='names'?'لم يغيّر أحد اسمه بعد':tab=='rep'?'لا توجد بلاغات 👍':'لا أحد بعد'}</p>`;
   const mo=$('#kMore');if(mo)mo.onclick=()=>{lim+=40;drawKids()};
   el.querySelectorAll('[data-k]').forEach(b=>b.onclick=e=>{if(e.target.closest('[data-g]'))return;kidCard(b.dataset.k)});
   el.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{const id=b.dataset.g,r=rows.find(x=>x.id==id)||{},p=(all||[]).find(x=>x.id==id)||{};giftTo(id,r.nick||p.nick,r.av||p.av)})}
@@ -406,6 +419,7 @@ async function panel(){const API=O();heroes=null;all=null;view='main';
       <button id="tFind"><span>🔍</span><b>ابحث عن طفل</b><small>بالاسم أو الرمز</small></button>
       <button id="tRep"><span>📋</span><b>تقرير التطبيق</b><small>انسخه أو شاركه</small></button>
       <button id="idSubs"><span>👥</span><b>المشتركون</b><small id="idSubsN">⏳</small></button>
+      <button id="tReps" style="grid-column:1/-1"><span>🚩</span><b>بلاغات الأسماء</b><small id="idRepN">⏳</small></button>
       <button id="tVoice" style="grid-column:1/-1"><span>🎙️</span><b>صوتي للأطفال</b><small>اقرأ العبارة بصوتك فيسمعها الأطفال عند كل إنجاز</small></button>
     </div>
     <div class="idbox"><h3>📊 إحصائيات التطبيق</h3><div id="idStats"><p class="tip">⏳</p></div></div>
@@ -413,6 +427,7 @@ async function panel(){const API=O();heroes=null;all=null;view='main';
     <p class="idsig">👑 جنّتي الصغيرة · بإشراف الشيخ علاء المطوري</p></div>`;
   body().querySelectorAll('[data-k0]').forEach(b=>b.onclick=()=>{if(all)openKids(b.dataset.k0)});
   $('#idSubs').onclick=()=>{if(all)openKids()};
+  $('#tReps').onclick=()=>{if(all)openKids('rep')};
   $('#tFind').onclick=()=>{if(!all)return;openKids();setTimeout(()=>{const i=$('#kQ');if(i)i.focus()},150)};
   $('#tMsg').onclick=()=>sendNews(API,0);$('#tPin').onclick=()=>sendNews(API,1);$('#tGift').onclick=()=>giftAll(API);$('#tRep').onclick=()=>report(API);$('#tVoice').onclick=()=>{if(window.Hamas)Hamas.recorder()};
   await loadKids(API);{const c=$('#idCnt'),n=(all||[]).length,g=(all||[]).filter(gone).length,u=(all||[]).filter(x=>!x.seen).length;
@@ -420,6 +435,7 @@ async function panel(){const API=O();heroes=null;all=null;view='main';
     const fr=lastV?(all||[]).filter(fresh).length:0,nb=$('#idNew');
     if(nb&&fr){nb.hidden=false;nb.innerHTML=`<span class="bl">🔔</span> ${fr==1?'مشترك جديد واحد':fr==2?'مشتركان جديدان':ar(fr)+(fr<=10?' مشتركين جدد':' مشتركًا جديدًا')} من آخر مرة فتحت الإدارة ‹`;nb.onclick=()=>openKids('fresh')}
     if(c)c.innerHTML=`💤 غائبون شهرًا أو أكثر: ${ar(g)}${u?` · ❔ بلا تسجيل دخول: ${ar(u)}`:''}`;
+    const rq=$('#idRepN');if(rq)rq.textContent=repSum();
     const sn=$('#idSubsN');if(sn)sn.textContent=`${ar(n)} طفل · ☀️ ${ar((all||[]).filter(p=>p.seen&&Date.now()-p.seen<864e5).length)} اليوم`}
   stats(API);
   // الرسائل
@@ -476,7 +492,7 @@ const FL={b:['👦 الأولاد',p=>p.sx=='b',bySeen],g:['👧 البنات',p
 function openKids(t0){view='kids';tab=t0||'all';q='';lim=40;window.scrollTo(0,0);
   body().innerHTML=`<div class="idban"><span class="sh">👥</span><span><b>المشتركون</b><small>${ar((all||[]).length)} طفل · اضغط على أي طفل لترى ملفّه</small></span></div>
     <input class="inp" id="kQ" placeholder="🔎 ابحث باسم الطفل أو رمزه" style="text-align:right;margin-bottom:6px">
-    <div class="jrooms" style="margin-bottom:8px;flex-wrap:wrap"><button data-tab="all">👥 الكل</button><button data-tab="heroes">🏅 الأبطال</button><button data-tab="top">⭐ المميّزون</button><button data-tab="names">✏️ غيّروا أسماءهم</button><button data-tab="gone">💤 غائبون</button><button data-tab="sus">⚠️ المشبوهون</button></div>
+    <div class="jrooms" style="margin-bottom:8px;flex-wrap:wrap"><button data-tab="all">👥 الكل</button><button data-tab="heroes">🏅 الأبطال</button><button data-tab="top">⭐ المميّزون</button><button data-tab="names">✏️ غيّروا أسماءهم</button><button data-tab="gone">💤 غائبون</button><button data-tab="sus">⚠️ المشبوهون</button><button data-tab="rep">🚩 بلاغات</button></div>
     <div id="idKids"></div>
     <p class="tip">بطل الأسبوع يأخذ تلقائيًا 💎١٠٠ (والثاني ٦٠ والثالث ٣٠) عند بداية الأسبوع الجديد.</p>
     <button class="btn sec" id="idKBack" style="flex:none;width:100%">‹ رجوع إلى لوحة الإدارة</button>`;
