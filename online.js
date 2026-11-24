@@ -125,7 +125,7 @@
     // ولد أو بنت: يختاره الطفل عند التسجيل، والصور تظهر حسب اختياره
     let sx = (window.Cups && Cups.sex) || (profile && profile.sx) || '';
     if (!sx && profile && profile.av) sx = AV_G.includes(profile.av) ? 'g' : AV_B.includes(profile.av) ? 'b' : '';
-    let av = (profile && profile.av) || '', own = (profile && profile.nick) || '';
+    let av = (profile && profile.av) || state.av || '', own = (profile && profile.nick) || state.nick || '';
     const list = () => sx === 'g' ? AV_G : AV_B;
     const draw = () => {
       if (sx && !list().includes(av)) av = list()[0];
@@ -533,6 +533,56 @@
   }
 
   function toast(t) { const d = document.createElement('div'); d.className = 'ctbanner b2'; d.style.fontSize = '18px'; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 1400); }
+
+  /* v21.1: إجباري من أول دخول — ولد أو بنت + صورة + اسم (طلب صاحب التطبيق).
+     مع الإنترنت: شاشة «اسمي وصورتي» الحقيقية (الاسم محجوز للطفل). بلا إنترنت: نفس الاختيارات تُحفظ بالجهاز،
+     وتُكمَّل أونلاين لاحقًا (setupProfile يأخذ الاسم والصورة المحفوظين). تتكرّر عند كل رجوع للرئيسية حتى يكمل. */
+  const needSetup = () => !(state.nick && window.Cups && Cups.sex);
+  let gating = false;
+  const goHome = () => { gating = false; renderHome(); show('home'); };
+  async function gate() {
+    if (gating || !needSetup()) return; gating = true;
+    show('online'); setHead('✏️ اسمي وصورتي');
+    body().innerHTML = `<div class="handoff"><div class="big spin">🌐</div><p>لحظة…</p></div>`;
+    try {
+      await Promise.race([init(), new Promise((_, no) => setTimeout(() => no(new Error('slow')), 8000))]);
+      if (profile && profile.nick && (profile.sx || window.Cups && Cups.sex)) { // طفل مسجّل من قبل: نأخذ بياناته بدون سؤال
+        const sx = (window.Cups && Cups.sex) || profile.sx; if (window.Cups && Cups.setSex) Cups.setSex(sx);
+        state.nick = profile.nick; state.av = profile.av; save(); return goHome();
+      }
+      afterProf = goHome; window.onlineReturn = goHome; setupProfile();
+    } catch (e) { localSetup(); }
+  }
+  function localSetup() {
+    let sx = (window.Cups && Cups.sex) || '', av = state.av || '', own = state.nick || '';
+    const draw = () => {
+      const list = sx === 'g' ? AV_G : AV_B; if (sx && !list.includes(av)) av = list[0];
+      body().innerHTML = `<div class="card" style="flex:none">
+        <h2 style="text-align:center">${sx === 'g' ? 'مرحبًا يا بطلة! 👋' : 'مرحبًا يا بطل! 👋'}</h2>
+        <div class="pick-h">أنا…</div>
+        <div class="sxpick"><button class="${sx === 'b' ? 'on' : ''}" data-sx="b"><span>👦</span>ولد</button><button class="${sx === 'g' ? 'on' : ''}" data-sx="g"><span>👧</span>بنت</button></div>
+        ${sx ? `<div class="preview"><span class="av">${av}</span><b id="nickPrev">${esc(own || 'اسمك هنا')}</b></div>
+        <div class="pick-h">صورتك</div><div class="chips">${list.map(a => `<button class="pk ${a === av ? 'on' : ''}" data-av="${a}">${a}</button>`).join('')}</div>
+        <div class="pick-h">✏️ اسمك</div>
+        <input class="inp" id="ownNick" maxlength="16" placeholder="${sx === 'g' ? 'مثل: زهراء، فاطمة، مريم' : 'مثل: حيدر، علي، أبو علي الصغير'}" value="${esc(own)}" autocomplete="off">
+        <div class="fb" id="nickMsg" style="font-size:14px">اسمك الأول أو اسم تحبّه، بلا اسم العائلة 🤍 حروف عربية فقط (٣ إلى ١٦ حرفًا)</div>
+        <div class="nav"><button class="btn gold" id="saveProf">هذا اسمي ✓</button></div>` : `<p style="text-align:center;color:var(--muted)">اختر: ولد أو بنت 👆</p>`}</div>`;
+      body().querySelectorAll('[data-sx]').forEach(b => b.onclick = () => { sx = b.dataset.sx; draw(); });
+      if (!sx) return;
+      body().querySelectorAll('[data-av]').forEach(b => b.onclick = () => { av = b.dataset.av; draw(); });
+      $('#ownNick').oninput = e => { own = e.target.value; $('#nickPrev').textContent = own.trim() || 'اسمك هنا'; };
+      $('#saveProf').onclick = () => {
+        const why = badNick(own); if (why) { $('#nickMsg').className = 'fb bad'; $('#nickMsg').textContent = why; $('#ownNick').focus(); return; }
+        if (window.Cups && Cups.setSex) Cups.setSex(sx);
+        state.nick = own.trim().replace(/\s+/g, ' '); state.av = av; save(); toast('حُفظ اسمك وصورتك ✓'); goHome();
+      };
+    };
+    draw();
+  }
+  { const _rh = window.renderHome; window.renderHome = function () { const r = _rh.apply(this, arguments); if (needSetup()) setTimeout(homeGate, 400); return r; };
+    // فقط إذا الطفل فعلًا بالرئيسية (رجع منها بزر الرجوع) نعيد فتح الشاشة؛ لا نقاطعه وهو يكتب
+    const homeGate = () => { const h = document.getElementById('home'); if (needSetup() && h && h.classList.contains('on')) { gating = false; gate(); } };
+    window.addEventListener('load', () => setTimeout(homeGate, 1200)); }
 
   window.openOnline = openOnline;
   // for «بيتك في الجنة»: friends' houses, gifts and likes
