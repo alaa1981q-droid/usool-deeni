@@ -140,6 +140,7 @@
         <div class="pick-h">✏️ اسمك</div>
         <input class="inp" id="ownNick" maxlength="16" placeholder="${sx === 'g' ? 'مثل: زهراء، فاطمة، مريم' : 'مثل: حيدر، علي، أبو علي الصغير'}" value="${esc(own)}" autocomplete="off">
         <div class="fb" id="nickMsg" style="font-size:14px">اسمك الأول أو اسم تحبّه، بلا اسم العائلة 🤍 حروف عربية فقط (٣ إلى ١٦ حرفًا)</div>
+        ${profile && profile.nick ? `<p style="text-align:center;font-size:14px;color:var(--muted);margin:4px 0">${(profile.nc | 0) < 1 ? '✏️ يمكنك تغيير اسمك مرة واحدة فقط' : '📨 تغيير اسمك مرة أخرى يحتاج موافقة الإدارة'}</p>` : ''}
         <div class="nav"><button class="btn gold" id="saveProf">هذا اسمي ✓</button></div>` : `<p style="text-align:center;color:var(--muted)">اختر: ولد أو بنت 👆</p>`}</div>`;
       const lk = locked();
       if (lk && sx) { own = profile.nick; const i = $('#ownNick'); i.value = own; i.disabled = true; $('#nickPrev').textContent = own;
@@ -153,12 +154,22 @@
         $('#saveProf').disabled = true;
         try {
           const why = locked() ? '' : badNick(own); if (why) { $('#nickMsg').className = 'fb bad'; $('#nickMsg').textContent = why; $('#saveProf').disabled = false; $('#ownNick').focus(); return; }
-          const nick = own.trim().replace(/\s+/g, ' '), isOwn = true;
+          let nick = own.trim().replace(/\s+/g, ' '), reqTo = '';
+          const isOwn = true;
+          // v21.2: تغيير الاسم مرة واحدة فقط؛ التغيير الثاني يصير طلبًا للإدارة (nreq/$uid) والاسم الجديد يُحجز له
+          const old0 = profile && profile.nick, changing = !!old0 && old0 !== nick && !locked();
+          if (changing && (profile.nc | 0) >= 1) {
+            let ok = true; try { ok = (await db.ref('nicks/' + nickKey(nick)).transaction(v => (v === null || v === me ? me : undefined))).committed; } catch (e) {}
+            if (!ok) { $('#nickMsg').className = 'fb bad'; $('#nickMsg').textContent = 'هذا الاسم أخذه طفل آخر 🙂 غيّره قليلًا، مثل: «' + nick + ' الصغير» أو أضف اسمًا ثانيًا'; $('#saveProf').disabled = false; $('#ownNick').focus(); return; }
+            try { const pr = (await db.ref('nreq/' + me).get()).val(); if (pr && pr.to && nickKey(pr.to) !== nickKey(nick) && nickKey(pr.to) !== nickKey(old0)) releaseNick(pr.to); } catch (e) {}
+            await db.ref('nreq/' + me).set({ from: old0, to: nick, av, t: firebase.database.ServerValue.TIMESTAMP });
+            reqTo = nick; nick = old0;   // الاسم يبقى كما هو حتى توافق الإدارة، والصورة تُحفظ الآن
+          }
           if (!locked() && !(await claimNick(nick))) { $('#nickMsg').className = 'fb bad'; $('#nickMsg').textContent = 'هذا الاسم أخذه طفل آخر 🙂 غيّره قليلًا، مثل: «' + nick + ' الصغير» أو أضف اسمًا ثانيًا'; $('#saveProf').disabled = false; $('#ownNick').focus(); return; }
           const code = (profile && profile.code) || await claimCode();
           // سجلّ الأسماء السابقة (تراه الإدارة): آخر ٥ أسماء ووقت آخر تغيير
           const old = profile && profile.nick, extra = {};
-          if (old && old !== nick) { extra.hist = [old].concat(String(profile.hist || '').split('|').filter(Boolean)).filter(x => x !== nick).slice(0, 5).join('|'); extra.nts = now(); }
+          if (old && old !== nick) { extra.hist = [old].concat(String(profile.hist || '').split('|').filter(Boolean)).filter(x => x !== nick).slice(0, 5).join('|'); extra.nts = now(); extra.nc = (profile.nc | 0) + 1; }
           const isNew = !profile || !profile.nick;
           if (!profile || !profile.since) extra.since = now();
           profile = Object.assign({ wins: 0, games: 0 }, profile || {}, { nick, av, sx, code, own: isOwn }, extra);
@@ -167,7 +178,9 @@
           state.online = true; state.nick = nick; state.av = av; save();
           startPresence(); refreshLeader();
           if (isNew && window.Idara && Idara.welcome) Idara.welcome(nick);
-          if (afterProf) { const f = afterProf; afterProf = null; window.onlineReturn = null; toast('حُفظ اسمك وصورتك ✓'); f(); } else hub();
+          const fin = () => { if (afterProf) { const f = afterProf; afterProf = null; window.onlineReturn = null; toast('حُفظ اسمك وصورتك ✓'); f(); } else hub(); };
+          if (reqTo) { modal(`<div style="font-size:54px">📨</div><h3 style="margin:4px 0">وصل طلبك إلى الإدارة</h3><p>طلبت تغيير اسمك إلى «${esc(reqTo)}».<br>عندما توافق الإدارة يتغيّر اسمك وحده 🌷<br>إلى ذلك الوقت يبقى اسمك «${esc(nick)}».</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`); hub(); }
+          else fin();
         } catch (e) { $('#saveProf').disabled = false; toast('تعذّر الحفظ، حاول مرة أخرى'); }
       };
     };
@@ -197,6 +210,7 @@
       return true;
     } catch (e) { return true; }                       // إن لم تُنشر القواعد بعد: لا نمنع الطفل من الحفظ
   }
+  const releaseNick = n => db.ref('nicks/' + nickKey(n)).transaction(v => (v === me ? null : undefined)).catch(() => {});
   function badNick(t) {
     t = t.trim().replace(/\s+/g, ' ');
     if (t.length < 3) return 'الاسم قصير، اكتب ٣ حروف على الأقل';
@@ -597,6 +611,7 @@
       body().innerHTML = `<div class="handoff"><div class="big spin">🌐</div><p>جارٍ الاتصال…</p></div>`;
       try { await init(); } catch (e) { afterProf = null; return openOnline(); } setupProfile(); },
     refreshLeader: () => { if (db && profile) refreshLeader(); },
+    claimNick: n => claimNick(n), releaseNick: n => releaseNick(n),
     openAdd: async () => { show('online'); try { await init(); } catch (e) { return openOnline(); } if (banned()) return bannedScreen(); if (!profile) return setupProfile(); addFriend(); }
   };
   window.onlineBack = () => { if (room && room.data && room.data.state === 'play' && !room.done) {

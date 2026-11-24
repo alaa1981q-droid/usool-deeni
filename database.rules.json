@@ -7,7 +7,10 @@
       "$uid": {
         ".read": "auth != null",
         ".write": "auth != null && auth.uid === $uid",
-        ".validate": "newData.child('nick').isString() && newData.child('nick').val().length <= 40 && newData.child('av').isString() && newData.child('av').val().length <= 8 && (!newData.child('adm').exists() || root.child('admins/' + $uid).val() === true) && (!data.child('tg').exists() || newData.child('tg').exists())",
+        ".validate": "newData.child('nick').isString() && newData.child('nick').val().length <= 40 && newData.child('av').isString() && newData.child('av').val().length <= 8 && (!newData.child('adm').exists() || root.child('admins/' + $uid).val() === true) && (!data.child('tg').exists() || newData.child('tg').exists()) && (!data.child('nc').exists() || newData.child('nc').exists()) && (!data.child('nick').exists() || newData.child('nick').val() === data.child('nick').val() || root.child('admins/' + auth.uid).val() === true || (newData.child('nc').val() === (data.child('nc').exists() ? data.child('nc').val() : 0) + 1 && (newData.child('nc').val() <= 1 || root.child('nok/' + $uid).val() === newData.child('nick').val())))",
+        "nc": {
+          ".validate": "newData.isNumber() && newData.val() >= (data.exists() ? data.val() : 0)"
+        },
         "lv": {
           ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 200"
         },
@@ -43,6 +46,21 @@
         ".read": "auth != null",
         ".write": "auth != null && (!data.exists() || data.val() === auth.uid) && (!newData.exists() || newData.val() === auth.uid)",
         ".validate": "!newData.exists() || ($key.length <= 40 && newData.isString())"
+      }
+    },
+    "nreq": {
+      ".read": "auth != null && root.child('admins/' + auth.uid).val() === true",
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && (auth.uid === $uid || root.child('admins/' + auth.uid).val() === true)",
+        ".validate": "!newData.exists() || (newData.child('from').isString() && newData.child('from').val().length <= 40 && newData.child('to').isString() && newData.child('to').val().length <= 40)"
+      }
+    },
+    "nok": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins/' + auth.uid).val() === true)",
+        ".write": "auth != null && root.child('admins/' + auth.uid).val() === true",
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 40)"
       }
     },
     "codes": {

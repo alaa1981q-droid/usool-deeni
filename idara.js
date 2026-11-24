@@ -164,7 +164,9 @@ async function inbox(){const API=O();if(!API||!navigator.onLine)return;
       if(v.cl){try{Aamal.cleanAll()}catch(e){}queue.push({em:'🧽',title:'🧽 نظّفت الإدارة بيتك هدية!',msg:(v.msg?v.msg+'\n':'')+B('حافظ','حافظي')+' على نظافته بأعمالك الصالحة كل يوم 🤍',j:Math.max(0,Math.min(1000,v.j|0)),done});return}
       if(typeof v.bd=='string'&&window.Madina&&Madina.PARTS[v.bd]){const ok=Madina.giftLv(v.bd),P=Madina.PARTS[v.bd];queue.push({em:'🏗️',title:'🏗️ هدية من الإدارة لمدينتك!',msg:ok?`بنت لك الإدارة مستوى جديدًا من ${P.e} ${P.n} 🌟${v.msg?'\n'+v.msg:''}`:`${P.e} ${P.n} عندك كاملة، ${B('أحسنت','أحسنتِ')}! 🌟${v.msg?'\n'+v.msg:''}`,j:ok?0:Math.max(0,Math.min(1000,v.j|0))||30,done});return}
       if(v.cr){queue.push({em:'🧹',title:v.title||'🧹 تذكير من الإدارة',msg:v.msg,done});return}
-      if(typeof v.rn=='string'&&v.rn.trim().length>=2){renameMe(API,v.rn);queue.push({em:'✏️',title:'✏️ غيّرت الإدارة اسمك',msg:`اسمك الآن: «${v.rn.trim()}»${v.msg?'\n'+v.msg:''}`,done});return}
+      // (v21.2) الإدارة رفضت طلب تغيير الاسم: نحرّر الاسم المحجوز ونخبر الطفل
+      if(typeof v.nrej=='string'){try{API.releaseNick&&API.releaseNick(v.nrej)}catch(e){}queue.push({em:'✏️',title:'✏️ عن طلب تغيير اسمك',msg:v.msg,done});return}
+      if(typeof v.rn=='string'&&v.rn.trim().length>=2){renameMe(API,v.rn);queue.push({em:'✏️',title:v.ok?'✅ وافقت الإدارة على اسمك الجديد':'✏️ غيّرت الإدارة اسمك',msg:`اسمك الآن: «${v.rn.trim()}»${v.msg?'\n'+v.msg:''}`,done});return}
       const x=Math.max(-5000,Math.min(5000,v.x|0)),j=v.j|0;
       if(x||j<0){if(x){d.xpAdj=(d.xpAdj|0)+x;Aamal.save();try{Alqab.soon()}catch(e){}}
         queue.push({em:x<0||j<0?'⚖️':'🎁',title:x<0||j<0?'تعديل من الإدارة':'🎁 هدية من الإدارة!',msg:v.msg,x,j:Math.max(0,Math.min(1000,j)),jm:Math.max(0,-j),done});return}
@@ -172,6 +174,10 @@ async function inbox(){const API=O();if(!API||!navigator.onLine)return;
   try{const b=(await API.db.ref('bans/'+API.me).get()).val();if(b&&b.until>API.now()&&d.banSeen!==b.until){d.banSeen=b.until;Aamal.save();const t=new Date(b.until);
     queue.unshift({em:'⛔',title:'توقّف لعبك أونلاين مؤقتًا',msg:`أوقفت الإدارة اللعب أونلاين حتى ${t.toLocaleDateString('ar-IQ',{weekday:'long',day:'numeric',month:'long'})}.${b.why?`\nالسبب: ${b.why}`:''}\nتستطيع أن تتعلّم وتحفظ وتبني بيتك كالعادة 🤍`})}}catch(e){}
   try{if(API.profile)await weekPrize(API)}catch(e){}
+  // 📨 (v21.2) للمدير فقط: رسالة إذا وصلت طلبات تغيير أسماء جديدة، وزر يفتحها مباشرة
+  try{if(API.profile&&API.profile.adm){await loadReqs(API);const ids=Object.keys(nreqs),nw=ids.filter(i=>!d.nreqSeen||!d.nreqSeen[i+(nreqs[i].to||'')]);
+    if(nw.length){d.nreqSeen=d.nreqSeen||{};nw.forEach(i=>d.nreqSeen[i+(nreqs[i].to||'')]=1);Aamal.save();
+      const v=nreqs[nw[0]];queue.push({em:'📨',title:'📨 طلب تغيير اسم',msg:nw.length==1?`«${v.from}» يريد أن يغيّر اسمه إلى «${v.to}».\nاضغط «حسنًا» لتوافق أو ترفض.`:`عندك ${ar(ids.length)} طلبات تغيير أسماء تنتظر موافقتك.\nاضغط «حسنًا» لتراها.`,done:()=>{openAdmin().then(()=>openReqs()).catch(()=>{})}})}}}catch(e){}
   nextMsg()}
 // (v13.3) 📌 إعلان مثبّت من المدير: شريط ذهبي أعلى الواجهة حتى ينتهي وقته (news.pin = وقت الانتهاء)
 function pinShow(v){let el=$('#idPin');if(!v){if(el)el.remove();return}
@@ -180,9 +186,12 @@ function pinShow(v){let el=$('#idPin');if(!v){if(el)el.remove();return}
   el.onclick=()=>modal(`<div class="idmsg"><div class="em">📌</div><h3 style="margin:2px 0">${esc(v.title||'إعلان من الإدارة')}</h3>${v.msg?`<p>${esc(v.msg)}</p>`:''}<small style="color:var(--muted)">من إدارة جنّتي الصغيرة 🤍</small></div><div class="nav"><button class="btn gold" data-close>حسنًا 🌷</button></div>`)}
 // ✏️ الإدارة غيّرت اسم الطفل: يُحفظ في ملفّه، ويُثبَّت أسبوعًا
 async function renameMe(API,n){n=String(n).trim().replace(/\s+/g,' ').slice(0,16);if(!API.profile)return;
-  const old=API.profile.nick;API.profile.nick=n;state.nick=n;save();D().nickLock=Date.now()+7*864e5;Aamal.save();
+  const old=API.profile.nick;if(old===n)return;
+  try{if(API.claimNick)await API.claimNick(n)}catch(e){}   // (v21.2) يحجز الاسم الجديد ويحرّر القديم
+  API.profile.nick=n;state.nick=n;save();D().nickLock=Date.now()+7*864e5;Aamal.save();
   const hist=[old].concat(String(API.profile.hist||'').split('|').filter(Boolean)).filter(x=>x&&x!==n).slice(0,5).join('|');API.profile.hist=hist;
-  try{await API.db.ref('profiles/'+API.me).update({nick:n,hist,nts:API.now(),byAdmin:true})}catch(e){}
+  const nc=(API.profile.nc|0)+1;API.profile.nc=nc;   // (v21.2) عدد مرات تغيير الاسم (قواعد Firebase تتحقق منه)
+  try{await API.db.ref('profiles/'+API.me).update({nick:n,hist,nts:API.now(),byAdmin:true,nc})}catch(e){}
   try{API.refreshLeader()}catch(e){}try{renderHome()}catch(e){}}
 // 🏆 بطل الأسبوع الماضي: الأول ١٠٠ جوهرة، الثاني ٦٠، الثالث ٣٠ (مرة واحدة لكل أسبوع)
 const WKJ=[100,60,30];
@@ -201,7 +210,7 @@ setInterval(()=>{if(document.visibilityState=='visible')inbox()},10*60000);
 const sec=document.createElement('section');sec.className='screen';sec.id='idara';
 sec.innerHTML=`<div class="bar"><button class="back" id="idBack">›</button><div class="ttl">👑 الإدارة</div></div><div id="idBody" style="flex:1;display:flex;flex-direction:column"></div>`;
 document.querySelector('.app').appendChild(sec);
-$('#idBack').onclick=()=>{if(view=='kids'){backMain();return}renderHome();show('home')};
+$('#idBack').onclick=()=>{if(view=='kids'||view=='reqs'){backMain();return}renderHome();show('home')};
 // الدخول: ٥ ضغطات على سطر الإصدار
 let taps=0,tapT=0;const vl=$('#verLine');if(vl)vl.addEventListener('click',()=>{taps++;clearTimeout(tapT);tapT=setTimeout(()=>taps=0,2500);if(taps>=5){taps=0;openAdmin()}});
 const body=()=>$('#idBody');
@@ -332,7 +341,8 @@ function renameKid(id,p){const API=O();
     <div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn gold" id="rnY">✏️ غيّر</button></div>`,()=>{
     $('#rnN').focus();
     $('#rnY').onclick=async()=>{const n=$('#rnN').value.trim().replace(/\s+/g,' ');if(n.length<2){API.toast('اكتب الاسم');return}$('#rnY').disabled=true;
-      try{await API.db.ref('prizes/'+id).push({msg:'',j:0,rn:n,ts:firebase.database.ServerValue.TIMESTAMP});
+      try{await API.db.ref('nok/'+id).set(n);   // (v21.2) إذن من الإدارة بهذا الاسم (قواعد Firebase)
+        await API.db.ref('prizes/'+id).push({msg:'',j:0,rn:n,ts:firebase.database.ServerValue.TIMESTAMP});
         const lr=API.db.ref(`leader/${API.week()}/${id}`);try{if((await lr.get()).exists())await lr.update({nick:n})}catch(e){}
         await clearReps(id).catch(()=>{});   // تغيّر الاسم ← البلاغ انتهى
         [all,heroes].forEach(L=>(L||[]).forEach(x=>{if(x.id==id){x.hist=[x.nick].concat(String(x.hist||'').split('|').filter(Boolean)).slice(0,5).join('|');x.nick=n;x.nts=Date.now()}}));
@@ -420,6 +430,7 @@ async function panel(){const API=O();heroes=null;all=null;view='main';
       <button id="tFind"><span>🔍</span><b>ابحث عن طفل</b><small>بالاسم أو الرمز</small></button>
       <button id="tRep"><span>📋</span><b>تقرير التطبيق</b><small>انسخه أو شاركه</small></button>
       <button id="idSubs"><span>👥</span><b>المشتركون</b><small id="idSubsN">⏳</small></button>
+      <button id="tNreq" style="grid-column:1/-1"><span>📨</span><b>طلبات تغيير الأسماء</b><small id="idNreqN">⏳</small></button>
       <button id="tReps" style="grid-column:1/-1"><span>🚩</span><b>بلاغات الأسماء</b><small id="idRepN">⏳</small></button>
       <button id="tVoice" style="grid-column:1/-1"><span>🎙️</span><b>صوتي للأطفال</b><small>اقرأ العبارة بصوتك فيسمعها الأطفال عند كل إنجاز</small></button>
     </div>
@@ -429,6 +440,8 @@ async function panel(){const API=O();heroes=null;all=null;view='main';
   body().querySelectorAll('[data-k0]').forEach(b=>b.onclick=()=>{if(all)openKids(b.dataset.k0)});
   $('#idSubs').onclick=()=>{if(all)openKids()};
   $('#tReps').onclick=()=>{if(all)openKids('rep')};
+  $('#tNreq').onclick=()=>openReqs();
+  loadReqs(API).then(()=>{const e=$('#idNreqN');if(e)e.textContent=reqSum()});
   $('#tFind').onclick=()=>{if(!all)return;openKids();setTimeout(()=>{const i=$('#kQ');if(i)i.focus()},150)};
   $('#tMsg').onclick=()=>sendNews(API,0);$('#tPin').onclick=()=>sendNews(API,1);$('#tGift').onclick=()=>giftAll(API);$('#tRep').onclick=()=>report(API);$('#tVoice').onclick=()=>{if(window.Hamas)Hamas.recorder()};
   await loadKids(API);{const c=$('#idCnt'),n=(all||[]).length,g=(all||[]).filter(gone).length,u=(all||[]).filter(x=>!x.seen).length;
@@ -503,6 +516,30 @@ function openKids(t0){view='kids';tab=t0||'all';q='';lim=40;window.scrollTo(0,0)
   $('#idKBack').onclick=backMain;tabs();
   if(tab=='dl'&&!dlSet)O().db.ref('stats/bookDlBy').get().then(x=>{dlSet=x.val()||{};drawKids()}).catch(()=>{dlSet=false;drawKids()})}
 function backMain(){view='main';window.scrollTo(0,0);panel()}
+/* 📨 (v21.2) طلبات تغيير الأسماء: الطفل يغيّر اسمه مرة واحدة وحده، والتغيير الثاني يصل هنا: nreq/{الطفل} = {from,to,av,t}
+   موافقة ← nok/{الطفل}=الاسم (إذن في قواعد Firebase) + رسالة rn تغيّر اسمه في جهازه. رفض ← رسالة nrej تحرّر الاسم المحجوز. */
+let nreqs={};
+async function loadReqs(API){try{nreqs=(await API.db.ref('nreq').get()).val()||{}}catch(e){nreqs={}}}
+const reqSum=()=>{const n=Object.keys(nreqs).length;return n?`🔴 ${ar(n)} ${n==1?'طلب ينتظر':'طلبات تنتظر'} موافقتك`:'لا توجد طلبات 👍'};
+async function openReqs(){const API=O();view='reqs';window.scrollTo(0,0);show('idara');
+  body().innerHTML='<div class="handoff"><div class="big spin">📨</div><p>جارٍ التحميل…</p></div>';await loadReqs(API);
+  const L=Object.entries(nreqs).sort((a,b)=>(a[1].t||0)-(b[1].t||0));
+  body().innerHTML=`<div class="idban"><span class="sh">📨</span><span><b>طلبات تغيير الأسماء</b><small>هؤلاء غيّروا أسماءهم مرة من قبل، ويريدون اسمًا جديدًا</small></span></div>
+    ${L.length?L.map(([id,v])=>`<div class="idrow" style="flex-wrap:wrap;gap:6px"><b style="flex:1 1 100%;font-size:17px">${esc(v.av||'')} «${esc(v.from||'')}» ← «${esc(v.to||'')}»</b>
+      <small>${v.t?new Date(v.t).toLocaleDateString('ar-IQ',{weekday:'long',day:'numeric',month:'long'}):''}</small>
+      <span style="display:flex;gap:6px;margin-inline-start:auto"><button class="btn gold" style="flex:none" data-ok="${esc(id)}">✅ وافق</button><button class="btn sec" style="flex:none" data-no="${esc(id)}">❌ ارفض</button></span></div>`).join('')
+      :'<p class="tip">لا توجد طلبات الآن 👍</p>'}
+    <button class="btn sec" id="rqBack" style="flex:none;width:100%;margin-top:8px">‹ رجوع إلى لوحة الإدارة</button>`;
+  $('#rqBack').onclick=backMain;
+  const TS=firebase.database.ServerValue.TIMESTAMP;
+  body().querySelectorAll('[data-ok]').forEach(b=>b.onclick=async()=>{const id=b.dataset.ok,v=nreqs[id];if(!v)return;b.disabled=true;
+    try{await API.db.ref('nok/'+id).set(v.to);
+      await API.db.ref('prizes/'+id).push({msg:'اسمك الجديد جميل 🌷',j:0,rn:v.to,ok:1,ts:TS});
+      const lr=API.db.ref(`leader/${API.week()}/${id}`);try{if((await lr.get()).exists())await lr.update({nick:v.to})}catch(e){}
+      await API.db.ref('nreq/'+id).remove();delete nreqs[id];API.toast(`✅ صار اسمه «${v.to}»`);openReqs()}catch(e){b.disabled=false;API.toast('تعذّر، هل نشرت قواعد Firebase الجديدة؟')}});
+  body().querySelectorAll('[data-no]').forEach(b=>b.onclick=async()=>{const id=b.dataset.no,v=nreqs[id];if(!v)return;b.disabled=true;
+    try{await API.db.ref('prizes/'+id).push({msg:`لم توافق الإدارة على تغيير اسمك إلى «${v.to}»، ويبقى اسمك «${v.from}» 🤍`,j:0,nrej:v.to,ts:TS});
+      await API.db.ref('nreq/'+id).remove();delete nreqs[id];API.toast('❌ رُفض الطلب');openReqs()}catch(e){b.disabled=false;API.toast('تعذّر')}})}
 /* 📊 الإحصائيات */
 async function stats(API){const el=$('#idStats');if(!el)return;const L=all||[],t=Date.now(),D1=864e5;
   const n=L.length,b=L.filter(p=>p.sx=='b').length,g=L.filter(p=>p.sx=='g').length;
