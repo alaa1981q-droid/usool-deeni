@@ -319,13 +319,14 @@ function publish(){const API=O();if(!API||!API.profile||!API.db)return;const s=s
   const wx=Math.max(0,s.x-a.wk.base);
   // ملخّص تقدّم الطفل للمدير (v8.2): يُنشر في profiles/$uid/sm
   const c=s.c,sm={st:c.stages|0,sr:c.stars|0,hz:c.hifz|0,pr:c.pray|0,sl:c.sal|0,ts:c.tas|0,wd:c.wird|0,ak:c.akhlaq|0,fq:c.fiqh|0,cu:c.cups|0,fl:c.floors|0,xp:s.x|0,
-    j:window.Deco?Deco.j|0:0,dt:window.Aamal&&Aamal.dirt?Aamal.dirt():0,u:window.Binaa?Binaa.code():'',mq:window.Deco&&Deco.owns('d_mosque')?1:0,ttl:s.titles.length};
+    j:window.Deco?Deco.j|0:0,dt:window.Aamal&&Aamal.dirt?Aamal.dirt():0,u:window.Binaa?Binaa.code():'',mq:window.Deco&&Deco.owns('d_mosque')?1:0,ttl:s.titles.length,tp:window.Seal?Seal.tampered():0};
   const flg=window.Flag?Flag.get():'';const key=[s.L,t&&t.id,md,wx,API.profile.nick,API.profile.av,JSON.stringify(sm),flg].join('|');if(key==pubKey)return;pubKey=key;
   const tt=isAdm()?'👑 مدير جنّتي الصغيرة':t?`${t.e} ${t.n}`:'';Object.assign(API.profile,{lv:s.L,tt,md,sm,flg});
   API.db.ref('profiles/'+API.me).update({lv:s.L,tt,md,sm,flg}).catch(()=>{});
   // v8.6: المدير لا يدخل أبطال الأسبوع (طلب صاحب التطبيق)، ويُشال اسمه إذا كان موجودًا
   if(isAdm()){API.db.ref(`leader/${w}/${API.me}`).remove().catch(()=>{});return}
-  if(wx>0)API.db.ref(`leader/${w}/${API.me}`).update({nick:API.profile.nick,av:API.profile.av,xp:wx,lv:s.L,tt}).catch(()=>{})}
+  // v20.9: السيرفر يقبل زيادة محدودة بحسب الوقت (tx = وقت السيرفر)؛ إذا رُفضت نعيد المحاولة لاحقًا
+  if(wx>0)API.db.ref(`leader/${w}/${API.me}`).update({nick:API.profile.nick,av:API.profile.av,xp:Math.min(20000,wx),lv:Math.min(200,s.L),tt,tx:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{pubKey=''})}
 
 /* ---------- الاحتفال: ارتفعت درجتك / وسام جديد / لقب جديد / جائزة للبيت ---------- */
 let soonT=0,pending=false;

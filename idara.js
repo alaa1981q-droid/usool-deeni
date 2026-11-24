@@ -241,7 +241,8 @@ const banOf=id=>{const b=bans[id];return b&&b.until>Date.now()?b:null};
 // يتعمّد الأخطاء؟ دقّة أقل من ٣٥٪ بعد ١٦ سؤالًا أونلاين، أو مباراتان بلا أي إجابة صحيحة
 const accOf=p=>{const a=p.acc||{};return a.q?a.r/a.q:null};
 const MONTH=30*864e5,gone=p=>!!(p&&p.seen&&Date.now()-p.seen>MONTH),goneDays=p=>Math.floor((Date.now()-p.seen)/864e5);
-const sus=p=>{const a=p.acc||{};return (a.q>=16&&a.r/a.q<.35)||(a.z|0)>=2};
+const sus=p=>{const a=p.acc||{};return (a.q>=16&&a.r/a.q<.35)||(a.z|0)>=2||((p.sm&&p.sm.tp)|0)>0};
+const cheat=p=>((p.sm&&p.sm.tp)|0)>0; // v20.9: غيّر أرقامه من خارج التطبيق (seal.js)
 function ago(t){if(!t)return 'لم يُسجَّل بعد';const m=Math.round((Date.now()-t)/60000);
   const w=(n,one,two,few,many)=>n==1?one:n==2?two:n<=10?`${ar(n)} ${few}`:`${ar(n)} ${many}`;
   if(m<2)return 'الآن';if(m<60)return 'قبل '+w(m,'دقيقة','دقيقتين','دقائق','دقيقة');const h=Math.round(m/60);if(h<24)return 'قبل '+w(h,'ساعة','ساعتين','ساعات','ساعة');
@@ -289,7 +290,7 @@ async function kidCard(id){const API=O();let p=(all||[]).find(x=>x.id==id);
       ${p.since?`<br>📅 سجّل: ${new Date(p.since).toLocaleDateString('ar-IQ')}`:''}
       ${p.hist?`<br>✏️ أسماؤه السابقة: <b>${esc(p.hist.split('|').join('، '))}</b>${p.nts?` (آخر تغيير ${ago(p.nts)})`:''}`:''}
       ${b?`<br>⛔ <b style="color:#c43d38">محظور حتى ${new Date(b.until).toLocaleString('ar-IQ',{weekday:'long',hour:'numeric',minute:'2-digit'})}</b>${b.why?` — ${esc(b.why)}`:''}`:''}
-      ${sus(p)?`<br><b style="color:#b06a2c">⚠️ قد يتعمّد الإجابات الخاطئة</b>`:''}</div>
+      ${cheat(p)?`<br><b style="color:#c0392b">⚠️ غيّر أرقامه من خارج التطبيق (${ar(p.sm.tp)} مرّة) ورجّعناها</b>`:sus(p)?`<br><b style="color:#b06a2c">⚠️ قد يتعمّد الإجابات الخاطئة</b>`:''}</div>
     ${repN(id)?`<div style="text-align:right;font-size:15px;line-height:1.8;background:#fdecea;border:2px solid #e2504a;border-radius:14px;padding:6px 10px;margin-top:6px">
       🚩 <b style="color:#c43d38">بلّغ عن اسمه ${repN(id)==1?'طفل واحد':repN(id)==2?'طفلان':ar(repN(id))+(repN(id)<=10?' أطفال':' طفلًا')}</b><br>
       <small>الاسم وقت البلاغ: <b>${esc([...new Set(Object.values(reps[id]).map(v=>v&&v.n).filter(Boolean))].join('، ')||p.nick)}</b> · آخر بلاغ ${ago(Math.max(...Object.values(reps[id]).map(v=>+(v&&v.t)||0)))}</small>

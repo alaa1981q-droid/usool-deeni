@@ -82,7 +82,28 @@
         ],
         "$uid": {
           ".write": "auth != null && ((auth.uid === $uid && (!root.child('bans/' + auth.uid).exists() || root.child('bans/' + auth.uid + '/until').val() < now)) || root.child('admins/' + auth.uid).val() === true)",
-          ".validate": "!newData.child('adm').exists() || root.child('admins/' + $uid).val() === true"
+          ".validate": "!newData.child('adm').exists() || root.child('admins/' + $uid).val() === true",
+          "xp": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && (root.child('admins/' + auth.uid).val() === true || (newData.val() <= 20000 && (newData.val() <= (data.exists() ? data.val() : 0) || (newData.parent().child('tx').val() === now && newData.val() <= (data.exists() ? data.val() : 0) + 400 + (now - (data.parent().child('tx').exists() ? data.parent().child('tx').val() : now - 600000)) / 3000))))"
+          },
+          "tx": {
+            ".validate": "newData.isNumber() && (newData.val() === now || root.child('admins/' + auth.uid).val() === true)"
+          },
+          "wins": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && (root.child('admins/' + auth.uid).val() === true || (newData.val() <= 300 && (newData.val() <= (data.exists() ? data.val() : 0) || (newData.val() === (data.exists() ? data.val() : 0) + 1 && newData.parent().child('tw').val() === now && (!data.parent().child('tw').exists() || now - data.parent().child('tw').val() >= 100000)))))"
+          },
+          "pts": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && (root.child('admins/' + auth.uid).val() === true || (newData.val() <= 100000 && (newData.val() <= (data.exists() ? data.val() : 0) || (newData.val() <= (data.exists() ? data.val() : 0) + 600 && newData.parent().child('tw').val() === now && (!data.parent().child('tw').exists() || now - data.parent().child('tw').val() >= 100000)))))"
+          },
+          "tw": {
+            ".validate": "newData.isNumber() && (newData.val() === now || root.child('admins/' + auth.uid).val() === true)"
+          },
+          "lv": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 200"
+          },
+          "nick": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          }
         }
       }
     },

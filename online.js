@@ -492,7 +492,8 @@
     // دقّة الإجابات: تساعد الإدارة على معرفة من يتعمّد الإجابات الخاطئة
     const acc = profile.acc || {}; profile.acc = { r: (acc.r | 0) + a.right, q: (acc.q | 0) + N_Q, z: (acc.z | 0) + (a.right === 0 ? 1 : 0) };
     db.ref('profiles/' + me).update({ wins: profile.wins, games: profile.games, acc: profile.acc, seen: firebase.database.ServerValue.TIMESTAMP });
-    if (!isAdm()) db.ref(`leader/${w}/${me}`).transaction(v => { v = v || { wins: 0, pts: 0 }; return Object.assign({}, v, { nick: profile.nick, av: profile.av, wins: (v.wins || 0) + winInc, pts: (v.pts || 0) + a.sc }); });
+    // v20.9: قواعد السيرفر تقبل فوزًا واحدًا و600 نقطة كحدّ أعلى لكل مباراة، مع وقت السيرفر tw (ضد الغش)
+    if (!isAdm()) { const lr = db.ref(`leader/${w}/${me}`); lr.get().then(s => { const v = s.val() || {}; return lr.update({ nick: profile.nick, av: profile.av, wins: (v.wins || 0) + winInc, pts: (v.pts || 0) + Math.min(600, Math.max(0, a.sc | 0)), tw: firebase.database.ServerValue.TIMESTAMP }); }).catch(() => {}); }
     if (winInc && window.Aamal) Aamal.grow('win');
     if (window.Alqab) Alqab.soon();
   }
