@@ -7,7 +7,25 @@
       "$uid": {
         ".read": "auth != null",
         ".write": "auth != null && auth.uid === $uid",
-        ".validate": "newData.child('nick').isString() && newData.child('nick').val().length <= 40 && newData.child('av').isString() && newData.child('av').val().length <= 8 && (!newData.child('adm').exists() || root.child('admins/' + $uid).val() === true)"
+        ".validate": "newData.child('nick').isString() && newData.child('nick').val().length <= 40 && newData.child('av').isString() && newData.child('av').val().length <= 8 && (!newData.child('adm').exists() || root.child('admins/' + $uid).val() === true) && (!data.child('tg').exists() || newData.child('tg').exists())",
+        "lv": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 200"
+        },
+        "tt": {
+          ".validate": "newData.isString() && newData.val().length <= 60"
+        },
+        "md": {
+          ".validate": "newData.isString() && newData.val().length <= 300"
+        },
+        "games": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 50000 && (newData.val() <= (data.exists() ? data.val() : 0) || (newData.val() === (data.exists() ? data.val() : 0) + 1 && newData.parent().child('tg').val() === now && (!data.parent().child('tg').exists() || now - data.parent().child('tg').val() >= 30000)))"
+        },
+        "wins": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 20000 && (newData.val() <= (data.exists() ? data.val() : 0) || (newData.val() === (data.exists() ? data.val() : 0) + 1 && newData.parent().child('tg').val() === now && (!data.parent().child('tg').exists() || now - data.parent().child('tg').val() >= 30000)))"
+        },
+        "tg": {
+          ".validate": "newData.isNumber() && (newData.val() === now || newData.val() === data.val())"
+        }
       }
     },
     "reports": {
@@ -90,10 +108,10 @@
             ".validate": "newData.isNumber() && (newData.val() === now || root.child('admins/' + auth.uid).val() === true)"
           },
           "wins": {
-            ".validate": "newData.isNumber() && newData.val() >= 0 && (root.child('admins/' + auth.uid).val() === true || (newData.val() <= 300 && (newData.val() <= (data.exists() ? data.val() : 0) || (newData.val() === (data.exists() ? data.val() : 0) + 1 && newData.parent().child('tw').val() === now && (!data.parent().child('tw').exists() || now - data.parent().child('tw').val() >= 100000)))))"
+            ".validate": "newData.isNumber() && newData.val() >= 0 && (root.child('admins/' + auth.uid).val() === true || (newData.val() <= 300 && (newData.val() <= (data.exists() ? data.val() : 0) || (newData.val() === (data.exists() ? data.val() : 0) + 1 && newData.parent().child('tw').val() === now && (!data.parent().child('tw').exists() || now - data.parent().child('tw').val() >= 30000)))))"
           },
           "pts": {
-            ".validate": "newData.isNumber() && newData.val() >= 0 && (root.child('admins/' + auth.uid).val() === true || (newData.val() <= 100000 && (newData.val() <= (data.exists() ? data.val() : 0) || (newData.val() <= (data.exists() ? data.val() : 0) + 600 && newData.parent().child('tw').val() === now && (!data.parent().child('tw').exists() || now - data.parent().child('tw').val() >= 100000)))))"
+            ".validate": "newData.isNumber() && newData.val() >= 0 && (root.child('admins/' + auth.uid).val() === true || (newData.val() <= 100000 && (newData.val() <= (data.exists() ? data.val() : 0) || (newData.val() <= (data.exists() ? data.val() : 0) + 600 && newData.parent().child('tw').val() === now && (!data.parent().child('tw').exists() || now - data.parent().child('tw').val() >= 30000)))))"
           },
           "tw": {
             ".validate": "newData.isNumber() && (newData.val() === now || root.child('admins/' + auth.uid).val() === true)"

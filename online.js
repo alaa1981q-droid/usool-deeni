@@ -163,7 +163,7 @@
           if (!profile || !profile.since) extra.since = now();
           profile = Object.assign({ wins: 0, games: 0 }, profile || {}, { nick, av, sx, code, own: isOwn }, extra);
           if (window.Cups && Cups.setSex) Cups.setSex(sx);
-          await db.ref('profiles/' + me).set(profile);
+          await db.ref('profiles/' + me).set(Object.assign({}, profile, { tg: firebase.database.ServerValue.TIMESTAMP })); // v21.0: tg لازم يبقى (قواعد ضد الغش)
           state.online = true; state.nick = nick; state.av = av; save();
           startPresence(); refreshLeader();
           if (isNew && window.Idara && Idara.welcome) Idara.welcome(nick);
@@ -491,7 +491,9 @@
     profile.wins = (profile.wins || 0) + winInc; profile.games = (profile.games || 0) + 1;
     // دقّة الإجابات: تساعد الإدارة على معرفة من يتعمّد الإجابات الخاطئة
     const acc = profile.acc || {}; profile.acc = { r: (acc.r | 0) + a.right, q: (acc.q | 0) + N_Q, z: (acc.z | 0) + (a.right === 0 ? 1 : 0) };
-    db.ref('profiles/' + me).update({ wins: profile.wins, games: profile.games, acc: profile.acc, seen: firebase.database.ServerValue.TIMESTAMP });
+    // v21.0: السيرفر يقبل +1 فوز/مباراة كل 30 ثانية (tg = وقت السيرفر)؛ إذا رُفض نرجع لأرقام السيرفر
+    db.ref('profiles/' + me).update({ wins: profile.wins, games: profile.games, acc: profile.acc, tg: firebase.database.ServerValue.TIMESTAMP, seen: firebase.database.ServerValue.TIMESTAMP })
+      .catch(() => db.ref('profiles/' + me).get().then(s => { const v = s.val() || {}; profile.wins = v.wins | 0; profile.games = v.games | 0; }).catch(() => {}));
     // v20.9: قواعد السيرفر تقبل فوزًا واحدًا و600 نقطة كحدّ أعلى لكل مباراة، مع وقت السيرفر tw (ضد الغش)
     if (!isAdm()) { const lr = db.ref(`leader/${w}/${me}`); lr.get().then(s => { const v = s.val() || {}; return lr.update({ nick: profile.nick, av: profile.av, wins: (v.wins || 0) + winInc, pts: (v.pts || 0) + Math.min(600, Math.max(0, a.sc | 0)), tw: firebase.database.ServerValue.TIMESTAMP }); }).catch(() => {}); }
     if (winInc && window.Aamal) Aamal.grow('win');
