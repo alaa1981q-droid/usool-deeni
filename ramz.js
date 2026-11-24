@@ -105,8 +105,50 @@ function openRestore(){
       try{const had=await restore(i.value);$('#modalIn').innerHTML=`<div style="text-align:center"><div style="font-size:56px">🎉</div><h3>رجع تقدّمك!</h3><p>${had?'بيتك وجواهرك ونجومك رجعت كلها 🤍':'رجع حسابك واسمك وأصدقاؤك 🤍'}</p></div>`;setTimeout(()=>location.reload(),1600)}
       catch(e){m.className='fb bad';m.textContent=errMsg(e);g.disabled=false;g.textContent='رجّع تقدّمي ✓'}}})}
 
+/* ---------- 🚪 تسجيل الخروج / فتح حساب آخر (v20.4) ----------
+   في أسفل «ملفّي» فقط. سؤال حساب للكبار أولًا، ثم تحذير كبير إذا لم يُؤخذ رمز الحفظ (الجنّة تضيع). */
+function gate(then){const a=6+Math.floor(Math.random()*4),b=6+Math.floor(Math.random()*4),an=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
+  modal(`<div style="text-align:center"><div style="font-size:44px">🚪</div><h3 style="margin:2px 0">تسجيل الخروج</h3><p>للكبار فقط، اكتب الجواب:<br><b style="font-size:24px">${an(a)} × ${an(b)} = ؟</b></p>
+   <input class="inp" id="rzG" inputmode="numeric" autocomplete="off" style="width:120px;text-align:center;font-size:22px"><div class="fb" id="rzGm"></div>
+   <div class="nav"><button class="btn gold" id="rzGo">تأكيد</button><button class="btn sec" data-close>رجوع</button></div></div>`,()=>{
+    const go=()=>{const v=norm($('#rzG').value);if(+v===a*b)then();else{const m=$('#rzGm');m.className='fb bad';m.textContent='جواب غير صحيح'}};
+    $('#rzGo').onclick=go;$('#rzG').onkeydown=e=>{if(e.key==='Enter')go()};setTimeout(()=>$('#rzG')&&$('#rzG').focus(),80)})}
+function openLogout(){gate(()=>{
+  if(rs.c){ // الرمز مأخوذ: الحساب محفوظ على الإنترنت حتى لو كان الجهاز بلا اتصال الآن
+    modal(`<div style="text-align:center"><div style="font-size:44px">🚪</div><h3 style="margin:2px 0">الخروج من هذه الجنّة</h3>
+      <p>هذا رمز حفظ هذه الجنّة. ${B('اكتبه','اكتبيه')} أو ${B('صوّره','صوّريه')} قبل الخروج، فبه ${B('ترجع','ترجعين')} لها من أي موبايل أو حاسبة:</p>${box(rs.c)}
+      <p class="tip">بعد الخروج ${B('تقدر','تقدرين')} تدخل بحساب آخر برمزه، أو ${B('تبدأ','تبدئين')} جنّة جديدة.</p>
+      <div class="fb" id="rzOm" style="font-size:14px;min-height:20px"></div>
+      <div class="nav"><button class="btn sec" data-close>لا، ابقَ هنا</button><button class="btn" id="rzOut2" style="background:#e05252;color:#fff">🚪 ${B('كتبت','كتبتُ')} الرمز، اخرج</button></div></div>`,()=>{
+      $('#rzOut2').onclick=async()=>{const b=$('#rzOut2'),m=$('#rzOm');b.disabled=true;b.textContent='⏳ نحفظ آخر تقدّمك…';try{if(A()&&navigator.onLine)await A().init()}catch(e){}
+        const ok=await backup(true);
+        if(ok||b.dataset.f){doLogout();return}
+        b.dataset.f=1;b.disabled=false;b.textContent='اخرج بدون حفظ آخر تقدّم';m.className='fb bad';m.textContent='لا يوجد إنترنت، فلم نحفظ تقدّم اليوم. اتصل ثم حاول، أو اخرج ويضيع تقدّم اليوم فقط.'}});
+    return}
+  modal(`<div style="text-align:center"><div style="font-size:54px">⚠️</div><h3 style="margin:2px 0;color:#c62828">انتبه! لم ${B('تحفظ','تحفظي')} رمز الحفظ</h3>
+    <p style="background:#ffe5e5;border:2px solid #e05252;border-radius:14px;padding:8px;color:#8b1a1a;font-weight:800">إذا ${B('خرجت','خرجتِ')} الآن <u>تضيع جنّتك كلّها</u>: بيتك وجواهرك ونجومك وحفظك وأصدقاؤك، ولا ترجع أبدًا 😢</p>
+    <p>${B('خذ','خذي')} رمز الحفظ أولًا، ثم ${B('اخرج','اخرجي')} مطمئنًّا.</p>
+    <div class="nav" style="flex-direction:column;gap:8px"><button class="btn gold" id="rzFirst">🔑 أعطني رمز الحفظ أولًا</button><button class="btn sec" data-close>لا، ابقَ هنا</button>
+    <button class="rzlink" id="rzLose" style="color:#c62828">أفهم، اخرج وتضيع جنّتي</button></div></div>`,()=>{
+    $('#rzFirst').onclick=openCode;
+    $('#rzLose').onclick=()=>modal(`<div style="text-align:center"><div style="font-size:50px">😢</div><h3 style="margin:2px 0">متأكّد؟</h3><p>هذه آخر مرة نسأل: الجنّة على هذا الجهاز تُمحى ولا ترجع.</p>
+      <div class="nav"><button class="btn gold" data-close>لا، ابقَ هنا</button><button class="btn" id="rzLose2" style="background:#e05252;color:#fff">نعم، امسحها واخرج</button></div></div>`,()=>{$('#rzLose2').onclick=doLogout})})})}
+async function doLogout(){
+  try{modal(`<div style="text-align:center"><div style="font-size:46px">🚪</div><p>جارٍ الخروج…</p></div>`)}catch(e){}
+  try{const a=fa();if(a&&a.currentUser)await a.signOut()}catch(e){}
+  try{const ks=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&(k.indexOf('usul5_')===0||k==='jannah_album_v1'))ks.push(k)}ks.forEach(k=>localStorage.removeItem(k))}catch(e){}
+  rs={};try{sessionStorage.setItem('jn_out','1')}catch(e){}
+  location.reload()}
+// بعد الخروج: شاشة تسأل «حساب آخر أم جنّة جديدة؟»
+try{if(sessionStorage.getItem('jn_out')){sessionStorage.removeItem('jn_out');
+  window.addEventListener('load',()=>setTimeout(()=>modal(`<div style="text-align:center"><div style="font-size:46px">👋</div><h3 style="margin:2px 0">خرجت من الجنّة</h3><p>ماذا ${B('تريد','تريدين')} الآن؟</p>
+    <div class="nav" style="flex-direction:column;gap:8px"><button class="btn gold" id="rzOther">🔑 الدخول بحساب آخر (عندي رمز)</button><button class="btn sec" data-close>🌱 أبدأ جنّة جديدة</button></div></div>`,()=>{$('#rzOther').onclick=openRestore}),1200))}}catch(e){}
+
 // زرّان في «ملفّي»: يُضافان بعد رسم الشاشة
-function addToProfile(){const b=$('#aqBody');if(!b||$('#rzCard'))return;const h=b.querySelector('.aqhead');if(!h)return;
+function addToProfile(){const b=$('#aqBody');if(!b)return;
+  if(!$('#rzOutW')&&b.querySelector('.aqhead')){const w=document.createElement('div');w.id='rzOutW';w.style.cssText='text-align:center;margin:22px 0 10px;opacity:.75';
+    w.innerHTML='<button class="rzlink" id="rzOut">🚪 تسجيل الخروج / الدخول بحساب آخر</button>';b.appendChild(w);$('#rzOut').onclick=openLogout}
+  if($('#rzCard'))return;const h=b.querySelector('.aqhead');if(!h)return;
   const d=document.createElement('div');d.id='rzCard';d.className='rzcard'+(rs.c?'':' new');
   d.innerHTML=rs.c?`<button class="btn sec" id="rzShow">🔑 أرني رمز الحفظ</button>`:`<b>🔑 ${B('احفظ','احفظي')} تقدّمك!</b><small>رمز صغير يرجع لك بيتك وجواهرك إذا تغيّر الموبايل</small><button class="btn gold" id="rzShow">🔑 أعطني رمز الحفظ</button>`;
   d.insertAdjacentHTML('beforeend',`<button class="rzlink" id="rzHave">عندي رمز من موبايل قديم</button>`);
@@ -117,5 +159,5 @@ function addToProfile(){const b=$('#aqBody');if(!b||$('#rzCard'))return;const h=
 .rzlink{background:none;border:0;color:var(--muted);text-decoration:underline;font:inherit;font-size:13px;cursor:pointer;padding:2px}`;document.head.appendChild(st)}
 new MutationObserver(()=>{if($('#aqTitle').textContent==='🏅 ملفّي')addToProfile()}).observe($('#aqBody'),{childList:true});
 
-window.Ramz={openCode,openRestore,backup,get code(){return rs.c||''}};
+window.Ramz={openCode,openRestore,openLogout,backup,get code(){return rs.c||''}};
 })();
