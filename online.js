@@ -154,6 +154,7 @@
         try {
           const why = locked() ? '' : badNick(own); if (why) { $('#nickMsg').className = 'fb bad'; $('#nickMsg').textContent = why; $('#saveProf').disabled = false; $('#ownNick').focus(); return; }
           const nick = own.trim().replace(/\s+/g, ' '), isOwn = true;
+          if (!locked() && !(await claimNick(nick))) { $('#nickMsg').className = 'fb bad'; $('#nickMsg').textContent = 'هذا الاسم أخذه طفل آخر 🙂 غيّره قليلًا، مثل: «' + nick + ' الصغير» أو أضف اسمًا ثانيًا'; $('#saveProf').disabled = false; $('#ownNick').focus(); return; }
           const code = (profile && profile.code) || await claimCode();
           // سجلّ الأسماء السابقة (تراه الإدارة): آخر ٥ أسماء ووقت آخر تغيير
           const old = profile && profile.nick, extra = {};
@@ -177,13 +178,33 @@
   // الاسم والصورة الجديدان يظهران فورًا في أبطال الأسبوع (إن كان الطفل فيهم)
   function refreshLeader() { const lr = db.ref(`leader/${week()}/${me}`); lr.once('value').then(s => { if (s.exists()) return lr.update({ nick: profile.nick, av: profile.av }); }).catch(() => {}); }
   // لقب يكتبه الطفل: حروف عربية ومسافات فقط (بلا أرقام هواتف ولا روابط)، وبلا كلمات غير لائقة
-  const BAD = ['غبي', 'حمار', 'كلب', 'زبال', 'قذر', 'حقير', 'تافه', 'لعن', 'منيوك', 'طيز', 'شرموط', 'عاهر', 'قحب', 'خنزير', 'وسخ', 'سافل', 'جحش', 'زمال'];
+  // كلمات ممنوعة أينما جاءت داخل الاسم (حتى لو فُصلت حروفها بمسافات أو كُرّرت: «ن ع ا ل»، «نعاااال»)
+  const BAD = ['غبي', 'حمار', 'كلب', 'زبال', 'قذر', 'حقير', 'تافه', 'لعن', 'منيوك', 'نيوك', 'طيز', 'شرموط', 'عاهر', 'قحب', 'خنزير', 'وسخ', 'سافل', 'جحش', 'زمال',
+    'نعال', 'قندره', 'صرمايه', 'كواد', 'قواد', 'ديوث', 'زرب', 'خرا', 'خره', 'منغول', 'معفن', 'حيوان', 'بهيم', 'ملعون', 'لوطي', 'ابليس', 'شيطان', 'مخنث', 'عرص', 'كحبه', 'سكس', 'نياك', 'اثول', 'دايح', 'خايس', 'ممسوخ', 'جريذي', 'جرذي', 'كيرك'];
+  // كلمات تُمنع فقط إذا جاءت كلمة كاملة (لأنها جزء من أسماء بريئة: مطيع، كسّار، زقاق…)
+  const BAD_W = ['كس', 'طز', 'تفو', 'تف', 'زفت', 'جلب', 'كير', 'عير', 'قرد', 'بقره', 'ثور', 'نجس', 'مطي', 'زق', 'فرخ', 'نيك', 'زنا', 'زاني', 'عرس'];
+  // إزالة التشكيل وتوحيد الهمزات والتاء المربوطة والياء — نفس الاسم بأشكال مختلفة يُعدّ اسمًا واحدًا
+  const normNick = t => String(t || '').trim().replace(/[ً-ْـ]/g, '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي').replace(/\s+/g, ' ');
+  const nickKey = t => normNick(t).replace(/ /g, '');
+  // كل اسم لطفل واحد فقط: nicks/{مفتاح الاسم} = uid (يُحجز بمعاملة، ويُحرَّر الاسم القديم عند التغيير)
+  async function claimNick(nick) {
+    const k = nickKey(nick), oldK = profile && profile.nick ? nickKey(profile.nick) : '';
+    if (k === oldK) return true;                       // نفس اسمه الحالي (غيّر صورته فقط)
+    try {
+      const r = await db.ref('nicks/' + k).transaction(v => (v === null || v === me ? me : undefined));
+      if (!r.committed) return false;
+      if (oldK) db.ref('nicks/' + oldK).transaction(v => (v === me ? null : undefined)).catch(() => {});
+      return true;
+    } catch (e) { return true; }                       // إن لم تُنشر القواعد بعد: لا نمنع الطفل من الحفظ
+  }
   function badNick(t) {
     t = t.trim().replace(/\s+/g, ' ');
-    if (t.length < 3) return 'اللقب قصير، اكتب ٣ حروف على الأقل';
+    if (t.length < 3) return 'الاسم قصير، اكتب ٣ حروف على الأقل';
     if (!/^[\u0621-\u064A\u0660-\u0669\u064B-\u0652 ]+$/.test(t) || /[\u0660-\u0669]/.test(t)) return 'حروف عربية فقط، بلا أرقام ولا رموز';
-    const plain = t.replace(/[\u064B-\u0652]/g, '').replace(/[أإآ]/g, 'ا');
-    if (BAD.some(w => plain.includes(w.replace(/[أإآ]/g, 'ا')))) return 'اختر لقبًا جميلًا 🌷';
+    const plain = normNick(t), words = plain.split(' ').map(w => w.replace(/(.)\1+/g, '$1'));
+    // الحروف المفصولة بمسافات تُجمع: «ن ع ا ل» ← «نعال»، والحرف المكرّر يُختصر: «نعااال» ← «نعال»
+    const glued = plain.split(' ').reduce((a, w) => { const L = a.length - 1; if (w.length <= 2 && L >= 0 && a[L].sh) a[L].s += w; else a.push({ s: w, sh: w.length <= 2 }); return a; }, []).map(p => p.s.replace(/(.)\1+/g, '$1'));
+    if (BAD.some(w => glued.some(p => p.includes(w))) || BAD_W.some(w => words.includes(w) || words.includes('ال' + w))) return 'هذا الاسم غير لائق 🌷 اختر اسمًا جميلًا يليق بك';
     return '';
   }
   async function claimCode() {
