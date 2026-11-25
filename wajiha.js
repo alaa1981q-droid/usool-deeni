@@ -74,7 +74,9 @@ $q('#wjGm').onclick=()=>{snd();show('wjGames');scrollTo(0,0)};
 ['#openBook','#dlBook','#openQisas'].forEach(s=>{const e=$q(s);if(e)moreB.appendChild(e)});
 moreB.insertAdjacentHTML('beforeend',`<button class="bookcard" id="wjFr"><span class="cup">👥</span><span><b>أصدقائي</b><small>أضف صديقًا، وزُر بيوت أصدقائك ومدنهم</small></span><span class="go">‹</span></button>
   <button class="bookcard" id="wjHe"><span class="cup">🏅</span><span><b>أبطال هذا الأسبوع</b><small>من جمع أكثر النقاط هذا الأسبوع؟</small></span><span class="go">‹</span></button>
-  <button class="bookcard" id="wjHow"><span class="cup">❓</span><span><b>كيف ألعب؟</b><small>شرح سريع للتطبيق</small></span><span class="go">‹</span></button>`);
+  <button class="bookcard" id="wjHow"><span class="cup">❓</span><span><b>كيف ألعب؟</b><small>شرح سريع للتطبيق</small></span><span class="go">‹</span></button>
+  <button class="bookcard" id="wjFb"><span class="cup">📬</span><span><b>راسل الإدارة</b><small>مشكلة أو اقتراح · رسالة واحدة كل أسبوع</small></span><span class="go">‹</span></button>`);
+$q('#wjFb').onclick=()=>{snd();window.Idara&&Idara.feedback()};
 $q('#wjFr').onclick=()=>{const b=$q('#hFrBtn');b&&b.click()};
 $q('#wjHe').onclick=()=>{const b=$q('#hHeBtn');b&&b.click()};
 $q('#wjHow').onclick=()=>{const b=$q('#howBtn');b&&b.click()};

@@ -433,6 +433,7 @@ async function panel(){const API=O();heroes=null;all=null;view='main';
       <button id="tRep"><span>📋</span><b>تقرير التطبيق</b><small>انسخه أو شاركه</small></button>
       <button id="idSubs"><span>👥</span><b>المشتركون</b><small id="idSubsN">⏳</small></button>
       <button id="tNreq" style="grid-column:1/-1"><span>📨</span><b>طلبات تغيير الأسماء</b><small id="idNreqN">⏳</small></button>
+      <button id="tFb" style="grid-column:1/-1"><span>📬</span><b>رسائل الأطفال</b><small id="idFbN">⏳</small></button>
       <button id="tReps" style="grid-column:1/-1"><span>🚩</span><b>بلاغات الأسماء</b><small id="idRepN">⏳</small></button>
       <button id="tVoice" style="grid-column:1/-1"><span>🎙️</span><b>صوتي للأطفال</b><small>اقرأ العبارة بصوتك فيسمعها الأطفال عند كل إنجاز</small></button>
     </div>
@@ -443,6 +444,7 @@ async function panel(){const API=O();heroes=null;all=null;view='main';
   $('#idSubs').onclick=()=>{if(all)openKids()};
   $('#tReps').onclick=()=>{if(all)openKids('rep')};
   $('#tNreq').onclick=()=>openReqs();
+  $('#tFb').onclick=()=>openFb();loadFb(API).then(()=>{const e=$('#idFbN');if(e)e.textContent=fbSum()});
   loadReqs(API).then(()=>{const e=$('#idNreqN');if(e)e.textContent=reqSum()});
   $('#tFind').onclick=()=>{if(!all)return;openKids();setTimeout(()=>{const i=$('#kQ');if(i)i.focus()},150)};
   $('#tMsg').onclick=()=>sendNews(API,0);$('#tPin').onclick=()=>sendNews(API,1);$('#tGift').onclick=()=>giftAll(API);$('#tRep').onclick=()=>report(API);$('#tVoice').onclick=()=>{if(window.Hamas)Hamas.recorder()};
@@ -542,6 +544,59 @@ async function openReqs(){const API=O();view='reqs';window.scrollTo(0,0);show('i
   body().querySelectorAll('[data-no]').forEach(b=>b.onclick=async()=>{const id=b.dataset.no,v=nreqs[id];if(!v)return;b.disabled=true;
     try{await API.db.ref('prizes/'+id).push({msg:`لم توافق الإدارة على تغيير اسمك إلى «${v.to}»، ويبقى اسمك «${v.from}» 🤍`,j:0,nrej:v.to,ts:TS});
       await API.db.ref('nreq/'+id).remove();delete nreqs[id];API.toast('❌ رُفض الطلب');openReqs()}catch(e){b.disabled=false;API.toast('تعذّر')}})}
+/* ---------- 📬 رسائل الأطفال للإدارة (v21.8، طلب صاحب التطبيق) ----------
+   الطفل يرسل مشكلة أو اقتراحًا مرة واحدة في الأسبوع: msgs/{uid}/{الأسبوع} = {k:'p'|'s', m (٢–٤٠٠ حرف), n, a, t}.
+   القواعد: يقرأها المدير فقط، والطفل لا يعدّل رسالة أرسلها (مفتاح الأسبوع مرّة واحدة). المدير يعلّم «قُرئت» (r:1) أو يحذف، ويردّ برسالة خاصة (kidDo msg). */
+let fbs=null;
+async function loadFb(API){fbs=[];try{const v=(await API.db.ref('msgs').get()).val()||{};
+  Object.entries(v).forEach(([uid,ws])=>Object.entries(ws||{}).forEach(([w,m])=>{if(m&&m.m)fbs.push(Object.assign({uid,w},m))}))}catch(e){fbs=null}
+  if(fbs)fbs.sort((a,b)=>(b.t||0)-(a.t||0))}
+const fbSum=()=>{if(!fbs)return 'تحتاج نشر قواعد Firebase الجديدة';const n=fbs.filter(x=>!x.r).length;return n?`🔴 ${ar(n)} ${n==1?'رسالة جديدة':'رسائل جديدة'}`:fbs.length?'لا رسائل جديدة 👍':'لا توجد رسائل بعد'};
+async function openFb(){const API=O();view='fb';window.scrollTo(0,0);show('idara');
+  body().innerHTML='<div class="handoff"><div class="big spin">📬</div><p>جارٍ التحميل…</p></div>';await loadFb(API);
+  const L=fbs||[];
+  body().innerHTML=`<div class="idban"><span class="sh">📬</span><span><b>رسائل الأطفال</b><small>مشكلات واقتراحات — كل طفل رسالة واحدة في الأسبوع</small></span></div>
+    ${!fbs?'<p class="tip">ما قدرنا نقرأ الرسائل: انشر قواعد Firebase الجديدة (database.rules.json).</p>':L.length?L.map((v,i)=>`<div class="idrow" style="flex-wrap:wrap;gap:6px;${v.r?'':'outline:2px solid #e2504a;'}">
+      <b style="flex:1 1 100%;font-size:16px">${esc(v.a||'')} ${esc(v.n||'')} <span style="font-size:13px;padding:1px 8px;border-radius:10px;background:${v.k=='p'?'#ffe1e1':'#e1f3ff'}">${v.k=='p'?'🛠️ مشكلة':'💡 اقتراح'}</span>${v.r?'':' <span style="color:#c43d38;font-size:13px">● جديدة</span>'}</b>
+      <p style="flex:1 1 100%;margin:2px 0;font-size:16px;white-space:pre-wrap;line-height:1.7">${esc(v.m)}</p>
+      <small>${v.t?new Date(v.t).toLocaleDateString('ar-IQ',{weekday:'long',day:'numeric',month:'long'}):''}</small>
+      <span style="display:flex;gap:6px;margin-inline-start:auto;flex-wrap:wrap"><button class="btn gold" style="flex:none" data-fr="${i}">📩 ردّ</button><button class="btn sec" style="flex:none" data-fc="${i}">👤 بطاقته</button><button class="btn sec" style="flex:none" data-fd="${i}">🗑️</button></span></div>`).join('')
+      :'<p class="tip">لا توجد رسائل بعد 👍</p>'}
+    <button class="btn sec" id="fbBack" style="flex:none;width:100%;margin-top:8px">‹ رجوع إلى لوحة الإدارة</button>`;
+  $('#fbBack').onclick=backMain;
+  L.filter(v=>!v.r).forEach(v=>API.db.ref(`msgs/${v.uid}/${v.w}/r`).set(1).catch(()=>{})); // فُتحت = قُرئت
+  body().querySelectorAll('[data-fr]').forEach(b=>b.onclick=()=>{const v=L[+b.dataset.fr];kidDo(v.uid,'msg',{nick:v.n,av:v.a})});
+  body().querySelectorAll('[data-fc]').forEach(b=>b.onclick=()=>{const v=L[+b.dataset.fc];kidCard(v.uid)});
+  body().querySelectorAll('[data-fd]').forEach(b=>b.onclick=async()=>{const v=L[+b.dataset.fd];if(!confirm('حذف الرسالة؟'))return;
+    try{await API.db.ref(`msgs/${v.uid}/${v.w}`).remove();openFb()}catch(e){API.toast('تعذّر')}})}
+// جهة الطفل: «📬 راسل الإدارة» (من «المزيد»)
+async function feedback(){const API=O();if(isAdmK())return openFb();
+  modal(`<div class="handoff" style="padding:10px"><div class="big spin">📬</div><p>لحظة…</p></div>`);
+  try{await API.init()}catch(e){modal(`<div style="font-size:46px">📶</div><h3>${B('اتصل','اتصلي')} بالإنترنت أولًا</h3><div class="nav"><button class="btn sec" data-close>حسنًا</button></div>`);return}
+  if(!API.profile){closeModal();return API.editProfile&&API.editProfile()}
+  if(API.banned){modal(`<div style="font-size:46px">⛔</div><p>لا يمكنك المراسلة الآن.</p><div class="nav"><button class="btn sec" data-close>حسنًا</button></div>`);return}
+  const w=API.week();let old=null;try{old=(await API.db.ref(`msgs/${API.me}/${w}`).get()).val()}catch(e){old=undefined}
+  if(old===undefined){modal(`<div style="font-size:46px">🛠️</div><p>المراسلة غير متاحة الآن، ${B('جرّب','جرّبي')} لاحقًا 🤍</p><div class="nav"><button class="btn sec" data-close>حسنًا</button></div>`);return}
+  if(old){modal(`<div style="font-size:50px">📬</div><h3 style="margin:4px 0">${B('أرسلتَ','أرسلتِ')} رسالتك هذا الأسبوع 🤍</h3>
+    <p style="background:#f4fbf6;border-radius:12px;padding:8px;white-space:pre-wrap">${esc(old.m)}</p><p style="font-size:14px;color:var(--muted)">${old.r?'✅ قرأتها الإدارة':'⏳ ستقرؤها الإدارة قريبًا'} · ${B('تستطيع','تستطيعين')} أن ${B('ترسل','ترسلي')} رسالة جديدة يوم الجمعة</p>
+    <div class="nav"><button class="btn sec" data-close>حسنًا</button></div>`);return}
+  let k='s';
+  modal(`<div style="font-size:50px">📬</div><h3 style="margin:4px 0">راسل الإدارة</h3>
+    <p style="font-size:14.5px;margin:2px 0">${B('عندك','عندكِ')} مشكلة في التطبيق أو فكرة جميلة؟ ${B('اكتبها','اكتبيها')} للإدارة 🌷<br><small>رسالة واحدة في الأسبوع، ${B('فاكتب','فاكتبي')} كل ما تريد فيها</small></p>
+    <div class="nav" style="position:static"><button class="btn sec" data-fk="p">🛠️ مشكلة</button><button class="btn gold" data-fk="s">💡 اقتراح</button></div>
+    <textarea class="inp" id="fbM" maxlength="400" rows="5" style="width:100%;box-sizing:border-box;font:inherit;font-size:16px;resize:vertical" placeholder="${B('اكتب','اكتبي')} هنا…"></textarea>
+    <div class="fb" id="fbE" style="font-size:13px">لا ${B('تكتب','تكتبي')} رقم هاتف أو عنوان بيت 🤍</div>
+    <div class="nav"><button class="btn sec" data-close>رجوع</button><button class="btn gold" id="fbSend">📨 أرسل</button></div>`,()=>{
+    const sel=()=>document.querySelectorAll('#modalIn [data-fk]').forEach(b=>b.className='btn '+(b.dataset.fk==k?'gold':'sec'));sel();
+    document.querySelectorAll('#modalIn [data-fk]').forEach(b=>b.onclick=()=>{k=b.dataset.fk;sel()});
+    $('#fbSend').onclick=async()=>{const m=$('#fbM').value.trim().replace(/\n{3,}/g,'\n\n'),e=$('#fbE');
+      if(m.length<5){e.className='fb bad';e.textContent=B('اكتب','اكتبي')+' رسالتك أولًا (كلمتين على الأقل)';return}
+      if(/\d{7,}|https?:|www\./i.test(m.replace(/\s/g,''))){e.className='fb bad';e.textContent='بلا أرقام هواتف أو روابط من فضلك 🤍';return}
+      $('#fbSend').disabled=true;
+      try{await API.db.ref(`msgs/${API.me}/${w}`).set({k,m:m.slice(0,400),n:String(API.profile.nick||'').slice(0,40),a:String(API.profile.av||'').slice(0,8),t:firebase.database.ServerValue.TIMESTAMP});
+        modal(`<div style="font-size:54px">💌</div><h3 style="margin:4px 0">وصلت رسالتك للإدارة!</h3><p>شكرًا لأنك ${B('تساعدنا','تساعدينا')} نجعل جنّتنا أجمل 🌷</p><div class="nav"><button class="btn gold" data-close>جميل 👍</button></div>`)}
+      catch(x){$('#fbSend').disabled=false;e.className='fb bad';e.textContent='تعذّر الإرسال، تأكّد من الإنترنت'}}})}
+const isAdmK=()=>window.isAdm&&isAdm();
 /* 📊 الإحصائيات */
 async function stats(API){const el=$('#idStats');if(!el)return;const L=all||[],t=Date.now(),D1=864e5;
   const n=L.length,b=L.filter(p=>p.sx=='b').length,g=L.filter(p=>p.sx=='g').length;
@@ -567,5 +622,5 @@ function welcome(nick){const d=D();if(d.welcomed)return;d.welcomed=Date.now();Aa
     msg:B('مرحبًا بك في «جنّتي الصغيرة»! سعداء بانضمامك إلينا.\nتعلّم أصول دينك، واحفظ، وصلِّ، وابنِ بيتك في الجنة بأعمالك الصالحة 🤍',
           'مرحبًا بكِ في «جنّتي الصغيرة»! سعداء بانضمامكِ إلينا.\nتعلّمي أصول دينكِ، واحفظي، وصلّي، وابني بيتكِ في الجنة بأعمالكِ الصالحة 🤍')});
   setTimeout(nextMsg,700)}
-window.Idara={card:id=>{show('idara');kidCard(id)},kidDo,welcome,gift:(id,n,a)=>giftTo(id,n,a),open:openAdmin,inbox,dayNight};
+window.Idara={feedback,card:id=>{show('idara');kidCard(id)},kidDo,welcome,gift:(id,n,a)=>giftTo(id,n,a),open:openAdmin,inbox,dayNight};
 })();

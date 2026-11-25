@@ -253,6 +253,16 @@
           ".validate": "!newData.exists() || (newData.child('n').isString() && newData.child('n').val().length <= 40 && newData.child('x').isNumber())"
         }
       }
+    },
+    "msgs": {
+      ".read": "auth != null && root.child('admins/' + auth.uid).val() === true",
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$wk": {
+          ".write": "auth != null && ((auth.uid === $uid && !data.exists() && (!root.child('bans/' + auth.uid).exists() || root.child('bans/' + auth.uid + '/until').val() < now)) || root.child('admins/' + auth.uid).val() === true)",
+          ".validate": "newData.child('m').isString() && newData.child('m').val().length >= 2 && newData.child('m').val().length <= 400 && newData.child('k').isString() && newData.child('k').val().length <= 2 && newData.child('n').isString() && newData.child('n').val().length <= 40 && newData.child('t').isNumber() && newData.child('t').val() <= now"
+        }
+      }
     }
   }
 }
