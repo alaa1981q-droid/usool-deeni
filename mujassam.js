@@ -1356,24 +1356,36 @@ function shiftScene(S){const T=THREE,bx=new T.Box3();S.updateMatrixWorld(true);
   S.children.slice().forEach(c=>one(c,0))}
 
 /* ---------- شخصية الطفل ---------- */
-function makeKid(){const T=THREE,G=new T.Group(),M=(c)=>new T.MeshStandardMaterial({color:c,roughness:.7});
+// (v21.7) طلب الشيخ: الطفل في المدينة بنفس الصورة التي اختارها — لون البشرة من الصورة، وغطاء الرأس:
+// 👦 شعر وطاقية بيضاء · 🧒 شعر فقط · 👲 طاقية حمراء · 🤴 تاج ذهبي · 🧕 حجاب أبيض · 👧 حجاب وردي · 👸 حجاب وتاج صغير
+function kidLook(){let av='';try{av=(window.OnlineAPI&&OnlineAPI.profile&&OnlineAPI.profile.av)||(typeof state!='undefined'&&state&&state.av)||''}catch(e){}
+  const TN={'🏻':[0xfbe0c8,.3],'🏼':[0xeec39a,.3],'🏽':[0xd4a073,.22],'🏾':[0xa86f45,.16],'🏿':[0x6f4528,.12]};let tn=[0xf6cfa6,.35];for(const k in TN)if(av.includes(k))tn=TN[k];
+  const hd=/🧕/.test(av)?'hj':/👸/.test(av)?'hjc':/👧/.test(av)?'hjp':/🤴/.test(av)?'crown':/👲/.test(av)?'cap':/🧒/.test(av)?'hair':'kufi';
+  return {skin:tn[0],em:tn[1],hd}}
+function makeKid(){const T=THREE,G=new T.Group(),M=(c)=>new T.MeshStandardMaterial({color:c,roughness:.7}),LK=kidLook(),gold=()=>new T.MeshStandardMaterial({color:0xf2c230,metalness:.6,roughness:.3,emissive:0x5a3c00,emissiveIntensity:.3});
   const add=(geo,m,x,y,z,p)=>{const o=new T.Mesh(geo,m);o.position.set(x,y,z);o.castShadow=true;(p||G).add(o);return o};
-  const girl=!boy(),skin=M(0xf2c9a0),shirt=M(girl?0xd94f8a:0x2f6fd0),pants=M(girl?0xd94f8a:0x2b3a55),shoe=M(0x3a2a1a),dk=M(0x222222);
+  const girl=!boy(),skin=M(LK.skin),shirt=M(girl?0xd94f8a:0x2f6fd0),pants=M(girl?0xd94f8a:0x2b3a55),shoe=M(0x3a2a1a),dk=M(0x222222);
   const legs=[-1,1].map(k=>{const L=new T.Group();L.position.set(k*.11,.5,0);G.add(L);add(new T.CylinderGeometry(.08,.08,.45,8),pants,0,-.22,0,L);add(new T.BoxGeometry(.14,.08,.22),shoe,0,-.46,.04,L);return L});
   if(girl)add(new T.CylinderGeometry(.2,.34,.6,14),shirt,0,.62,0);else add(new T.CylinderGeometry(.2,.24,.5,14),shirt,0,.72,0);
   const arms=[-1,1].map(k=>{const A=new T.Group();A.position.set(k*.27,.92,0);G.add(A);add(new T.CylinderGeometry(.06,.06,.42,8),shirt,0,-.2,0,A);add(new T.SphereGeometry(.065,8,6),skin,0,-.43,0,A);return A});
   // (v11.4) وجه أوضح: رأس أكبر، عيون كبيرة لامعة، خدود وردية وابتسامة
-  const face=new T.MeshStandardMaterial({color:0xf6cfa6,roughness:.6,emissive:0x4a3020,emissiveIntensity:.35});
+  const face=new T.MeshStandardMaterial({color:LK.skin,roughness:.6,emissive:0x4a3020,emissiveIntensity:LK.em});
   const n0=G.children.length;add(new T.SphereGeometry(.32,20,16),face,0,1.32,0);
   const wh=new T.MeshBasicMaterial({color:0xffffff}),pu=new T.MeshBasicMaterial({color:0x1a1a2a});
   [-.115,.115].forEach(x=>{add(new T.SphereGeometry(.085,12,10),wh,x,1.35,.24);add(new T.SphereGeometry(.052,10,8),pu,x,1.35,.31);add(new T.SphereGeometry(.018,6,4),wh,x-.018,1.375,.36)});
   const ck=new T.MeshBasicMaterial({color:0xff9aa8});[-.2,.2].forEach(x=>{const c=add(new T.SphereGeometry(.055,10,8),ck,x,1.25,.24);c.scale.z=.4});
   const sm=add(new T.TorusGeometry(.085,.02,6,14,Math.PI),new T.MeshBasicMaterial({color:0xc0343a}),0,1.22,.285);sm.rotation.z=Math.PI;
-  if(girl){const hj=M(0xffffff);const h=add(new T.SphereGeometry(.36,20,14,0,Math.PI*2,0,Math.PI*.6),hj,0,1.33,-.04);h.rotation.x=-.55;
+  if(girl){const pk=LK.hd=='hjp',hj=M(pk?0xf06fa0:0xffffff);const h=add(new T.SphereGeometry(.36,20,14,0,Math.PI*2,0,Math.PI*.6),hj,0,1.33,-.04);h.rotation.x=-.55;
     add(new T.SphereGeometry(.37,20,14,Math.PI,Math.PI,Math.PI*.5,Math.PI*.5),hj,0,1.33,-.06);
-    add(new T.ConeGeometry(.4,.4,20,1,true),hj,0,1.05,-.02);add(new T.TorusGeometry(.31,.035,8,24),M(0xff7fb0),0,1.36,.06).rotation.x=-.3}
+    add(new T.ConeGeometry(.4,.4,20,1,true),hj,0,1.05,-.02);add(new T.TorusGeometry(.31,.035,8,24),M(pk?0xffe0ec:0xff7fb0),0,1.36,.06).rotation.x=-.3;
+    if(LK.hd=='hjc'){const g=gold();const tr=add(new T.CylinderGeometry(.2,.23,.1,18,1,true),g,0,1.72,-.06);tr.rotation.x=-.3;
+      [-.13,-.065,0,.065,.13].forEach((x,i)=>add(new T.ConeGeometry(.04,i==2?.18:i%2?.13:.1,6),g,x,i==2?1.85:1.81,.1-Math.abs(x)*.5));add(new T.SphereGeometry(.04,8,6),M(0xe0306a),0,1.74,.15)}}
   else{const hair=M(0x3b2414);const hr=add(new T.SphereGeometry(.335,20,12,0,Math.PI*2,0,Math.PI*.5),hair,0,1.33,-.03);hr.rotation.x=-.35;
-    add(new T.SphereGeometry(.26,16,8,0,Math.PI*2,0,Math.PI/2),M(0xffffff),0,1.5,-.04)}
+    if(LK.hd=='kufi')add(new T.SphereGeometry(.26,16,8,0,Math.PI*2,0,Math.PI/2),M(0xffffff),0,1.5,-.04);
+    else if(LK.hd=='cap'){add(new T.SphereGeometry(.27,16,8,0,Math.PI*2,0,Math.PI/2),M(0xc8283a),0,1.49,-.04);add(new T.SphereGeometry(.045,8,6),M(0xf2c230),0,1.77,-.04)}
+    else if(LK.hd=='crown'){const g=gold();add(new T.CylinderGeometry(.24,.25,.13,18,1,true),g,0,1.62,-.03);
+      for(let i=0;i<6;i++){const a=i/6*Math.PI*2;add(new T.ConeGeometry(.045,.13,6),g,Math.sin(a)*.235,1.74,Math.cos(a)*.235-.03)}
+      add(new T.SphereGeometry(.035,8,6),M(0xd8203a),0,1.63,.22)}}
   const H=new T.Group();H.position.y=1.08;G.children.slice(n0).forEach(c=>{G.remove(c);c.position.y-=1.08;H.add(c)});G.add(H);
   G.scale.setScalar(KS);G.userData={legs,arms,head:H};return G}
 

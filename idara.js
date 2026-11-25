@@ -245,7 +245,7 @@ async function clearReps(id){await O().db.ref('reports/'+id).remove();delete rep
 const repSum=()=>{const n=Object.keys(reps).filter(repN).length;return n?`🔴 ${ar(n)} ${n==1?'اسم':n==2?'اسمان':n<=10?'أسماء':'اسمًا'} تنتظرك`:'لا توجد بلاغات 👍'};
 let bans={};
 // ولد أو بنت: من اختياره، وإلا من صورته
-const sexOf=av=>/👧|🧕|👩/.test(av||'')?'g':/👦|🧒|👨/.test(av||'')?'b':'';
+const sexOf=av=>/👧|🧕|👩|👸/.test(av||'')?'g':/👦|🧒|👨|👲|🤴/.test(av||'')?'b':'';
 const banOf=id=>{const b=bans[id];return b&&b.until>Date.now()?b:null};
 // يتعمّد الأخطاء؟ دقّة أقل من ٣٥٪ بعد ١٦ سؤالًا أونلاين، أو مباراتان بلا أي إجابة صحيحة
 const accOf=p=>{const a=p.acc||{};return a.q?a.r/a.q:null};
