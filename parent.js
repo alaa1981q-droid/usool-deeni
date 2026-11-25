@@ -71,9 +71,11 @@ function report(){
     <div class="ptip">${tips(d).map(x=>'• '+x).join('<br>')}</div>
     <p style="font-size:12px;color:var(--muted);margin:4px 0">الأرقام محفوظة على هذا الجهاز فقط، وتبدأ من يوم تحديث التطبيق.</p>
     <div class="nav"><button class="btn gold" id="pgTask">📝 مهمة لطفلي</button><button class="btn gold" id="pgRem">🔔 تذكير يومي</button></div>
+    <button class="btn sec" id="pgLow" style="width:100%;margin-top:6px">📱 وضع التلفونات البسيطة: <b>${window.isLow&&isLow()?'شغّال ✔':'مطفأ'}</b><small style="display:block;font-size:12px;font-weight:700">إذا التطبيق يعلّق: يوقف الحركات الزخرفية ويخفّف المدينة</small></button>
     <a class="pyt" href="https://www.youtube.com/@jannati-kids" target="_blank" rel="noopener">📺 قناتنا على YouTube<small>شرح التطبيق ودروس من الكتاب</small></a>
     <div class="nav"><button class="btn gold" id="pgSend">📤 أرسل التقرير</button><button class="btn sec" data-close>إغلاق</button></div>`,
-    ()=>{$('#pgTask').onclick=()=>{if(window.Hamas)Hamas.parentTask()};$('#pgRem').onclick=()=>{if(window.Hamas)Hamas.reminder()};$('#pgSend').onclick=()=>{const t=text(d);
+    ()=>{$('#pgTask').onclick=()=>{if(window.Hamas)Hamas.parentTask()};$('#pgRem').onclick=()=>{if(window.Hamas)Hamas.reminder()};$('#pgLow').onclick=()=>{const on=!(window.isLow&&isLow());try{localStorage.setItem('jannah_lowfx',on?'1':'0');localStorage.removeItem('usul5_m3lite')}catch(e){}
+        document.documentElement.classList.toggle('lowfx',on);$('#pgLow b').textContent=on?'شغّال ✔':'مطفأ'};$('#pgSend').onclick=()=>{const t=text(d);
       if(navigator.share)navigator.share({text:t}).catch(()=>{});else window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank')}})}
 function gate(){
   const a=6+Math.floor(Math.random()*4),b=6+Math.floor(Math.random()*4);

@@ -116,7 +116,7 @@ const BSTOP=[[1,16.6,2.85,3.45],[-1,16.6,-2.75,-3.45]]; // (v14.5) ملعب كر
 // (v16.9) طلب الشيخ: 👮 مركز الشرطة يمين الطريق مقابل مدينة الألعاب، و⚡ محطة الكهرباء (شمس ورياح) في السهل الغربي
 const POL=[10.5,-34],PWR=[-34,-17],TAPP=[3.25,-6.6],IFT=[9.6,3.7],SHK=[-2.95,8.3];
 const WALLETS=[[-2.5,-9.5],[2.6,-12.5],[-2.5,14.5],[2.6,10.5],[-2.5,-27],[2.6,-27.5]];
-const LKEY='usul5_m3lite';function liteOn(){try{return localStorage.getItem(LKEY)==='1'}catch(e){return false}}
+const LKEY='usul5_m3lite';function liteOn(){try{const v=localStorage.getItem(LKEY);if(v!==null)return v==='1'}catch(e){return false}return !!(window.isLow&&isLow())} // (v21.5) التلفونات البسيطة تبدأ بالوضع الخفيف ما لم يختر الطفل غيره
 // حكايات جدّو (يوم الجمعة) — كتبها Claude، والشيخ يراجعها
 const GST=['رأى رجلٌ شيخًا كبيرًا يغرس نخلة، فقال له: لماذا تغرسها وأنت لن تأكل منها؟ فقال: غرس مَن قبلنا فأكلنا، ونغرس ليأكل مَن بعدنا 🌴',
   'قالت أمٌّ لابنتها: اخلطي الحليب بالماء، فلا أحد يرانا. فقالت البنت: إن لم يرنا أحد، فاللَّهُ يرانا 🥛',
@@ -1397,7 +1397,8 @@ function rainyDay(){const d=new Date(),k=d.getFullYear()*372+d.getMonth()*31+d.g
 function rainNow(){const d=window.City3D&&City3D.debugRain;if(d!=null)return !!d;const w=wxNow();if(w)return wRainy(w);const h=hourNow();return rainyDay()&&h>=7&&h<15}
 function rainbowNow(){const d=window.City3D&&City3D.debugRainbow;if(d!=null)return !!d;const h=hourNow(),w=wxNow();if(w)return !wRainy(w)&&!wSnowy(w)&&w.past>.2&&w.cc<85&&h>=7&&h<17.5;return rainyDay()&&h>=15&&h<16.5}
 // رمضان (الشهر ٩) والعيدان (١–٣ شوال، ١٠–١٣ ذو الحجة) بالتقويم الهجري (أم القرى) — قد يختلف يومًا عن الرؤية المحلية
-function festNow(){const d=window.City3D&&City3D.debugFest;if(d!=null)return d||null;try{const p=new Intl.DateTimeFormat("en-u-ca-islamic-umalqura",{month:"numeric",day:"numeric"}).formatToParts(new Date()),m=+p.find(x=>x.type==="month").value,dd=+p.find(x=>x.type==="day").value;
+let HJF=null,HJK=-1,HJP=null;function hjParts(){const k=Math.floor(Date.now()/6e4);if(k!==HJK){HJF=HJF||new Intl.DateTimeFormat("en-u-ca-islamic-umalqura",{month:"numeric",day:"numeric"});HJP=HJF.formatToParts(new Date());HJK=k}return HJP} // (v21.5) منسّق واحد ونتيجة كل دقيقة
+function festNow(){const d=window.City3D&&City3D.debugFest;if(d!=null)return d||null;try{const p=hjParts(),m=+p.find(x=>x.type==="month").value,dd=+p.find(x=>x.type==="day").value;
   if(m===9)return "ramadan";if(m===10&&dd<=3||m===12&&dd>=10&&dd<=13)return "eid"}catch(e){}return null}
 // (v14.6) طلب الشيخ: زينة المناسبات الدينية المعروفة. sad = سواد ورايات سود (محرّم…)، joy = أضواء وأعلام وفرح.
 // [الشهر الهجري، من يوم، إلى يوم، النوع، لافتة الشارع، عنوان البطاقة، درس البطاقة] — الأيام بتقويم أم القرى (قد يفرق يومًا عن الرؤية)
@@ -1441,7 +1442,7 @@ function season(){const d=window.City3D&&City3D.debugSeason;if(d)return d;const 
 // إطعام العصافير في البرد: تشرين الثاني إلى شباط
 function birdMonths(){const d=window.City3D&&City3D.debugBirds;if(d!=null)return !!d;return [10,11,0,1].includes(new Date().getMonth())}
 const HM=['محرّم','صفر','ربيع الأول','ربيع الثاني','جمادى الأولى','جمادى الآخرة','رجب','شعبان','رمضان','شوّال','ذو القعدة','ذو الحجّة'];
-function hijri(){const d=window.City3D&&City3D.debugHijri;if(d)return d;try{const p=new Intl.DateTimeFormat("en-u-ca-islamic-umalqura",{month:"numeric",day:"numeric"}).formatToParts(new Date());return {m:+p.find(x=>x.type==="month").value,d:+p.find(x=>x.type==="day").value}}catch(e){return null}}
+function hijri(){const d=window.City3D&&City3D.debugHijri;if(d)return d;try{const p=hjParts();return {m:+p.find(x=>x.type==="month").value,d:+p.find(x=>x.type==="day").value}}catch(e){return null}}
 function adhanGlow(){if(window.City3D&&City3D.debugGlow)return true;try{const t=Adhan.times(new Date()),n=Date.now();return ['fajr','dhuhr','maghrib'].some(p=>n>=+t[p]&&n<+t[p]+20*60e3)}catch(e){return false}}
 function maghribH(){try{const x=new Date(+Adhan.times(new Date()).maghrib);return x.getHours()+x.getMinutes()/60}catch(e){return 17.3}}
 function sunsetBirds(){const h=hourNow(),m=maghribH();return h>=m-.9&&h<m+.2}

@@ -2,6 +2,11 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
+<script>/* (v21.5) وضع التلفونات البسيطة: يوقف الحركات الزخرفية ويخفّف المدينة المجسّمة.
+   jannah_lowfx: '1' شغّله الأهل، '0' أطفأه الأهل، 'a1' شُغّل تلقائيًا لأن الجهاز بطيء. خارج usul5_ لأنه يخصّ هذا الجهاز فقط */
+(function(){var d=document.documentElement;function weak(){var n=navigator,m=n.deviceMemory,c=n.hardwareConcurrency;return m?(m<=2||(m<=4&&c&&c<=4)):!!(c&&c<=2)}
+window.isLow=function(){try{var v=localStorage.getItem('jannah_lowfx');if(v==='1'||v==='a1')return true;if(v==='0')return false}catch(e){}return weak()};
+if(window.isLow())d.classList.add('lowfx')})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#14794f">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -375,9 +380,9 @@ button{font-family:inherit;cursor:pointer}
 .hero.kid .cl{height:22px;border-radius:22px;background:#fff;box-shadow:0 3px 0 rgba(140,190,220,.45)}
 .hero.kid .cl::before,.hero.kid .cl::after{content:'';position:absolute;background:#fff;border-radius:50%}
 .hero.kid .cl::before{width:26px;height:26px;top:-13px;left:10px}.hero.kid .cl::after{width:20px;height:20px;top:-9px;left:30px}
-.hero.kid .c1{width:62px;top:30px;right:-70px;animation:hcloud 26s linear infinite}
-.hero.kid .c2{width:50px;top:62px;right:-70px;animation:hcloud 34s linear infinite -12s;transform:scale(.8)}
-.hero.kid .c3{width:56px;top:12px;right:-70px;animation:hcloud 30s linear infinite -22s;opacity:.9}
+.hero.kid .c1{width:62px;top:30px;right:-70px;animation:hcloud 26s linear infinite;will-change:transform}
+.hero.kid .c2{--s:.8;width:50px;top:62px;right:-70px;animation:hcloud 34s linear infinite -12s;transform:scale(.8);will-change:transform}
+.hero.kid .c3{width:56px;top:12px;right:-70px;animation:hcloud 30s linear infinite -22s;opacity:.9;will-change:transform}
 .hero.kid .sp{font-size:15px;animation:htw 2.4s ease-in-out infinite}
 .hero.kid .s1{top:16%;right:12%}.hero.kid .s2{top:38%;left:8%;animation-delay:-.6s;font-size:13px}.hero.kid .s3{top:52%;right:6%;animation-delay:-1.2s}.hero.kid .s4{top:10%;left:30%;animation-delay:-1.8s;font-size:12px}
 .hero.kid .hill{bottom:-40px;border-radius:50%}
@@ -394,7 +399,7 @@ button{font-family:inherit;cursor:pointer}
  background:rgba(255,255,255,.85);box-shadow:0 3px 0 rgba(61,159,211,.45)}
 .hero.kid .by{display:inline-block;margin-top:6px;opacity:1;font-size:12.5px;font-weight:800;color:#fff;background:#2fa35a;border-radius:12px;padding:2px 10px;box-shadow:0 2px 0 #1d7a40;position:relative}
 @keyframes hspin{to{transform:rotate(360deg)}}
-@keyframes hcloud{to{right:115%}}
+@keyframes hcloud{from{transform:translateX(0) scale(var(--s,1))}to{transform:translateX(calc(-100vw - 160px)) scale(var(--s,1))}}
 @keyframes htw{50%{transform:scale(1.35) rotate(15deg);opacity:.6}}
 @keyframes hsway{50%{transform:rotate(9deg)}}
 @keyframes hbob{50%{transform:translateY(-6px)}}
@@ -418,6 +423,9 @@ body.night .hero.kid p{background:rgba(255,255,255,.9)}
 @keyframes hin{from{transform:scale(.85) translateY(10px);opacity:0}}
 @keyframes hfloat{50%{transform:translateY(-4px) rotate(-4deg)}}
 @media (prefers-reduced-motion:reduce){#home *,#home .hero.kid *{animation:none!important}}
+/* (v21.5) التلفونات البسيطة: الواجهة ساكنة (الحركات المستمرة كانت تشغل المعالج حتى والطفل لا يلمس شيئًا) */
+html.lowfx #home *,html.lowfx #home .hero.kid *{animation:none!important;will-change:auto!important}
+html.lowfx #home .hero.kid .cl{display:none}
 </style>
 </head>
 <body>
@@ -502,8 +510,8 @@ body.night .hero.kid p{background:rgba(255,255,255,.9)}
 <div class="celebrate" id="celebrate" role="dialog" aria-live="assertive"><div class="in" id="celebIn"></div></div>
 <div class="modal" id="modal"><div class="in" id="modalIn"></div></div>
 
-<script src="seal.js?v=21.4"></script><!-- ختم التقدّم: لازم يكون أول ملف -->
-<script src="questions.js?v=21.4"></script><!-- غيّر ?v= مع APP_VER حتى لا يأخذ المتصفح نسخة قديمة -->
+<script src="seal.js?v=21.5"></script><!-- ختم التقدّم: لازم يكون أول ملف -->
+<script src="questions.js?v=21.5"></script><!-- غيّر ?v= مع APP_VER حتى لا يأخذ المتصفح نسخة قديمة -->
 <script>
 /* ---------- helpers ---------- */
 const AR='٠١٢٣٤٥٦٧٨٩';
@@ -1244,32 +1252,37 @@ document.addEventListener('keydown',e=>{if($('#zoomv').classList.contains('on'))
   if(!$('#reader').classList.contains('on'))return;
   if(e.key=='ArrowLeft')rGo(rCur+1);else if(e.key=='ArrowRight')rGo(rCur-1);else if(e.key=='Escape')closeReader()});
 
-const APP_VER='21.4';
+const APP_VER='21.5';
 $('#verLine').textContent=`الإصدار ${ar(APP_VER).replace('.','٫')} · ${ar(ALLQ.length)} سؤالًا`;
 renderHome();
 if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
-<script src="online.js?v=21.4"></script>
-<script src="bayt.js?v=21.4"></script>
-<script src="nafsak.js?v=21.4"></script>
-<script src="hifz.js?v=21.4"></script>
-<script src="jannah.js?v=21.4"></script>
-<script src="baytrace.js?v=21.4"></script>
-<script src="wird.js?v=21.4"></script>
-<script src="sawt.js?v=21.4"></script>
-<script src="salah.js?v=21.4"></script>
-<script src="adhan.js?v=21.4"></script>
-<script src="alqab.js?v=21.4"></script>
-<script src="binaa.js?v=21.4"></script>
-<script src="madina.js?v=21.4"></script>
-<script src="mujassam.js?v=21.4"></script>
-<script src="idara.js?v=21.4"></script>
-<script src="parent.js?v=21.4"></script>
-<script src="qisas.js?v=21.4"></script>
-<script src="bookdl.js?v=21.4"></script>
-<script src="ramz.js?v=21.4"></script>
-<script src="wajiha.js?v=21.4"></script>
-<script src="hamas.js?v=21.4"></script>
+<script src="online.js?v=21.5"></script>
+<script src="bayt.js?v=21.5"></script>
+<script src="nafsak.js?v=21.5"></script>
+<script src="hifz.js?v=21.5"></script>
+<script src="jannah.js?v=21.5"></script>
+<script src="baytrace.js?v=21.5"></script>
+<script src="wird.js?v=21.5"></script>
+<script src="sawt.js?v=21.5"></script>
+<script src="salah.js?v=21.5"></script>
+<script src="adhan.js?v=21.5"></script>
+<script src="alqab.js?v=21.5"></script>
+<script src="binaa.js?v=21.5"></script>
+<script src="madina.js?v=21.5"></script>
+<script src="mujassam.js?v=21.5"></script>
+<script src="idara.js?v=21.5"></script>
+<script src="parent.js?v=21.5"></script>
+<script src="qisas.js?v=21.5"></script>
+<script src="bookdl.js?v=21.5"></script>
+<script src="ramz.js?v=21.5"></script>
+<script src="wajiha.js?v=21.5"></script>
+<script src="hamas.js?v=21.5"></script>
+<script>/* (v21.5) إذا لم يُعرف الجهاز من مواصفاته: نقيس سرعة الرسم مرّة على الرئيسية؛ أقل من ٣٢ إطارًا بالثانية = تلفون بسيط */
+(function(){var K='jannah_lowfx';try{if(localStorage.getItem(K)!==null||document.documentElement.classList.contains('lowfx'))return}catch(e){return}
+addEventListener('load',function(){setTimeout(function(){var h=document.getElementById('home');if(document.hidden||!h||!h.classList.contains('on'))return;
+var n=0,t0=performance.now();(function f(t){n++;if(t-t0<3000)return requestAnimationFrame(f);if(document.hidden)return;var fps=n*1000/(t-t0);
+try{localStorage.setItem(K,fps<32?'a1':'ok')}catch(e){}if(fps<32)document.documentElement.classList.add('lowfx')})(t0)},4000)})})();</script>
 <script>/* زر «ثبّت التطبيق»: يظهر في المتصفح فقط (لا في تطبيق APK ولا بعد التثبيت) */
 (function(){
   var ua=navigator.userAgent,standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;

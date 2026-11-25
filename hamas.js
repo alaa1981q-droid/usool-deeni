@@ -31,9 +31,10 @@ function toast(html,onTap){const d=document.createElement('button');d.className=
   d.onclick=()=>{d.remove();onTap&&onTap()};setTimeout(()=>d.classList.add('on'),30);setTimeout(()=>{d.classList.remove('on');setTimeout(()=>d.remove(),400)},onTap?7000:3200)}
 
 /* ---------- 🌙 التاريخ الهجري ---------- */
-function hij(t=Date.now()){if(H.debugHij)return H.debugHij;
-  try{const p=new Intl.DateTimeFormat('en-u-ca-islamic-umalqura',{day:'numeric',month:'numeric',year:'numeric'}).formatToParts(new Date(t));
-    const g=k=>parseInt((p.find(x=>x.type==k)||{}).value,10);return {d:g('day'),m:g('month'),y:g('year')}}catch(e){return null}}
+let hjF=null,hjK=-1,hjV=null; // (v21.5) المنسّق يُصنع مرّة واحدة والنتيجة تُحفظ دقيقة (كان يُصنع في كل نداء، ثقيل على التلفونات البسيطة)
+function hij(t=Date.now()){if(H.debugHij)return H.debugHij;const k=Math.floor(t/6e4);if(k===hjK)return hjV;
+  try{hjF=hjF||new Intl.DateTimeFormat('en-u-ca-islamic-umalqura',{day:'numeric',month:'numeric',year:'numeric'});const p=hjF.formatToParts(new Date(t));
+    const g=k=>parseInt((p.find(x=>x.type==k)||{}).value,10);hjV={d:g('day'),m:g('month'),y:g('year')}}catch(e){hjV=null}hjK=k;return hjV}
 
 const css=document.createElement('style');
 css.textContent=`
