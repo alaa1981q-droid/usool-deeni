@@ -92,7 +92,7 @@ setTimeout(()=>{try{admMore()}catch(e){}},0);
 $q('#wjAFb').onclick=()=>{snd();window.Idara&&Idara.open('fb')};
 $q('#wjACity').onclick=()=>{snd();window.Idara&&Idara.open('kids')};
 $q('#wjAPan').onclick=()=>{snd();window.Idara&&Idara.open()};
-function admMore(){const a=!!(window.isAdm&&isAdm());$q('#wjAdm').hidden=!a;$q('#wjFb').hidden=a;
+function admMore(){const a=!!(window.isAdm&&isAdm());$q('#wjAdm').hidden=!a;$q("#wjFb").style.display=a?"none":"";
   if(a&&window.Idara&&Idara.fbCount)Idara.fbCount().then(n=>{const e=$q('#wjAFbN');if(e)e.textContent=n<0?'مشكلاتهم واقتراحاتهم':n>0?`🔴 ${n.toLocaleString('ar-EG')} ${n==1?'رسالة جديدة':'رسائل جديدة'}`:'لا رسائل جديدة 👍'})}
 $q('#wjFr').onclick=()=>{const b=$q('#hFrBtn');b&&b.click()};
 $q('#wjHe').onclick=()=>{const b=$q('#hHeBtn');b&&b.click()};
