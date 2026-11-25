@@ -86,6 +86,9 @@ moreB.insertAdjacentHTML('afterbegin',`<div id="wjAdm" hidden><div class="wjah">
   <button class="bookcard wjab" id="wjAFb"><span class="cup">📬</span><span><b>رسائل الأطفال</b><small id="wjAFbN">مشكلاتهم واقتراحاتهم</small></span><span class="go">‹</span></button>
   <button class="bookcard wjab" id="wjACity"><span class="cup">🏙️</span><span><b>مدن الأطفال</b><small>ادخل مدينة أيّ طفل وشاهد بيته وإنجازاته</small></span><span class="go">‹</span></button>
   <button class="bookcard wjab" id="wjAPan"><span class="cup">🛡️</span><span><b>لوحة الإدارة</b><small>المشتركون، الإحصائيات، الرسائل والهدايا</small></span><span class="go">‹</span></button></div>`);
+/* (v22.3) أيّ طريق يفتح «المزيد» (زرّ، بحث، رجوع) يحدّث صندوق المدير ويخفي «راسل الإدارة» */
+try{let wasOn=false;new MutationObserver(()=>{const on=$q('#wjMore').classList.contains('on');if(on&&!wasOn)admMore();wasOn=on}).observe($q('#wjMore'),{attributes:true,attributeFilter:['class']})}catch(e){}
+setTimeout(()=>{try{admMore()}catch(e){}},0);
 $q('#wjAFb').onclick=()=>{snd();window.Idara&&Idara.open('fb')};
 $q('#wjACity').onclick=()=>{snd();window.Idara&&Idara.open('kids')};
 $q('#wjAPan').onclick=()=>{snd();window.Idara&&Idara.open()};
