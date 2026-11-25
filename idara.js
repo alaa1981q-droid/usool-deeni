@@ -214,7 +214,7 @@ $('#idBack').onclick=()=>{if(view=='kids'||view=='reqs'){backMain();return}rende
 // الدخول: ٥ ضغطات على سطر الإصدار
 let taps=0,tapT=0;const vl=$('#verLine');if(vl)vl.addEventListener('click',()=>{taps++;clearTimeout(tapT);tapT=setTimeout(()=>taps=0,2500);if(taps>=5){taps=0;openAdmin()}});
 const body=()=>$('#idBody');
-async function openAdmin(){show('idara');body().innerHTML=`<div class="handoff"><div class="big spin">🛡️</div><p>جارٍ الاتصال…</p></div>`;
+async function openAdmin(go){show('idara');body().innerHTML=`<div class="handoff"><div class="big spin">🛡️</div><p>جارٍ الاتصال…</p></div>`;
   const API=O();try{await API.init()}catch(e){body().innerHTML=`<div class="handoff"><div class="big">📡</div><h2>لا يوجد اتصال</h2><p>الإدارة تحتاج إنترنت.</p></div>`;return}
   let ok=false;try{ok=!!(await API.db.ref('admins/'+API.me).get()).val()}catch(e){}
   if(!ok){body().innerHTML=`<div class="idbox idgate"><div style="font-size:54px">🔒</div><h3>هذه الصفحة لمدير التطبيق فقط</h3>
@@ -222,6 +222,8 @@ async function openAdmin(){show('idara');body().innerHTML=`<div class="handoff">
       <div class="code-card" style="justify-content:center"><b dir="ltr" style="font-size:15px;letter-spacing:0;word-break:break-all" id="idUid">${esc(API.me)}</b></div>
       <button class="btn sec" id="idCp" style="flex:none;width:100%">📋 نسخ المعرّف</button></div>`;
     $('#idCp').onclick=()=>{try{navigator.clipboard.writeText(API.me).then(()=>API.toast('نُسخ ✓'))}catch(e){API.toast(API.me)}};return}
+  if(go=='kids'){view='kids';body().innerHTML='<div class="handoff"><div class="big spin">🏙️</div><p>جارٍ التحميل…</p></div>';await loadKids(API);openKids('all');return}
+  if(go=='fb')return openFb();
   try{lastV=+localStorage.getItem('usul5_admSeen')||0;localStorage.setItem('usul5_admSeen',Date.now())}catch(e){}
   panel()}
 let lastV=0;
@@ -622,5 +624,5 @@ function welcome(nick){const d=D();if(d.welcomed)return;d.welcomed=Date.now();Aa
     msg:B('مرحبًا بك في «جنّتي الصغيرة»! سعداء بانضمامك إلينا.\nتعلّم أصول دينك، واحفظ، وصلِّ، وابنِ بيتك في الجنة بأعمالك الصالحة 🤍',
           'مرحبًا بكِ في «جنّتي الصغيرة»! سعداء بانضمامكِ إلينا.\nتعلّمي أصول دينكِ، واحفظي، وصلّي، وابني بيتكِ في الجنة بأعمالكِ الصالحة 🤍')});
   setTimeout(nextMsg,700)}
-window.Idara={feedback,card:id=>{show('idara');kidCard(id)},kidDo,welcome,gift:(id,n,a)=>giftTo(id,n,a),open:openAdmin,inbox,dayNight};
+window.Idara={feedback,fbCount:async()=>{try{await loadFb(O())}catch(e){}return fbs?fbs.filter(x=>!x.r).length:-1},card:id=>{show('idara');kidCard(id)},kidDo,welcome,gift:(id,n,a)=>giftTo(id,n,a),open:openAdmin,inbox,dayNight};
 })();

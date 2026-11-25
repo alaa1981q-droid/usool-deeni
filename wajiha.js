@@ -41,6 +41,10 @@ css.textContent=`
 #wjMoreBody,#wjDurBody{flex:1;padding:4px 2px 18px;display:flex;flex-direction:column;gap:10px}
 #wjMoreBody .bookcard,#wjMoreBody .wdcard{margin:0}
 #wjMoreBody .hfbtn{margin:0}
+#wjAdm{display:flex;flex-direction:column;gap:10px;padding:10px;border-radius:20px;background:linear-gradient(160deg,#fff8e1,#fdeec0);border:2px solid #d9a92a;box-shadow:0 4px 0 #b8871a,0 8px 16px rgba(150,110,20,.18),inset 0 2px 0 #fff}
+#wjAdm[hidden]{display:none}
+#wjAdm .wjah{text-align:center;font-weight:900;font-size:17px;color:#7a5200}
+#wjAdm .wjab{border-color:#d9a92a;box-shadow:0 4px 0 #c99a2e,0 6px 12px rgba(150,110,20,.15),inset 0 2px 0 #fff;background:linear-gradient(180deg,#fffdf5,#fff6dc)}
 #wjGamesBody{flex:1;padding:4px 2px 18px;display:flex;flex-direction:column;gap:10px}#wjGamesBody .bookcard{margin:0}
 #bayt.wj-deco .bnhint,#bayt.wj-deco #msqB,#bayt.wj-deco .brank,#bayt.wj-deco #rcOpen,#bayt.wj-deco .dbuild,#bayt.wj-deco .jvis,#bayt.wj-deco #jVis,
 #bayt.wj-deco .bbest,#bayt.wj-deco #byRace,#bayt.wj-deco .blvg,#bayt.wj-deco #byHow,
@@ -62,7 +66,7 @@ durB.innerHTML=`<p class="bcap" style="text-align:center;margin:6px 0 2px">${B('
 const map=$q('#map');if(map)durB.appendChild(map);
 // (v13.0) «المزيد» أقصر: 🎮 ألعابي (كل الألعاب في شاشة واحدة)، الكتاب، تحميله، القصص، الأصدقاء، الأبطال، كيف ألعب.
 // البيت لم يعد هنا: يُفتح من بيت الطفل داخل المدينة فقط، حتى لا يتشتّت بين المدينة والبيت.
-$q('#wjGames .back').onclick=()=>{snd();show('wjMore');scrollTo(0,0)};
+$q('#wjGames .back').onclick=()=>{snd();try{admMore()}catch(e){}show('wjMore');scrollTo(0,0)};
 const gamesB=$q('#wjGamesBody');
 gamesB.innerHTML=`<p class="bcap" style="text-align:center;margin:6px 0 2px">${B('العب','العبي')} ${B('واربح','واربحي')} الكؤوس والجواهر 🏆💎</p>`;
 ['#openContest','#openNafsak'].forEach(s=>{const e=$q(s);if(e)gamesB.appendChild(e)});
@@ -77,6 +81,16 @@ moreB.insertAdjacentHTML('beforeend',`<button class="bookcard" id="wjFr"><span c
   <button class="bookcard" id="wjHow"><span class="cup">❓</span><span><b>كيف ألعب؟</b><small>شرح سريع للتطبيق</small></span><span class="go">‹</span></button>
   <button class="bookcard" id="wjFb"><span class="cup">📬</span><span><b>راسل الإدارة</b><small>مشكلة أو اقتراح · رسالة واحدة كل أسبوع</small></span><span class="go">‹</span></button>`);
 $q('#wjFb').onclick=()=>{snd();window.Idara&&Idara.feedback()};
+/* (v22.2) طلب الشيخ: حساب المدير مميّز — «المزيد» عنده صندوق ذهبي «👑 أدوات المدير» بدل «راسل الإدارة» */
+moreB.insertAdjacentHTML('afterbegin',`<div id="wjAdm" hidden><div class="wjah">👑 أدوات المدير</div>
+  <button class="bookcard wjab" id="wjAFb"><span class="cup">📬</span><span><b>رسائل الأطفال</b><small id="wjAFbN">مشكلاتهم واقتراحاتهم</small></span><span class="go">‹</span></button>
+  <button class="bookcard wjab" id="wjACity"><span class="cup">🏙️</span><span><b>مدن الأطفال</b><small>ادخل مدينة أيّ طفل وشاهد بيته وإنجازاته</small></span><span class="go">‹</span></button>
+  <button class="bookcard wjab" id="wjAPan"><span class="cup">🛡️</span><span><b>لوحة الإدارة</b><small>المشتركون، الإحصائيات، الرسائل والهدايا</small></span><span class="go">‹</span></button></div>`);
+$q('#wjAFb').onclick=()=>{snd();window.Idara&&Idara.open('fb')};
+$q('#wjACity').onclick=()=>{snd();window.Idara&&Idara.open('kids')};
+$q('#wjAPan').onclick=()=>{snd();window.Idara&&Idara.open()};
+function admMore(){const a=!!(window.isAdm&&isAdm());$q('#wjAdm').hidden=!a;$q('#wjFb').hidden=a;
+  if(a&&window.Idara&&Idara.fbCount)Idara.fbCount().then(n=>{const e=$q('#wjAFbN');if(e)e.textContent=n<0?'مشكلاتهم واقتراحاتهم':n>0?`🔴 ${n.toLocaleString('ar-EG')} ${n==1?'رسالة جديدة':'رسائل جديدة'}`:'لا رسائل جديدة 👍'})}
 $q('#wjFr').onclick=()=>{const b=$q('#hFrBtn');b&&b.click()};
 $q('#wjHe').onclick=()=>{const b=$q('#hHeBtn');b&&b.click()};
 $q('#wjHow').onclick=()=>{const b=$q('#howBtn');b&&b.click()};
@@ -88,7 +102,7 @@ dur.innerHTML=`<span class="cup">📚</span><span><b>دروس الكتاب</b><s
 const more=document.createElement('button');more.className='bookcard wjtile wjmore';more.id='wjMoreBtn';
 more.innerHTML=`<span class="cup">☰</span><span><b>المزيد</b><small>الألعاب، الكتاب، القصص، الأصدقاء</small></span>`;
 dur.onclick=()=>{snd();try{renderHome()}catch(e){}show('wjDur');scrollTo(0,0)};
-more.onclick=()=>{snd();show('wjMore');scrollTo(0,0)};
+more.onclick=()=>{snd();admMore();show('wjMore');scrollTo(0,0)};
 hp.onclick=()=>{snd();const b=$q('#hProf');b&&b.click()};
 /* ---------- (v17.3) 🔍 البحث العامّ: طلب الشيخ — يبحث الطفل عن أيّ شيء في التطبيق (تعليم الصلاة، القراءة، الوِرد، القصص، أماكن المدينة…) ---------- */
 const gs=document.createElement('button');gs.id='gSearch';gs.type='button';gs.innerHTML=`<span>🔍</span><b>${B('ابحث','ابحثي')} عن أيّ شيء…</b><small>الصلاة، الوضوء، سورة، قصة، المسبح…</small>`;
