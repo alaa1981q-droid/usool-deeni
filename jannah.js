@@ -201,7 +201,16 @@ function gardenSVG(g,layer){g=cleanG(g);let gi=0,si=0;const out=[];
     const big=c=='e'||c=='f',z=big?(p[1]<292?24:19):sky?(c=='k'?15:12):13,an=c=='b'?'fly':c=='g'?'flut':c=='d'?'twinkle':c=='k'?'bob':'';
     out.push([p[1],`<text x="${spX(p[0],p[1]).toFixed(1)}" y="${p[1].toFixed(1)}" font-size="${z}" text-anchor="middle"${an?` class="dk-${an}" style="animation-delay:${(out.length%7)*.3}s"`:''}>${GL[c]}</text>`])}
   return out.sort((a,b)=>a[0]-b[0]).map(x=>x[1]).join('')}
-function lookItems(L){return String(L.i||'').split(',').filter(id=>IT[id])}
+/* (v21.6) قاعدة houses تقبل i حتى ٤٠٠ حرف فقط؛ الطفل الذي يملك أغلب الزينة يتجاوزها (≈٤٦٦) فيُرفض حفظ بيته كلّه بصمت،
+   ويبقى أصدقاؤه يرون بيتًا قديمًا (مثلًا بلا القصر). إن طالت القائمة تُنشر برموز قصيرة: «~» ثم رقم كل زينة في ICODE (أساس ٣٦)،
+   والمسجد يبقى باسمه الكامل لأنه يُفحص بالاسم. ICODE ثابتة: أضف الجديد في آخرها فقط، ولا تحذف ولا ترتّب. */
+const ICODE='tulips sunfl tree grapes palm2 pine apple cat fish swan peacock deer horse birds butter moon clouds lights candles glow bench lamps sparkle bike car racecar fbox curt gdoor ivy carpet sofa frame clock plantin fruits shelf desk quran globe candle bed teddy train nlight kite_r prayrug rahl misbaha lant_r aqua d_rose d_birds d_lamps d_star d_spring d_mosque d_street d_street2 d_palms d_fruit d_h1 d_h3 d_h6 d_h12 d_noor g_balloon g_bear g_rose g_rabbit g_bird g_kite'.split(' ');
+function lookItems(L){let a=String(L.i||'').split(',');if(a[0]&&a[0][0]=='~'){a[0]=a[0].slice(1);a=a.map(c=>c=='d_mosque'?c:ICODE[parseInt(c,36)]||'')}
+  return a.filter(id=>id&&IT[id])}
+function packI(ids){ids=ids.filter(id=>IT[id]);let t=ids.join(',');if(t.length<=400)return t;
+  const c=ids.map(id=>id=='d_mosque'?id:ICODE.indexOf(id)<0?'':ICODE.indexOf(id).toString(36)).filter(Boolean);
+  if(c[0]=='d_mosque')c.push(c.shift()); // الأوّل يحمل «~»
+  return '~'+c.join(',')}
 const Deco={
   myLook(){return {c:Bayt.cups,p:myPaint(),w:myWall(),f:Bayt.done,i:Object.keys(js.on).filter(id=>js.on[id]&&js.own[id]).join(','),g:window.Aamal?cleanG(Aamal.d.gl):'',dt:window.Aamal&&Aamal.dirt?Aamal.dirt():0,u:window.Binaa?Binaa.code():'',job:window.Binaa?Binaa.job:null,fx:window.Binaa?Binaa.fx:null}},
   svg(L,layer,full,withRoof){const ids=lookItems(L);let s='';SP=mkSpread(L);
@@ -476,7 +485,7 @@ function publishSoon(){clearTimeout(pubT);pubT=setTimeout(publish,1200)}
 // (v20.8) آخر ما نُشر فعلًا (بصمة + وقت): إن تغيّر البيت ولم يُنشر (بلا إنترنت أو قبل الاتصال) يُنشر وحده لاحقًا
 const HPK='usul5_hpub_v1';
 const houseData=A=>{const L=Deco.myLook(),AF=ADM(); // (v19.9) مدينة المدير مكتملة دائمًا، فيُنشر بيته مكتملًا (٥ طوابق، قصر، كل المباني) ليراه الأصدقاء كما يراه هو
-  return {f:AF?5:Bayt.done,c:Bayt.cups,p:L.p,w:L.w,i:L.i,g:L.g||'',u:AF?'333333':L.u||'',m:AF?'33333':window.Madina?Madina.code():'',q:AF||window.Qasr&&Qasr.done?1:0,n:A.profile.nick,a:A.profile.av}};
+  return {f:AF?5:Bayt.done,c:Bayt.cups,p:L.p,w:L.w,i:packI(String(L.i||'').split(',')),g:L.g||'',u:AF?'333333':L.u||'',m:AF?'33333':window.Madina?Madina.code():'',q:AF||window.Qasr&&Qasr.done?1:0,n:A.profile.nick,a:A.profile.av}};
 function publish(){if(!ready())return;const A=O();
   const d=houseData(A);
   const sig=A.me+'|'+JSON.stringify(d);
