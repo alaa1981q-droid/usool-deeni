@@ -285,12 +285,12 @@ async function friendCard(id){const r=(fcache||[]).find(x=>x.id==id);if(!r)retur
 
 /* ---------- 🚩 التبليغ عن اسم غير لائق (v20.7) ----------
    يصل للمدير فقط في reports/{الطفل}/{المبلِّغ} — الطفل المبلَّغ عنه لا يعرف من بلّغ، ولا يراه غيره.
-   مرة واحدة لكل اسم (القواعد تمنع التكرار)، وحدّ ٣ بلاغات في اليوم حتى لا يصير لعبًا. */
+   مرة واحدة لكل اسم (القواعد تمنع التكرار)، وحدّ بلاغين في اليوم حتى لا يصير لعبًا (v21.8). */
 function reportName(id,nick,av){const API=O();if(!API||!API.me||!API.db||id==API.me)return;
   const a=A(),day=new Date().toDateString();a.rep=a.rep&&typeof a.rep=='object'?a.rep:{d:'',n:0,ids:{}};a.rep.ids=a.rep.ids||{};
   if(a.rep.d!==day){a.rep.d=day;a.rep.n=0}
   if(a.rep.ids[id]){API.toast('سبق أن بلّغت عن هذا الاسم 🤍 الإدارة ستراه');return}
-  if(a.rep.n>=3){API.toast('تكفي ٣ بلاغات في اليوم 🤍 جرّب غدًا');return}
+  if(a.rep.n>=2){API.toast('تكفي بلاغان في اليوم 🤍 جرّب غدًا');return} // (v21.8) طلب صاحب التطبيق: شخص أو شخصان في اليوم، ونفس الاسم مرة واحدة فقط
   modal(`<div style="font-size:50px;line-height:1.2">${esc(av||'❔')}</div><h3 style="margin:4px 0">هل اسم «${esc(nick||'')}» غير لائق؟</h3>
     <p style="font-size:15px;margin:4px 0">يصل بلاغك إلى الإدارة فقط، ولن يعرف ${B('صاحب','صاحبة')} الاسم من بلّغ 🤍<br>${B('بلّغ','بلّغي')} فقط إذا كان الاسم فيه كلمة سيئة أو شتيمة.</p>
     <div class="nav"><button class="btn sec" data-close>لا، رجوع</button><button class="btn" id="rpYes" style="background:#c43d38;box-shadow:0 5px 0 #8a2a26">🚩 نعم، ${B('بلّغ','بلّغي')}</button></div>`,()=>{
@@ -298,7 +298,7 @@ function reportName(id,nick,av){const API=O();if(!API||!API.me||!API.db||id==API
       try{await API.init();await API.db.ref(`reports/${id}/${API.me}`).set({n:String(nick||'').slice(0,40),t:firebase.database.ServerValue.TIMESTAMP})}
       catch(e){ok=/permission/i.test(String(e&&(e.code||e.message)))}   // «ممنوع» = بلّغ عنه من قبل
       if(!ok){$('#rpYes').disabled=false;API.toast('تعذّر الإرسال، تأكّد من الإنترنت');return}
-      a.rep.ids[id]=1;a.rep.n++;const k=Object.keys(a.rep.ids);if(k.length>60)delete a.rep.ids[k[0]];Aamal.save();
+      a.rep.ids[id]=1;a.rep.n++;const k=Object.keys(a.rep.ids);if(k.length>300)delete a.rep.ids[k[0]];Aamal.save();
       closeModal();API.toast('وصل بلاغك للإدارة، شكرًا لأنك تحافظ على جنّتنا نظيفة 🌷')}})}
 // الضغط على أي بطل في «أبطال هذا الأسبوع» يفتح بطاقة صغيرة فيها زر التبليغ
 document.addEventListener('click',e=>{const d=e.target.closest&&e.target.closest('.hher [data-hr]');if(!d)return;
@@ -307,8 +307,9 @@ document.addEventListener('click',e=>{const d=e.target.closest&&e.target.closest
   modal(`<div style="font-size:60px;line-height:1.2">${esc(r.av)}</div><h3 style="margin:2px 0">${esc(r.nick)}</h3>
     <p style="margin:2px 0">${r.lv?`<span class="aqlv">⭐ المستوى ${ar(r.lv)}</span>`:''} ${r.tt?`<span class="aqtt">${esc(r.tt)}</span>`:''}</p>
     <p style="margin:4px 0;color:var(--muted);font-size:14px">${r.xp?`✨ ${ar(r.xp)} نقطة هذا الأسبوع`:''}${r.wins?` · 🏆 ${ar(r.wins)}`:''}</p>
-    <div class="nav"><button class="btn sec" data-close>رجوع</button></div>
+    <div class="nav"><button class="btn sec" data-close>رجوع</button><button class="btn gold" id="hrFr">🤝 ${B('اطلب','اطلبي')} الصداقة</button></div>
     ${isAdm()?'':`<button class="rzlink" id="hrRep" style="display:block;margin:6px auto 0;font-size:13px;opacity:.75">🚩 بلّغ عن اسم غير لائق</button>`}`,()=>{
+    $('#hrFr').onclick=()=>{closeModal();API.friendReq&&API.friendReq(id)}; // (v21.8) طلب صداقة، والطرف الثاني يقبل أو يرفض
     const b=$('#hrRep');if(b)b.onclick=()=>reportName(id,r.nick,r.av)})});
 
 /* ---------- نشر المستوى والأوسمة للأصدقاء + نقاط الأسبوع ---------- */
@@ -484,7 +485,7 @@ if(window.Deco&&Deco.menuHook){const orig=Deco.menuHook;Deco.menuHook=function(B
   const box=document.createElement('div');box.className='dbuild';
   box.innerHTML=`<h4>🤲 ${B('ابنِ','ابني')} بيتك بالأعمال الصالحة · ${ar(own)}/${ar(all)} جائزة</h4><div class="aqdo">${doBtns()}</div>`;
   const jb=B0.querySelector('.jbar');(jb||hb).after(box);bindDo(box,()=>{show('bayt');Bayt.menu()});soon()}}
-window.Alqab={report:(id,n,a)=>reportName(id,n,a),soon,check,openProfile,snap,deedFor(id){const m={d_rose:'sal',d_palms:'sal',d_noor:'sal',d_birds:'tas',d_lamps:'pray',d_fruit:'pray',d_star:'hifz',d_spring:'salah',d_mosque:'salah'};goTo(m[id]||'salah',()=>{show('bayt');Bayt.menu()})}};
+window.Alqab={reload:()=>loadSocial(true),report:(id,n,a)=>reportName(id,n,a),soon,check,openProfile,snap,deedFor(id){const m={d_rose:'sal',d_palms:'sal',d_noor:'sal',d_birds:'tas',d_lamps:'pray',d_fruit:'pray',d_star:'hifz',d_spring:'salah',d_mosque:'salah'};goTo(m[id]||'salah',()=>{show('bayt');Bayt.menu()})}};
 
 /* ---------- ربط الأحداث ---------- */
 // اختبر نفسك: الجولة الممتازة (كأسان أو أكثر) = عمل خُلقي

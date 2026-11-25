@@ -529,12 +529,70 @@
     $('#backHub').onclick = hub;
   }
 
+  /* ---------- 🤝 طلبات الصداقة (v21.8، طلب صاحب التطبيق) ----------
+     من «أبطال هذا الأسبوع»: الطفل يطلب صداقة بطل، والطرف الثاني يقبل أو يرفض.
+     الطلب يمرّ في invites/{المستقبِل}/{المرسِل} = {kind:'fr',nick,av,t} (القواعد الحالية تسمح، بلا تغيير قواعد).
+     القبول يكتب friends للطرفين ثم يرسل للمرسِل {kind:'fra'} «قبل صداقتك». الرفض يحذف الطلب بهدوء (لا يُخبَر المرسل).
+     حدود: ٥ طلبات في اليوم، ونفس الشخص مرة كل ٣ أيام. الطلب يبقى ١٤ يومًا حتى يفتح الطرف الثاني التطبيق. */
+  const frQ = [];
+  function frShowNext() {
+    if (!frQ.length) return;
+    const busy = $('#modal').classList.contains('on') || !$('#home').classList.contains('on') || document.hidden || (room && room.data && room.data.state === 'play');
+    if (busy) { clearTimeout(frShowNext.t); frShowNext.t = setTimeout(frShowNext, 3000); return; }
+    const { s, v, from } = frQ.shift();
+    const next = () => { closeModal(); setTimeout(frShowNext, 500); };
+    if (v.kind === 'fra') {
+      tone(784, .12, 'sine'); tone(1046, .15, 'sine', .14, .12);
+      modal(`<div style="font-size:56px">${esc(v.av || '🙂')}</div><h3 style="margin:4px 0">🤝 ${esc(v.nick || '')}</h3><p>وافق على صداقتك! صرتما صديقين 🌷</p>
+        <div class="nav"><button class="btn gold" id="fraOk">جميل 👍</button></div>`, () => { $('#fraOk').onclick = next; });
+      s.ref.remove().catch(() => {}); try { window.Alqab && Alqab.reload && Alqab.reload(); } catch (e) {}
+      return;
+    }
+    tone(880, .1, 'sine'); tone(1320, .15, 'sine', .16, .12);
+    modal(`<div style="font-size:56px">${esc(v.av || '🙂')}</div><h3 style="margin:4px 0">${esc(v.nick || '')}</h3><p>يطلب صداقتك 🤝</p>
+      <div class="nav"><button class="btn sec" id="frNo">لا، شكرًا</button><button class="btn gold" id="frYes">✅ أقبل الصداقة</button></div>`, () => {
+      $('#frNo').onclick = () => { s.ref.remove().catch(() => {}); next(); };
+      $('#frYes').onclick = async () => {
+        $('#frYes').disabled = true;
+        try {
+          await db.ref().update({ [`friends/${me}/${from}`]: true, [`friends/${from}/${me}`]: true });
+          s.ref.remove().catch(() => {});
+          db.ref(`invites/${from}/${me}`).set({ kind: 'fra', nick: profile.nick, av: profile.av, t: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
+          toast('صرتما صديقين 🤝'); try { window.Alqab && Alqab.reload && Alqab.reload(); } catch (e) {}
+        } catch (e) { toast('تعذّر، تأكّد من الإنترنت'); }
+        next();
+      };
+    });
+  }
+  async function frIn(s, v, from) {
+    if (now() - (v.t || 0) > 14 * 864e5 || banned()) { s.ref.remove().catch(() => {}); return; }
+    if (v.kind === 'fr') { try { if ((await db.ref(`friends/${me}/${from}`).get()).val()) { s.ref.remove().catch(() => {}); return; } } catch (e) {} }
+    if (!frQ.some(x => x.from === from && x.v.kind === v.kind)) frQ.push({ s, v, from });
+    frShowNext();
+  }
+  async function friendReq(uid) {
+    try { await init(); } catch (e) { toast('تأكّد من الإنترنت'); return; }
+    if (!profile) return setupProfile();
+    if (banned()) return bannedScreen();
+    if (uid === me) return;
+    if ((await db.ref(`friends/${me}/${uid}`).get()).val()) { toast('أنتما صديقان من قبل 🤝'); return; }
+    const day = new Date().toDateString(); state.frq = state.frq && typeof state.frq === 'object' ? state.frq : { d: '', n: 0, ids: {} };
+    const q = state.frq; q.ids = q.ids || {}; if (q.d !== day) { q.d = day; q.n = 0; }
+    if (q.ids[uid] && Date.now() - q.ids[uid] < 3 * 864e5) { toast('أرسلت طلبًا من قبل، انتظر الجواب 🤍'); return; }
+    if (q.n >= 5) { toast('تكفي ٥ طلبات صداقة في اليوم 🤍 جرّب غدًا'); return; }
+    try { await db.ref(`invites/${uid}/${me}`).set({ kind: 'fr', nick: profile.nick, av: profile.av, t: firebase.database.ServerValue.TIMESTAMP }); }
+    catch (e) { toast('تعذّر الإرسال، تأكّد من الإنترنت'); return; }
+    q.n++; q.ids[uid] = Date.now(); const k = Object.keys(q.ids); if (k.length > 80) delete q.ids[k[0]]; save();
+    toast('أُرسل طلب الصداقة 🤝 بانتظار الموافقة');
+  }
+
   /* ---------- incoming challenges ---------- */
   function listenInvites() {
     if (invOff) return;
     const ref = db.ref('invites/' + me);
     const cb = ref.on('child_added', async s => {
       const v = s.val(), from = s.key;
+      if (v && (v.kind === 'fr' || v.kind === 'fra')) return frIn(s, v, from); // (v21.8) طلبات الصداقة لها طريقها
       if (!v || now() - (v.t || 0) > 120000 || (room && room.data && room.data.state === 'play')) { s.ref.remove(); return; }
       tone(880, .1, 'sine'); tone(1320, .15, 'sine', .16, .12);
       const isBayt = v.kind === 'bayt';
@@ -613,6 +671,7 @@
       try { await init(); } catch (e) { afterProf = null; return openOnline(); } setupProfile(); },
     refreshLeader: () => { if (db && profile) refreshLeader(); },
     claimNick: n => claimNick(n), releaseNick: n => releaseNick(n),
+    friendReq: uid => friendReq(uid),
     openAdd: async () => { show('online'); try { await init(); } catch (e) { return openOnline(); } if (banned()) return bannedScreen(); if (!profile) return setupProfile(); addFriend(); }
   };
   window.onlineBack = () => { if (room && room.data && room.data.state === 'play' && !room.done) {
