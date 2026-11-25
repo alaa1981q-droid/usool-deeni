@@ -82,6 +82,30 @@ function autoTitle(s){const r=AREAS.map(a=>({a,t:areaTier(a,s)})).filter(x=>x.t>
 const shownTitle=s=>autoTitle(s);
 const myName=()=>(O()&&O().profile&&O().profile.nick)||state.nick||state.name||B('بطلنا','بطلتنا');
 const myAv=()=>(O()&&O().profile&&O().profile.av)||state.av||(boy()?'👦':'👧');
+// (v22.1) صورة المدير: مدينة مرسومة مستديرة (قبّة وأبنية بنوافذ مضيئة وسماء المغرب) بدل رمز 🏙️ المربّع الذي لم يعجب الشيخ
+let admN=0;
+function admAvSVG(){const i='aa'+(++admN);
+  const win=(x,y,w,h,c,r)=>{let o='';for(let yy=y;yy<y+h-3;yy+=6)for(let xx=x+2;xx<x+w-3;xx+=5)o+=`<rect x="${xx}" y="${yy}" width="2.4" height="3" rx=".5" fill="${(xx*7+yy*3)%5<3?'#ffd75e':c}"/>`;return o};
+  return `<svg viewBox="0 0 100 100" width="100%" height="100%" aria-label="مدينتي" role="img"><defs>
+   <clipPath id="${i}c"><circle cx="50" cy="50" r="50"/></clipPath>
+   <linearGradient id="${i}s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1d4f7a"/><stop offset=".55" stop-color="#3f8fa8"/><stop offset="1" stop-color="#f6c66a"/></linearGradient>
+   <linearGradient id="${i}d" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe28a"/><stop offset="1" stop-color="#d8961e"/></linearGradient></defs>
+  <g clip-path="url(#${i}c)">
+   <rect width="100" height="100" fill="url(#${i}s)"/>
+   <circle cx="26" cy="22" r="7" fill="#fff4c4"/><circle cx="29" cy="20" r="6.2" fill="#2a5f86"/>
+   <circle cx="70" cy="14" r=".9" fill="#fff"/><circle cx="82" cy="26" r=".7" fill="#fff"/><circle cx="12" cy="40" r=".7" fill="#fff"/>
+   <g fill="#2c6b62" opacity=".75"><rect x="4" y="52" width="14" height="48"/><rect x="80" y="48" width="16" height="52"/><rect x="16" y="60" width="10" height="40"/></g>
+   <rect x="8" y="62" width="18" height="38" fill="#14604a"/>${win(8,65,18,30,'#2e7f63')}
+   <rect x="74" y="58" width="20" height="42" fill="#14604a"/>${win(74,61,20,36,'#2e7f63')}
+   <rect x="62" y="30" width="5" height="44" fill="#f7efd9"/><rect x="61" y="40" width="7" height="2" fill="#d8961e"/><path d="M61.5 30 L64.5 22 L67.5 30Z" fill="url(#${i}d)"/>
+   <rect x="30" y="64" width="40" height="36" fill="#f7efd9"/>
+   <path d="M33 64 Q33 44 50 40 Q67 44 67 64Z" fill="url(#${i}d)"/>
+   <rect x="48.9" y="33" width="2.2" height="7" fill="#d8961e"/><circle cx="50" cy="32" r="2.2" fill="#ffe28a"/>
+   <path d="M44 100 V84 Q50 76 56 84 V100Z" fill="#14604a"/>
+   <path d="M34 78 V72 Q36.5 68 39 72 V78Z M61 78 V72 Q63.5 68 66 72 V78Z" fill="#14604a"/>
+   <rect x="0" y="94" width="100" height="6" fill="#0f5b45"/>
+  </g><circle cx="50" cy="50" r="49" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="2"/></svg>`}
+const avHTML=()=>isAdm()?`<span class="admav">${admAvSVG()}</span>`:esc(myAv());
 
 /* ---------- الشكل ---------- */
 const css=document.createElement('style');
@@ -142,6 +166,7 @@ css.textContent=`
 .aqdo{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 /* (v13.2) ملفّي: أزرار مجسّمة بألوان فاتحة */
 .aqhead{background:linear-gradient(160deg,#fff8e0,#fff 70%);border:0;box-shadow:0 5px 0 #efd27a,0 10px 20px rgba(200,150,30,.15),inset 0 2px 0 #fff}
+.admav{display:block;width:1.1em;height:1.1em;border-radius:50%;overflow:hidden}.aqhead .av .admav{width:86px;height:86px}
 .aqhead .av{display:inline-grid;place-items:center;width:86px;height:86px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#ffeec0);box-shadow:0 0 0 4px #f2b632,0 5px 0 4px #d8961e;font-size:56px;margin:4px 0 6px}
 .aqlv{box-shadow:0 3px 0 #0b4d31}.aqtt{box-shadow:0 3px 0 #e3b54a}
 .aqhead #aqOn{flex:none;margin:0 auto;font-size:15px;padding:6px 14px!important;border-radius:14px;box-shadow:0 3px 0 #b9cfc2}
@@ -218,7 +243,7 @@ let fcache=null,hcache=null,loading=false,lastLoad=0,frOpen=false;
 try{const c=J('usul5_social_v1');fcache=c.f||null;hcache=c.h||null}catch(e){}
 function drawHome(){const s=snap(),ln=lvName(s.L),t=shownTitle(s),f=(s.x-need(s.L))/(need(s.L+1)-need(s.L));
   const meds=MEDALS.filter(m=>s.tiers[m.id]).sort((a,b)=>s.tiers[b.id]-s.tiers[a.id]).slice(0,3).map(m=>TIERS[s.tiers[m.id]-1].e+m.e).join(' ');
-  home.innerHTML=`<button class="hpro" id="hProf"><span class="av">${esc(myAv())}<span class="lv">${ar(s.L)}</span></span>
+  home.innerHTML=`<button class="hpro" id="hProf"><span class="av">${avHTML()}<span class="lv">${ar(s.L)}</span></span>
     <span class="nm"><b>${nameTag(myName(),isAdm())}</b><small>${ln[1]} ${ln[2]} · المستوى ${ar(s.L)}${t?` · ${t.e} ${t.n}`:''}</small><div class="xpbar"><i style="width:${Math.round(f*100)}%"></i></div></span>
     <span class="md">${meds||'🏅'}</span></button>
    <button class="hfbtn" id="hFrBtn"><span class="e">👥</span><span class="nm"><b>أصدقائي</b><small id="hFrSum">${frSum()}</small></span><span class="go">‹</span></button>
@@ -382,7 +407,7 @@ let aqTab='m';
 const PAL=i=>['--c:#e6f8ec;--d:#a9e2bd','--c:#e5f1ff;--d:#a9c7ee','--c:#ffe9f2;--d:#f2b3cb','--c:#fff6d6;--d:#efd27a','--c:#f0eaff;--d:#c6b5ee','--c:#e2f7f5;--d:#9fd9d2'][i%6];
 function openProfile(){stopVc();aqBack=null;show('alqab');$('#aqTitle').textContent='🏅 ملفّي';const s=snap(),c=s.c,ln=lvName(s.L),t=shownTitle(s),f=(s.x-need(s.L))/(need(s.L+1)-need(s.L));
   const prof=O()&&O().profile;
-  $('#aqBody').innerHTML=`<div class="aqhead"><div class="av">${esc(myAv())}</div><h2>${nameTag(myName(),isAdm())} <button class="aqflag" id="aqFlag" aria-label="علم دولتي">${window.Flag?Flag.get():''}</button></h2>
+  $('#aqBody').innerHTML=`<div class="aqhead"><div class="av">${avHTML()}</div><h2>${nameTag(myName(),isAdm())} <button class="aqflag" id="aqFlag" aria-label="علم دولتي">${window.Flag?Flag.get():''}</button></h2>
     <button class="aqloc" id="aqLoc">📍 ${window.Flag?Flag.name():'العراق'} · ${window.Adhan&&Adhan.city?Adhan.city[1]:'بغداد'} <i>✏️ دولتي ومدينتي</i></button>
     <span class="aqlv">${ln[1]} المستوى ${ar(s.L)} · ${ln[2]}</span><br>${t?`<span class="aqtt">${t.e} ${t.n}</span>`:''}
     <div class="xpbar" style="margin:8px 10px 2px;height:12px"><i style="width:${Math.round(f*100)}%"></i></div>
