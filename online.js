@@ -15,6 +15,7 @@
   // صور الطفل: شخصيات أولاد وبنات بألوان متنوّعة (من v6.3 بدل الحيوانات)
   // (v21.7) صور أكثر بكل ألوان البشرة + أمير/أميرة للقصر؛ الطفل في المدينة المجسّمة يُرسم بنفس الصورة (mujassam.js kidLook)
   const AV_B = ['👦', '👦🏻', '👦🏼', '👦🏽', '👦🏾', '👦🏿', '🧒', '🧒🏻', '🧒🏽', '👲', '👲🏻', '👲🏽', '🤴', '🤴🏻', '🤴🏽'];
+  const ADM_AV = '🏙️';
   const AV_G = ['👧', '👧🏻', '👧🏼', '👧🏽', '👧🏾', '👧🏿', '🧕', '🧕🏻', '🧕🏼', '🧕🏽', '🧕🏾', '🧕🏿', '👸', '👸🏻', '👸🏽'];
   const isGirl = () => !!(window.Cups && Cups.sex === 'g');
   let afterProf = null; // من «ملفّي»: بعد الحفظ نرجع إليه
@@ -67,6 +68,9 @@
       try { ban = (await db.ref('bans/' + me).get()).val(); } catch (e) { ban = null; }
       try { const a = (await db.ref('admins/' + me).get()).val() === true; localStorage.setItem('usul5_adm', a ? '1' : '');
         if (profile && a && !profile.adm) { profile.adm = true; db.ref('profiles/' + me).update({ adm: true }).catch(() => {}); }
+        // (v22.0) طلب صاحب التطبيق: صورة المدير صورة مدينة 🏙️ وليست صورة طفل — في كل مكان (بطاقته، الأصدقاء، البيوت…)
+        if (profile && a && profile.av !== ADM_AV) { profile.av = ADM_AV; db.ref('profiles/' + me).update({ av: ADM_AV }).catch(() => {}); }
+        if (a && state.av !== ADM_AV) { state.av = ADM_AV; save(); }
         if (profile && !a && profile.adm) { delete profile.adm; db.ref('profiles/' + me + '/adm').remove().catch(() => {}); } } catch (e) {}
       return true;
     })();
@@ -172,6 +176,7 @@
           const old = profile && profile.nick, extra = {};
           if (old && old !== nick) { extra.hist = [old].concat(String(profile.hist || '').split('|').filter(Boolean)).filter(x => x !== nick).slice(0, 5).join('|'); extra.nts = now(); extra.nc = (profile.nc | 0) + 1; }
           const isNew = !profile || !profile.nick;
+          if (window.isAdm && isAdm()) av = ADM_AV; // (v22.0) المدير صورته مدينة دائمًا
           if (!profile || !profile.since) extra.since = now();
           profile = Object.assign({ wins: 0, games: 0 }, profile || {}, { nick, av, sx, code, own: isOwn }, extra);
           if (window.Cups && Cups.setSex) Cups.setSex(sx);
