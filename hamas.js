@@ -457,7 +457,9 @@ function taskDone(){const t=hs.task;if(!t)return;delete hs.task;hs.tasksN=(hs.ta
    ===================================================================== */
 const MON=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 function bdayPick(back){const b=hs.bd||{};
-  modal(`<div style="font-size:46px">🎂</div><h3 style="margin:2px 0">يوم ميلادي</h3><p style="margin:2px 0">في يوم ميلادك ${B('تصلك','تصلكِ')} تهنئة وهديّة 🎁</p>
+  // (v22.6) طلب الشيخ: يوم الميلاد يُختار مرة واحدة فقط (حتى لا تتكرّر الهدية بتغييره). من اختاره سابقًا يبقى ثابتًا.
+  if(hs.bd)return modal(`<div style="font-size:46px">🎂</div><h3 style="margin:2px 0">يوم ميلادي</h3><p style="font-size:22px;font-weight:900;margin:6px 0">${arn(b.d)} ${MON[b.m-1]}</p><p style="margin:2px 0">🔒 يوم الميلاد يُختار مرة واحدة فقط ولا يتغيّر 🌷</p><div class="nav"><button class="btn sec" data-close>حسنًا</button></div>`);
+  modal(`<div style="font-size:46px">🎂</div><h3 style="margin:2px 0">يوم ميلادي</h3><p style="margin:2px 0">في يوم ميلادك ${B('تصلك','تصلكِ')} تهنئة وهديّة 🎁</p><p style="margin:2px 0;color:#b4471f;font-weight:900;font-size:14px">⚠️ ${B('تختاره','تختارينه')} مرة واحدة فقط، ${B('اختره','اختاريه')} صحيحًا</p>
    <div style="display:flex;gap:8px;justify-content:center"><select class="hminp" id="hmBd" style="width:90px">${Array.from({length:31},(_,i)=>`<option value="${i+1}" ${b.d==i+1?'selected':''}>${arn(i+1)}</option>`).join('')}</select>
    <select class="hminp" id="hmBm" style="width:140px">${MON.map((m,i)=>`<option value="${i+1}" ${b.m==i+1?'selected':''}>${m}</option>`).join('')}</select></div>
    <div class="nav"><button class="btn gold" id="hmBs">💾 احفظ</button><button class="btn sec" data-close>رجوع</button></div>`,()=>{

@@ -435,7 +435,7 @@ function openProfile(){stopVc();aqBack=null;show('alqab');$('#aqTitle').textCont
       <p style="font-size:15px">${m.at.map((x,k)=>`${TIERS[k].e} ${TIERS[k].n}: ${ar(x)}${c[m.k]>=x?' ✅':''}`).join('<br>')}</p>
       <div class="nav"><button class="btn gold" id="mGo">هيّا أعمل 💪</button><button class="btn sec" data-close>رجوع</button></div>`,()=>{$('#mGo').onclick=()=>{closeModal();goTo(m.go)}})});
   // (v17.2) الدولة ثم المدينة (للأذان والطقس)
-  const locPick=()=>{stopVc();Flag.pick(f=>{try{Adhan.fitCountry(f)}catch(e){}publish();if(window.Adhan&&Adhan.pickCity)Adhan.pickCity(()=>{publish();openProfile()});else openProfile()})};
+  const locPick=()=>{stopVc();if(Flag.locked&&Flag.locked()&&window.Adhan&&Adhan.pickCity){return Adhan.pickCity(()=>{publish();openProfile()})}Flag.pick(f=>{try{Adhan.fitCountry(f)}catch(e){}publish();if(window.Adhan&&Adhan.pickCity)Adhan.pickCity(()=>{publish();openProfile()});else openProfile()})};
   {const fb=$('#aqFlag');if(fb)fb.onclick=locPick;const lb=$('#aqLoc');if(lb)lb.onclick=locPick}
   const on=$('#aqOn');if(on)on.onclick=()=>{stopVc();if(O()&&O().editProfile)O().editProfile(openProfile);else{window.onlineReturn=openProfile;openOnline()}};
   window.scrollTo(0,0)}
@@ -542,10 +542,15 @@ drawHome();setTimeout(check,1500);
 .flgov .g button{border:0;border-radius:14px;padding:6px 2px;font:inherit;font-weight:900;font-size:12.5px;line-height:1.2;color:#2b3550;background:var(--c);box-shadow:0 4px 0 var(--d),0 4px 8px #0002,inset 0 2px 0 #fff9}
 .flgov .g button b{display:block;font-size:34px;line-height:1.2}.flgov .g button.on{outline:3px solid #1fa463}
 .flgov .x{margin:10px auto 0;border:0;border-radius:14px;padding:9px 26px;font:inherit;font-weight:900;font-size:15px;background:#e3ecf7;color:#1d4e9e;box-shadow:0 3px 0 #a9bcd6}`;document.head.appendChild(st);
-  function pick(done){const C=[['#dff5e3','#9fd3aa'],['#dcecff','#9dbde6'],['#ffe1ec','#e6a9bf'],['#fff3c4','#e3c56e'],['#ece3ff','#b9a6e6'],['#d9f5f1','#94d1c8']],cur=get();
+  // (v22.6) طلب الشيخ: الدولة والعلم يُختاران مرة واحدة فقط. من اختار دولة سابقًا (محفوظة) تبقى ثابتة؛ المدينة داخل الدولة تبقى قابلة للتغيير.
+  const locked=()=>{try{return !!localStorage.getItem(K)}catch(e){return false}};
+  function lockedMsg(){const ov=document.createElement('div');ov.className='flgov';
+    ov.innerHTML=`<div class="in" style="text-align:center"><b style="font-size:54px;line-height:1.2">${get()}</b><h4>${name()}</h4><p style="font-size:15px">🔒 الدولة والعلم ${typeof B=='function'?B('تختارهما','تختارينهما'):'تختارهما'} مرة واحدة فقط ولا يتغيّران 🌷</p><button class="x">حسنًا</button></div>`;
+    document.body.appendChild(ov);ov.onclick=e=>{if(e.target===ov||e.target.closest('.x'))ov.remove()}}
+  function pick(done){if(locked())return lockedMsg();const C=[['#dff5e3','#9fd3aa'],['#dcecff','#9dbde6'],['#ffe1ec','#e6a9bf'],['#fff3c4','#e3c56e'],['#ece3ff','#b9a6e6'],['#d9f5f1','#94d1c8']],cur=get();
     const ov=document.createElement('div');ov.className='flgov';
-    ov.innerHTML=`<div class="in"><h4>🏳️ ${typeof B=='function'?B('اختر','اختاري'):'اختر'} علم دولتك</h4><p>يظهر في «ملفّي» وعلى مدرستك في المدينة</p><div class="g">${L.map((f,i)=>`<button data-i="${i}" class="${f[0]===cur?'on':''}" style="--c:${C[i%6][0]};--d:${C[i%6][1]}"><b>${f[0]}</b>${f[1]}</button>`).join('')}</div><button class="x">✖ إغلاق</button></div>`;
+    ov.innerHTML=`<div class="in"><h4>🏳️ ${typeof B=='function'?B('اختر','اختاري'):'اختر'} علم دولتك</h4><p>يظهر في «ملفّي» وعلى مدرستك في المدينة</p><p style="color:#b4471f;font-size:14px">⚠️ ${typeof B=='function'?B('تختاره','تختارينه'):'تختاره'} مرة واحدة فقط، ${typeof B=='function'?B('اختر','اختاري'):'اختر'} دولتك الصحيحة</p><div class="g">${L.map((f,i)=>`<button data-i="${i}" class="${f[0]===cur?'on':''}" style="--c:${C[i%6][0]};--d:${C[i%6][1]}"><b>${f[0]}</b>${f[1]}</button>`).join('')}</div><button class="x">✖ إغلاق</button></div>`;
     document.body.appendChild(ov);
     ov.onclick=e=>{const b=e.target.closest('button');if(e.target===ov||b&&b.classList.contains('x')){ov.remove();return}if(!b)return;try{window.Bayt&&Bayt.sTap()}catch(x){}set(L[+b.dataset.i][0]);ov.remove();done&&done(L[+b.dataset.i][0])}}
-  window.Flag={get,set,name,pick,list:L};
+  window.Flag={get,set,name,pick,locked,list:L};
 })();
