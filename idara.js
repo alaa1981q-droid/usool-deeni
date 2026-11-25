@@ -1,5 +1,5 @@
 /* 🛡️ الإدارة (لصاحب التطبيق فقط) + رسائل الإدارة وجوائزها للأطفال + جائزة بطل الأسبوع + الليل والنهار للبيت.
-   - الدخول: اضغط سطر «الإصدار» أسفل الواجهة ٥ مرات. لا يكتب إلا من كان معرّفه في admins/$uid (يُضاف من لوحة Firebase فقط).
+   - الدخول: (v22.4) «☰ المزيد» ← «👑 أدوات المدير» (يظهر للمدير فقط). لا يكتب إلا من كان معرّفه في admins/$uid (يُضاف من لوحة Firebase فقط).
    - news/$id: رسالة لكل الأطفال {title,msg,j,ts}. prizes/$uid/$id: جائزة لطفل واحد {msg,j,ts}.
    - كل طفل يستلم الرسالة مرة واحدة، والجواهر تُضاف لبيته. يعتمد على online.js (OnlineAPI) و jannah.js (Deco). */
 (function(){
@@ -212,7 +212,7 @@ sec.innerHTML=`<div class="bar"><button class="back" id="idBack">›</button><di
 document.querySelector('.app').appendChild(sec);
 $('#idBack').onclick=()=>{if(view=='kids'||view=='reqs'){backMain();return}renderHome();show('home')};
 // الدخول: ٥ ضغطات على سطر الإصدار
-let taps=0,tapT=0;const vl=$('#verLine');if(vl)vl.addEventListener('click',()=>{taps++;clearTimeout(tapT);tapT=setTimeout(()=>taps=0,2500);if(taps>=5){taps=0;openAdmin()}});
+// (v22.4) طلب الشيخ: أُلغي فتح الإدارة بالضغط ٥ مرات على رقم النسخة — الإدارة الآن في «☰ المزيد» ← «👑 أدوات المدير»
 const body=()=>$('#idBody');
 async function openAdmin(go){show('idara');body().innerHTML=`<div class="handoff"><div class="big spin">🛡️</div><p>جارٍ الاتصال…</p></div>`;
   const API=O();try{await API.init()}catch(e){body().innerHTML=`<div class="handoff"><div class="big">📡</div><h2>لا يوجد اتصال</h2><p>الإدارة تحتاج إنترنت.</p></div>`;return}
