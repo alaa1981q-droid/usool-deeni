@@ -1,11 +1,11 @@
 plugins { id 'com.android.application' }
 android {
     namespace 'io.github.alaa1981qdroid.usooldeeni'
-    compileSdk 34
+    compileSdk 36
     defaultConfig {
         applicationId 'io.github.alaa1981qdroid.usooldeeni'
         minSdk 21
-        targetSdk 34
+        targetSdk 36
         versionCode Integer.parseInt(System.getenv('VERSION_CODE') ?: '1')
         versionName '1.0'
     }
@@ -16,11 +16,18 @@ android {
             keyAlias 'usool'
             keyPassword 'usooldeeni'
         }
+        play {
+            storeFile file('play-upload.jks')
+            storePassword System.getenv('PLAY_KEY_PASS') ?: ''
+            keyAlias 'upload'
+            keyPassword System.getenv('PLAY_KEY_PASS') ?: ''
+        }
     }
     buildTypes {
         release {
             minifyEnabled false
-            signingConfig signingConfigs.release
+            // Google Play builds (play.yml) sign with the private upload key; the side-loaded APK keeps the old key.
+            signingConfig System.getenv('PLAY_KEY_PASS') ? signingConfigs.play : signingConfigs.release
         }
     }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }

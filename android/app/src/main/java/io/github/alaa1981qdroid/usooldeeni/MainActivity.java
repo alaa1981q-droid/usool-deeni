@@ -19,6 +19,8 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.WindowInsets;
+import android.widget.FrameLayout;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
@@ -156,7 +158,26 @@ public class MainActivity extends Activity {
             @JavascriptInterface
             public void migDone() { prefs.edit().putBoolean("migDone", true).apply(); try { migFile().delete(); } catch (Exception ignored) { } }
         }, "JannahApp");
-        setContentView(web);
+        // Android 15+ draws apps edge-to-edge: keep the page clear of the status/navigation bars and the keyboard.
+        FrameLayout root = new FrameLayout(this);
+        root.setBackgroundColor(Color.parseColor("#0e5a3a"));
+        root.addView(web, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        if (Build.VERSION.SDK_INT >= 30) {
+            root.setOnApplyWindowInsetsListener((v, ins) -> {
+                android.graphics.Insets b = ins.getInsets(WindowInsets.Type.systemBars() | WindowInsets.Type.ime() | WindowInsets.Type.displayCutout());
+                v.setPadding(b.left, b.top, b.right, b.bottom);
+                return WindowInsets.CONSUMED;
+            });
+        } else if (Build.VERSION.SDK_INT >= 20) {
+            root.setFitsSystemWindows(true);
+        }
+        setContentView(root);
+        // Android 13+: back gesture (onBackPressed is not called on Android 16 when targeting it).
+        if (Build.VERSION.SDK_INT >= 33) {
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                () -> { if (web.canGoBack()) web.goBack(); else finish(); });
+        }
         if (state != null) web.restoreState(state); else web.loadUrl(migrated() ? SITE : START);
     }
 

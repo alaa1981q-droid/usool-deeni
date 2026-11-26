@@ -1,0 +1,42 @@
+name: Build for Google Play (AAB)
+# Run by hand: Actions → "Build for Google Play (AAB)" → Run workflow.
+# Needs the repository secret PLAY_KEY_PASS (password of the private upload key android/play-upload.jks.enc).
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  aab:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the secret
+        env:
+          PLAY_KEY_PASS: ${{ secrets.PLAY_KEY_PASS }}
+        run: |
+          if [ -z "$PLAY_KEY_PASS" ]; then echo "::error::Add the secret PLAY_KEY_PASS first (Settings → Secrets and variables → Actions)."; exit 1; fi
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: '8.13' }
+      - name: Unlock the upload key
+        env:
+          PLAY_KEY_PASS: ${{ secrets.PLAY_KEY_PASS }}
+        run: openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in android/play-upload.jks.enc -out android/app/play-upload.jks -pass env:PLAY_KEY_PASS
+      - name: Bundle the web app
+        run: |
+          mkdir -p android/app/src/main/assets/www
+          cp -r index.html seal.js online.js questions.js bayt.js nafsak.js hifz.js jannah.js baytrace.js wird.js sawt.js salah.js adhan.js alqab.js binaa.js madina.js mujassam.js idara.js parent.js qisas.js bookdl.js sighar.js ramz.js wajiha.js hamas.js audio vendor manifest.webmanifest icon-192.png icon-512.png apple-touch-icon.png p p2 android/app/src/main/assets/www/
+      - name: Build AAB
+        working-directory: android
+        env:
+          PLAY_KEY_PASS: ${{ secrets.PLAY_KEY_PASS }}
+        run: VERSION_CODE=$((GITHUB_RUN_NUMBER + 1000)) gradle --no-daemon :app:bundleRelease
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -f android/app/play-upload.jks
+          cp android/app/build/outputs/bundle/release/app-release.aab usool-deeni-play.aab
+          gh release delete play --yes --cleanup-tag || true
+          gh release create play usool-deeni-play.aab --prerelease --title "Google Play bundle" --notes "ملف AAB يُرفع في Google Play Console فقط (لا يُثبَّت على الموبايل)."
