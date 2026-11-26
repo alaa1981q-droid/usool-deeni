@@ -598,7 +598,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();farmAt(V?!!V.p
     add(new T.SphereGeometry(.18,6,5),M(0xf4f4f4),-.15,.16,0,G);add(new T.CylinderGeometry(.1,.1,.3,8),M(0xd94040),.2,.1,.1,G).rotation.z=Math.PI/2;
     add(new T.BoxGeometry(.3,.04,.22),M(0xc9a774),0,.03,-.2,G);mark(G,'🧹','#8a6dd6',1.2,0,.8);lit[i]=G});
   // القطة العطشى (إذا بُني السبيل)
-  let cat=null;if(!V&&LV('s')>=1&&!D.cat){cat=new T.Group();cat.position.set(CAT[0],0,CAT[1]);cat.userData.cat=1;S.add(cat);const fur=M(0xf2a65a),dk=M(0x333333);
+  let cat=null,fmW=null,cfG=null,gfG=null;if(!V&&LV('s')>=1&&!D.cat){cat=new T.Group();cat.position.set(CAT[0],0,CAT[1]);cat.userData.cat=1;S.add(cat);const fur=M(0xf2a65a),dk=M(0x333333);
     const b=add(new T.SphereGeometry(.28,10,8),fur,0,.3,0,cat);b.scale.set(1,.85,1.4);add(new T.SphereGeometry(.2,10,8),fur,0,.55,.35,cat);
     [-.1,.1].forEach(x=>{add(new T.ConeGeometry(.07,.15,4),fur,x,.75,.35,cat);add(new T.SphereGeometry(.03,6,4),dk,x,.58,.53,cat)});
     const tl=add(new T.CylinderGeometry(.04,.04,.5,6),fur,0,.5,-.45,cat);tl.rotation.x=-.6;
@@ -621,8 +621,8 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();farmAt(V?!!V.p
     [[2.4,-.3],[2.4,.45]].forEach(([x,z])=>{const h=add(new T.CylinderGeometry(.35,.35,.7,14),M(0xe8c25a),x,.35,z,F);h.rotation.x=Math.PI/2});
     // حوض الماء
     const WT=new T.Group();WT.position.set(.2,0,-.9);WT.userData.fk='wat';F.add(WT);box(1.5,.32,.5,wood,0,.16,0,WT);
-    const wl=add(new T.PlaneGeometry(1.3,.32),FM.wat?water:M(0x6b4a2a),0,FM.wat?.3:.2,0,WT);wl.rotation.x=-Math.PI/2;wl.castShadow=false;
-    if(!V&&!FM.wat)mark(WT,'💧','#3b9be0',1.5,0,.85);
+    const wl=add(new T.PlaneGeometry(1.3,.32),FM.wat?water:M(0x6b4a2a),0,FM.wat?.3:.2,0,WT);wl.rotation.x=-Math.PI/2;wl.castShadow=false;fmW={wl,y:.3,m:water};
+    if(!V&&!FM.wat){mark(WT,'💧','#3b9be0',1.5,0,.85);fmW.mk=marks[marks.length-1]}
     // (v13.5) حيوانات أكثر واقعية (طلب الشيخ): أجسام مستديرة، بقرة هولشتاين بيضاء ببقع سوداء وضرع، وبقرة بنية بغرّة بيضاء، تَرعيان العشب وتحرّكان الذيل والأذنين
     const ell=(r,sx,sy,sz,mat,x,y,z,p)=>{const m=add(new T.SphereGeometry(r,18,14),mat,x,y,z,p);m.scale.set(sx,sy,sz);return m};
     const CW=new T.Group();CW.position.set(1.4,0,.9);CW.userData.fk='cow';F.add(CW);
@@ -1248,7 +1248,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();farmAt(V?!!V.p
       [[-1.72,-1.75,1],[1.72,-1.75,-1]].forEach(([x,z,f],i)=>{const P=new T.Group();P.position.set(x,0,z);P.rotation.y=f>0?Math.PI/2:-Math.PI/2;CF.add(P);
         add(new T.CylinderGeometry(.2,.26,.62,10),i?robe2:robe,0,.78,0,P);box(.42,.12,.5,i?robe2:robe,0,.5,.18,P);[-.1,.1].forEach(q=>box(.12,.45,.12,i?robe2:robe,q,.25,.38,P));
         ell(.15,1,1.1,1,skin,0,1.24,0,P);ell(.17,1.05,.55,1.05,i?sh2:shm,0,1.37,0,P);add(new T.TorusGeometry(.13,.025,5,14),agal,0,1.42,0,P).rotation.x=Math.PI/2;ell(.09,1,.8,.7,M(0xdddddd),0,1.12,.09,P)})}
-    if(!V&&!(D.cf))mark(CF,'☕','#8a5a2e',3.2,0,.85)}
+    if(!V&&!(D.cf)){mark(CF,'☕','#8a5a2e',3.2,0,.85);cfG=marks[marks.length-1]}}
   {// 🪧 (v15.9) ١٠ لوحات أسماء الشوارع: الطفل يختار اسم كل شارع (CITY.st)
     const NM={m:'الشارع الكبير',f:'شارع الجامع',b:'شارع الحديقة'},sp=M(0x4a5560,{metalness:.5,roughness:.4});
     const plate=t=>{const c=document.createElement('canvas');c.width=512;c.height=128;const x=c.getContext('2d');x.fillStyle='#1f5fae';x.fillRect(0,0,512,128);x.strokeStyle='#fff';x.lineWidth=8;x.strokeRect(10,10,492,108);
@@ -1257,7 +1257,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();farmAt(V?!!V.p
       box(.09,2.6,.09,sp,0,1.3,0,G);const mt=plate((!V&&CITY.st&&CITY.st[k])||NM[k]);[1,-1].forEach(q=>{const pl=new T.Mesh(new T.PlaneGeometry(1.9,.48),mt);pl.position.set(0,2.45,q*.03);if(q<0)pl.rotation.y=Math.PI;G.add(pl)});
       box(1.96,.54,.04,M(0xffffff),0,2.45,0,G)})}
   // 🎁 (v15.9) ٨ هدية اليوم المخفية (صندوق صغير بشريط ذهبي، نصفه خلف شيء)
-  if(!V&&!D.gf){const g=GIFTS[seed()%GIFTS.length],G=new T.Group();G.position.set(g[0],0,g[1]);G.rotation.y=.5;G.userData.act='gift';S.add(G);
+  if(!V&&!D.gf){const g=GIFTS[seed()%GIFTS.length],G=new T.Group();G.position.set(g[0],0,g[1]);G.rotation.y=.5;G.userData.act='gift';S.add(G);gfG=G;
     const rb=M(0xffd23f,{metalness:.4,roughness:.3});box(.5,.42,.5,M(0xe2304a),0,.21,0,G);box(.54,.1,.54,M(0xc81f38),0,.44,0,G);box(.1,.47,.54,rb,0,.235,0,G);box(.54,.47,.1,rb,0,.235,0,G);
     [-1,1].forEach(k=>{const l=ell(.11,1.3,.6,.6,rb,k*.1,.54,0,G);l.rotation.z=k*.5});anim.push(t=>{G.position.y=Math.max(0,Math.sin(t*2.2))*.06;G.rotation.y=.5+Math.sin(t*.8)*.15})}
   // 🌷 (v15.9) ٩ المدينة تزهر بأعمال الطفل: وردة لكل عمل صالح (حتى ٤٠٠) وشجرة صغيرة لكل ١٠ أعمال (حتى ٣٠)
@@ -1292,7 +1292,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();farmAt(V?!!V.p
     anim.push(t=>{const s=sig(),bl=Math.sin(t*8)>0;L.forEach(o=>{on(o.r,s==='r');on(o.y,s==='y');on(o.gr,s==='g');on(o.r2,s==='r');on(o.y2,s==='y');on(o.g2,s==='g');
       const pg=s==='r',pr=!pg;o.pg.color.setHex(pg?0xffffff:0x333333);o.pr.color.setHex(pr?0xffffff:0x333333)})})}
   shiftScene(S);
-  Object.assign(S.userData,{marks,trees,lit,cat});try{mergeStatic(S)}catch(e){console.error('merge',e)}return S}
+  Object.assign(S.userData,{marks,trees,lit,cat,fmW,cfG,gfG});try{mergeStatic(S)}catch(e){console.error('merge',e)}return S}
 // (v16.2) يزيح كل ما في المشهد حسب fX (ما عدا الشارع الجديد المعلَّم rd): الأشياء التي في جهة واحدة تُزاح، والمجموعات الممتدّة على الجهتين
 // يُزاح أبناؤها كلٌّ وحده، وزهور InstancedMesh كلّ زهرة وحدها، والأشياء الضيّقة فوق الشارع (لافتات، حبال زينة) تتّسع معه
 // (v17.4) طلب الشيخ: «اللعبة صارت تعلق». كان المشهد ≈١٠٤٠٠ قطعة و≈٢٧٦٠ رسمة في كل إطار (+ الظلال)، وفي الليل ٦٦ ضوءًا.
@@ -2191,7 +2191,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
         wat:{btn:'💧 '+B('اسقِ','اسقي')+' الحيوانات',doing:`💧 ${B('تملأ','تملئين')} حوض الماء…`,done:'💧 شربت الحيوانات الماء البارد',full:'💧 الحوض مليء بالماء اليوم 💚'}};
       if(!k){card(`🐄 كل حيوانات ${B('مزرعتك','مزرعتكِ')} أكلت وشربت اليوم! ${B('أحسنت','أحسنتِ')} 💚<br><small>${B('تعال','تعالي')} غدًا ${B('لترعاها','لترعيها')} من جديد</small>`,[['حسنًا',null,'sec']]);return}
       if(F[k]){card(FD[k].full);setTimeout(()=>card(''),1800);return}
-      go(FARM_IN,()=>{busy=1;card(FD[k].doing);setTimeout(()=>{busy=0;F[k]=1;dsv();jewels(2);refresh();const left=ks.filter(x=>!F[x]);
+      go(FARM_IN,()=>{busy=1;card(FD[k].doing);setTimeout(()=>{busy=0;F[k]=1;dsv();jewels(2);if(k==='wat'){const w=S.userData.fmW;if(w){w.wl.material=w.m;w.wl.position.y=w.y;unmark(w.mk)}}const left=ks.filter(x=>!F[x]);
         card(`${FD[k].done} 💎 +٢<br><b style="color:#1fa463;font-size:18px">🌟 هذا عمل صالح!</b><br><small>الرحمة بالحيوان ورعايته من أخلاق المسلم 🤍</small>`,
           left.length?[[FD[left[0]].btn,()=>A.farm(left[0])],['حسنًا',null,'sec']]:[['الحمد لله',null]])},1300)})},
     // ===== (v13.7) 🦆 إطعام البطّ، 🏪 آداب السوق، ⛲ النافورة، 👴 مساعدة جدّو =====
@@ -2304,11 +2304,11 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
     cafe(){const D=day();go({x:-4.9,z:36.6,via:null},()=>{if(night||sleeping){card('☕ مقهى الحيّ مغلق الآن… الجيران نائمون 🌙');setTimeout(()=>card(''),2200);return}
       if(D.cf){card(`☕ الجدّان يشربان الشاي ويدعوان لك: «اللَّهُ يحفظك${yaN()}» 🤍`);setTimeout(()=>card(''),2600);return}
       card(`☕ في مقهى الحيّ جدّان كبيران يشربان الشاي…<br><small>ماذا ${B('تفعل','تفعلين')}؟</small>`,[['👋 السلام عليكم يا عمّي',()=>{life.say(kid,'السلام عليكم يا عمّي 👋',3,2.4);
-        setTimeout(()=>{D.cf=1;dsv();jewels(1);try{Aamal.grow('akhlaq')}catch(e){}refresh();card(`<b style="color:#1fa463;font-size:19px">🌟 هذا عمل صالح!</b><br>قالا: «وعليكم السلام، هلا${yaN()}! اللَّهُ يحفظك» 🤍<br><small>احترام الكبار وتوقيرهم من أخلاق المسلم 💎 +١</small>`,[['الحمد لله',null]])},1200)}],
+        setTimeout(()=>{D.cf=1;dsv();jewels(1);try{Aamal.grow('akhlaq')}catch(e){}unmark(S.userData.cfG);card(`<b style="color:#1fa463;font-size:19px">🌟 هذا عمل صالح!</b><br>قالا: «وعليكم السلام، هلا${yaN()}! اللَّهُ يحفظك» 🤍<br><small>احترام الكبار وتوقيرهم من أخلاق المسلم 💎 +١</small>`,[['الحمد لله',null]])},1200)}],
         ['🏃 أمرّ مسرعًا',()=>card(`🤍 الأجمل أن ${B('تسلّم','تسلّمي')} على الكبار ${B('وتبتسم','وتبتسمي')} لهم`,[['👋 السلام عليكم يا عمّي',()=>A.cafe()]]),'sec']])})},
     mashhoof(){card('🛶 هذا مشحوف! قارب أهل الأهوار في جنوب العراق، يدفعه صاحبه بعصا طويلة اسمها «المردي» 🌾<br><small>نحافظ على أنهارنا نظيفة، فالماء نعمة 💧</small>',[['حسنًا',null,'sec']])},
     clock(){const d=new Date(),np=nextPrayer();card(`🕰️ ساعة المدينة: الساعة الآن ${hm(d)}<br><small>الوقت نعمة من اللَّه، والمسلم يحافظ على وقته وصلاته ⏰${np&&np.t?`<br>🕌 الصلاة القادمة: ${PNAME[np.p]||''} ${hm(new Date(+np.t))}`:''}</small>`,[['حسنًا',null,'sec']])},
-    gift(){const D=day();if(D.gf)return;const g=GIFTS[seed()%GIFTS.length];go({x:g[0]+(g[0]>0?-.7:.7),z:g[1],via:null},()=>{D.gf=1;dsv();jewels(5);refresh();
+    gift(){const D=day();if(D.gf)return;const g=GIFTS[seed()%GIFTS.length];go({x:g[0]+(g[0]>0?-.7:.7),z:g[1],via:null},()=>{D.gf=1;dsv();jewels(5);unput(S.userData.gfG);
       card(`🎁 ${B('وجدتَ','وجدتِ')} هدية اليوم المخفية! 💎 +٥<br><small>${B('تعال','تعالي')} غدًا، ستُخبَّأ هدية جديدة في مكان آخر 🔍</small>`,[['🤍 الحمد لله',null]])})},
     giftHint(){const D=day();if(D.gf){card(`🎁 ${B('وجدتَ','وجدتِ')} هدية اليوم ✔<br><small>غدًا هدية جديدة في مكان آخر 🔍</small>`,[['حسنًا',null,'sec']]);return}const g=GIFTS[seed()%GIFTS.length];
       card(`🎁 هدية اليوم مخبّأة ${g[2]}<br><small>${B('ابحث','ابحثي')} عن صندوق أحمر صغير ${B('والمسه','والمسيه')} 🔍</small>`,[['🔍 '+B('دلّني','دلّيني'),()=>lookPt(g[0],g[1])],[B('سأبحث بنفسي','سأبحث بنفسي'),null,'sec']])},
@@ -2974,6 +2974,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
   if(pn&&!day().pr[pn]&&mLvs().m)setTimeout(()=>{if(alive&&!V&&!path.length&&!busy&&!sleeping&&!inSchool){card(`🕌 الله أكبر! حان وقت صلاة ${PNAME[pn]}… هيّا إلى الجامع`);setTimeout(()=>A.mosque(),1200)}},1500);
   // (v23.1) سقي الشجرة / رفع النفايات / سقي القطة: كانت تعيد بناء المدينة كلها (refresh) فتعلّق الشاشة ١–٢ ثانية على الكمبيوتر وأكثر على الهاتف.
   // الآن نخفي العلامة 💧 أو نرفع الشيء وحده فقط، وتُحدَّث الظلال مرة واحدة.
+  // (v23.2) وكذلك المزرعة ومقهى الحيّ وهدية اليوم: لا تعيد بناء المدينة، تخفي العلامة أو ترفع الهدية فقط.
   function unmark(G){const ms=S.userData.marks;if(!G||!ms)return;G.traverse(c=>{if(c.isSprite){const k=ms.indexOf(c);if(k>=0){ms.splice(k,1);c.visible=false}}});shF=999}
   function unput(G){if(G&&G.parent){G.parent.remove(G);shF=999}}
   function refresh(){shF=999;const old=S;old.remove(kid);old.remove(life.g);S=makeScene(night,V);S.add(kid);S.add(life.g);applySky();OB=null;
