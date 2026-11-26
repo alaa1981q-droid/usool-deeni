@@ -2,6 +2,11 @@
 
 App name (chosen by the owner, v2.8): «جنّتي الصغيرة». Children's app for the book «أصول ديني الخمسة» by الشيخ علاء المطوري (Iraq). Talk to the owner in Iraqi Arabic, simply and step by step (he is not a programmer; give exact taps/clicks, ask for screenshots when stuck). Never guess Quranic text: verses must stay exactly as in the book.
 
+## The owner's vision (read first — owner asked: «احفظ أفكاري حتى تفهمني», 2026-11-26)
+- The goal is NOT to show religion as a picture. Play is the WAY IN, not the goal: the child comes to play and leaves having memorised verses/surahs, reading them correctly, saying tasbih and salawat on Muhammad and his family with his own tongue, and practising good deeds and religious manners (salam, respecting elders, helping the needy, honesty…).
+- Origin of the idea: the owner read a narration that when the Imam appears, the currency people buy with will be the salawat on Muhammad and his family. So in the app the salawat/tasbih/memorising are the «money»: the palace, the car, the city grow only by dhikr, hifz and good deeds — the child learns they are a treasure, not a burden. (Claude does not know the narration's source; if it is ever quoted in the app, take the exact text and source from the owner — never guess.)
+- He is NOT against developing and adding more («ما بالي أطوّر»): many city features are fine as long as each one leads the child to a verse, dhikr or a good manner. Test for any new idea: «هاي شنو تعلّم الطفل؟». Memorising and correct reading should stay the most valuable thing (biggest rewards).
+
 ## Where it lives
 - Live app (PWA, the link families use): https://alaa1981q-droid.github.io/usool-deeni/ — GitHub Pages from `main`, root.
 - Android APK: built by `.github/workflows/android.yml` on every push, published to Release `latest` → `releases/download/latest/usool-deeni.apk`. Families prefer the link (APK triggers Play Protect warnings).
