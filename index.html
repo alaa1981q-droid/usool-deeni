@@ -118,6 +118,10 @@ button{font-family:inherit;cursor:pointer}
 .imams{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0;padding:0;list-style:none;font-size:15.5px}
 .imams li{background:#f4f0ff;border-radius:12px;padding:5px 8px}
 .imams li b{color:var(--c4)}
+.mcards{display:flex;flex-direction:column;gap:8px;margin:8px 0}
+.mcards .mc{background:#fff;border:2px solid color-mix(in srgb,var(--sc) 35%,#fff);border-radius:14px;padding:8px 12px;line-height:1.7}
+.mcards .mc b{display:block;color:var(--sc);font-size:17px}.mcards .mc i{display:block;font-style:normal;color:#9a6a12;font-size:14px;font-weight:700}
+.mnote{font-size:12.5px;color:var(--muted);margin-top:8px}
 .memo{background:linear-gradient(160deg,#fffaf0,#fff1c9);border:3px dashed var(--gold)}
 
 .nav{display:flex;gap:10px;margin-top:14px}
@@ -446,7 +450,8 @@ html.lowfx #home .hero.kid .cl{display:none}
       <div class="stat"><b id="stDone">٠</b><span>مرحلة مكتملة</span></div>
       <div class="stat"><b id="stStars">٠</b><span>نجمة ⭐</span></div>
     </div>
-    <button class="bookcard" id="openBook"><img src="p/01.webp" alt=""><span><b>📖 الكتاب المصوّر</b><small>تصفّح صفحات الكتاب كما هي، بالصور والألوان</small></span><span class="go">‹</span></button>
+    <button class="bookcard" id="openBook"><img src="p/01.webp" alt=""><span><b>📖 الكتاب المصوّر</b><small>«أصول ديني الخمسة»: الطبعة الجديدة بالصور والألوان</small></span><span class="go">‹</span></button>
+    <button class="bookcard" id="openBook2"><img src="p2/01.webp" alt=""><span><b>🌈 أنا أعرف ديني</b><small>كتاب مصوّر للصغار: الأصول الخمسة بكلمات بسيطة</small></span><span class="go">‹</span></button>
     <button class="bookcard contestcard" id="openContest"><span class="cup">🏆</span><span><b>مسابقة الأبطال</b><small id="bestLine">جاوب بسرعة واجمع النقاط، أو تحدَّ صديقك!</small></span><span class="go">‹</span></button>
     <div class="map" id="map"></div>
     <div class="footer-links">
@@ -510,8 +515,8 @@ html.lowfx #home .hero.kid .cl{display:none}
 <div class="celebrate" id="celebrate" role="dialog" aria-live="assertive"><div class="in" id="celebIn"></div></div>
 <div class="modal" id="modal"><div class="in" id="modalIn"></div></div>
 
-<script src="seal.js?v=22.5"></script><!-- ختم التقدّم: لازم يكون أول ملف -->
-<script src="questions.js?v=22.5"></script><!-- غيّر ?v= مع APP_VER حتى لا يأخذ المتصفح نسخة قديمة -->
+<script src="seal.js?v=22.8"></script><!-- ختم التقدّم: لازم يكون أول ملف -->
+<script src="questions.js?v=22.8"></script><!-- غيّر ?v= مع APP_VER حتى لا يأخذ المتصفح نسخة قديمة -->
 <script>
 /* ---------- helpers ---------- */
 const AR='٠١٢٣٤٥٦٧٨٩';
@@ -683,6 +688,12 @@ const STAGES=[
      'الأنبياء <b>صادقون أمناء</b>، لا يكذبون أبدًا، و<b>معصومون</b> أي يحفظهم الله من الخطأ في تبليغ الدين.',
      'ومعهم <b>معجزة</b>: أمرٌ عجيب يعجز الناس عن مثله ليعرفوا أنهم صادقون. ومعجزة نبيّنا الكبرى: <b>القرآن الكريم</b>، كتابٌ باقٍ إلى يوم القيامة.'],
     box:['try','جرّب','اقرأ آيةً من القرآن بصوتٍ جميل، وتذكّر أنه كلام الله الذي جاء به النبي.']},
+   {h:'نتعرّف على نبيّنا محمد', sm:'صلى الله عليه وآله', cards:[
+     {n:'اسمه ونسبه', t:'محمد بن عبد الله بن عبد المطلب، من قريش. أبوه عبد الله، وأمه آمنة بنت وهب.'},
+     {n:'ولادته وطفولته', t:'وُلد في مكة في عام الفيل، والمشهور عندنا أنه وُلد في ١٧ ربيع الأول. نشأ يتيمًا، فرعاه جدّه عبد المطلب، ثم عمّه أبو طالب.'},
+     {n:'أخلاقه الجميلة', t:'كان صادقًا وأمينًا ورحيمًا بالناس، وكانوا يسمّونه <b>الصادق الأمين</b>.'},
+     {n:'رسالته', t:'اختاره الله نبيًّا وعمره أربعون سنة، وأنزل عليه القرآن الكريم ليهدينا إلى الخير. هاجر إلى المدينة وعلّم الناس عبادة الله وحده.'}],
+    box:['try','جرّب','أقتدي بنبيّي فأصدق وأرحم الآخرين.']},
    {h:'آياتٌ عن النبوّة', sm:'من القرآن الكريم', verses:[
      {a:'وَمَا أَرْسَلْنَاكَ إِلَّا رَحْمَةً لِلْعَالَمِينَ', s:'سورة الأنبياء، الآية ١٠٧', t:'أرسل الله النبي محمدًا رحمةً لجميع الناس.'},
      {a:'مَا كَانَ مُحَمَّدٌ أَبَا أَحَدٍ مِنْ رِجَالِكُمْ وَلَٰكِنْ رَسُولَ اللَّهِ وَخَاتَمَ النَّبِيِّينَ', s:'سورة الأحزاب، الآية ٤٠', t:'محمدٌ رسول الله وآخر الأنبياء.'},
@@ -715,6 +726,23 @@ const STAGES=[
    {h:'الأئمة الاثنا عشر', art:'twelve', imams:['علي بن أبي طالب','الحسن بن علي','الحسين بن علي','علي بن الحسين (السجاد)','محمد بن علي (الباقر)','جعفر بن محمد (الصادق)','موسى بن جعفر (الكاظم)','علي بن موسى (الرضا)','محمد بن علي (الجواد)','علي بن محمد (الهادي)','الحسن بن علي (العسكري)','محمد بن الحسن (المهدي)'],
     body:['عليهم السلام جميعًا.'],
     box:['remember','تذكّر','الإمام الثاني عشر هو <b>الإمام المهدي</b> عجّل الله فرجه، حيٌّ غائب، يشبه الشمس خلف السحاب: ينفع الناس وإن لم يروه.']},
+   {h:'نتعرّف على المعصومين الأربعة عشر', sm:'نبيّنا وأهل بيته عليهم السلام', cards:[
+     {n:'النبي محمد بن عبد الله صلى الله عليه وآله', d:'١٧ ربيع الأول، عام الفيل', t:'هو خاتم الأنبياء، جاءنا بالقرآن الكريم، وعلّمنا الصدق والرحمة.'},
+     {n:'السيدة فاطمة الزهراء عليها السلام', d:'٢٠ جمادى الآخرة، السنة الخامسة للبعثة', t:'هي ابنة نبينا محمد وأم الحسن والحسين. نتعلّم منها العبادة والعطاء.'},
+     {n:'الإمام الأول: علي بن أبي طالب', d:'١٣ رجب، قبل البعثة بعشر سنوات', t:'هو أمير المؤمنين، عُرف بالشجاعة والعدل ومساعدة الفقراء.'},
+     {n:'الإمام الثاني: الحسن المجتبى', d:'١٥ رمضان، ٣ هـ', t:'هو ابن الإمام علي والسيدة فاطمة. نتعلّم منه الكرم وحب السلام.'},
+     {n:'الإمام الثالث: الحسين بن علي', d:'٣ شعبان، ٤ هـ', t:'هو سيد الشهداء. نتعلّم منه الشجاعة والوقوف مع الحق.'},
+     {n:'الإمام الرابع: علي بن الحسين السجاد', d:'٥ شعبان، ٣٨ هـ', t:'كان كثير العبادة والدعاء، ومن أدعيته الصحيفة السجادية.'},
+     {n:'الإمام الخامس: محمد بن علي الباقر', d:'٣ صفر، ٥٧ هـ', t:'علّم الناس أمور الدين، ونتعلّم منه حب العلم.'},
+     {n:'الإمام السادس: جعفر بن محمد الصادق', d:'١٧ ربيع الأول، ٨٣ هـ', t:'علّم كثيرًا من الطلاب، ونتعلّم منه الصدق وطلب العلم.'},
+     {n:'الإمام السابع: موسى بن جعفر الكاظم', d:'٧ صفر، ١٢٩ هـ', t:'عُرف بالصبر وكظم الغيظ، ونتعلّم منه أن نتحكّم بغضبنا.'},
+     {n:'الإمام الثامن: علي بن موسى الرضا', d:'١١ ذو القعدة، ١٤٨ هـ', t:'عُرف بعلمه وحسن معاملته للناس، ونتعلّم منه احترام الآخرين.'},
+     {n:'الإمام التاسع: محمد بن علي الجواد', d:'١٠ رجب، ١٩٥ هـ', t:'أصبح إمامًا وهو صغير السن، ونتعلّم منه الكرم وحب الخير.'},
+     {n:'الإمام العاشر: علي بن محمد الهادي', d:'٢ رجب، ٢١٢ هـ', t:'كان يرشد الناس إلى الخير، ونتعلّم منه حسن الأخلاق.'},
+     {n:'الإمام الحادي عشر: الحسن بن علي العسكري', d:'٨ ربيع الآخر، ٢٣٢ هـ', t:'هو والد الإمام المهدي، ونتعلّم منه الصبر والعبادة.'},
+     {n:'الإمام الثاني عشر: محمد بن الحسن المهدي', d:'١٥ شعبان، ٢٥٥ هـ', t:'هو إمام زماننا، ننتظر ظهوره وندعو الله أن يعجّل فرجه ليملأ الأرض عدلًا.'}],
+    box:['remember','تذكّر يا صديقي','عدد الأئمة اثنا عشر، ومع النبي وفاطمة الزهراء يكون عدد المعصومين <b>أربعة عشر</b>، عليهم السلام جميعًا.'],
+    note:'تواريخ الولادة بحسب أحد الأقوال المشهورة في التراث الإمامي، وقد اختلفت بعض الروايات فيها.'},
    {h:'آياتٌ عن الإمامة', sm:'من القرآن الكريم', verses:[
      {a:'إِنَّمَا أَنْتَ مُنْذِرٌ ۖ وَلِكُلِّ قَوْمٍ هَادٍ', s:'سورة الرعد، الآية ٧', t:'لكل قومٍ هادٍ يدلّهم على الحق.'},
      {a:'وَجَعَلْنَا مِنْهُمْ أَئِمَّةً يَهْدُونَ بِأَمْرِنَا لَمَّا صَبَرُوا ۖ وَكَانُوا بِآيَاتِنَا يُوقِنُونَ', s:'سورة السجدة، الآية ٢٤', t:'جعل الله منهم أئمةً يهدون الناس بأمره لمّا صبروا وأيقنوا.'},
@@ -880,8 +908,9 @@ function renderPage(){
     if(l.surah){h+=`<ul class="vlist">${l.surah.map((v,k)=>`<li><div><div class="q">${v[0]} ﴿${ar(k+1)}﴾</div><div class="s">${v[1]}</div></div></li>`).join('')}</ul>`}
     if(l.imams){h+=`<ul class="imams">${l.imams.map((n,k)=>`<li><b>${ar(k+1)}</b> ${n}</li>`).join('')}</ul>`}
     if(l.body)h+=l.body.map(t=>`<p>${t}</p>`).join('');
+    if(l.cards)h+=`<div class="mcards">${l.cards.map(c=>`<div class="mc"><b>${c.n}</b>${c.d?`<i>الولادة: ${c.d}</i>`:''}<span>${c.t}</span></div>`).join('')}</div>`;
     if(l.verses)h+=verseBlock(l.verses);
-    h+=boxHTML(l.box)+boxHTML(l.box2)+`</div>`;
+    h+=boxHTML(l.box)+boxHTML(l.box2)+(l.note?`<p class="mnote">${l.note}</p>`:'')+`</div>`;
   } else if(pg.memo){
     h=`<div class="card memo"><h2 style="text-align:center">⭐ آيةٌ أحفظها ⭐</h2><p style="text-align:center;color:var(--muted)">اقرأها ثلاث مرات بصوتٍ جميل حتى تحفظها</p>${verseBlock([pg.memo])}</div>`;
   } else {
@@ -1198,50 +1227,56 @@ function confetti(){
 }
 
 /* ---------- picture book reader (merged) ---------- */
-const BOOK_N=38;
-const STAGE_PAGE=[2,7,13,19,25,31];
-const QUIZ_PAGE={12:1,18:2,24:3,30:4,36:5};
-const BTOC=[[1,'الغلاف',0],[2,'إلى صديقي الصغير',0],[3,'بيت ديني',0],[4,'سورة الحمد',0],[6,'سورة التوحيد',0],
+/* v22.8: كتابان مصوّران — «أصول ديني الخمسة» (٤٣ صفحة، الطبعة الجديدة) و«أنا أعرف ديني» للصغار (٢٤ صفحة) */
+const BOOKS=[
+ {t:'أصول ديني الخمسة',dir:'p',n:43,key:'usul5_book_page',quiz:{12:1,18:2,25:3,35:4,41:5},toc:[[1,'الغلاف',0],[2,'إلى صديقي الصغير',0],[3,'بيت ديني',0],[4,'سورة الحمد',0],[6,'سورة التوحيد',0],
  [7,'الأصل الأول: التوحيد',1,'--c1'],[8,'كيف نعرف أن الله موجود؟',2],[9,'أدلّة بسيطة',2],[10,'الله واحد',2],[11,'آيات عن التوحيد',2],[12,'اختبر نفسك: التوحيد',2],
- [13,'الأصل الثاني: العدل',1,'--c2'],[14,'الله عادلٌ لا يظلم',2],[15,'أنا أختار',2],[16,'لماذا نمرض أحيانًا؟',2],[17,'آيات عن العدل',2],[18,'اختبر نفسك: العدل',2],
- [19,'الأصل الثالث: النبوّة',1,'--c3'],[20,'لماذا أرسل الله الأنبياء؟',2],[21,'من هم الأنبياء؟',2],[22,'صفات الأنبياء ومعجزاتهم',2],[23,'آيات عن النبوّة',2],[24,'اختبر نفسك: النبوّة',2],
- [25,'الأصل الرابع: الإمامة',1,'--c4'],[26,'لماذا نحتاج إلى الإمام؟',2],[27,'يوم الغدير',2],[28,'الأئمة الاثنا عشر',2],[29,'آيات عن الإمامة',2],[30,'اختبر نفسك: الإمامة',2],
- [31,'الأصل الخامس: المعاد',1,'--c5'],[32,'رحلة الحياة',2],[33,'يوم القيامة والحساب',2],[34,'الجنة والنار',2],[35,'آيات عن المعاد',2],[36,'اختبر نفسك: المعاد',2],
- [37,'صفحة الإجابات',0],[38,'شهادة إتمام',0]];
-const bSec=p=>{let t=BTOC[0];for(const e of BTOC)if(e[0]<=p)t=e;return t};
-const rbook=$('#rbook'),rPages=[];
-for(let i=1;i<=BOOK_N;i++){
-  const d=document.createElement('section');d.className='rpage';d.dataset.p=i;
-  const im=document.createElement('img');im.src='p/'+String(i).padStart(2,'0')+'.webp';im.alt='صفحة '+ar(i);im.loading=i<=2?'eager':'lazy';im.decoding='async';
-  im.addEventListener('dblclick',openZoom);d.appendChild(im);
-  if(QUIZ_PAGE[i]!=null){const si=QUIZ_PAGE[i],b=document.createElement('button');b.className='rcta';b.style.background=STAGES[si].color;
-    b.textContent='✍️ ادخل امتحان '+STAGES[si].title;b.onclick=()=>{closeReader();cur={s:si,p:pages(si).length-1};renderPage();startQuiz()};d.appendChild(b)}
-  rbook.appendChild(d);rPages.push(d);
-}
-const rtocLs=$('#rtocLs');
-BTOC.forEach(([p,t,l,c])=>{const b=document.createElement('button');b.className=l==2?'s':'m';b.dataset.p=p;
-  if(l!=2){const d=document.createElement('span');d.className='d';d.style.background=c?'var('+c+')':'var(--line)';b.appendChild(d)}
-  b.appendChild(document.createTextNode(t));const n=document.createElement('span');n.className='n';n.textContent=ar(p);b.appendChild(n);
-  b.onclick=()=>{$('#rtoc').classList.remove('on');rGo(p,false)};rtocLs.appendChild(b)});
-let rCur=1;
+ [13,'الأصل الثاني: العدل',1,'--c2'],[14,'الله عادلٌ لا يظلم',2],[15,'أنا أختار',2],[16,'لماذا يوجد ألمٌ أحيانًا؟',2],[17,'آيات عن العدل',2],[18,'اختبر نفسك: العدل',2],
+ [19,'الأصل الثالث: النبوّة',1,'--c3'],[20,'لماذا أرسل الله الأنبياء؟',2],[21,'من هم الأنبياء؟',2],[22,'صفات الأنبياء ومعجزتهم',2],[23,'نتعرّف على نبيّنا محمد',2],[24,'آيات عن النبوّة',2],[25,'اختبر نفسك: النبوّة',2],
+ [26,'الأصل الرابع: الإمامة',1,'--c4'],[27,'لماذا نحتاج إلى الإمام؟',2],[28,'يوم الغدير',2],[29,'الأئمة الاثنا عشر',2],[30,'المعصومون الأربعة عشر',2],[34,'آيات عن الإمامة',2],[35,'اختبر نفسك: الإمامة',2],
+ [36,'الأصل الخامس: المعاد',1,'--c5'],[37,'رحلة الحياة',2],[38,'يوم القيامة والحساب',2],[39,'الجنة والنار',2],[40,'آيات عن المعاد',2],[41,'اختبر نفسك: المعاد',2],
+ [42,'صفحة الإجابات',0],[43,'شهادة إتمام',0]]},
+ {t:'أنا أعرف ديني',dir:'p2',n:24,key:'usul5_book2_page',quiz:{},toc:[[1,'الغلاف',0],[2,'مرحبًا يا صديقي',0],[3,'أعُدّ أصول ديني',0],
+ [4,'١. التوحيد',1,'--c1'],[6,'لوّن الشمس',2],[7,'أتأمّل خلق الله',2],
+ [8,'٢. العدل',1,'--c2'],[9,'أنا أختار',2],[10,'أنا طفلٌ عادل',2],
+ [11,'٣. النبوّة',1,'--c3'],[12,'أحبّ نبيّي محمدًا',2],
+ [13,'٤. الإمامة',1,'--c4'],[14,'الإمام المهدي',2],[15,'أحبّ أهل البيت',2],[16,'أئمّتي ١–٦',2],[17,'أئمّتي ٧–١٢',2],[18,'لوّن الفانوس',2],
+ [19,'٥. المعاد',1,'--c5'],[20,'أعمالٌ طيّبة',2],[21,'أزرع الخير',2],
+ [22,'نشيد الأصابع الخمسة',0],[23,'نشاط: صِلْ كل صورة',0],[24,'أحسنتَ يا بطل!',0]]}];
+const STAGE_PAGE=[2,7,13,19,26,36];
+let BK=BOOKS[0],BOOK_N=0,rPages=[],rCur=1;
+const bSec=p=>{let t=BK.toc[0];for(const e of BK.toc)if(e[0]<=p)t=e;return t};
+const rbook=$('#rbook'),rtocLs=$('#rtocLs');
+const rio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting&&e.intersectionRatio>.6)rUpdate(+e.target.dataset.p)}),{root:rbook,threshold:[.6]});
+function buildBook(b){if(BOOK_N&&BK===b)return;BK=b;BOOK_N=b.n;rio.disconnect();rbook.innerHTML='';rPages=[];rtocLs.innerHTML='';
+  $('#reader .rhead .t').textContent=b.t;$('#rSlider').max=b.n;
+  for(let i=1;i<=b.n;i++){
+    const d=document.createElement('section');d.className='rpage';d.dataset.p=i;
+    const im=document.createElement('img');im.src=b.dir+'/'+String(i).padStart(2,'0')+'.webp';im.alt='صفحة '+ar(i);im.loading=i<=2?'eager':'lazy';im.decoding='async';
+    im.addEventListener('dblclick',openZoom);d.appendChild(im);
+    if(b.quiz[i]!=null){const si=b.quiz[i],q=document.createElement('button');q.className='rcta';q.style.background=STAGES[si].color;
+      q.textContent='✍️ ادخل امتحان '+STAGES[si].title;q.onclick=()=>{closeReader();cur={s:si,p:pages(si).length-1};renderPage();startQuiz()};d.appendChild(q)}
+    rbook.appendChild(d);rPages.push(d);rio.observe(d)}
+  b.toc.forEach(([p,t,l,c])=>{const x=document.createElement('button');x.className=l==2?'s':'m';x.dataset.p=p;
+    if(l!=2){const d=document.createElement('span');d.className='d';d.style.background=c?'var('+c+')':'var(--line)';x.appendChild(d)}
+    x.appendChild(document.createTextNode(t));const n=document.createElement('span');n.className='n';n.textContent=ar(p);x.appendChild(n);
+    x.onclick=()=>{$('#rtoc').classList.remove('on');rGo(p,false)};rtocLs.appendChild(x)})}
 function rUpdate(p){rCur=p;$('#rCount').textContent=ar(p)+' / '+ar(BOOK_N);$('#rSec').textContent=bSec(p)[1];$('#rSlider').value=p;
   $('#rPrev').disabled=p==1;$('#rNext').disabled=p==BOOK_N;
   rtocLs.querySelectorAll('button').forEach(b=>b.classList.toggle('on',+b.dataset.p==bSec(p)[0]));
-  try{localStorage.setItem('usul5_book_page',p)}catch(e){}}
+  try{localStorage.setItem(BK.key,p)}catch(e){}}
 function rGo(p,smooth=true){p=Math.max(1,Math.min(BOOK_N,p));
   const red=matchMedia('(prefers-reduced-motion: reduce)').matches;
   rPages[p-1].scrollIntoView({inline:'center',block:'nearest',behavior:smooth&&!red?'smooth':'auto'});rUpdate(p)}
-const rio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting&&e.intersectionRatio>.6)rUpdate(+e.target.dataset.p)}),{root:rbook,threshold:[.6]});
-rPages.forEach(x=>rio.observe(x));
-function openReader(p){$('#reader').classList.add('on');document.body.style.overflow='hidden';
-  if(p==null){p=1;try{p=parseInt(localStorage.getItem('usul5_book_page'),10)||1}catch(e){}}
+function openReader(p,bi=0){buildBook(BOOKS[bi]);$('#reader').classList.add('on');document.body.style.overflow='hidden';
+  if(p==null){p=1;try{p=parseInt(localStorage.getItem(BK.key),10)||1}catch(e){}}
   requestAnimationFrame(()=>rGo(p,false))}
 function closeReader(){$('#reader').classList.remove('on');$('#rtoc').classList.remove('on');document.body.style.overflow=''}
 function openZoom(){const z=$('#zoomv');z.classList.remove('fit');$('#zimg').src=rPages[rCur-1].querySelector('img').src;z.classList.add('on');$('#zx').classList.add('on');
   z.scrollTop=0;z.scrollLeft=(z.scrollWidth-z.clientWidth)/2}
 function closeZoom(){$('#zoomv').classList.remove('on');$('#zx').classList.remove('on')}
 $('#zimg').addEventListener('dblclick',()=>$('#zoomv').classList.toggle('fit'));
-$('#openBook').onclick=()=>openReader();
+$('#openBook').onclick=()=>openReader();$('#openBook2').onclick=()=>openReader(null,1);
 $('#lsBook').onclick=()=>openReader(STAGE_PAGE[cur.s]);
 $('#rClose').onclick=closeReader;$('#rZoom').onclick=openZoom;$('#zx').onclick=closeZoom;
 $('#rTocBtn').onclick=()=>{$('#rtoc').classList.add('on');const o=rtocLs.querySelector('.on');o&&o.scrollIntoView({block:'center'})};
@@ -1252,32 +1287,32 @@ document.addEventListener('keydown',e=>{if($('#zoomv').classList.contains('on'))
   if(!$('#reader').classList.contains('on'))return;
   if(e.key=='ArrowLeft')rGo(rCur+1);else if(e.key=='ArrowRight')rGo(rCur-1);else if(e.key=='Escape')closeReader()});
 
-const APP_VER='22.7';
+const APP_VER='22.8';
 $('#verLine').textContent=`الإصدار ${ar(APP_VER).replace('.','٫')} · ${ar(ALLQ.length)} سؤالًا`;
 renderHome();
 if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
-<script src="online.js?v=22.5"></script>
-<script src="bayt.js?v=22.5"></script>
-<script src="nafsak.js?v=22.5"></script>
-<script src="hifz.js?v=22.5"></script>
-<script src="jannah.js?v=22.5"></script>
-<script src="baytrace.js?v=22.5"></script>
-<script src="wird.js?v=22.5"></script>
-<script src="sawt.js?v=22.5"></script>
-<script src="salah.js?v=22.5"></script>
-<script src="adhan.js?v=22.5"></script>
-<script src="alqab.js?v=22.5"></script>
-<script src="binaa.js?v=22.5"></script>
-<script src="madina.js?v=22.5"></script>
-<script src="mujassam.js?v=22.5"></script>
-<script src="idara.js?v=22.5"></script>
-<script src="parent.js?v=22.5"></script>
-<script src="qisas.js?v=22.5"></script>
-<script src="bookdl.js?v=22.5"></script>
-<script src="ramz.js?v=22.5"></script>
-<script src="wajiha.js?v=22.5"></script>
-<script src="hamas.js?v=22.5"></script>
+<script src="online.js?v=22.8"></script>
+<script src="bayt.js?v=22.8"></script>
+<script src="nafsak.js?v=22.8"></script>
+<script src="hifz.js?v=22.8"></script>
+<script src="jannah.js?v=22.8"></script>
+<script src="baytrace.js?v=22.8"></script>
+<script src="wird.js?v=22.8"></script>
+<script src="sawt.js?v=22.8"></script>
+<script src="salah.js?v=22.8"></script>
+<script src="adhan.js?v=22.8"></script>
+<script src="alqab.js?v=22.8"></script>
+<script src="binaa.js?v=22.8"></script>
+<script src="madina.js?v=22.8"></script>
+<script src="mujassam.js?v=22.8"></script>
+<script src="idara.js?v=22.8"></script>
+<script src="parent.js?v=22.8"></script>
+<script src="qisas.js?v=22.8"></script>
+<script src="bookdl.js?v=22.8"></script>
+<script src="ramz.js?v=22.8"></script>
+<script src="wajiha.js?v=22.8"></script>
+<script src="hamas.js?v=22.8"></script>
 <script>/* (v21.5) إذا لم يُعرف الجهاز من مواصفاته: نقيس سرعة الرسم مرّة على الرئيسية؛ أقل من ٣٢ إطارًا بالثانية = تلفون بسيط */
 (function(){var K='jannah_lowfx';try{if(localStorage.getItem(K)!==null||document.documentElement.classList.contains('lowfx'))return}catch(e){return}
 addEventListener('load',function(){setTimeout(function(){var h=document.getElementById('home');if(document.hidden||!h||!h.classList.contains('on'))return;
