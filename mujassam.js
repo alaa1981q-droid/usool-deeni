@@ -2154,15 +2154,15 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
     water(){const D=day(),i=thirsty().find(k=>!D.tr[k]);if(i==null){card(`🌳 كل الأشجار شربت اليوم! ${B('أحسنت','أحسنتِ')} 💚<br><small>${B('تعال','تعالي')} غدًا، ستعطش أشجار جديدة</small>`,[['حسنًا',null,'sec']]);return}A.tree(i)},
     tree(i){const D=day();if(D.tr[i]||!thirsty().includes(i)){card('🌳 هذه الشجرة ليست عطشى الآن 💚');setTimeout(()=>card(''),1800);return}
       go(treeSpot(i),()=>{D.tr[i]=1;dsv();splash(S.userData.trees[i]);jewels(2);
-        const left=thirsty().filter(k=>!D.tr[k]).length;card(`💧 ${B('سقيتَ','سقيتِ')} الشجرة فكبرت وفرحت! 🌳${left?`<br><small>باقي ${arn(left)} ${left==1?'شجرة عطشى':'أشجار عطشى'} (عليها 💧)</small>`:'<br><small>كل الأشجار شربت اليوم 💚</small>'}`,left?[['💧 الشجرة التالية',()=>follow(()=>A.water())],['حسنًا',null,'sec']]:[['الحمد لله',null]]);refresh()})},
-    litter(i){const D=day();if(D.lt[i])return;go(litSpot(i),()=>{D.lt[i]=1;dsv();jewels(1);refresh();
+        const left=thirsty().filter(k=>!D.tr[k]).length;card(`💧 ${B('سقيتَ','سقيتِ')} الشجرة فكبرت وفرحت! 🌳${left?`<br><small>باقي ${arn(left)} ${left==1?'شجرة عطشى':'أشجار عطشى'} (عليها 💧)</small>`:'<br><small>كل الأشجار شربت اليوم 💚</small>'}`,left?[['💧 الشجرة التالية',()=>follow(()=>A.water())],['حسنًا',null,'sec']]:[['الحمد لله',null]]);unmark(S.userData.trees[i])})},
+    litter(i){const D=day();if(D.lt[i])return;go(litSpot(i),()=>{D.lt[i]=1;dsv();jewels(1);unput((S.userData.lit||[])[i]);
       const left=litter().filter(k=>!D.lt[k]).length;card(`🧹 ${B('رفعتَ','رفعتِ')} النفايات ووضعتها في السلّة 🗑️<br><small>${left?`باقي ${arn(left)} في الطرق (عليها 🧹)`:'مدينتك نظيفة جميلة! ✨'}</small>`,left?[['🧹 التالية',()=>follow(()=>A.clean())],['حسنًا',null,'sec']]:[['الحمد لله',null]])})},
     clean(){const D=day(),i=litter().find(k=>!D.lt[k]);if(i==null){card(`✨ ${B('مدينتك','مدينتكِ')} نظيفة اليوم! ${B('أحسنت','أحسنتِ')} 💚`,[['حسنًا',null,'sec']]);return}A.litter(i)},
     // (v15.7) 👋 سلّم على أقرب جار (أو ردّ على من يسلّم عليك الآن)
     salamNear(){const ps=life.peds,kp=kid.position;let bi=-1,bd=1e9;ps.forEach((P,i)=>{const u=P.userData.u;if(!P.visible||u.fade||u.trip<0&&!u.shep)return;const d=Math.hypot(P.position.x-kp.x,P.position.z-kp.z)-(u.greet>0?1e3:0);if(d<bd){bd=d;bi=i}});
       if(bi<0){card(`🙂 لا أحد في الشارع الآن… ${B('انتظر','انتظري')} قليلًا حتى يمرّ أحد الجيران 👋`);setTimeout(()=>card(''),2400);return}A.salam(bi)},
     cat(){const D=day();if(D.cat)return;go(door('s'),()=>{busy=1;card(`🥛 ${B('ملأتَ','ملأتِ')} الإناء من السبيل…`);setTimeout(()=>{busy=0;go({x:CAT[0]-.2,z:CAT[1]+1.3,via:null},()=>{D.cat=1;dsv();jewels(3);
-      card(`🐱 شربت القطة وقالت: مياو! شكرًا 🤍<br><small>الرحمة بالحيوان من الأخلاق الجميلة</small>`,[['حسنًا',null,'sec']]);refresh()})},1200)})},
+      card(`🐱 شربت القطة وقالت: مياو! شكرًا 🤍<br><small>الرحمة بالحيوان من الأخلاق الجميلة</small>`,[['حسنًا',null,'sec']]);unput(S.userData.cat)})},1200)})},
     school(){go(door('q'),()=>card(`🏫 مدرسة القرآن: هيّا ${B('احفظ','احفظي')} سورة مع الشيخ عبد الباسط ⭐`,[['⭐ أنا حافظ صغير',()=>closeTo(()=>{const b=document.getElementById('openHifz');b&&b.click()})],['لاحقًا',null,'sec']]))},
     // (v11.8) 🎒 مدرستي: الذهاب للمدرسة مرة في اليوم 💎5، ثم دعوة لدرس حقيقي من الكتاب
     mySchool(){if(inSchool){schoolCard();return}const h=hourNow();
@@ -2972,6 +2972,10 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
     stepFly(dt);place();if(drv&&camIn&&myCar)cockpit(dt);rMap();requestAnimationFrame(loop)})();
   // عند وقت الأذان: الشخصية تذهب للجامع وحدها
   if(pn&&!day().pr[pn]&&mLvs().m)setTimeout(()=>{if(alive&&!V&&!path.length&&!busy&&!sleeping&&!inSchool){card(`🕌 الله أكبر! حان وقت صلاة ${PNAME[pn]}… هيّا إلى الجامع`);setTimeout(()=>A.mosque(),1200)}},1500);
+  // (v23.1) سقي الشجرة / رفع النفايات / سقي القطة: كانت تعيد بناء المدينة كلها (refresh) فتعلّق الشاشة ١–٢ ثانية على الكمبيوتر وأكثر على الهاتف.
+  // الآن نخفي العلامة 💧 أو نرفع الشيء وحده فقط، وتُحدَّث الظلال مرة واحدة.
+  function unmark(G){const ms=S.userData.marks;if(!G||!ms)return;G.traverse(c=>{if(c.isSprite){const k=ms.indexOf(c);if(k>=0){ms.splice(k,1);c.visible=false}}});shF=999}
+  function unput(G){if(G&&G.parent){G.parent.remove(G);shF=999}}
   function refresh(){shF=999;const old=S;old.remove(kid);old.remove(life.g);S=makeScene(night,V);S.add(kid);S.add(life.g);applySky();OB=null;
     // الأشجار التي تكبر الآن تبقى بحجمها
     old.userData.trees.forEach((G,i)=>{if(G&&S.userData.trees[i])S.userData.trees[i].scale.copy(G.scale)});
