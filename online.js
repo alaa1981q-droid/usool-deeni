@@ -368,7 +368,7 @@
 
   function enterRoom(id, isHost, invited, pin, seat) {
     leaveRoom();
-    room = { id, isHost, seat, scored: false, answered: {}, cut: 1, pin };
+    room = { id, isHost, seat, scored: false, answered: {}, cut: 1, pin, invited };
     roomRef = db.ref('rooms/' + id);
     roomRef.child(`players/${me}/on`).onDisconnect().set(false);
     setHead('⚔️ التحدّي');
@@ -378,19 +378,29 @@
       <div class="lobby" id="lobby"></div>
       <button class="btn gold" id="startNow" style="flex:none;min-width:200px" hidden>▶️ ابدأ الآن</button>
       <button class="btn sec" id="cancelRoom" style="flex:none;min-width:200px">إلغاء</button></div>`;
-    $('#cancelRoom').onclick = async () => {
-      const r = room && room.data;
-      if (isHost || !r || (r.max || 2) <= 2) {
+    $('#cancelRoom').onclick = () => {
+      if (room && !room.data) { // لم تصل بيانات الغرفة بعد
         if (invited) db.ref(`invites/${invited}/${me}`).remove(); if (pin) db.ref('quick/' + pin).remove();
-        roomRef.update({ state: 'gone' }).catch(() => {});
-      } else if (seat) { // غرفة جماعية: الضيف يخرج وحده ويترك مقعده لغيره
-        room.done = true; roomRef.child(`players/${me}/on`).onDisconnect().cancel(); roomRef.update({ [seat]: null, [`players/${me}`]: null }).catch(() => {});
+        if (isHost) roomRef.update({ state: 'gone' }).catch(() => {}); room.done = true;
       }
-      hub();
+      quitWait(); hub();
     };
     $('#startNow').onclick = () => { if (room && room.data && room.data.state === 'wait') startGame(room.data); };
     const cb = roomRef.on('value', s => onRoom(s.val(), pin));
-    roomOff = () => roomRef.off('value', cb);
+    // v23.3: انقطع الإنترنت لحظة (أو ذهب الطفل إلى واتساب ليرسل الرمز) → يرجع للغرفة تلقائيًا بدل أن يُحسب خارجًا
+    const myRef = roomRef, conR = db.ref('.info/connected');
+    const ccb = conR.on('value', c => {
+      if (c.val() !== true || !room || room.id !== id || room.done) return;
+      const d = room.data, mine = d && d.players && d.players[me];
+      if (!isHost && d && !mine) return; // خرج فعلًا (أو أُخرج): لا نعيد إنشاءه
+      myRef.child(`players/${me}/on`).onDisconnect().set(false);
+      if (!d || !mine || mine.on === false) myRef.child(`players/${me}/on`).set(true).catch(() => {});
+      // المضيف: الانقطاع يحذف رمز الغرفة (onDisconnect)، فنعيده ما دامت الغرفة تنتظر
+      if (isHost && pin && (!d || d.state === 'wait')) { const qr = db.ref('quick/' + pin);
+        qr.transaction(v => (!v || v.room === id || now() - v.t > 10 * 60000 ? { room: id, t: now() } : undefined))
+          .then(x => { if (x && x.committed) qr.onDisconnect().remove(); }).catch(() => {}); }
+    });
+    roomOff = () => { myRef.off('value', cb); conR.off('value', ccb); };
   }
   // v10.8: الإدارة ترى من «يلعب أونلاين الآن»: profiles/$me/pl = وقت بدء المباراة، ويُحذف عند انتهائها أو انقطاع الاتصال
   function playing(on) {
@@ -399,7 +409,21 @@
     try { if (on) { r.set(firebase.database.ServerValue.TIMESTAMP).catch(() => {}); r.onDisconnect().remove(); }
       else { r.remove().catch(() => {}); r.onDisconnect().cancel(); } } catch (e) {}
   }
+  // v23.3: الخروج من غرفة الانتظار (زر الرجوع أو الإلغاء): المضيف يلغي الغرفة، والضيف في غرفة جماعية يترك مقعده لغيره
+  function quitWait() {
+    const r = room && room.data; if (!room || room.done || !roomRef || !r || r.state !== 'wait') return;
+    room.done = true;
+    if (room.isHost || (r.max || 2) <= 2) {
+      if (room.invited) db.ref(`invites/${room.invited}/${me}`).remove().catch(() => {}); if (room.pin) db.ref('quick/' + room.pin).remove().catch(() => {});
+      roomRef.update({ state: 'gone' }).catch(() => {});
+    } else {
+      const seat = room.seat || SEATS.find(k => r[k] === me);
+      roomRef.child(`players/${me}/on`).onDisconnect().cancel();
+      if (seat) roomRef.update({ [seat]: null, [`players/${me}`]: null }).catch(() => {});
+    }
+  }
   function leaveRoom() {
+    quitWait();
     playing(false);
     if (roomOff) roomOff(); roomOff = null;
     if (loop) clearInterval(loop); loop = null;
@@ -410,7 +434,7 @@
   const liveIds = r => Object.keys(r.players || {}).filter(i => r.players[i] && r.players[i].on !== false);
   function startGame(r) {
     if (!room || !room.isHost || room.starting) return;
-    const ids = liveIds(r); if (ids.length < 2) return;
+    const ids = liveIds(r); if (!ids.includes(me)) ids.unshift(me); if (ids.length < 2) return;
     room.starting = true;
     if (room.pin) db.ref('quick/' + room.pin).remove();
     const lim = Math.min(...ids.map(i => r.players[i].ms || 0));
@@ -419,7 +443,7 @@
   }
   function drawLobby(r) {
     const lb = document.getElementById('lobby'); if (!lb) return;
-    const max = r.max || 2, ids = liveIds(r);
+    const max = r.max || 2, ids = liveIds(r); if (r.players && r.players[me] && !ids.includes(me)) ids.unshift(me);
     const seats = [];
     for (let i = 0; i < max; i++) { const id = ids[i], p = id && r.players[id]; seats.push(p ? `<span class="lseat on"><span class="av">${esc(p.av)}</span><small>${id === me ? 'أنت' : esc(p.nick)}</small></span>` : `<span class="lseat"><span class="av">❔</span><small>ننتظر…</small></span>`); }
     lb.innerHTML = max > 2 || ids.length > 1 ? seats.join('') : '';
@@ -433,7 +457,7 @@
     if (r.state === 'gone') { if (!room.done) { toast('أُلغي التحدّي'); hub(); } return; }
     if (r.state === 'wait') {
       drawLobby(r);
-      if (room.isHost && liveIds(r).length >= (r.max || 2)) startGame(r);
+      if (room.isHost && new Set(liveIds(r).concat(me)).size >= (r.max || 2)) startGame(r);
       return;
     }
     if (r.state === 'play' && !loop) {
@@ -464,8 +488,8 @@
     let s = 0;
     for (let i = 0; i < N_Q; i++) {
       st.push(s); let e = s + Q_MS;
-      const as = ids.map(u => ((P[u] || {}).ans || {})[i]);
-      if (ids.length >= 2 && as.every(a => a && typeof a.at === 'number')) e = Math.min(e, Math.max(s, ...as.map(a => a.at)) + BOTH_MS);
+      const as = ids.filter(u => (P[u] || {}).on !== false || ((P[u] || {}).ans || {})[i]).map(u => ((P[u] || {}).ans || {})[i]);
+      if (as.length >= 1 && ids.length >= 2 && as.every(a => a && typeof a.at === 'number')) e = Math.min(e, Math.max(s, ...as.map(a => a.at)) + BOTH_MS);
       en.push(e); s = e + REVEAL_MS;
     }
     return { st, en, total: s };
@@ -476,7 +500,8 @@
     const r = room && room.data; if (!r) return;
     const t = now() - r.start;
     const S = sched(r);
-    if (!room.done && t < S.total && room.others.every(u => pOf(r, u).on === false)) { return finish(r, true); }
+    // v23.3: لا نعلن «خرج الجميع» من انقطاع لحظي: ننتظر ١٠ ثوانٍ، فإن رجع أحدهم تستمر اللعبة
+    if (!room.done && t < S.total && room.others.every(u => pOf(r, u).on === false)) { room.offT = room.offT || now(); if (now() - room.offT > 10000) return finish(r, true); } else room.offT = 0;
     if (t < 0) {
       const n = Math.ceil(-t / 1000);
       if (room.cd !== n) { room.cd = n; tone(n <= 3 ? 523 : 392, .12, 'square', .1);
