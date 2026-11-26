@@ -485,7 +485,7 @@ function publishSoon(){clearTimeout(pubT);pubT=setTimeout(publish,1200)}
 // (v20.8) آخر ما نُشر فعلًا (بصمة + وقت): إن تغيّر البيت ولم يُنشر (بلا إنترنت أو قبل الاتصال) يُنشر وحده لاحقًا
 const HPK='usul5_hpub_v1';
 const houseData=A=>{const L=Deco.myLook(),AF=ADM(); // (v19.9) مدينة المدير مكتملة دائمًا، فيُنشر بيته مكتملًا (٥ طوابق، قصر، كل المباني) ليراه الأصدقاء كما يراه هو
-  return {f:AF?5:Bayt.done,c:Bayt.cups,p:L.p,w:L.w,i:packI(String(L.i||'').split(',')),g:L.g||'',u:AF?'333333':L.u||'',m:AF?'33333':window.Madina?Madina.code():'',q:AF||window.Qasr&&Qasr.done?1:0,n:A.profile.nick,a:A.profile.av}};
+  return {f:AF?5:Bayt.done,c:Bayt.cups,p:L.p,w:L.w,i:packI(String(L.i||'').split(',')),g:L.g||'',u:AF?'333333':L.u||'',m:AF?'33333':window.Madina?Madina.code():'',q:AF||window.Qasr&&Qasr.done?1:0,ql:AF?3:window.Qasr&&Qasr.lv|0||0,sd:AF?'3333':window.Qasr&&Qasr.sd||'0000',qj:AF||window.Qasr&&Qasr.jn?1:0,n:A.profile.nick,a:A.profile.av}};
 function publish(){if(!ready())return;const A=O();
   const d=houseData(A);
   const sig=A.me+'|'+JSON.stringify(d);
