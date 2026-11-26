@@ -17,6 +17,8 @@ const BKEY='usul5_bayt_v1';
 let bs={done:0,best:0,stars:[0,0,0,0,0]};
 try{const s=JSON.parse(localStorage.getItem(BKEY)||'null');if(s&&typeof s.done=='number')bs=Object.assign(bs,s)}catch(e){}
 const bsave=()=>{try{localStorage.setItem(BKEY,JSON.stringify(bs))}catch(e){}};
+// (v23.9) طلب الشيخ: بيت المدير مكتمل دائمًا — الطوابق الخمسة بثلاث نجوم في صفحة الطوابق أيضًا (كانت تظهر حقيقته ٤ من ٥)
+const admFull=()=>{try{if(!(window.isAdm&&isAdm()))return;if(bs.done<5||bs.stars.some(x=>x<3)){bs.done=5;bs.stars=[3,3,3,3,3];bsave()}if(cs.n<40){cs.n=40;csave()}}catch(e){}};
 
 /* ---------- الكؤوس 🏆 (مشتركة بين: بيتك في الجنة، اختبر نفسك، مسابقة الأبطال) ---------- */
 const CKEY='usul5_cups_v1';
@@ -549,7 +551,7 @@ $('#byBack').onclick=()=>{clearTimeout(autoT);if(G&&G.net){G.net.quit(G);return}
 let autoT=0;
 
 /* سبب قفل الطابق i، أو '' إذا كان مفتوحًا */
-function lockWhy(i){if(i>bs.done)return 'أكمل الطابق الذي قبله أولًا';
+function lockWhy(i){if(window.isAdm&&isAdm())return '';if(i>bs.done)return 'أكمل الطابق الذي قبله أولًا';
   if(cs.n<FLOOR_CUPS[i])return `يحتاج ${ar(FLOOR_CUPS[i])} ${cupWord(FLOOR_CUPS[i])} 🏆 — عندك ${ar(cs.n)}`;return ''}
 function rankBox(){const r=rankOf(cs.n),nx=nextRank(cs.n),f=nx?(cs.n-r.at)/(nx.at-r.at):1;
   return `<div class="brank"><span class="ri">${r.icon}</span><span style="flex:1"><b style="color:${r.color}">${r.name} · ${ar(cs.n)} 🏆</b>
@@ -560,7 +562,7 @@ function tilt3d(h){const sv=h&&h.querySelector('svg');if(!sv)return;sv.style.tra
   h.addEventListener('pointermove',mv);h.addEventListener('pointerleave',()=>set(0,0));h.addEventListener('pointerup',()=>setTimeout(()=>set(0,0),500));
   const dev=e=>{if(!document.contains(h)){removeEventListener('deviceorientation',dev);return}if(e.gamma==null)return;set(Math.max(-5,Math.min(5,((e.beta||45)-50)/9)),Math.max(-9,Math.min(9,e.gamma/4)))};
   addEventListener('deviceorientation',dev,{passive:true})}
-function menu(){G=null;clearTimeout(autoT);const B=$('#byBody');
+function menu(){admFull();G=null;clearTimeout(autoT);const B=$('#byBody');
   B.innerHTML=`<div class="bhouse">${houseSVG(bs.done,-1,0,true,false,window.Deco?Object.assign(Deco.myLook(),{ed:1}):undefined)}</div>
   ${rankBox()}
   <div class="bbest"><div><b>${ar(bs.done)} / ${ar(LEVELS.length)}</b><span>طوابق بيتك</span></div><div><b>${ar(bs.best)}</b><span>أفضل نتيجة ⭐</span></div></div>
@@ -761,5 +763,5 @@ function wideView(){const look=window.Deco?Object.assign(Deco.myLook(),{wide:1,e
   setTimeout(()=>{const h=$('#wvH');if(h)h.style.opacity=0},4000)}
 document.addEventListener('click',e=>{const h=e.target&&e.target.closest&&e.target.closest('#byBody .bhouse');if(!h||G||e.target.closest('[data-up]'))return;sTap();wideView()});
 
-window.Bayt={get hk(){return HK},houseSVG,wideView,mosqueParts,walkers,menu,LEVELS,begin:()=>begin(),stop:()=>{stop();G=null},play:(i,net)=>{show('bayt');play(i,0,false,net)},get G(){return G},get done(){return bs.done},get cups(){return cs.n},rankOf,RANKS,sTap,sStar,sLine,VW,VH,GY,FX,FW,DX,fy};
+window.Bayt={get hk(){return HK},houseSVG,wideView,mosqueParts,walkers,menu,LEVELS,begin:()=>begin(),stop:()=>{stop();G=null},play:(i,net)=>{show('bayt');play(i,0,false,net)},get G(){return G},get done(){admFull();return bs.done},get cups(){return cs.n},rankOf,RANKS,sTap,sStar,sLine,VW,VH,GY,FX,FW,DX,fy};
 })();
