@@ -57,8 +57,10 @@ function times(day){const [,,lat,lng]=city();const y=day.getFullYear(),m=day.get
   const s0=sun(jd+.5),noon=12-lng/15-s0.eqt;
   const T=(a,t)=>{const s=sun(jd+t/24);const v=(-Math.sin(rad(a))-Math.sin(rad(s.dec))*Math.sin(rad(lat)))/(Math.cos(rad(s.dec))*Math.cos(rad(lat)));return deg(Math.acos(Math.max(-1,Math.min(1,v))))/15};
   const fajr=noon-T(16,noon-6),magh=noon+T(4,noon+6);
+  // العصر: ظلّ الشيء مثله (للسجلّ فقط)، والعشاء: ١٤ درجة (للسجلّ فقط)
+  const sd=sun(jd+noon/24).dec,asrA=-deg(Math.atan(1/(1+Math.tan(rad(Math.abs(lat-sd)))))),asr=noon+T(asrA,noon+3.5),isha=noon+T(14,noon+7.5);
   const at=h=>new Date(Date.UTC(y,m-1,d)+h*3600e3);
-  return {fajr:at(fajr),dhuhr:at(noon+1/60),maghrib:at(magh)}}
+  return {fajr:at(fajr),dhuhr:at(noon+1/60),asr:at(asr),maghrib:at(magh),isha:at(isha)}}
 const hm=t=>t.toLocaleTimeString('ar-IQ',{hour:'numeric',minute:'2-digit'});
 function next(){const now=new Date();for(let k=0;k<2;k++){const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()+k),t=times(d);
   for(const p of ['fajr','dhuhr','maghrib'])if(t[p]>now)return {p,t:t[p]}}return null}

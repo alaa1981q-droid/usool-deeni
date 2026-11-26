@@ -99,6 +99,7 @@ css.textContent=`
 .slslots span{background:#e3f7ea;border:2px solid #1fa463;border-radius:12px;padding:2px 8px;font-size:14px;font-weight:700;animation:bpopin .3s}
 .slpray{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:10px 0}
 .slpray button{border:2px solid var(--line);background:#fff;border-radius:16px;padding:8px 2px;font-size:14px;font-weight:800;color:var(--ink);line-height:1.4}
+.slpray button.lk{background:#f1f2f1;color:#8a948e;border-style:dashed}.slpray button i{display:block;font-style:normal;font-size:11px;font-weight:700;color:#8a948e}
 .slpray button span{display:block;font-size:28px}.slpray button.on{background:linear-gradient(160deg,#e3f7ea,#c9f0d6);border-color:#1fa463}
 .slweek{display:flex;gap:4px;justify-content:center;margin:8px 0}.slweek span{width:38px;border-radius:10px;background:#eef3ef;font-size:11px;text-align:center;padding:2px 0;line-height:1.5}.slweek span b{display:block;font-size:14px}
 `;
@@ -236,15 +237,21 @@ function test(kind){stopV();back=hub;const w=way(),bank=kind=='wudu'?w.wq:w.sq,N
 const PR=[['🌅','الصبح'],['☀️','الظهر'],['🌤️','العصر'],['🌇','المغرب'],['🌙','العشاء']];
 const dkey=(t=Date.now())=>{const d=new Date(t);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
 function todayPray(){const p=D().pray||{};return p[dkey()]||[0,0,0,0,0]}
+// لا تُسجَّل الصلاة إلا بعد دخول وقتها (طلب الشيخ: حتى لا يصير السجلّ لعبة)
+const PK=['fajr','dhuhr','asr','maghrib','isha'],PFB=[4.5,12.2,15.3,17.5,18.8];
+function prayAt(k){const n=new Date();try{const t=Adhan.times(n)[PK[k]];if(t&&!isNaN(+t))return +t}catch(e){}const h=PFB[k];return new Date(n.getFullYear(),n.getMonth(),n.getDate(),Math.floor(h),Math.round(h%1*60)).getTime()}
+const prayOpen=k=>Date.now()>=prayAt(k);
+const hmT=t=>new Date(t).toLocaleTimeString('ar-IQ',{hour:'numeric',minute:'2-digit'});
 function pray(){stopV();back=hub;title('🤲 سجلّ صلاتي');const d=D();d.pray=d.pray||{};
   const t=todayPray();const L=['أحد','اثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'];
   let wk='';for(let k=6;k>=0;k--){const ts=Date.now()-k*864e5,n=(d.pray[dkey(ts)]||[]).filter(Boolean).length;wk+=`<span style="${k==0?'outline:2px solid var(--gold)':''}"><b>${n==5?'🌟':n?ar(n):'·'}</b>${L[new Date(ts).getDay()]}</span>`}
   body().innerHTML=`<div class="slhead"><div class="em">🤲</div><h2>أيّ الصلوات ${B('صلّيتَ','صلّيتِ')} اليوم؟</h2><p>${B('اضغط','اضغطي')} على الصلاة <b>بعد أن ${B('تصلّيها','تصلّيها')}</b> فقط. الله يراك ويحبّ الصادقين 🤍</p></div>
-   <div class="slpray">${PR.map((p,k)=>`<button data-p="${k}" class="${t[k]?'on':''}"><span>${t[k]?'✅':p[0]}</span>${p[1]}</button>`).join('')}</div>
+   <div class="slpray">${PR.map((p,k)=>`<button data-p="${k}" class="${t[k]?'on':prayOpen(k)?'':'lk'}"><span>${t[k]?'✅':prayOpen(k)?p[0]:'🔒'}</span>${p[1]}${!t[k]&&!prayOpen(k)?`<i>${hmT(prayAt(k))}</i>`:''}</button>`).join('')}</div>
    <div class="slweek" dir="ltr">${wk}</div>
    <p class="tip">كل صلاةٍ ${B('تصلّيها','تصلّينها')} ترفع درجتك 🏅، والصلوات الخمس كاملة تعطيك كأسًا 🏆 لبيتك في الجنة.<br>مجموع صلواتك المسجّلة: <b>${ar(d.prayN||0)}</b></p>
    <div id="slCups"></div>`;
   body().querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{const k=+b.dataset.p,arr=todayPray().slice();if(arr[k])return;
+    if(!prayOpen(k)){modal(`<div style="font-size:46px">🕰️</div><h2>لم يحِن وقتُ صلاة ${PR[k][1]} بعد</h2><p>يدخل وقتها الساعة <b>${hmT(prayAt(k))}</b> إن شاء اللَّه.<br>${B('صلِّها','صلّيها')} في وقتها، ثم ${B('ارجع','ارجعي')} ${B('وسجّلها','وسجّليها')} هنا 🤍</p><div class="nav"><button class="btn" data-close>حسنًا</button></div>`);return}
     arr[k]=1;d.pray[dkey()]=arr;d.prayN=(d.prayN||0)+1;
     // نحتفظ بآخر ٦٠ يومًا فقط
     const ks=Object.keys(d.pray);if(ks.length>60)ks.sort((a,b)=>new Date(a)-new Date(b)).slice(0,ks.length-60).forEach(x=>delete d.pray[x]);
