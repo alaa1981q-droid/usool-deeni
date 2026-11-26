@@ -15,6 +15,13 @@ const card=document.createElement('button');card.className='bookcard dlcard';car
 function line(){const n=st.n;return n>0?'حمّله أنت أيضًا 🌟':'ملف PDF تحفظه في هاتفك وتقرأه بلا إنترنت'}
 function draw(){card.innerHTML=`<span class="cup" style="line-height:0"><svg viewBox="0 0 50 70" width="34" height="48" aria-hidden="true" style="border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.18)"><defs><linearGradient id="dlg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3fbf6f"/><stop offset="1" stop-color="#14794f"/></linearGradient></defs><rect width="50" height="70" rx="8" fill="url(#dlg)"/><path d="M25 12v26M14 28l11 12 11-12" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="11" y="48" width="28" height="4" rx="2" fill="#fff"/><text x="25" y="63" font-size="9" font-weight="800" text-anchor="middle" fill="#fff">PDF</text></svg></span><span><b>حمّل الكتاب</b>${st.n>0?`<span class="dlcnt"><span class="nn">${ar(st.n)}</span><span class="ll">${st.n==1?'تحميل':st.n==2?'تحميلان':st.n<=10?'تحميلات':'تحميلًا'}</span></span>`:''}<small id="dlLine">${line()}</small></span><span class="go">‹</span>`}
 draw();$('#openBook').after(card);
+/* v23.0: تحميل الكتاب الثاني «أنا أعرف ديني» (بلا عدّاد) */
+const PDF2='ana-aarif-deeni.pdf',card2=document.createElement('button');card2.className='bookcard dlcard';card2.id='dlBook2';
+card2.innerHTML=`<span class="cup" style="font-size:40px">🌈</span><span><b>حمّل «أنا أعرف ديني»</b><small>كتاب الصغار PDF تحفظه في هاتفك</small></span><span class="go">‹</span>`;
+card.after(card2);
+card2.onclick=()=>{if(location.host=='appassets.androidplatform.net'){location.href='https://alaa1981q-droid.github.io/usool-deeni/'+PDF2;return}
+  const a=document.createElement('a');a.href=PDF2;a.download='أنا-أعرف-ديني.pdf';document.body.appendChild(a);a.click();a.remove();
+  modal(`<div style="font-size:52px">⬇️</div><h3 style="margin:4px 0">جاري تحميل الكتاب</h3><p>سيُحفظ في هاتفك.</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`)};
 async function sync(add){
   if(!navigator.onLine||!window.OnlineAPI)return;
   try{await OnlineAPI.init();const db=OnlineAPI.db,me=OnlineAPI.me;if(!db||!me)return;

@@ -18,7 +18,7 @@ jobs:
       - name: Bundle the web app into the APK
         run: |
           mkdir -p android/app/src/main/assets/www
-          cp -r index.html seal.js online.js questions.js bayt.js nafsak.js hifz.js jannah.js baytrace.js wird.js sawt.js salah.js adhan.js alqab.js binaa.js madina.js mujassam.js idara.js parent.js qisas.js bookdl.js ramz.js wajiha.js hamas.js audio vendor manifest.webmanifest icon-192.png icon-512.png apple-touch-icon.png p p2 android/app/src/main/assets/www/
+          cp -r index.html seal.js online.js questions.js bayt.js nafsak.js hifz.js jannah.js baytrace.js wird.js sawt.js salah.js adhan.js alqab.js binaa.js madina.js mujassam.js idara.js parent.js qisas.js bookdl.js sighar.js ramz.js wajiha.js hamas.js audio vendor manifest.webmanifest icon-192.png icon-512.png apple-touch-icon.png p p2 android/app/src/main/assets/www/
       - name: Build
         working-directory: android
         env:

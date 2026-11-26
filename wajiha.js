@@ -75,7 +75,7 @@ gamesB.insertAdjacentHTML('beforeend',`<button class="bookcard baytcard" id="wjO
 $q('#wjOld').onclick=()=>{snd();if(window.City3D&&City3D.oldHouse)City3D.oldHouse('game');else{try{Bayt.menu();show('bayt')}catch(e){}}};
 moreB.insertAdjacentHTML('beforeend',`<button class="bookcard" id="wjGm" style="border-color:#f0a020;box-shadow:0 5px 0 #f3c56a"><span class="cup">🎮</span><span><b>ألعابي ومسابقاتي</b><small>مسابقة الأبطال، اختبر نفسك، لعبة الطوابق، راجع أخطائي</small></span><span class="go">‹</span></button>`);
 $q('#wjGm').onclick=()=>{snd();show('wjGames');scrollTo(0,0)};
-['#openBook','#openBook2','#dlBook','#openQisas'].forEach(s=>{const e=$q(s);if(e)moreB.appendChild(e)});
+['#openBook','#openBook2','#openSighar','#dlBook','#dlBook2','#openQisas'].forEach(s=>{const e=$q(s);if(e)moreB.appendChild(e)});
 moreB.insertAdjacentHTML('beforeend',`<button class="bookcard" id="wjFr"><span class="cup">👥</span><span><b>أصدقائي</b><small>أضف صديقًا، وزُر بيوت أصدقائك ومدنهم</small></span><span class="go">‹</span></button>
   <button class="bookcard" id="wjHe"><span class="cup">🏅</span><span><b>أبطال هذا الأسبوع</b><small>من جمع أكثر النقاط هذا الأسبوع؟</small></span><span class="go">‹</span></button>
   <button class="bookcard" id="wjHow"><span class="cup">❓</span><span><b>كيف ألعب؟</b><small>شرح سريع للتطبيق</small></span><span class="go">‹</span></button>
