@@ -6,7 +6,7 @@
 const RK='usul5_ramz_v1',CH='ABCDEFGHJKMNPQRSTUVWXYZ23456789',SKIP={usul5_adm:1,usul5_admSeen:1,usul5_social_v1:1,[RK]:1};
 const A=()=>window.OnlineAPI;
 const B=(m,f)=>(window.Cups&&Cups.sex==='g')?f:m;
-const esc=v=>String(v==null?'':v).replace(/[<>&"]/g,'');
+const esc=v=>String(v==null?'':v).replace(/[<>&"'`]/g,'');
 const load=()=>{try{return JSON.parse(localStorage.getItem(RK)||'null')||{}}catch(e){return {}}};
 let rs=load();
 const keep=()=>{try{localStorage.setItem(RK,JSON.stringify(rs))}catch(e){}};

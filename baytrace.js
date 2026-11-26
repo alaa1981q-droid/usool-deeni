@@ -4,7 +4,7 @@
 (function(){
 const O=()=>window.OnlineAPI;
 const boy=()=>!window.Cups||Cups.sex!='g';
-const esc=v=>String(v==null?'':v).replace(/[<>&"]/g,'');
+const esc=v=>String(v==null?'':v).replace(/[<>&"'`]/g,'');
 const CHEERS=['👏','💪','😄','🌟'];
 let R=null; // {id,ref,off,isHost,lv,opp,ended,G,startT,lastCheer,seenCheer}
 

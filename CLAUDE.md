@@ -146,3 +146,9 @@ App name (chosen by the owner, v2.8): «جنّتي الصغيرة». Children's 
 - Modals (v7.6): `.modal .in` is capped at the screen height and scrolls; its last `.nav` (buttons) is sticky at the bottom so a child is never stuck (owner hit this on a laptop). Keep action buttons in a final `.nav`.
 - Commit and push to `main` directly; Pages and the APK rebuild automatically.
 - Test in Playwright before pushing (a Firebase mock is needed; this sandbox cannot reach Firebase).
+
+## Security & group rooms (v22.7, 2026-11-26)
+- Rooms hold 2–4 players: `max`, seats `guest` (2nd) / `s2` (3rd) / `s3` (4th); each joiner claims a free seat in one update with `players/$me`; host auto-starts when full or taps «ابدأ الآن» (≥2); host writes `ids` (players at start). 1v1 invites and baytrace still use `guest` only.
+- Rules: every kid-written string is blocked from containing `<` or `>` (stops stored XSS); unknown fields limited by `$other` (scalars only, short); invites must carry the sender's real profile nick; `$to` may only delete invites; quick pins only by the room's host (or after 10 min); room children have per-field rules (only host writes qs/state/start; seats only while waiting).
+- Friends: writing into someone else's list needs proof — the value is their 6-char code (add by code) or `'fr'` when they sent me a friend request (`invites/me/them/kind == 'fr'`).
+- Local test: scratchpad mock Firebase served as vendor/firebase-app-compat.js (`window.__fb` store) — rules themselves can only be checked in the Firebase console.

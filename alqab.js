@@ -7,7 +7,7 @@ const boy=()=>!window.Cups||Cups.sex!='g';
 const B=(m,f)=>boy()?m:f;
 const A=()=>Aamal.d;
 const O=()=>window.OnlineAPI;
-const esc=v=>String(v==null?'':v).replace(/[<>&"]/g,'');
+const esc=v=>String(v==null?'':v).replace(/[<>&"'`]/g,'');
 const J=k=>{try{return JSON.parse(localStorage.getItem(k)||'null')||{}}catch(e){return {}}};
 
 /* ---------- العدّادات ---------- */

@@ -4,7 +4,7 @@
    - كل طفل يستلم الرسالة مرة واحدة، والجواهر تُضاف لبيته. يعتمد على online.js (OnlineAPI) و jannah.js (Deco). */
 (function(){
 const O=()=>window.OnlineAPI;
-const esc=v=>String(v==null?'':v).replace(/[<>&"]/g,'');
+const esc=v=>String(v==null?'':v).replace(/[<>&"'`]/g,'');
 const boy=()=>!window.Cups||Cups.sex!='g';
 const B=(m,f)=>boy()?m:f;
 const D=()=>Aamal.d;
@@ -595,7 +595,7 @@ async function feedback(){const API=O();if(isAdmK())return openFb();
       if(m.length<5){e.className='fb bad';e.textContent=B('اكتب','اكتبي')+' رسالتك أولًا (كلمتين على الأقل)';return}
       if(/\d{7,}|https?:|www\./i.test(m.replace(/\s/g,''))){e.className='fb bad';e.textContent='بلا أرقام هواتف أو روابط من فضلك 🤍';return}
       $('#fbSend').disabled=true;
-      try{await API.db.ref(`msgs/${API.me}/${w}`).set({k,m:m.slice(0,400),n:String(API.profile.nick||'').slice(0,40),a:String(API.profile.av||'').slice(0,8),t:firebase.database.ServerValue.TIMESTAMP});
+      try{await API.db.ref(`msgs/${API.me}/${w}`).set({k,m:m.replace(/[<>]/g,'').slice(0,400),n:String(API.profile.nick||'').slice(0,40),a:String(API.profile.av||'').slice(0,8),t:firebase.database.ServerValue.TIMESTAMP});
         modal(`<div style="font-size:54px">💌</div><h3 style="margin:4px 0">وصلت رسالتك للإدارة!</h3><p>شكرًا لأنك ${B('تساعدنا','تساعدينا')} نجعل جنّتنا أجمل 🌷</p><div class="nav"><button class="btn gold" data-close>جميل 👍</button></div>`)}
       catch(x){$('#fbSend').disabled=false;e.className='fb bad';e.textContent='تعذّر الإرسال، تأكّد من الإنترنت'}}})}
 const isAdmK=()=>window.isAdm&&isAdm();

@@ -31,8 +31,15 @@
   window.isAdm = () => { try { return localStorage.getItem('usul5_adm') === '1'; } catch (e) { return false; } };
   window.nameTag = (nick, adm) => adm ? `<span class="admn">👑 ${esc(nick)}</span> <span class="admb">مدير التطبيق</span>` : esc(nick);
   { const st = document.createElement('style'); st.textContent = `.admn{font-weight:900;background:linear-gradient(90deg,#b9851a,#f2b632 40%,#e0731f 70%,#b9851a);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none}
-.admb{display:inline-block;font-size:11px;font-weight:800;color:#fff;background:linear-gradient(160deg,#1fa463,#0b5a32);border-radius:10px;padding:0 7px;line-height:1.7;vertical-align:middle;box-shadow:0 2px 0 #0a3d27;white-space:nowrap}`; document.head.appendChild(st); }
-  const esc = (v) => String(v == null ? '' : v).replace(/[<>&"]/g, '');
+.admb{display:inline-block;font-size:11px;font-weight:800;color:#fff;background:linear-gradient(160deg,#1fa463,#0b5a32);border-radius:10px;padding:0 7px;line-height:1.7;vertical-align:middle;box-shadow:0 2px 0 #0a3d27;white-space:nowrap}
+.lobby{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:6px 0 10px}
+.lseat{width:76px;background:#fff;border:3px dashed var(--line);border-radius:16px;padding:6px 2px;text-align:center;opacity:.6}
+.lseat.on{border-style:solid;border-color:var(--gold);opacity:1}
+.lseat .av{font-size:34px;display:block;line-height:1.2}.lseat small{display:block;font-weight:800;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vs.many{flex-wrap:wrap}.vs.many .av{font-size:44px}.vs.many .vs-x{font-size:26px}
+.live.many{justify-content:space-around;font-size:17px;flex-wrap:wrap}
+.board.many{flex-wrap:wrap}.board.many div{flex:1 1 40%;padding:6px}.board.many b{font-size:24px}.board .md{display:block;font-size:22px}`; document.head.appendChild(st); }
+  const esc = (v) => String(v == null ? '' : v).replace(/[<>&"'`]/g, '');
   const week = () => Math.floor((now() - Date.UTC(2024, 0, 5)) / (7 * 864e5)); // يبدأ كل جمعة
   const body = () => $('#onBody');
   const maxStage = () => { let m = 0; STAGES.forEach((s, i) => { if (unlocked(i)) m = i; }); return m; };
@@ -259,7 +266,7 @@
       return { id, p: p.val() || { nick: '؟', av: '❔' }, on: !!pr.val() };
     }));
     rows.sort((a, b) => b.on - a.on);
-    body().innerHTML = `<div class="flist">${rows.map(r => `<div class="frow"><span class="av">${r.p.av}</span><span class="who-n"><b>${nameTag(r.p.nick, r.p.adm)}</b><small>${r.on ? '🟢 متصل الآن' : '⚪ غير متصل'}</small></span>
+    body().innerHTML = `<div class="flist">${rows.map(r => `<div class="frow"><span class="av">${esc(r.p.av)}</span><span class="who-n"><b>${nameTag(r.p.nick, r.p.adm)}</b><small>${r.on ? '🟢 متصل الآن' : '⚪ غير متصل'}</small></span>
       <button class="mini go" data-ch="${r.id}" ${r.on ? '' : 'disabled'}>⚔️ تحدَّ</button></div>`).join('')}</div>
       <button class="btn sec" id="backHub" style="margin-top:12px">رجوع</button>`;
     body().querySelectorAll('[data-ch]').forEach(b => b.onclick = () => challenge(b.dataset.ch));
@@ -280,41 +287,56 @@
       if (c === profile.code) { msg.className = 'fb bad'; msg.textContent = 'هذا رمزك أنت 😊'; return; }
       const uid = (await db.ref('codes/' + c).get()).val();
       if (!uid) { msg.className = 'fb bad'; msg.textContent = 'لا يوجد لاعب بهذا الرمز'; return; }
-      await db.ref().update({ [`friends/${me}/${uid}`]: true, [`friends/${uid}/${me}`]: true });
+      await db.ref().update({ [`friends/${me}/${uid}`]: true, [`friends/${uid}/${me}`]: c }); // v22.7: الرمز إثبات أنك تعرف رمز صديقك (القواعد تتحقق)
       const p = (await db.ref('profiles/' + uid).get()).val() || {};
       msg.className = 'fb ok'; msg.textContent = `أُضيف ${p.av || ''} ${esc(p.nick || '')} ✓`;
       tone(784, .12, 'sine');
     };
   }
 
-  /* ---------- rooms ---------- */
-  async function createRoom(guest) {
+  /* ---------- rooms ----------
+     v22.7: الغرفة تتسع ٢ أو ٣ أو ٤ لاعبين (طلب صاحب التطبيق). المقاعد: guest (الثاني) ثم s2 (الثالث) ثم s3 (الرابع).
+     كل لاعب يحجز مقعدًا فارغًا بنفسه، والقواعد لا تسمح بأخذ مقعد محجوز ولا بأكثر من max.
+     يبدأ المضيف تلقائيًا عند امتلاء الغرفة، أو بزر «ابدأ الآن» إذا حضر لاعبان أو أكثر.
+     ids = قائمة اللاعبين ساعة البدء (يكتبها المضيف) حتى ترى كل الهواتف نفس اللاعبين. */
+  const SEATS = ['guest', 's2', 's3'];
+  const clean = v => String(v == null ? '' : v).replace(/[<>]/g, '');
+  const meP = () => ({ nick: profile.nick, av: profile.av, ms: maxStage(), on: true });
+  async function createRoom(guest, max) {
     const ref = db.ref('rooms').push();
-    await ref.set({ host: me, guest: guest || null, state: 'wait', t: firebase.database.ServerValue.TIMESTAMP,
-      players: { [me]: { nick: profile.nick, av: profile.av, ms: maxStage(), on: true } } });
+    await ref.set({ host: me, guest: guest || null, max: max || 2, state: 'wait', t: firebase.database.ServerValue.TIMESTAMP,
+      players: { [me]: meP() } });
     return ref.key;
   }
   async function challenge(uid) {
-    const id = await createRoom(uid);
+    const id = await createRoom(uid, 2);
     await db.ref(`invites/${uid}/${me}`).set({ room: id, nick: profile.nick, av: profile.av, t: firebase.database.ServerValue.TIMESTAMP });
     enterRoom(id, true, uid);
   }
   function quick() {
     setHead('🔢 غرفة سريعة');
-    body().innerHTML = `<div class="modes"><button class="mode" id="qNew"><span class="e">🏠</span><span><b>أنشئ غرفة</b><small>تحصل على رمز من ٤ أرقام تعطيه لصديقك.</small></span></button>
+    body().innerHTML = `<div class="modes"><button class="mode" id="qNew"><span class="e">🏠</span><span><b>أنشئ غرفة</b><small>تحصل على رمز من ٤ أرقام تعطيه لأصدقائك.</small></span></button>
       <button class="mode" id="qJoin"><span class="e">🚪</span><span><b>ادخل غرفة</b><small>اكتب الرمز الذي أعطاك إياه صديقك.</small></span></button></div>
       <button class="btn sec" id="backHub" style="margin-top:12px">رجوع</button>`;
     $('#backHub').onclick = hub;
-    $('#qNew').onclick = async () => {
-      const id = await createRoom(null);
-      let pin;
-      for (let i = 0; i < 8; i++) {
-        pin = String(1000 + Math.floor(Math.random() * 9000));
-        const r = await db.ref('quick/' + pin).transaction(v => (!v || now() - v.t > 10 * 60000 ? { room: id, t: now() } : undefined));
-        if (r.committed) break;
-      }
-      db.ref('quick/' + pin).onDisconnect().remove();
-      enterRoom(id, true, null, pin);
+    $('#qNew').onclick = () => {
+      body().innerHTML = `<div class="card" style="flex:none;text-align:center"><h2>كم لاعبًا في الغرفة؟</h2>
+        <div class="modes">${[2, 3, 4].map(n => `<button class="mode" data-n="${n}"><span class="e">${['', '', '👥', '👨‍👩‍👦', '👨‍👩‍👧‍👦'][n]}</span><span><b>${ar(n)} لاعبين</b><small>${['', '', 'أنت وصديق واحد', 'أنت وصديقان', 'أنت و٣ أصدقاء'][n]}</small></span></button>`).join('')}</div>
+        <button class="btn sec" id="backQ" style="margin-top:10px">رجوع</button></div>`;
+      $('#backQ').onclick = quick;
+      body().querySelectorAll('[data-n]').forEach(b => b.onclick = async () => {
+        body().querySelectorAll('[data-n]').forEach(x => x.disabled = true);
+        const max = +b.dataset.n;
+        const id = await createRoom(null, max);
+        let pin;
+        for (let i = 0; i < 8; i++) {
+          pin = String(1000 + Math.floor(Math.random() * 9000));
+          const r = await db.ref('quick/' + pin).transaction(v => (!v || now() - v.t > 10 * 60000 ? { room: id, t: now() } : undefined));
+          if (r.committed) break;
+        }
+        db.ref('quick/' + pin).onDisconnect().remove();
+        enterRoom(id, true, null, pin);
+      });
     };
     $('#qJoin').onclick = () => {
       body().innerHTML = `<div class="card" style="flex:none;text-align:center"><h2>رمز الغرفة</h2>
@@ -331,23 +353,42 @@
     };
   }
   async function joinRoom(id) {
-    const r = (await db.ref('rooms/' + id).get()).val();
-    if (!r || r.state !== 'wait' || (r.guest && r.guest !== me) || r.host === me) { toast('انتهت هذه الدعوة'); return hub(); }
-    await db.ref('rooms/' + id).update({ guest: me, [`players/${me}`]: { nick: profile.nick, av: profile.av, ms: maxStage(), on: true } });
-    enterRoom(id, false);
+    const ref = db.ref('rooms/' + id);
+    const r = (await ref.get()).val();
+    if (!r || r.state !== 'wait' || r.host === me) { toast('انتهت هذه الدعوة'); return hub(); }
+    const seats = SEATS.slice(0, Math.max(1, (r.max || 2) - 1));
+    let seat = seats.find(s => r[s] === me);
+    if (!seat && r.guest && seats.length === 1) { toast('انتهت هذه الدعوة'); return hub(); }
+    for (const s of seat ? [seat] : seats.filter(s => !r[s])) {
+      try { await ref.update({ [s]: me, [`players/${me}`]: meP() }); seat = s; break; } catch (e) { seat = null; }
+    }
+    if (!seat) { toast('الغرفة ممتلئة 🙂'); return hub(); }
+    enterRoom(id, false, null, null, seat);
   }
 
-  function enterRoom(id, isHost, invited, pin) {
+  function enterRoom(id, isHost, invited, pin, seat) {
     leaveRoom();
-    room = { id, isHost, scored: false, answered: {}, cut: 1 };
+    room = { id, isHost, seat, scored: false, answered: {}, cut: 1, pin };
     roomRef = db.ref('rooms/' + id);
     roomRef.child(`players/${me}/on`).onDisconnect().set(false);
     setHead('⚔️ التحدّي');
     body().innerHTML = `<div class="handoff"><div class="big spin">⏳</div>
-      ${pin ? `<p>أعطِ صديقك هذا الرمز:</p><div class="pin" dir="ltr">${pin}</div>` : ''}
-      <h2>${invited ? 'ننتظر صديقك يقبل التحدّي…' : 'ننتظر الخصم…'}</h2>
+      ${pin ? `<p>أعطِ أصدقاءك هذا الرمز:</p><div class="pin" dir="ltr">${pin}</div>` : ''}
+      <h2 id="waitH">${invited ? 'ننتظر صديقك يقبل التحدّي…' : isHost ? 'ننتظر الأصدقاء…' : 'ننتظر بدء اللعبة…'}</h2>
+      <div class="lobby" id="lobby"></div>
+      <button class="btn gold" id="startNow" style="flex:none;min-width:200px" hidden>▶️ ابدأ الآن</button>
       <button class="btn sec" id="cancelRoom" style="flex:none;min-width:200px">إلغاء</button></div>`;
-    $('#cancelRoom').onclick = async () => { if (invited) db.ref(`invites/${invited}/${me}`).remove(); if (pin) db.ref('quick/' + pin).remove(); roomRef.update({ state: 'gone' }); hub(); };
+    $('#cancelRoom').onclick = async () => {
+      const r = room && room.data;
+      if (isHost || !r || (r.max || 2) <= 2) {
+        if (invited) db.ref(`invites/${invited}/${me}`).remove(); if (pin) db.ref('quick/' + pin).remove();
+        roomRef.update({ state: 'gone' }).catch(() => {});
+      } else if (seat) { // غرفة جماعية: الضيف يخرج وحده ويترك مقعده لغيره
+        room.done = true; roomRef.child(`players/${me}/on`).onDisconnect().cancel(); roomRef.update({ [seat]: null, [`players/${me}`]: null }).catch(() => {});
+      }
+      hub();
+    };
+    $('#startNow').onclick = () => { if (room && room.data && room.data.state === 'wait') startGame(room.data); };
     const cb = roomRef.on('value', s => onRoom(s.val(), pin));
     roomOff = () => roomRef.off('value', cb);
   }
@@ -366,22 +407,44 @@
     if (roomRef) roomRef.child(`players/${me}/on`).onDisconnect().cancel();
     room = null; roomRef = null;
   }
+  const liveIds = r => Object.keys(r.players || {}).filter(i => r.players[i] && r.players[i].on !== false);
+  function startGame(r) {
+    if (!room || !room.isHost || room.starting) return;
+    const ids = liveIds(r); if (ids.length < 2) return;
+    room.starting = true;
+    if (room.pin) db.ref('quick/' + room.pin).remove();
+    const lim = Math.min(...ids.map(i => r.players[i].ms || 0));
+    const qs = pickFresh(ALLQ.filter(q => q.st <= lim && PLAYABLE(q)), N_Q).map(q => { const p = toPlay(q); return { q: clean(p.q), verse: clean(p.verse), src: clean(p.src), o: p.o.map(clean), a: p.a, fixed: !!p.fixed, st: q.st }; });
+    roomRef.update({ qs, ids, start: now() + LEAD_MS, state: 'play' }).catch(() => { room && (room.starting = false); });
+  }
+  function drawLobby(r) {
+    const lb = document.getElementById('lobby'); if (!lb) return;
+    const max = r.max || 2, ids = liveIds(r);
+    const seats = [];
+    for (let i = 0; i < max; i++) { const id = ids[i], p = id && r.players[id]; seats.push(p ? `<span class="lseat on"><span class="av">${esc(p.av)}</span><small>${id === me ? 'أنت' : esc(p.nick)}</small></span>` : `<span class="lseat"><span class="av">❔</span><small>ننتظر…</small></span>`); }
+    lb.innerHTML = max > 2 || ids.length > 1 ? seats.join('') : '';
+    const sb = document.getElementById('startNow');
+    if (sb) sb.hidden = !(room.isHost && max > 2 && ids.length >= 2 && ids.length < max);
+    if (sb && !sb.hidden) sb.textContent = `▶️ ابدأ الآن (${ar(ids.length)} لاعبين)`;
+  }
   function onRoom(r, pin) {
     if (!room || !r) return;
     room.data = r;
-    const ids = Object.keys(r.players || {});
     if (r.state === 'gone') { if (!room.done) { toast('أُلغي التحدّي'); hub(); } return; }
-    if (r.state === 'wait' && room.isHost && ids.length === 2) {
-      if (pin) db.ref('quick/' + pin).remove();
-      const lim = Math.min(...ids.map(i => r.players[i].ms || 0));
-      const qs = pickFresh(ALLQ.filter(q => q.st <= lim && PLAYABLE(q)), N_Q).map(q => { const p = toPlay(q); return { q: p.q, verse: p.verse || '', src: p.src || '', o: p.o, a: p.a, fixed: !!p.fixed, st: q.st }; });
-      roomRef.update({ qs, start: now() + LEAD_MS, state: 'play' });
+    if (r.state === 'wait') {
+      drawLobby(r);
+      if (room.isHost && liveIds(r).length >= (r.max || 2)) startGame(r);
       return;
     }
-    if (r.state === 'play' && !loop) { room.opp = ids.find(i => i !== me); loop = setInterval(tick, 150); tick(); playing(true); }
+    if (r.state === 'play' && !loop) {
+      const ids = (Array.isArray(r.ids) && r.ids.length ? r.ids : Object.keys(r.players || {})).filter(i => r.players[i]);
+      if (!ids.includes(me)) { toast('بدأت اللعبة بدونك 🙂'); return hub(); }
+      room.ids = [me].concat(ids.filter(i => i !== me)); room.others = room.ids.slice(1); room.opp = room.others[0];
+      loop = setInterval(tick, 150); tick(); playing(true);
+    }
   }
 
-  /* scoring is computed from the answers on both phones, so both see the same numbers */
+  /* scoring is computed from the answers on every phone, so all see the same numbers */
   function scoreOf(r, uid) {
     const ans = (r.players[uid] && r.players[uid].ans) || {};
     let sc = 0, st = 0, right = 0;
@@ -392,31 +455,33 @@
     return { sc, right, st };
   }
 
-  /* v10.2: shared schedule — when BOTH players have answered, the question ends
-     at once (after a short pause) instead of waiting for the full 15 s. Both phones
-     compute the same schedule from the answer times (at) saved in the room. */
+  /* v10.2: shared schedule — when ALL players have answered, the question ends
+     at once (after a short pause) instead of waiting for the full 15 s. Every phone
+     computes the same schedule from the answer times (at) saved in the room. */
   const BOTH_MS = 900;
   function sched(r) {
-    const P = r.players || {}, ids = Object.keys(P), st = [], en = [];
+    const P = r.players || {}, ids = room && room.ids ? room.ids : Object.keys(P), st = [], en = [];
     let s = 0;
     for (let i = 0; i < N_Q; i++) {
       st.push(s); let e = s + Q_MS;
       const as = ids.map(u => ((P[u] || {}).ans || {})[i]);
-      if (ids.length === 2 && as.every(a => a && typeof a.at === 'number')) e = Math.min(e, Math.max(s, ...as.map(a => a.at)) + BOTH_MS);
+      if (ids.length >= 2 && as.every(a => a && typeof a.at === 'number')) e = Math.min(e, Math.max(s, ...as.map(a => a.at)) + BOTH_MS);
       en.push(e); s = e + REVEAL_MS;
     }
     return { st, en, total: s };
   }
+  const many = () => room.others.length > 1;
+  const pOf = (r, u) => r.players[u] || {};
   function tick() {
     const r = room && room.data; if (!r) return;
     const t = now() - r.start;
-    const opp = r.players[room.opp] || {};
     const S = sched(r);
-    if (opp.on === false && !room.done && t < S.total) { return finish(r, true); }
+    if (!room.done && t < S.total && room.others.every(u => pOf(r, u).on === false)) { return finish(r, true); }
     if (t < 0) {
       const n = Math.ceil(-t / 1000);
       if (room.cd !== n) { room.cd = n; tone(n <= 3 ? 523 : 392, .12, 'square', .1);
-        body().innerHTML = `<div class="vs"><div><span class="av">${r.players[me].av}</span><b>${esc(r.players[me].nick)}</b></div><span class="vs-x">⚔️</span><div><span class="av">${opp.av || '❔'}</span><b>${esc(opp.nick || '')}</b></div></div><div class="countdown-in">${ar(n)}</div>`; }
+        const who = room.ids.map(u => `<div><span class="av">${esc(pOf(r, u).av || '❔')}</span><b>${esc(pOf(r, u).nick || '')}</b></div>`);
+        body().innerHTML = `<div class="vs ${many() ? 'many' : ''}">${who.join('<span class="vs-x">⚔️</span>')}</div><div class="countdown-in">${ar(n)}</div>`; }
       return;
     }
     let idx = 0; while (idx < N_Q && t >= S.en[idx] + REVEAL_MS) idx++;
@@ -431,30 +496,35 @@
       if (tl && tl.textContent !== ar(left)) { tl.textContent = ar(left); if (left <= 5 && left > 0) { tone(left <= 2 ? 1200 : 900, .06, 'square', .08); const tb = document.getElementById('tbox'); if (tb) tb.classList.add('hot'); } }
       if (bar) bar.style.transform = `scaleX(${Math.max(0, (Q_MS - qt) / Q_MS)})`;
       const od = document.getElementById('oppState');
-      const oa = (opp.ans || {})[idx];
-      if (od) od.textContent = oa ? '✅ جاوب' : '🤔 يفكّر…';
+      if (od) {
+        const done = room.others.filter(u => (pOf(r, u).ans || {})[idx]).length;
+        od.textContent = many() ? `✅ ${ar(done)} من ${ar(room.others.length)}` : done ? '✅ جاوب' : '🤔 يفكّر…';
+      }
     }
     updScores(r);
   }
   function updScores(r) {
-    const a = scoreOf(r, me), b = scoreOf(r, room.opp);
     const s = document.getElementById('liveScore');
-    if (s) s.innerHTML = `<span>${r.players[me].av} ${ar(a.sc)}</span><span>${ar(b.sc)} ${(r.players[room.opp] || {}).av || ''}</span>`;
+    if (s) s.innerHTML = room.ids.map(u => `<span>${esc(pOf(r, u).av)} ${ar(scoreOf(r, u).sc)}</span>`).join('');
   }
   function qOpts(idx) {
     room.opts = room.opts || {};
-    if (!room.opts[idx]) { const q = room.data.qs[idx]; room.opts[idx] = { q, si: q.st, opts: withOpts(q).opts }; }
+    if (!room.opts[idx]) {
+      const q0 = room.data.qs[idx] || {};
+      const q = { q: clean(q0.q), verse: clean(q0.verse), src: clean(q0.src), o: (q0.o || []).map(clean), a: q0.a | 0, fixed: !!q0.fixed, st: STAGES[q0.st] ? q0.st : 0 };
+      room.opts[idx] = { q, si: q.st, opts: withOpts(q).opts };
+    }
     return room.opts[idx];
   }
   function drawQ(r, idx) {
     const { q, si, opts } = qOpts(idx), golden = idx === N_Q - 1;
     const mine = ((r.players[me].ans) || {})[idx];
-    body().innerHTML = `<div class="live" id="liveScore"></div>
-      <div class="turn"><span class="pts">سؤال ${ar(idx + 1)} من ${ar(N_Q)}</span><span class="pts">الخصم: <b id="oppState">🤔 يفكّر…</b></span></div>
+    body().innerHTML = `<div class="live ${many() ? 'many' : ''}" id="liveScore"></div>
+      <div class="turn"><span class="pts">سؤال ${ar(idx + 1)} من ${ar(N_Q)}</span><span class="pts">${many() ? 'الأصدقاء' : 'الخصم'}: <b id="oppState">🤔 يفكّر…</b></span></div>
       <div class="timer" id="tbox"><i id="tbar"></i></div>
       <div class="helps"><button class="help" id="hCut" ${room.cut && !mine ? '' : 'disabled'}>✂️<small>احذف جوابًا</small></button></div>
       <div class="qcard ${golden ? 'golden' : ''}" style="--sc:${golden ? '#d4a017' : STAGES[si].color}"><div class="qn">${golden ? '⭐ السؤال الذهبي — نقاطه مضاعفة! · ' : ''}⏱️ <b id="tleft">${ar(15)}</b></div>${qHead(q)}
-      ${opts.map((o, k) => `<button class="opt" data-k="${k}" ${mine ? 'disabled' : ''}><span class="l">${LET[k]}</span><span>${o.t}</span></button>`).join('')}<div class="fb" id="cfb">${mine ? 'انتظر الخصم…' : ''}</div></div>`;
+      ${opts.map((o, k) => `<button class="opt" data-k="${k}" ${mine ? 'disabled' : ''}><span class="l">${LET[k]}</span><span>${o.t}</span></button>`).join('')}<div class="fb" id="cfb">${mine ? 'انتظر الآخرين…' : ''}</div></div>`;
     if (golden) { tone(784, .12, 'sine', .12); tone(1175, .3, 'sine', .12, .12); }
     const btns = [...body().querySelectorAll('.opt')];
     btns.forEach((b, k) => b.onclick = () => {
@@ -465,7 +535,7 @@
       const ok = opts[k].ok;
       roomRef.child(`players/${me}/ans/${idx}`).set({ ok, left, k: opts[k].t, at });
       btns.forEach(x => x.disabled = true); b.classList.add('sel');
-      $('#hCut').disabled = true; $('#cfb').textContent = 'تم! انتظر الخصم…';
+      $('#hCut').disabled = true; $('#cfb').textContent = many() ? 'تم! انتظر الآخرين…' : 'تم! انتظر الخصم…';
       tone(660, .08, 'sine');
     });
     $('#hCut').onclick = () => {
@@ -476,7 +546,7 @@
   }
   function drawReveal(r, idx) {
     const { opts } = qOpts(idx);
-    const mine = ((r.players[me].ans) || {})[idx], his = (((r.players[room.opp] || {}).ans) || {})[idx];
+    const mine = ((r.players[me].ans) || {})[idx];
     const btns = [...body().querySelectorAll('.opt')];
     btns.forEach((b, i) => { b.disabled = true; b.classList.remove('sel'); if (opts[i].ok) b.classList.add('ok'); else if (mine && mine.k === opts[i].t) b.classList.add('bad'); });
     const tb = document.getElementById('tbox'); if (tb) tb.classList.remove('hot');
@@ -485,7 +555,13 @@
     if (f) {
       if (mine && mine.ok) { f.className = 'fb ok'; f.textContent = s.st >= 3 ? `🔥 سلسلة ${ar(s.st)}!` : 'أحسنت! ✓'; beep(true); if (s.st === 3) ctBanner('🔥 رائع! النقاط ×٢'); if (s.st === 5) { ctBanner('⚡ لا يُوقَف! ×٣', 'b2'); } }
       else { f.className = 'fb bad'; f.textContent = mine ? 'ليست هذه الإجابة 💪' : '⏰ انتهى الوقت!'; beep(false); try { navigator.vibrate && navigator.vibrate(150); } catch (e) {} }
-      f.textContent += his ? (his.ok ? ' · الخصم: ✓' : ' · الخصم: ✗') : ' · الخصم لم يجب';
+      if (many()) {
+        const right = room.others.filter(u => ((pOf(r, u).ans || {})[idx] || {}).ok).length;
+        f.textContent += ` · أصاب ${ar(right)} من ${ar(room.others.length)}`;
+      } else {
+        const his = (pOf(r, room.opp).ans || {})[idx];
+        f.textContent += his ? (his.ok ? ' · الخصم: ✓' : ' · الخصم: ✗') : ' · الخصم لم يجب';
+      }
     }
     updScores(r);
   }
@@ -493,17 +569,22 @@
   async function finish(r, forfeit) {
     if (room.done) return; room.done = true; playing(false);
     if (loop) clearInterval(loop); loop = null;
-    const a = scoreOf(r, me), b = scoreOf(r, room.opp), opp = r.players[room.opp] || {};
-    const win = forfeit || a.sc > b.sc, tie = !forfeit && a.sc === b.sc;
-    body().innerHTML = `<div class="result"><div class="big">${forfeit ? '🏳️' : tie ? '🤝' : win ? '🏆' : '💪'}</div>
-      <h2>${forfeit ? 'خرج خصمك — الفوز لك!' : tie ? 'تعادل! كلاكما بطل' : win ? 'فزت يا بطل!' : 'أحسنت المحاولة!'}</h2>
-      <div class="board"><div class="${win && !tie ? 'win' : ''}"><span class="av">${r.players[me].av}</span><small class="nk">أنت</small><b>${ar(a.sc)}</b><small>${ar(a.right)} صحيحة</small></div>
-      <div class="${!win && !tie ? 'win' : ''}"><span class="av">${opp.av || '❔'}</span><small class="nk">${esc(opp.nick || '')}</small><b>${ar(b.sc)}</b><small>${ar(b.right)} صحيحة</small></div></div>
+    const rows = room.ids.map(u => ({ u, p: pOf(r, u), ...scoreOf(r, u) }));
+    const a = rows[0], best = Math.max(...rows.slice(1).map(x => x.sc));
+    const win = forfeit || a.sc > best, tie = !forfeit && a.sc === best;
+    const place = 1 + rows.filter(x => x.sc > a.sc).length;
+    rows.sort((x, y) => y.sc - x.sc);
+    const top = rows[0].sc, medal = ['🥇', '🥈', '🥉', '4️⃣'];
+    const head = forfeit ? (many() ? 'خرج الجميع — الفوز لك!' : 'خرج خصمك — الفوز لك!') : tie ? (many() ? 'تعادلت في المركز الأول! 🤝' : 'تعادل! كلاكما بطل') : win ? 'فزت يا بطل!' : many() ? `أنت ${['', 'الأول', 'الثاني', 'الثالث', 'الرابع'][place]}! أحسنت 💪` : 'أحسنت المحاولة!';
+    body().innerHTML = `<div class="result"><div class="big">${forfeit ? '🏳️' : tie ? '🤝' : win ? '🏆' : place === 2 && many() ? '🥈' : '💪'}</div>
+      <h2>${head}</h2>
+      <div class="board ${many() ? 'many' : ''}">${rows.map(x => { const i = rows.filter(y => y.sc > x.sc).length; return `<div class="${!forfeit && x.sc === top ? 'win' : forfeit && x.u === me ? 'win' : ''}">${many() ? `<span class="md">${medal[i]}</span>` : ''}<span class="av">${esc(x.p.av || '❔')}</span><small class="nk">${x.u === me ? 'أنت' : esc(x.p.nick || '')}</small><b>${ar(x.sc)}</b><small>${ar(x.right)} صحيحة</small></div>`; }).join('')}</div>
       ${!win && !tie ? '<p class="tip">المرة القادمة لك إن شاء الله! 💪</p>' : ''}
       <div class="nav"><button class="btn gold" id="again">تحدٍّ جديد</button></div><div class="nav"><button class="btn sec" id="toHub">الرئيسية أونلاين</button></div></div>`;
     if (win || tie) { fanfare(); confetti(); }
-    if (window.Deco) { const jw = Deco.challenge(win && !tie ? 30 : tie ? 20 : 10, 'online'); if (jw) $('#onBody .result h2').insertAdjacentHTML('afterend', jw); }
-    $('#again').onclick = () => (room && room.opp && !forfeit ? challenge(room.opp) : hub());
+    if (window.Deco) { const jw = Deco.challenge(win && !tie ? 30 : tie ? 20 : many() && place === 2 ? 15 : 10, 'online'); if (jw) $('#onBody .result h2').insertAdjacentHTML('afterend', jw); }
+    const solo = !many() && room.opp && !forfeit ? room.opp : null;
+    $('#again').onclick = () => (solo ? challenge(solo) : many() ? quick() : hub());
     $('#toHub').onclick = hub;
     if (room.isHost) roomRef.update({ state: 'done' });
     // own stats only
@@ -560,7 +641,7 @@
       $('#frYes').onclick = async () => {
         $('#frYes').disabled = true;
         try {
-          await db.ref().update({ [`friends/${me}/${from}`]: true, [`friends/${from}/${me}`]: true });
+          await db.ref().update({ [`friends/${me}/${from}`]: true, [`friends/${from}/${me}`]: 'fr' }); // v22.7: 'fr' = هو طلب صداقتي (القواعد تتحقق من الطلب)
           s.ref.remove().catch(() => {});
           db.ref(`invites/${from}/${me}`).set({ kind: 'fra', nick: profile.nick, av: profile.av, t: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
           toast('صرتما صديقين 🤝'); try { window.Alqab && Alqab.reload && Alqab.reload(); } catch (e) {}
@@ -601,7 +682,7 @@
       if (!v || now() - (v.t || 0) > 120000 || (room && room.data && room.data.state === 'play')) { s.ref.remove(); return; }
       tone(880, .1, 'sine'); tone(1320, .15, 'sine', .16, .12);
       const isBayt = v.kind === 'bayt';
-      modal(`<div style="font-size:52px">${v.av}</div><h3 style="margin:4px 0">${esc(v.nick)}</h3><p>${isBayt ? 'يدعوك إلى سباق بناء البيت! 🏗️🏁' : 'يتحدّاك الآن! ⚔️'}</p>
+      modal(`<div style="font-size:52px">${esc(v.av)}</div><h3 style="margin:4px 0">${esc(v.nick)}</h3><p>${isBayt ? 'يدعوك إلى سباق بناء البيت! 🏗️🏁' : 'يتحدّاك الآن! ⚔️'}</p>
         <div class="nav"><button class="btn sec" id="invNo">لاحقًا</button><button class="btn gold" id="invYes">قبول التحدّي</button></div>`, () => {
         $('#invNo').onclick = () => { closeModal(); s.ref.remove(); db.ref('rooms/' + v.room).update({ state: 'gone' }); };
         $('#invYes').onclick = () => { closeModal(); s.ref.remove(); if (isBayt && window.BaytRace) return BaytRace.join(v.room); show('online'); joinRoom(v.room); };

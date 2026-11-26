@@ -8,6 +8,12 @@
         ".read": "auth != null",
         ".write": "auth != null && auth.uid === $uid",
         ".validate": "newData.child('nick').isString() && newData.child('nick').val().length <= 40 && newData.child('av').isString() && newData.child('av').val().length <= 8 && (!newData.child('adm').exists() || root.child('admins/' + $uid).val() === true) && (!data.child('tg').exists() || newData.child('tg').exists()) && (!data.child('nc').exists() || newData.child('nc').exists()) && (!data.child('nick').exists() || newData.child('nick').val() === data.child('nick').val() || root.child('admins/' + auth.uid).val() === true || (newData.child('nc').val() === (data.child('nc').exists() ? data.child('nc').val() : 0) + 1 && (newData.child('nc').val() <= 1 || root.child('nok/' + $uid).val() === newData.child('nick').val())))",
+        "nick": {
+          ".validate": "newData.isString() && newData.val().matches(/^[^<>]*$/)"
+        },
+        "av": {
+          ".validate": "newData.isString() && newData.val().matches(/^[^<>]*$/)"
+        },
         "nc": {
           ".validate": "newData.isNumber() && newData.val() >= (data.exists() ? data.val() : 0)"
         },
@@ -15,10 +21,10 @@
           ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 200"
         },
         "tt": {
-          ".validate": "newData.isString() && newData.val().length <= 60"
+          ".validate": "newData.isString() && newData.val().length <= 60 && newData.val().matches(/^[^<>]*$/)"
         },
         "md": {
-          ".validate": "newData.isString() && newData.val().length <= 300"
+          ".validate": "newData.isString() && newData.val().length <= 300 && newData.val().matches(/^[^<>]*$/)"
         },
         "games": {
           ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 50000 && (newData.val() <= (data.exists() ? data.val() : 0) || (newData.val() === (data.exists() ? data.val() : 0) + 1 && newData.parent().child('tg').val() === now && (!data.parent().child('tg').exists() || now - data.parent().child('tg').val() >= 30000)))"
@@ -28,6 +34,19 @@
         },
         "tg": {
           ".validate": "newData.isNumber() && (newData.val() === now || newData.val() === data.val())"
+        },
+        "acc": {
+          "$k": {
+            ".validate": "$k.length <= 2 && newData.isNumber()"
+          }
+        },
+        "sm": {
+          "$k": {
+            ".validate": "$k.length <= 4 && (newData.isNumber() || newData.isBoolean() || (newData.isString() && newData.val().length <= 60 && newData.val().matches(/^[^<>]*$/)))"
+          }
+        },
+        "$other": {
+          ".validate": "$other.length <= 12 && (newData.isNumber() || newData.isBoolean() || (newData.isString() && newData.val().length <= 300 && newData.val().matches(/^[^<>]*$/)))"
         }
       }
     },
@@ -37,7 +56,7 @@
         ".write": "auth != null && root.child('admins/' + auth.uid).val() === true && !newData.exists()",
         "$who": {
           ".write": "auth != null && auth.uid === $who && $who !== $id && !data.exists()",
-          ".validate": "newData.child('n').isString() && newData.child('n').val().length <= 40 && newData.child('t').isNumber() && newData.child('t').val() <= now"
+          ".validate": "newData.child('n').isString() && newData.child('n').val().length <= 40 && newData.child('n').val().matches(/^[^<>]*$/) && newData.child('t').isNumber() && newData.child('t').val() <= now"
         }
       }
     },
@@ -53,7 +72,7 @@
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
         ".write": "auth != null && (auth.uid === $uid || root.child('admins/' + auth.uid).val() === true)",
-        ".validate": "!newData.exists() || (newData.child('from').isString() && newData.child('from').val().length <= 40 && newData.child('to').isString() && newData.child('to').val().length <= 40)"
+        ".validate": "!newData.exists() || (newData.child('from').isString() && newData.child('from').val().length <= 40 && newData.child('to').isString() && newData.child('to').val().length <= 40 && newData.child('to').val().matches(/^[^<>]*$/))"
       }
     },
     "nok": {
@@ -66,7 +85,8 @@
     "codes": {
       "$code": {
         ".read": "auth != null",
-        ".write": "auth != null && (!data.exists() || data.val() === auth.uid) && (!newData.exists() || newData.val() === auth.uid)"
+        ".write": "auth != null && (!data.exists() || data.val() === auth.uid) && (!newData.exists() || newData.val() === auth.uid)",
+        ".validate": "!newData.exists() || ($code.length === 6 && newData.isString())"
       }
     },
     "saves": {
@@ -79,14 +99,24 @@
     "presence": {
       "$uid": {
         ".read": "auth != null",
-        ".write": "auth != null && auth.uid === $uid"
+        ".write": "auth != null && auth.uid === $uid",
+        "on": {
+          ".validate": "newData.isBoolean()"
+        },
+        "t": {
+          ".validate": "newData.isNumber()"
+        },
+        "$other": {
+          ".validate": false
+        }
       }
     },
     "friends": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
         "$friend": {
-          ".write": "auth != null && (auth.uid === $uid || auth.uid === $friend)"
+          ".write": "auth != null && (auth.uid === $uid || (auth.uid === $friend && (!newData.exists() || root.child('codes/' + newData.val()).val() === $uid || (newData.val() === 'fr' && root.child('invites/' + auth.uid + '/' + $uid + '/kind').val() === 'fr'))))",
+          ".validate": "newData.val() === true || (newData.isString() && newData.val().length <= 8)"
         }
       }
     },
@@ -94,20 +124,171 @@
       "$to": {
         ".read": "auth != null && auth.uid === $to",
         "$from": {
-          ".write": "auth != null && ((auth.uid === $from && (!root.child('bans/' + auth.uid).exists() || root.child('bans/' + auth.uid + '/until').val() < now)) || auth.uid === $to)"
+          ".write": "auth != null && ((auth.uid === $from && (!root.child('bans/' + auth.uid).exists() || root.child('bans/' + auth.uid + '/until').val() < now)) || (auth.uid === $to && !newData.exists()))",
+          ".validate": "newData.child('t').isNumber() && newData.child('nick').isString() && newData.child('nick').val() === root.child('profiles/' + $from + '/nick').val() && newData.child('av').isString() && newData.child('av').val().length <= 8 && newData.child('av').val().matches(/^[^<>]*$/)",
+          "nick": {
+            ".validate": "newData.val().length <= 40 && newData.val().matches(/^[^<>]*$/)"
+          },
+          "room": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "kind": {
+            ".validate": "newData.isString() && newData.val().length <= 4"
+          },
+          "av": {
+            ".validate": true
+          },
+          "t": {
+            ".validate": true
+          },
+          "$other": {
+            ".validate": false
+          }
         }
       }
     },
     "quick": {
       "$pin": {
         ".read": "auth != null",
-        ".write": "auth != null && (!root.child('bans/' + auth.uid).exists() || root.child('bans/' + auth.uid + '/until').val() < now)"
+        ".write": "auth != null && (!root.child('bans/' + auth.uid).exists() || root.child('bans/' + auth.uid + '/until').val() < now) && (!data.exists() || data.child('t').val() < now - 600000 || root.child('rooms/' + data.child('room').val() + '/host').val() === auth.uid) && (!newData.exists() || root.child('rooms/' + newData.child('room').val() + '/host').val() === auth.uid)",
+        ".validate": "$pin.length === 4 && newData.child('room').isString() && newData.child('room').val().length <= 40 && newData.child('t').isNumber()",
+        "room": {
+          ".validate": true
+        },
+        "t": {
+          ".validate": true
+        },
+        "$other": {
+          ".validate": false
+        }
       }
     },
     "rooms": {
       "$room": {
         ".read": "auth != null",
-        ".write": "auth != null && (!root.child('bans/' + auth.uid).exists() || root.child('bans/' + auth.uid + '/until').val() < now) && (!data.exists() || data.child('host').val() === auth.uid || data.child('guest').val() === auth.uid || !data.child('guest').exists())"
+        ".write": "auth != null && (!root.child('bans/' + auth.uid).exists() || root.child('bans/' + auth.uid + '/until').val() < now) && (data.exists() ? data.child('host').val() === auth.uid : newData.child('host').val() === auth.uid)",
+        ".validate": "newData.child('host').isString()",
+        "host": {
+          ".validate": "!data.exists() || newData.val() === data.val()"
+        },
+        "guest": {
+          ".write": "auth != null && data.parent().child('state').val() === 'wait' && (((!root.child('bans/' + auth.uid).exists() || root.child('bans/' + auth.uid + '/until').val() < now) && newData.val() === auth.uid && (!data.exists() || data.val() === auth.uid) && data.parent().child('host').val() !== auth.uid) || (data.val() === auth.uid && !newData.exists()))",
+          ".validate": "newData.isString() && newData.val().length <= 40"
+        },
+        "s2": {
+          ".write": "auth != null && data.parent().child('state').val() === 'wait' && (((!root.child('bans/' + auth.uid).exists() || root.child('bans/' + auth.uid + '/until').val() < now) && newData.val() === auth.uid && !data.exists() && data.parent().child('host').val() !== auth.uid && data.parent().child('max').val() >= 3) || (data.val() === auth.uid && !newData.exists()))",
+          ".validate": "newData.isString() && newData.val().length <= 40"
+        },
+        "s3": {
+          ".write": "auth != null && data.parent().child('state').val() === 'wait' && (((!root.child('bans/' + auth.uid).exists() || root.child('bans/' + auth.uid + '/until').val() < now) && newData.val() === auth.uid && !data.exists() && data.parent().child('host').val() !== auth.uid && data.parent().child('max').val() >= 4) || (data.val() === auth.uid && !newData.exists()))",
+          ".validate": "newData.isString() && newData.val().length <= 40"
+        },
+        "max": {
+          ".validate": "newData.isNumber() && newData.val() >= 2 && newData.val() <= 4"
+        },
+        "ids": {
+          "$i": {
+            ".validate": "$i.length <= 1 && newData.isString() && newData.val().length <= 40"
+          }
+        },
+        "type": {
+          ".validate": "newData.isString() && newData.val().length <= 8"
+        },
+        "state": {
+          ".write": "auth != null && newData.val() === 'gone' && (data.parent().child('guest').val() === auth.uid || data.parent().child('s2').val() === auth.uid || data.parent().child('s3').val() === auth.uid)",
+          ".validate": "newData.isString() && newData.val().length <= 8"
+        },
+        "quit": {
+          ".write": "auth != null && newData.val() === auth.uid && (data.parent().child('guest').val() === auth.uid || data.parent().child('s2').val() === auth.uid || data.parent().child('s3').val() === auth.uid)",
+          ".validate": "newData.isString() && newData.val().length <= 40"
+        },
+        "winner": {
+          ".write": "auth != null && !data.exists() && (data.parent().child('host').val() === auth.uid || data.parent().child('guest').val() === auth.uid || data.parent().child('s2').val() === auth.uid || data.parent().child('s3').val() === auth.uid)",
+          ".validate": "newData.isString() && newData.val().length <= 80 && newData.val().matches(/^[^<>]*$/)"
+        },
+        "t": {
+          ".validate": "newData.isNumber()"
+        },
+        "start": {
+          ".validate": "newData.isNumber()"
+        },
+        "lv": {
+          ".validate": "newData.isNumber()"
+        },
+        "cheer": {
+          "$u": {
+            ".write": "auth != null && auth.uid === $u && (data.parent().parent().child('host').val() === auth.uid || data.parent().parent().child('guest').val() === auth.uid || data.parent().parent().child('s2').val() === auth.uid || data.parent().parent().child('s3').val() === auth.uid)",
+            ".validate": "newData.child('e').isString() && newData.child('e').val().length <= 8 && newData.child('e').val().matches(/^[^<>]*$/) && newData.child('t').isNumber()"
+          }
+        },
+        "qs": {
+          "$i": {
+            ".validate": "$i.length <= 2 && newData.child('q').isString()",
+            "q": {
+              ".validate": "newData.val().length <= 1500 && newData.val().matches(/^[^<>]*$/)"
+            },
+            "verse": {
+              ".validate": "newData.isString() && newData.val().length <= 3000 && newData.val().matches(/^[^<>]*$/)"
+            },
+            "src": {
+              ".validate": "newData.isString() && newData.val().length <= 300 && newData.val().matches(/^[^<>]*$/)"
+            },
+            "o": {
+              "$j": {
+                ".validate": "$j.length <= 1 && newData.isString() && newData.val().length <= 500 && newData.val().matches(/^[^<>]*$/)"
+              }
+            },
+            "a": {
+              ".validate": "newData.isNumber()"
+            },
+            "fixed": {
+              ".validate": "newData.isBoolean()"
+            },
+            "st": {
+              ".validate": "newData.isNumber()"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "players": {
+          "$p": {
+            ".write": "auth != null && auth.uid === $p && (!root.child('bans/' + auth.uid).exists() || root.child('bans/' + auth.uid + '/until').val() < now) && (data.exists() || newData.parent().parent().child('guest').val() === auth.uid || newData.parent().parent().child('s2').val() === auth.uid || newData.parent().parent().child('s3').val() === auth.uid)",
+            "nick": {
+              ".validate": "newData.isString() && newData.val().length <= 40 && newData.val().matches(/^[^<>]*$/)"
+            },
+            "av": {
+              ".validate": "newData.isString() && newData.val().length <= 8 && newData.val().matches(/^[^<>]*$/)"
+            },
+            "ans": {
+              "$i": {
+                ".validate": "$i.length <= 2",
+                "ok": {
+                  ".validate": "newData.isBoolean()"
+                },
+                "left": {
+                  ".validate": "newData.isNumber()"
+                },
+                "at": {
+                  ".validate": "newData.isNumber()"
+                },
+                "k": {
+                  ".validate": "newData.isString() && newData.val().length <= 500 && newData.val().matches(/^[^<>]*$/)"
+                },
+                "$other": {
+                  ".validate": false
+                }
+              }
+            },
+            "$other": {
+              ".validate": "$other.length <= 6 && (newData.isNumber() || newData.isBoolean() || (newData.isString() && newData.val().length <= 40 && newData.val().matches(/^[^<>]*$/)))"
+            }
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
       }
     },
     "leader": {
@@ -138,7 +319,13 @@
             ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 200"
           },
           "nick": {
-            ".validate": "newData.isString() && newData.val().length <= 40"
+            ".validate": "newData.isString() && newData.val().length <= 40 && newData.val().matches(/^[^<>]*$/)"
+          },
+          "av": {
+            ".validate": "newData.isString() && newData.val().length <= 8 && newData.val().matches(/^[^<>]*$/)"
+          },
+          "$other": {
+            ".validate": "$other.length <= 6 && (newData.isNumber() || newData.isBoolean() || (newData.isString() && newData.val().length <= 100 && newData.val().matches(/^[^<>]*$/)))"
           }
         }
       }
@@ -147,7 +334,10 @@
       "$uid": {
         ".read": "auth != null",
         ".write": "auth != null && auth.uid === $uid",
-        ".validate": "newData.child('f').isNumber() && newData.child('i').isString() && newData.child('i').val().length <= 400 && newData.child('n').isString() && newData.child('n').val().length <= 40"
+        ".validate": "newData.child('f').isNumber() && newData.child('i').isString() && newData.child('i').val().length <= 400 && newData.child('n').isString() && newData.child('n').val().length <= 40",
+        "$other": {
+          ".validate": "$other.length <= 4 && (newData.isNumber() || newData.isBoolean() || (newData.isString() && newData.val().length <= 400 && newData.val().matches(/^[^<>]*$/)))"
+        }
       }
     },
     "gifts": {
@@ -155,7 +345,10 @@
         ".read": "auth != null && auth.uid === $uid",
         "$id": {
           ".write": "auth != null && ((!data.exists() && (!root.child('bans/' + auth.uid).exists() || root.child('bans/' + auth.uid + '/until').val() < now) && newData.child('f').val() === auth.uid && root.child('friends/' + $uid + '/' + auth.uid).exists()) || (auth.uid === $uid && !newData.exists()))",
-          ".validate": "newData.child('g').isString() && newData.child('g').val().length <= 16 && newData.child('n').isString() && newData.child('n').val().length <= 40"
+          ".validate": "newData.child('g').isString() && newData.child('g').val().length <= 16 && newData.child('g').val().matches(/^[^<>]*$/) && newData.child('n').isString() && newData.child('n').val().length <= 40 && newData.child('n').val().matches(/^[^<>]*$/)",
+          "$other": {
+            ".validate": "$other.length <= 4 && (newData.isNumber() || newData.isBoolean() || (newData.isString() && newData.val().length <= 40 && newData.val().matches(/^[^<>]*$/)))"
+          }
         }
       }
     },
@@ -164,7 +357,10 @@
         ".read": "auth != null",
         "$from": {
           ".write": "auth != null && auth.uid === $from && (!root.child('bans/' + auth.uid).exists() || root.child('bans/' + auth.uid + '/until').val() < now) && root.child('friends/' + $uid + '/' + $from).exists()",
-          ".validate": "newData.child('n').isNumber() && newData.child('n').val() <= (data.exists() ? data.child('n').val() : 0) + 1"
+          ".validate": "newData.child('n').isNumber() && newData.child('n').val() <= (data.exists() ? data.child('n').val() : 0) + 1",
+          "$other": {
+            ".validate": "$other.length <= 4 && (newData.isNumber() || newData.isBoolean() || (newData.isString() && newData.val().length <= 40 && newData.val().matches(/^[^<>]*$/)))"
+          }
         }
       }
     },
@@ -206,7 +402,10 @@
         ".read": "auth != null && auth.uid === $uid",
         "$from": {
           ".write": "auth != null && auth.uid === $from && root.child('friends/' + $uid + '/' + $from).exists()",
-          ".validate": "newData.child('n').isString() && newData.child('n').val().length <= 40"
+          ".validate": "newData.child('n').isString() && newData.child('n').val().length <= 40 && newData.child('n').val().matches(/^[^<>]*$/)",
+          "$other": {
+            ".validate": "$other.length <= 4 && (newData.isNumber() || newData.isBoolean() || (newData.isString() && newData.val().length <= 40 && newData.val().matches(/^[^<>]*$/)))"
+          }
         }
       }
     },
@@ -242,7 +441,10 @@
       "$c": {
         ".read": "auth != null",
         ".write": "auth != null && (data.exists() ? data.child('t').val() === auth.uid : newData.child('t').val() === auth.uid)",
-        ".validate": "!newData.exists() || ($c.length === 5 && newData.child('n').isString() && newData.child('n').val().length <= 40 && newData.child('t').isString())"
+        ".validate": "!newData.exists() || ($c.length === 5 && newData.child('n').isString() && newData.child('n').val().length <= 40 && newData.child('n').val().matches(/^[^<>]*$/) && newData.child('t').isString())",
+        "$other": {
+          ".validate": "$other.length <= 4 && (newData.isNumber() || newData.isBoolean() || (newData.isString() && newData.val().length <= 40))"
+        }
       }
     },
     "classm": {
@@ -250,7 +452,10 @@
         ".read": "auth != null",
         "$uid": {
           ".write": "auth != null && ((auth.uid === $uid && root.child('classes/' + $c).exists() && (!root.child('bans/' + auth.uid).exists() || root.child('bans/' + auth.uid + '/until').val() < now)) || root.child('classes/' + $c + '/t').val() === auth.uid)",
-          ".validate": "!newData.exists() || (newData.child('n').isString() && newData.child('n').val().length <= 40 && newData.child('x').isNumber())"
+          ".validate": "!newData.exists() || (newData.child('n').isString() && newData.child('n').val().length <= 40 && newData.child('n').val().matches(/^[^<>]*$/) && newData.child('x').isNumber())",
+          "$other": {
+            ".validate": "$other.length <= 4 && (newData.isNumber() || newData.isBoolean() || (newData.isString() && newData.val().length <= 40 && newData.val().matches(/^[^<>]*$/)))"
+          }
         }
       }
     },
@@ -260,7 +465,7 @@
         ".read": "auth != null && auth.uid === $uid",
         "$wk": {
           ".write": "auth != null && ((auth.uid === $uid && !data.exists() && (!root.child('bans/' + auth.uid).exists() || root.child('bans/' + auth.uid + '/until').val() < now)) || root.child('admins/' + auth.uid).val() === true)",
-          ".validate": "newData.child('m').isString() && newData.child('m').val().length >= 2 && newData.child('m').val().length <= 400 && newData.child('k').isString() && newData.child('k').val().length <= 2 && newData.child('n').isString() && newData.child('n').val().length <= 40 && newData.child('t').isNumber() && newData.child('t').val() <= now"
+          ".validate": "newData.child('m').isString() && newData.child('m').val().length >= 2 && newData.child('m').val().length <= 400 && newData.child('m').val().matches(/^[^<>]*$/) && newData.child('k').isString() && newData.child('k').val().length <= 2 && newData.child('n').isString() && newData.child('n').val().length <= 40 && newData.child('n').val().matches(/^[^<>]*$/) && newData.child('t').isNumber() && newData.child('t').val() <= now"
         }
       }
     }

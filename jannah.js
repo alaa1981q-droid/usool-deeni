@@ -18,7 +18,7 @@ const today=()=>new Date().toDateString();
 const O=()=>window.OnlineAPI;
 const boy=()=>!window.Cups||Cups.sex!='g';
 const B_=(m,f)=>boy()?m:f;
-const esc=v=>String(v==null?'':v).replace(/[<>&"]/g,'');
+const esc=v=>String(v==null?'':v).replace(/[<>&"'`]/g,'');
 
 /* ---------- الكتالوج: [x,y,size] بإحداثيات رسم البيت (عرض ٣٦٠ × ارتفاع ٣٣٠، الأرض عند y=292) ---------- */
 const CATS=[['deeds','🤲','جوائز الأعمال'],['inside','🛋️','داخل البيت'],['onhouse','🪟','على البيت'],['garden','🌳','الأشجار والورد'],['light','💡','الإنارة'],['car','🚗','السيارات'],['animals','🦚','الحيوانات'],['sky','🕊️','السماء'],['deco','✨','الزينة'],['paint','🎨','الألوان'],['gift','🎁','هدايا الأصدقاء']];
