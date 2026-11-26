@@ -1,3 +1,12 @@
+/* (v23.8) مراحل ما بعد القصر في صفحة الطوابق: ٧ القصر الذهبي · ٨ قصر الأنوار · ٩ حيّ الخير · ١٠ قصر في الجنة */
+function Q_ST(){const Q=window.Qasr||{},adm=window.isAdm&&isAdm(),pd=!!Q.done,lv=Q.lv|0,sd=String(Q.sd||'0000'),sn=sd.split('').filter(x=>x==='3').length,jn=!!Q.jn;
+  return [{e:'🌟',t:'المرحلة السابعة',n:'القصر الذهبي',sub:lv>=2?'بوابة ذهبية ونافورة ✔':'بوابة ذهبية ونافورة أعلى',ok:pd||adm,done:lv>=2,go:'qHub',bg:'linear-gradient(135deg,#ffd96a,#e0a10f)',lock:'حوّل بيتك إلى قصر أولًا (المرحلة السادسة) 👑'},
+    {e:'💡',t:'المرحلة الثامنة',n:'قصر الأنوار',sub:lv>=3?'أضواء ورايات ✔':'أضواء على القصر ورايات',ok:lv>=2||adm,done:lv>=3,go:'qHub',bg:'linear-gradient(135deg,#8fd3ff,#3f86e0)',lock:'اجعل قصرك «القصر الذهبي» أولًا (المرحلة السابعة) 🌟'},
+    {e:'🤲',t:'المرحلة التاسعة',n:'حيّ الخير',sub:sn>=4?'٤ صدقات جارية ✔':'صدقات جارية: '+ar(sn)+' من ٤',pr:ar(sn)+' من ٤',ok:pd||adm,done:sn>=4,go:'sdNext',bg:'linear-gradient(135deg,#7be3a5,#1fa463)',lock:'حوّل بيتك إلى قصر أولًا، ثم ابنِ في «حيّ الخير»: سبيل ماء، دار أيتام، مخبز خير، ومضيف 🤍'},
+    {e:'🌿',t:'المرحلة العاشرة',n:'قصر في الجنة',sub:jn?'أنهار من ماء ولبن وعسل ✔':'أنهار من ماء ولبن وعسل',ok:(lv>=3&&sn>=4)||adm,done:jn,go:'jannah',bg:'linear-gradient(135deg,#b9f0c9,#2fa37a)',lock:'أكمل «قصر الأنوار» والصدقات الجارية الأربع أولًا، وداوم على وردك وصلاتك وحفظك… فالجنة جزاء المداومة 🤍'}]}
+function qStages(){return Q_ST().map((S,i)=>`<button class="blv ${S.ok?'':'locked'}" data-qs="${i}"><span class="ic" style="background:${S.bg}">${S.ok?S.e:'🔒'}</span>
+    <span><b>${S.t}</b><small>${S.n}${S.pr&&S.ok&&!S.done?' · '+S.pr:''}</small></span>
+    <span class="mk">${S.done?'✅':S.ok?'▶️':'🔒'}</span></button>`).join('')}
 /* ابنِ بيتك في الجنة — سباق بناء البيت
    الطوب ينزل وعليه كلمات، والطفل يلمس الكلمة الصحيحة التالية بالترتيب قبل أن ينتهي الوقت.
    الخطأ أو فوات الكلمة الصحيحة يُسقط طوبتين ويُنقص قلبًا، وإذا نفدت القلوب أو الوقت انهدم الطابق.
@@ -562,11 +571,15 @@ function menu(){G=null;clearTimeout(autoT);const B=$('#byBody');
     <span class="mk">${dn?'⭐'.repeat(bs.stars[i]||1):why?'🔒':'▶️'}</span></button>`}).join('')}${(()=>{const ok=bs.done>=LEVELS.length||(window.isAdm&&isAdm()),qd=window.Qasr&&Qasr.done;
     return `<button class="blv ${ok?'':'locked'}" id="byQt"><span class="ic" style="background:linear-gradient(135deg,#f6c945,#e0a10f)">${ok?'👑':'🔒'}</span>
     <span><b>المرحلة السادسة</b><small>${qd?'قصرك في مدينتك':'حوّل بيتك إلى قصر'}</small></span>
-    <span class="mk">${qd?'👑':ok?'▶️':'🔒'}</span></button>`})()}</div>
+    <span class="mk">${qd?'👑':ok?'▶️':'🔒'}</span></button>`+qStages()})()}</div>
   <button class="link-btn" id="byHow" style="align-self:center;margin-top:10px">❓ كيف ألعب؟</button>`;
   $('#byHow').onclick=()=>modal(`<div style="font-size:46px">🏡</div><h3 style="margin:4px 0">كيف ألعب؟</h3><p class="bcap" style="text-align:right;line-height:1.9">المس الكلمة <b>التالية</b> بالترتيب قبل أن ينتهي الوقت ⏱️<br>الصحيح المتتابع يضاعف نقاطك 🔥 والنجمة الذهبية ⭐ تعطيك وقتًا إضافيًا.<br>الخطأ أو ترك الكلمة الصحيحة تسقط يهدم من بيتك!<br>🏆 كل نجمة جديدة تربحها في طابق = كأس.<br>▶️ زر «أكمل الطوابق» يأخذك إلى الطابق الذي لم تبنِه بعد.<br>واجمع كؤوسًا أكثر من «اختبر نفسك» و«مسابقة الأبطال».</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`);
   {const q=$('#byQasr');if(q)q.onclick=()=>{try{City3D.goTo('palace')}catch(e){}}}
   // (v19.8) طلب الشيخ: مربّع «المرحلة السادسة: القصر» مع الطوابق — مقفول حتى تكتمل الطوابق الخمسة
+  // (v23.8) طلب الشيخ: مراحل ما بعد القصر تظهر هنا حتى يراها الطفل ويتحدّى نفسه
+  document.querySelectorAll('[data-qs]').forEach(b=>b.onclick=()=>{sTap();const S=Q_ST()[+b.dataset.qs];
+    if(b.classList.contains('locked')){tone(200,.15,'square',.08);modal(`<div style="font-size:50px">${S.e}</div><h3 style="margin:4px 0">${S.t}: ${S.n}</h3><p>${S.lock}</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`);return}
+    try{City3D.goTo(S.go)}catch(e){}});
   {const q=$('#byQt');if(q)q.onclick=()=>{sTap();if(q.classList.contains('locked')){tone(200,.15,'square',.08);modal(`<div style="font-size:50px">👑</div><h3 style="margin:4px 0">المرحلة السادسة: القصر</h3><p>أكمل طوابق بيتك الخمسة أولًا (عندك ${ar(bs.done)} من ${ar(LEVELS.length)})، ثم حوّل بيتك إلى قصر بصلواتك وتسبيحك واختبار صغير 🤍</p><div class="nav"><button class="btn gold" data-close>حسنًا</button></div>`);return}try{City3D.goTo('palace')}catch(e){}}}
   {const r=$('#byRace');if(r)r.onclick=()=>{const t=B.querySelector('[data-lv="'+bs.done+'"]');if(t)t.click()}}
   if(window.Deco)Deco.menuHook(B);
