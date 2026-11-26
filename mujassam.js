@@ -2144,6 +2144,19 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
   wxFetch();setTimeout(showWx,50);
   const showJ=()=>{ui.j.textContent="💎 "+arn(window.Deco?Deco.j:0);drawHp()};showJ();
   const closeTo=f=>{ui.close();setTimeout(f,60)};
+  // (v23.4) طلب صاحب التطبيق: الطفل يكمل كل واجبات جهته من الشارع (سقي، تنظيف، القطة) ثم يعبر للجهة الثانية،
+  // لا يروح ويجي على الشارع لكل شغلة. نختار الأقرب في نفس الجهة أولًا، والجهة الثانية عليها «غرامة» كبيرة.
+  const side=x=>Math.abs(x)<2.3?0:Math.sign(x);
+  function chores(only){const D=day(),r=[];
+    if(!only||only==='t')thirsty().forEach(i=>{if(!D.tr[i]){const p=treeSpot(i);r.push({k:'t',i,x:p.x,z:p.z})}});
+    if(!only||only==='l')litter().forEach(i=>{if(!D.lt[i]){const p=litSpot(i);r.push({k:'l',i,x:p.x,z:p.z})}});
+    if((!only||only==='c')&&!V&&!D.cat&&S.userData.cat)r.push({k:'c',x:CAT[0],z:CAT[1]});
+    const kp=kid.position,ks=side(kp.x);
+    r.forEach(c=>{const cs=side(c.x);c.d=Math.hypot(c.x-kp.x,c.z-kp.z)+(ks&&cs&&cs!==ks?80:0)});
+    return r.sort((a,b)=>a.d-b.d)}
+  const doChore=c=>c.k==='t'?A.tree(c.i):c.k==='l'?A.litter(c.i):A.cat();
+  const CHL={t:'💧 الشجرة التالية',l:'🧹 النفايات التالية',c:'🐱 اسقِ القطّة'};
+  function nextBtn(){const c=chores()[0];return c?[[CHL[c.k],()=>follow(()=>doChore(c))],['حسنًا',null,'sec']]:[['الحمد لله',null]]}
   // الأعمال
   const A={
     mosque(){const p=prayerNow(),D=day();go(door('m'),()=>{
@@ -2151,18 +2164,18 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
       if(p&&!D.pr[p]){D.pr[p]=1;dsv();enter(()=>{jewels(10);card(`🕌 حان وقت صلاة ${PNAME[p]}! ${B('دخلتَ','دخلتِ')} الجامع 💎 +١٠<br><small>الآن ${B('قم وصلِّ','قومي وصلّي')} صلاتك الحقيقية، ثم ${B('سجّلها','سجّليها')} 🤲</small>`,[['🤲 '+B('سأصلّي الآن','سأصلّي الآن'),()=>closeTo(()=>window.Salah&&Salah.openPray())],['لاحقًا',null,'sec']])});return}
       if(p){card(`🕌 ${B('زرتَ','زرتِ')} الجامع في صلاة ${PNAME[p]} ✔<br><small>هل ${B('صلّيتَ','صلّيتِ')}؟ ${B('سجّل','سجّلي')} صلاتك في «وضوئي وصلاتي»</small>`,[['🤲 سجلّ صلاتي',()=>closeTo(()=>window.Salah&&Salah.openPray())],['حسنًا',null,'sec']]);return}
       const n=nextPrayer();card(`🕌 الجامع ينتظرك${n?`<br><small>الأذان القادم: صلاة ${PNAME[n.p]} الساعة ${hm(n.t)} ⏰<br>${B('تعال','تعالي')} وقت الأذان ${B('وخذ','وخذي')} 💎١٠</small>`:''}`,[['حسنًا',null,'sec']])})},
-    water(){const D=day(),i=thirsty().find(k=>!D.tr[k]);if(i==null){card(`🌳 كل الأشجار شربت اليوم! ${B('أحسنت','أحسنتِ')} 💚<br><small>${B('تعال','تعالي')} غدًا، ستعطش أشجار جديدة</small>`,[['حسنًا',null,'sec']]);return}A.tree(i)},
+    water(){const c=chores('t')[0],i=c?c.i:null;if(i==null){card(`🌳 كل الأشجار شربت اليوم! ${B('أحسنت','أحسنتِ')} 💚<br><small>${B('تعال','تعالي')} غدًا، ستعطش أشجار جديدة</small>`,[['حسنًا',null,'sec']]);return}A.tree(i)},
     tree(i){const D=day();if(D.tr[i]||!thirsty().includes(i)){card('🌳 هذه الشجرة ليست عطشى الآن 💚');setTimeout(()=>card(''),1800);return}
       go(treeSpot(i),()=>{D.tr[i]=1;dsv();splash(S.userData.trees[i]);jewels(2);
-        const left=thirsty().filter(k=>!D.tr[k]).length;card(`💧 ${B('سقيتَ','سقيتِ')} الشجرة فكبرت وفرحت! 🌳${left?`<br><small>باقي ${arn(left)} ${left==1?'شجرة عطشى':'أشجار عطشى'} (عليها 💧)</small>`:'<br><small>كل الأشجار شربت اليوم 💚</small>'}`,left?[['💧 الشجرة التالية',()=>follow(()=>A.water())],['حسنًا',null,'sec']]:[['الحمد لله',null]]);unmark(S.userData.trees[i])})},
+        const left=thirsty().filter(k=>!D.tr[k]).length;card(`💧 ${B('سقيتَ','سقيتِ')} الشجرة فكبرت وفرحت! 🌳${left?`<br><small>باقي ${arn(left)} ${left==1?'شجرة عطشى':'أشجار عطشى'} (عليها 💧)</small>`:'<br><small>كل الأشجار شربت اليوم 💚</small>'}`,nextBtn());unmark(S.userData.trees[i])})},
     litter(i){const D=day();if(D.lt[i])return;go(litSpot(i),()=>{D.lt[i]=1;dsv();jewels(1);unput((S.userData.lit||[])[i]);
-      const left=litter().filter(k=>!D.lt[k]).length;card(`🧹 ${B('رفعتَ','رفعتِ')} النفايات ووضعتها في السلّة 🗑️<br><small>${left?`باقي ${arn(left)} في الطرق (عليها 🧹)`:'مدينتك نظيفة جميلة! ✨'}</small>`,left?[['🧹 التالية',()=>follow(()=>A.clean())],['حسنًا',null,'sec']]:[['الحمد لله',null]])})},
-    clean(){const D=day(),i=litter().find(k=>!D.lt[k]);if(i==null){card(`✨ ${B('مدينتك','مدينتكِ')} نظيفة اليوم! ${B('أحسنت','أحسنتِ')} 💚`,[['حسنًا',null,'sec']]);return}A.litter(i)},
+      const left=litter().filter(k=>!D.lt[k]).length;card(`🧹 ${B('رفعتَ','رفعتِ')} النفايات ووضعتها في السلّة 🗑️<br><small>${left?`باقي ${arn(left)} في الطرق (عليها 🧹)`:'مدينتك نظيفة جميلة! ✨'}</small>`,nextBtn())})},
+    clean(){const c=chores('l')[0],i=c?c.i:null;if(i==null){card(`✨ ${B('مدينتك','مدينتكِ')} نظيفة اليوم! ${B('أحسنت','أحسنتِ')} 💚`,[['حسنًا',null,'sec']]);return}A.litter(i)},
     // (v15.7) 👋 سلّم على أقرب جار (أو ردّ على من يسلّم عليك الآن)
     salamNear(){const ps=life.peds,kp=kid.position;let bi=-1,bd=1e9;ps.forEach((P,i)=>{const u=P.userData.u;if(!P.visible||u.fade||u.trip<0&&!u.shep)return;const d=Math.hypot(P.position.x-kp.x,P.position.z-kp.z)-(u.greet>0?1e3:0);if(d<bd){bd=d;bi=i}});
       if(bi<0){card(`🙂 لا أحد في الشارع الآن… ${B('انتظر','انتظري')} قليلًا حتى يمرّ أحد الجيران 👋`);setTimeout(()=>card(''),2400);return}A.salam(bi)},
     cat(){const D=day();if(D.cat)return;go(door('s'),()=>{busy=1;card(`🥛 ${B('ملأتَ','ملأتِ')} الإناء من السبيل…`);setTimeout(()=>{busy=0;go({x:CAT[0]-.2,z:CAT[1]+1.3,via:null},()=>{D.cat=1;dsv();jewels(3);
-      card(`🐱 شربت القطة وقالت: مياو! شكرًا 🤍<br><small>الرحمة بالحيوان من الأخلاق الجميلة</small>`,[['حسنًا',null,'sec']]);unput(S.userData.cat)})},1200)})},
+      unput(S.userData.cat);S.userData.cat=null;card(`🐱 شربت القطة وقالت: مياو! شكرًا 🤍<br><small>الرحمة بالحيوان من الأخلاق الجميلة</small>`,nextBtn())})},1200)})},
     school(){go(door('q'),()=>card(`🏫 مدرسة القرآن: هيّا ${B('احفظ','احفظي')} سورة مع الشيخ عبد الباسط ⭐`,[['⭐ أنا حافظ صغير',()=>closeTo(()=>{const b=document.getElementById('openHifz');b&&b.click()})],['لاحقًا',null,'sec']]))},
     // (v11.8) 🎒 مدرستي: الذهاب للمدرسة مرة في اليوم 💎5، ثم دعوة لدرس حقيقي من الكتاب
     mySchool(){if(inSchool){schoolCard();return}const h=hourNow();
