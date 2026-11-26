@@ -70,7 +70,8 @@
       const p = await withTimeout(db.ref('profiles/' + me).once('value'), 20000, 'db');
       profile = p.val();
       if (profile && profile.nick && (state.nick !== profile.nick || state.av !== profile.av)) { state.nick = profile.nick; state.av = profile.av; save(); }
-      if (profile && profile.sx && window.Cups && !Cups.sex) Cups.setSex(profile.sx);
+      // v23.4: ولد/بنت يؤخذ دائمًا مما اختاره الطفل في «اسمي وصورتي» (كان زرّ في «اختبر نفسك» يقلبه بالخطأ)
+      if (profile && profile.sx && window.Cups && Cups.sex !== profile.sx) Cups.setSex(profile.sx);
       if (profile) { startPresence(); db.ref('profiles/' + me).update({ seen: firebase.database.ServerValue.TIMESTAMP }).catch(() => {}); }
       try { ban = (await db.ref('bans/' + me).get()).val(); } catch (e) { ban = null; }
       try { const a = (await db.ref('admins/' + me).get()).val() === true; localStorage.setItem('usul5_adm', a ? '1' : '');
@@ -78,6 +79,7 @@
         // (v22.0) طلب صاحب التطبيق: صورة المدير صورة مدينة 🏙️ وليست صورة طفل — في كل مكان (بطاقته، الأصدقاء، البيوت…)
         if (profile && a && profile.av !== ADM_AV) { profile.av = ADM_AV; db.ref('profiles/' + me).update({ av: ADM_AV }).catch(() => {}); }
         if (a && state.av !== ADM_AV) { state.av = ADM_AV; save(); }
+        if (a && !(profile && profile.sx) && window.Cups && Cups.sex !== 'b') Cups.setSex('b'); // v23.4: حساب المدير (الشيخ) ولد دائمًا ما لم يختر غيره
         if (profile && !a && profile.adm) { delete profile.adm; db.ref('profiles/' + me + '/adm').remove().catch(() => {}); } } catch (e) {}
       return true;
     })();

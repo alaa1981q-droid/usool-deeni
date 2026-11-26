@@ -80,9 +80,9 @@ function intro(){const B=$('#nfBody');
   B.innerHTML=`<div class="nfq"><div class="em">🪞</div><h2>${boy()?'هل أنت ولدٌ صالح؟':'هل أنتِ بنتٌ صالحة؟'}</h2>
     <p style="margin:0 0 6px;font-size:16px;line-height:1.8">ستمرّ ${boy()?'بك':'بكِ'} ${ar(N)} مواقف من الحياة: مع الأهل والجيران والأصدقاء والمدرسة.<br>${boy()?'اختر':'اختاري'} ماذا ${boy()?'تفعل':'تفعلين'} <b>بصدق</b>، فالله يرى كل شيء 🤍</p>
     <p style="margin:0;font-size:14px;color:var(--muted)">🏆 الإجابات الجميلة تربحك كؤوسًا لبيتك في الجنة</p>
-    <div class="nav" style="margin-top:12px"><button class="btn gold" id="nfGo" style="flex:1">ابدأ</button></div>
-    <button class="link-btn" id="nfSex" style="margin-top:8px">${boy()?'أنا بنت 👧':'أنا ولد 👦'}</button></div>`;
-  $('#nfGo').onclick=start;$('#nfSex').onclick=()=>{Cups.setSex(boy()?'g':'b');intro()}}
+    <div class="nav" style="margin-top:12px"><button class="btn gold" id="nfGo" style="flex:1">ابدأ</button></div></div>`;
+  // v23.4: أُزيل رابط «أنا بنت / أنا ولد» من هنا: ضغطة واحدة كانت تقلب التطبيق كله (القصر وردي، حجاب في المدينة…). ولد/بنت يُختار من «ملفّي» فقط.
+  $('#nfGo').onclick=start}
 function start(){Q={qs:shuffle(SITS.slice()).slice(0,N).map(s=>({s,opts:shuffle(s[2].map(o=>({t:o[0],ok:!!o[1]})))})),i:0,good:0,res:[],wrong:[]};ask()}
 function ask(){const q=Q.qs[Q.i],[em,txt,,why]=q.s,B=$('#nfBody');
   B.innerHTML=`<div class="nfprog">${Q.qs.map((x,k)=>`<i class="${k<Q.i?(Q.res[k]?'ok':'bad'):k==Q.i?'cur':''}"></i>`).join('')}</div>
