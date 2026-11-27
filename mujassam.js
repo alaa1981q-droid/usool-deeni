@@ -2279,14 +2279,13 @@ const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),ne
   // (v13.9) طلب الشيخ: الطفل يعبر الشارع الرئيسي من ممرّ المشاة فقط (z=±4.6)، ويقف عند الرصيف ينظر يمينًا ويسارًا (النقطة الثالثة =1)
   // الأماكن يمين الشارع بلا via يصلها عبر الممرّ الأقرب ثم الرصيف الأيمن (x=2.8)
   function go(to,done,w){if(busy)return;if(inSchool&&!schOK){if(!w)schoolCard();return}if(drv)leaveCar(1);if(window.City3D&&City3D.debugTp&&!w){path=[];at=to;kid.position.set(to.x,0,to.z);card('');if(done)setTimeout(done,50);return} // للتجربة فقط: وصول فوري
-if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0?4.6:-4.6,rt=a=>a.via==null&&a.x>2.2;
-    if(rt(at)&&rt(to)&&(at.z>=0)===(to.z>=0))p.push([R,at.z],[R,to.z],[to.x,to.z]);
-    else{if(at.via!=null){p.push([at.x,at.via]);if(at.x>0)p.push([R,at.via,1])}
-      else if(rt(at))p.push([R,at.z],[R,zb(at.z),1]);
-      p.push([SW,at.via!=null?at.via:rt(at)?zb(at.z):at.z]);
-      if(to.via!=null)p.push([SW,to.via,to.x>0?1:0],[to.x,to.via],[to.x,to.z]);
-      else if(rt(to)){const z1=zb(to.z);p.push([SW,z1,1],[R,z1],[R,to.z],[to.x,to.z])}
-      else p.push([SW,to.z],[to.x,to.z])}
+if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8;
+    // (v25.0) الشيخ: الطفل يعبر الشارع أكثر من اللازم. كان كل مشوار بطريق جانبي يمرّ بالرصيف الأيسر، فمن مكان في الجهة اليمنى إلى مكان آخر فيها
+    // كان يعبر الشارع ذهابًا وإيابًا. الآن: يمشي على رصيف جهته، ولا يعبر إلا إذا كان الهدف في الجهة الأخرى، ومن أقرب عبور مشاة (±٤٫٦)
+    const sd=o=>o.x>0?1:-1,sx=o=>sd(o)>0?R:SW,za=at.via!=null?at.via:at.z,zt=to.via!=null?to.via:to.z;
+    if(at.via!=null)p.push([at.x,at.via]);p.push([sx(at),za]);
+    if(sd(at)!==sd(to)){const zc=[4.6,-4.6].sort((u,v)=>Math.abs(za-u)+Math.abs(zt-u)-Math.abs(za-v)-Math.abs(zt-v))[0];p.push([sx(at),zc,1],[sx(to),zc])}
+    p.push([sx(to),zt]);if(to.via!=null)p.push([to.x,to.via]);p.push([to.x,to.z]);
     path=p;at=to;onArrive=done;card('')}
   function card(html,btns){const c=ui.card;if(!html){c.classList.remove('on');return}c.innerHTML=html+(btns?`<div class="row">${btns.map((b,i)=>`<button data-i="${i}" class="${b[2]||''}">${b[0]}</button>`).join('')}</div>`:'');
     c.classList.add('on');c.querySelectorAll('button').forEach(b=>b.onclick=()=>{const f=btns[+b.dataset.i][1];card('');f&&f()})}
@@ -2310,14 +2309,21 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
   // (v23.4) طلب صاحب التطبيق: الطفل يكمل كل واجبات جهته من الشارع (سقي، تنظيف، القطة) ثم يعبر للجهة الثانية،
   // لا يروح ويجي على الشارع لكل شغلة. نختار الأقرب في نفس الجهة أولًا، والجهة الثانية عليها «غرامة» كبيرة.
   const side=x=>Math.abs(x)<2.3?0:Math.sign(x);
+  // (v25.0) الشيخ: ما زال يعبر كثيرًا → نتذكّر جهة الطفل (حتى لو كان على الرصيف/العبور)، وزرّ «اسقِ» أو «نظّف» لا يعبر الشارع ما دام في جهته عمل باقٍ من أي نوع
+  let chSide=0;const kSide=()=>{const s2=side(kid.position.x);if(s2)chSide=s2;return chSide};
   function chores(only){const D=day(),r=[];
     if(!only||only==='t')thirsty().forEach(i=>{if(!D.tr[i]){const p=treeSpot(i);r.push({k:'t',i,x:p.x,z:p.z})}});
     if(!only||only==='l')litter().forEach(i=>{if(!D.lt[i]){const p=litSpot(i);r.push({k:'l',i,x:p.x,z:p.z})}});
     if((!only||only==='c')&&!V&&!D.cat&&S.userData.cat)r.push({k:'c',x:CAT[0],z:CAT[1]});
-    const kp=kid.position,ks=side(kp.x);
+    const kp=kid.position,ks=kSide();
     r.forEach(c=>{const cs=side(c.x);c.d=Math.hypot(c.x-kp.x,c.z-kp.z)+(ks&&cs&&cs!==ks?80:0)});
     return r.sort((a,b)=>a.d-b.d)}
-  const doChore=c=>c.k==='t'?A.tree(c.i):c.k==='l'?A.litter(c.i):A.cat();
+  const doChore=c=>{const cs=side(c.x);if(cs)chSide=cs;return c.k==='t'?A.tree(c.i):c.k==='l'?A.litter(c.i):A.cat()};
+  // زرّ نوع معيّن: إن كان أقربه في الجهة الأخرى وفي جهتنا عمل آخر، نكمل جهتنا أولًا
+  function sideFirst(c,want){if(!c)return false;const ks=kSide(),cs=side(c.x);if(!ks||!cs||cs===ks)return false;
+    const here=chores().filter(o=>side(o.x)===ks);if(!here.length)return false;const h=here[0];
+    card(`🚸 ${want} في الجهة الثانية من الشارع.<br><small>${B('أكمل','أكملي')} أعمال جهتك أولًا، ثم ${B('اعبر','اعبري')} الشارع مرة واحدة 👍</small>`,
+      [[CHL[h.k].replace('التالية','هنا').replace('الشجرة هنا','اسقِ الشجرة هنا'),()=>follow(()=>doChore(h))],[B('اعبر','اعبري')+' الآن',()=>follow(()=>doChore(c)),'sec']]);return true}
   const CHL={t:'💧 الشجرة التالية',l:'🧹 النفايات التالية',c:'🐱 اسقِ القطّة'};
   // (v23.7) 👑 بعد القصر: إظهار المرحلة المبنيّة مسبقًا (بلا إعادة بناء = بلا تعليق)، وإن لم تكن جاهزة نعيد البناء مرة واحدة
   function nxShow(key){const N=S.__nx||{},E=N[key];if(!E){refresh();return}const C=N[key+'c'];if(C)C.visible=false;E.visible=true;delete N[key];delete N[key+'c'];ZS=null;OB=null;shF=999}
@@ -2356,13 +2362,13 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8,zb=z=>z>=0
       if(p&&!D.pr[p]){D.pr[p]=1;dsv();enter(()=>{jewels(10);card(`🕌 حان وقت صلاة ${PNAME[p]}! ${B('دخلتَ','دخلتِ')} الجامع 💎 +١٠<br><small>الآن ${B('قم وصلِّ','قومي وصلّي')} صلاتك الحقيقية، ثم ${B('سجّلها','سجّليها')} 🤲</small>`,[['🤲 '+B('سأصلّي الآن','سأصلّي الآن'),()=>closeTo(()=>window.Salah&&Salah.openPray())],['لاحقًا',null,'sec']])});return}
       if(p){card(`🕌 ${B('زرتَ','زرتِ')} الجامع في صلاة ${PNAME[p]} ✔<br><small>هل ${B('صلّيتَ','صلّيتِ')}؟ ${B('سجّل','سجّلي')} صلاتك في «وضوئي وصلاتي»</small>`,[['🤲 سجلّ صلاتي',()=>closeTo(()=>window.Salah&&Salah.openPray())],['حسنًا',null,'sec']]);return}
       const n=nextPrayer();card(`🕌 الجامع ينتظرك${n?`<br><small>الأذان القادم: صلاة ${PNAME[n.p]} الساعة ${hm(n.t)} ⏰<br>${B('تعال','تعالي')} وقت الأذان ${B('وخذ','وخذي')} 💎١٠</small>`:''}`,[['حسنًا',null,'sec']])})},
-    water(){const c=chores('t')[0],i=c?c.i:null;if(i==null){card(`🌳 كل الأشجار شربت اليوم! ${B('أحسنت','أحسنتِ')} 💚<br><small>${B('تعال','تعالي')} غدًا، ستعطش أشجار جديدة</small>`,[['حسنًا',null,'sec']]);return}A.tree(i)},
+    water(){const c=chores('t')[0],i=c?c.i:null;if(sideFirst(c,'🌳 الأشجار العطشى الباقية'))return;if(i==null){card(`🌳 كل الأشجار شربت اليوم! ${B('أحسنت','أحسنتِ')} 💚<br><small>${B('تعال','تعالي')} غدًا، ستعطش أشجار جديدة</small>`,[['حسنًا',null,'sec']]);return}A.tree(i)},
     tree(i){const D=day();if(D.tr[i]||!thirsty().includes(i)){card('🌳 هذه الشجرة ليست عطشى الآن 💚');setTimeout(()=>card(''),1800);return}
       go(treeSpot(i),()=>{D.tr[i]=1;dsv();splash(S.userData.trees[i]);jewels(2);
         const left=thirsty().filter(k=>!D.tr[k]).length;card(`💧 ${B('سقيتَ','سقيتِ')} الشجرة فكبرت وفرحت! 🌳${left?`<br><small>باقي ${arn(left)} ${left==1?'شجرة عطشى':'أشجار عطشى'} (عليها 💧)</small>`:'<br><small>كل الأشجار شربت اليوم 💚</small>'}`,nextBtn());unmark(S.userData.trees[i])})},
     litter(i){const D=day();if(D.lt[i])return;go(litSpot(i),()=>{D.lt[i]=1;dsv();jewels(1);unput((S.userData.lit||[])[i]);
       const left=litter().filter(k=>!D.lt[k]).length;card(`🧹 ${B('رفعتَ','رفعتِ')} النفايات ووضعتها في السلّة 🗑️<br><small>${left?`باقي ${arn(left)} في الطرق (عليها 🧹)`:'مدينتك نظيفة جميلة! ✨'}</small>`,nextBtn())})},
-    clean(){const c=chores('l')[0],i=c?c.i:null;if(i==null){card(`✨ ${B('مدينتك','مدينتكِ')} نظيفة اليوم! ${B('أحسنت','أحسنتِ')} 💚`,[['حسنًا',null,'sec']]);return}A.litter(i)},
+    clean(){const c=chores('l')[0],i=c?c.i:null;if(sideFirst(c,'🧹 النفايات الباقية'))return;if(i==null){card(`✨ ${B('مدينتك','مدينتكِ')} نظيفة اليوم! ${B('أحسنت','أحسنتِ')} 💚`,[['حسنًا',null,'sec']]);return}A.litter(i)},
     // (v15.7) 👋 سلّم على أقرب جار (أو ردّ على من يسلّم عليك الآن)
     salamNear(){const ps=life.peds,kp=kid.position;let bi=-1,bd=1e9;ps.forEach((P,i)=>{const u=P.userData.u;if(!P.visible||u.fade||u.trip<0&&!u.shep)return;const d=Math.hypot(P.position.x-kp.x,P.position.z-kp.z)-(u.greet>0?1e3:0);if(d<bd){bd=d;bi=i}});
       if(bi<0){card(`🙂 لا أحد في الشارع الآن… ${B('انتظر','انتظري')} قليلًا حتى يمرّ أحد الجيران 👋`);setTimeout(()=>card(''),2400);return}A.salam(bi)},
