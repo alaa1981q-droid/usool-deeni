@@ -99,12 +99,9 @@ document.head.appendChild(css);
    ١) 🎙️ صوت الشيخ
    ===================================================================== */
 const VO=[
- ['wel','👋','أول ما يدخل التطبيق',
+ ['wel','👋','أول مرة يفتح المدينة (طفل جديد فقط)',
   'السلام عليكم يا بطل، أنا الشيخ علاء. أهلًا بك في جنّتي الصغيرة. تعلّم دينك، وابنِ بيتك في الجنة بأعمالك الصالحة.',
   'السلام عليكم يا بطلة، أنا الشيخ علاء. أهلًا بكِ في جنّتي الصغيرة. تعلّمي دينكِ، وابني بيتكِ في الجنة بأعمالكِ الصالحة.'],
- ['back','💚','يرجع بعد غياب ٣ أيام',
-  'اشتقنا لك يا بطل! بيتك ومدينتك ينتظرونك. تعال نكمل رحلتنا.',
-  'اشتقنا لكِ يا بطلة! بيتكِ ومدينتكِ ينتظرونكِ. تعالي نكمل رحلتنا.'],
  ['stage','🏅','ينجح في مرحلة من الكتاب',
   'ما شاء الله! نجحتَ في المرحلة يا بطل. أنا فخورٌ بك، واصل إلى المرحلة التالية.',
   'ما شاء الله! نجحتِ في المرحلة يا بطلة. أنا فخورٌ بكِ، واصلي إلى المرحلة التالية.'],
@@ -114,27 +111,6 @@ const VO=[
  ['hifz','📖','يحفظ سورة',
   'أحسنت يا بطل! حفظتَ سورةً جديدة من القرآن. القرآن نورٌ في قلبك، بارك الله فيك.',
   'أحسنتِ يا بطلة! حفظتِ سورةً جديدة من القرآن. القرآن نورٌ في قلبكِ، بارك الله فيكِ.'],
- ['level','⬆️','يرتفع مستواه',
-  'مبروك! ارتفعت درجتك يا بطل. كل عملٍ صالح يرفعك، فاستمرّ.',
-  'مبروك! ارتفعت درجتكِ يا بطلة. كل عملٍ صالح يرفعكِ، فاستمرّي.'],
- ['pray','🤲','يسجّل صلاته (مرة باليوم)',
-  'تقبّل الله صلاتك يا بطل. حافظ على صلاتك في وقتها، فالله يحبّ المصلّين.',
-  'تقبّل الله صلاتكِ يا بطلة. حافظي على صلاتكِ في وقتها، فالله يحبّ المصلّين.'],
- ['wird7','🔥','يداوم على الورد ٧ أيام',
-  'ما شاء الله! سبعة أيامٍ وأنت مداومٌ على وردك. هكذا يكون الأبطال.',
-  'ما شاء الله! سبعة أيامٍ وأنتِ مداومةٌ على وردكِ. هكذا تكون البطلات.'],
- ['hero','👑','يصير من أبطال الأسبوع',
-  'مبارك! أنت من أبطال هذا الأسبوع. أنا فخورٌ بك جدًّا يا بطل.',
-  'مبارك! أنتِ من بطلات هذا الأسبوع. أنا فخورٌ بكِ جدًّا يا بطلة.'],
- ['ahl','👨‍👩‍👧','يخلّص مهمة من أهله',
-  'أحسنت يا بطل! أطعتَ أهلك وأسعدتهم، والله يحبّ من يبرّ والديه.',
-  'أحسنتِ يا بطلة! أطعتِ أهلكِ وأسعدتِهم، والله يحبّ من يبرّ والديه.'],
- ['card','🃏','يجمع كل البطاقات',
-  'ما شاء الله! جمعتَ كلّ البطاقات. أنت بطلٌ مجتهد، بارك الله فيك.',
-  'ما شاء الله! جمعتِ كلّ البطاقات. أنتِ بطلةٌ مجتهدة، بارك الله فيكِ.'],
- ['bday','🎂','يوم ميلاده',
-  'كل عامٍ وأنت بخير يا بطل! أسأل الله أن يجعل عمرك كلّه طاعةً وسعادة.',
-  'كل عامٍ وأنتِ بخير يا بطلة! أسأل الله أن يجعل عمركِ كلّه طاعةً وسعادة.'],
  ['ram','🌙','أول ما يفتح التطبيق في رمضان',
   'رمضان كريم يا بطل! هذا شهر الخير. افتح باب رمضان كلّ يوم، واربح الجوائز.',
   'رمضان كريم يا بطلة! هذا شهر الخير. افتحي باب رمضان كلّ يوم، واربحي الجوائز.'],
@@ -162,8 +138,10 @@ async function prefetch(){for(const v of VO){const id=vKey(v[0]);if(!vidx[id])co
   await getAudio(v[0]);await new Promise(r=>setTimeout(r,1200))}}
 let cur=null,lastPlay=0;
 /* play(k): يُسمِع الطفل صوت الشيخ لهذه المناسبة (إن كان مسجّلًا). يرجع true إذا بدأ. */
-async function play(k,force){if(!hasV(k))return false;if(!force&&Date.now()-lastPlay<15000)return false;
-  const a=await getAudio(k);if(!a)return false;lastPlay=Date.now();
+const RARE={wel:1,all:1,ram:1,eid:1};
+async function play(k,force){if(!VK(k)||!hasV(k))return false;if(!force&&Date.now()-lastPlay<15000)return false;
+  if(!RARE[k]&&hs.vd===dk())return false; // صوت الشيخ مرة واحدة في اليوم فقط حتى لا يملّ الطفل
+  const a=await getAudio(k);if(!a)return false;if(!RARE[k]){hs.vd=dk();hsave()}lastPlay=Date.now();
   if(cur){try{cur.au.pause()}catch(e){}cur.el.remove();cur=null}
   const v=VK(k)||['','🎙️',''],el=document.createElement('div');el.className='hvb';
   el.innerHTML=`<div class="av">🎙️</div><div><b>🎙️ رسالة من الشيخ علاء</b><small>${v[1]} ${B('اسمع','اسمعي')} ما يقوله لك</small></div><div class="wv"><i></i><i></i><i></i><i></i></div><button class="pp" aria-label="تشغيل">▶</button><button class="cl" aria-label="إغلاق">✖</button>`;
@@ -564,18 +542,18 @@ function hookMore(){const m=$q('#wjMoreBody');if(!m||$q('#hmMore'))return;
 function homeBits(){ramTile();taskTile()}
 const oRH=window.renderHome;if(typeof oRH=='function')window.renderHome=function(){const r=oRH.apply(this,arguments);try{homeBits()}catch(e){}return r};
 
-// صوت الترحيب / العودة
-const lastOpen=hs.lo||0;hs.lo=Date.now();hsave();
-function greet(){if(busy()||!isOn('home'))return;
-  if(!hs.vwel&&hasV('wel')){if(Date.now()-lastPlay>15000){hs.vwel=1;hsave();play('wel',1)}return}
-  if(lastOpen&&Date.now()-lastOpen>3*864e5&&!hs.vback0&&hasV('back')){hs.vback0=1;play('back',1)}}
+// صوت الترحيب: للطفل الجديد فقط، أول مرة يفتح المدينة
+if(!hs.lo&&!hs.vwel)hs.nw=1;hs.lo=Date.now();hsave();
+function greet(){if(!hs.nw||hs.vwel||!hasV('wel')||!document.body.classList.contains('m3on'))return;
+  if(!greet.t)greet.t=Date.now();if(Date.now()-greet.t<4000)return;
+  hs.vwel=1;delete hs.nw;hsave();play('wel',1)}
 
 let ticks=0;
 function loop(){ticks++;try{
   if(!idxLoaded&&ticks%2==0&&navigator.onLine)loadIdx();
   if(ticks==2)certCheck();
   if(ticks>=2&&ticks%2==0){cardCheck();bdayCheck()}
-  if(ticks>=3)greet();
+  if(ticks>=2)greet();
   if(ticks%6==3)feasts();
   const w=state.wird;if(w&&w.last==(new Date().toDateString())&&w.streak>0&&w.streak%7==0&&hs.vw7!==dk()&&hasV('wird7')&&!busy()){hs.vw7=dk();hsave();play('wird7',1)}
   if(ticks%12==0)homeBits();
