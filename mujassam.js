@@ -944,11 +944,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();farmAt(V?!!V.p
         const R2=new T.Group();R2.position.set(x+.75,9.1,z);G.add(R2);add(new T.SphereGeometry(.24,10,8),tw,0,0,0,R2);for(let b=0;b<3;b++){const B2=new T.Mesh(bladeG,tw);B2.castShadow=true;B2.rotation.x=b*Math.PI*2/3;R2.add(B2)}
         const rd=add(new T.SphereGeometry(.1,8,6),new T.MeshBasicMaterial({color:0xff2020}),x,9.45,z,G);
         anim.push((t,dt)=>{R2.rotation.x+=dt*(1.1+i*.15);rd.visible=night&&(t*.8+i*.3)%2<1})});
-      // أبراج الأسلاك نحو المدينة
-      const pyl=(x,z)=>{add(new T.CylinderGeometry(.08,.42,6.4,4),fm,x,3.2,z,G);[5.6,4.7].forEach(y=>box(.1,.1,2.4,fm,x,y,z,G))};
-      const wire=(a,b)=>{const d=new T.Vector3(b[0]-a[0],b[1]-a[1],b[2]-a[2]),m=new T.Mesh(new T.CylinderGeometry(.018,.018,d.length(),4),M(0x2a2a2a));
-        m.position.set((a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2);m.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),d.normalize());m.castShadow=false;G.add(m)};
-      pyl(10.5,6.4);pyl(16.5,6.4);[-1.1,1.1].forEach(k=>{wire([3.4,2.5,4.4+k*.6],[10.5,5.55,6.4+k]);wire([10.5,5.55,6.4+k],[16.5,5.55,6.4+k])});
+      // (v24.5) أُزيلت أبراج الأسلاك: من فوق كانت تبدو خطوطًا سوداء على العشب
       if(!V&&!D3.pw)mark(G,'⚡','#f0a020',4.6,3.4,.9)}
     // 🚰 حنفية عامّة على الرصيف الأيمن قرب السبيل: في بعض الأيام تبقى مفتوحة والماء يضيع
     {const G=new T.Group();G.position.set(TAPP[0],0,TAPP[1]);G.userData.act='leak';S.add(G);const mt=M(0x9aa3ad,{metalness:.7,roughness:.3});
