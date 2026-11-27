@@ -103,9 +103,12 @@ const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform=='Ma
    لذلك نُحضّره فورًا عند الضغط على المايك، قبل انتظار إذن المايك. */
 let preAC=null;
 function warm(){try{if(!preAC||preAC.state=='closed')preAC=new (window.AudioContext||window.webkitAudioContext)();if(preAC.state=='suspended')preAC.resume()}catch(e){preAC=null}}
-async function openMic(){
+/* raw=true: بلا «تنظيف الضوضاء» ولا تقليل الصدى. بعض مايكات الحاسوب (Intel Smart Sound، مايك بعدّة قنوات)
+   يصلنا صوتها شبه صامت مع هذه المعالجة في Chrome/Edge، فنجرّب الصوت الخام إذا لم نسمع شيئًا. */
+async function openMic(raw){
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw {name:'NoMedia'};
-  try{return await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}})}
+  const c=raw?{echoCancellation:false,noiseSuppression:false,autoGainControl:false}:{echoCancellation:true,noiseSuppression:true,autoGainControl:true};
+  try{return await navigator.mediaDevices.getUserMedia({audio:c})}
   catch(e){if(e&&(e.name=='NotAllowedError'||e.name=='SecurityError'))throw e;
     return await navigator.mediaDevices.getUserMedia({audio:true})}}
 /* رسالة واضحة للطفل/الأهل حسب سبب فشل المايك */
@@ -123,17 +126,24 @@ function quietMsg(dead){return dead
   :'🎤 المايك لا يوصل أي صوت. في الحاسوب: اضغط 🔒 بجانب الرابط ← الميكروفون واختر المايك الصحيح، وتأكّد أنه غير مكتوم (زر الكتم في السمّاعة أو الكيبورد)، ثم أعد المحاولة'
   :B('لا أسمعك جيدًا 🎤 اقترب من المايك وارفع صوتك قليلًا','لا أسمعكِ جيدًا 🎤 اقتربي من المايك وارفعي صوتك قليلًا')}
 async function vad({onLevel,onUtter,onQuiet,minMs=650}){
-  const stream=await openMic();
+  let stream=await openMic();
   let ac=preAC;preAC=null;if(!ac||ac.state=='closed')ac=new (window.AudioContext||window.webkitAudioContext)();
   if(ac.state=='suspended')await Promise.race([ac.resume(),new Promise(r=>setTimeout(r,1500))]);
-  const src=ac.createMediaStreamSource(stream),an=ac.createAnalyser();an.fftSize=1024;src.connect(an);
-  const buf=new Float32Array(an.fftSize);let floor=[],thr=.02,talking=false,start=0,lastLoud=0,raf=0,stopped=false,quietT=0,peak=0;const t0=performance.now();
+  const an=ac.createAnalyser();an.fftSize=1024;let src=ac.createMediaStreamSource(stream);src.connect(an);
+  const buf=new Float32Array(an.fftSize);
+  /* العتبة نسبية لضجيج الغرفة (يُتابَع باستمرار) وليست رقمًا ثابتًا، حتى يعمل المايك الضعيف أيضًا (v25.8) */
+  let noise=-1,thr=.02,talking=false,start=0,lastLoud=0,raf=0,stopped=false,quietT=0,peak=0,rawTried=false,t0=performance.now(),tS=t0;
+  async function goRaw(){rawTried=true;try{const ns=await openMic(true);if(stopped){ns.getTracks().forEach(x=>x.stop());return}
+      try{src.disconnect()}catch(e){}stream.getTracks().forEach(x=>x.stop());stream=ns;src=ac.createMediaStreamSource(ns);src.connect(an);noise=-1;peak=0;tS=performance.now()}catch(e){}}
   function loop(){if(stopped)return;an.getFloatTimeDomainData(buf);let s=0;for(const v of buf)s+=v*v;const rms=Math.sqrt(s/buf.length),t=performance.now();
-    if(t-t0<500){floor.push(rms)}else if(floor){floor.sort((a,b)=>a-b);thr=Math.max(.012,(floor[Math.floor(floor.length/2)]||0)*3.2);floor=null}
-    const loud=!floor&&rms>thr;onLevel&&onLevel(Math.min(1,rms/(thr*3)),loud);
-    if(rms>peak)peak=rms;
-    // ٨ ثوانٍ بلا أي صوت → غالبًا المايك مكتوم أو غير موصول أو المتصفح اختار مايكًا آخر
-    if(!lastLoud&&t-t0>8000&&t-quietT>8000){quietT=t;onQuiet&&onQuiet(peak<.002)}
+    if(noise<0)noise=rms;else noise+=(rms-noise)*(rms<noise?.08:.0015);
+    thr=Math.max(.0028,noise*2.8);
+    const warm=t-tS<400,loud=!warm&&(rms>thr||(talking&&rms>thr*.65));onLevel&&onLevel(Math.min(1,rms/(thr*3)),loud);
+    if(!warm&&rms>peak)peak=rms;
+    // ٥ ثوانٍ بلا صوت مع المعالجة → نجرّب الصوت الخام مرة واحدة
+    if(!lastLoud&&!rawTried&&t-t0>5000)goRaw();
+    // ٩ ثوانٍ بلا أي صوت → غالبًا المايك مكتوم أو غير موصول أو المتصفح اختار مايكًا آخر
+    if(!lastLoud&&t-t0>9000&&t-quietT>8000){quietT=t;onQuiet&&onQuiet(peak<.0015)}
     if(loud){lastLoud=t;if(!talking){talking=true;start=t}}
     else if(talking&&t-lastLoud>480){talking=false;const d=lastLoud-start;if(d>=minMs)onUtter&&onUtter(d)}
     raf=requestAnimationFrame(loop)}

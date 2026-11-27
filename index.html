@@ -516,8 +516,8 @@ html.lowfx #home .hero.kid .cl{display:none}
 <div class="celebrate" id="celebrate" role="dialog" aria-live="assertive"><div class="in" id="celebIn"></div></div>
 <div class="modal" id="modal"><div class="in" id="modalIn"></div></div>
 
-<script src="seal.js?v=25.7"></script><!-- ختم التقدّم: لازم يكون أول ملف -->
-<script src="questions.js?v=25.7"></script><!-- غيّر ?v= مع APP_VER حتى لا يأخذ المتصفح نسخة قديمة -->
+<script src="seal.js?v=25.8"></script><!-- ختم التقدّم: لازم يكون أول ملف -->
+<script src="questions.js?v=25.8"></script><!-- غيّر ?v= مع APP_VER حتى لا يأخذ المتصفح نسخة قديمة -->
 <script>
 /* ---------- helpers ---------- */
 const AR='٠١٢٣٤٥٦٧٨٩';
@@ -1288,33 +1288,33 @@ document.addEventListener('keydown',e=>{if($('#zoomv').classList.contains('on'))
   if(!$('#reader').classList.contains('on'))return;
   if(e.key=='ArrowLeft')rGo(rCur+1);else if(e.key=='ArrowRight')rGo(rCur-1);else if(e.key=='Escape')closeReader()});
 
-const APP_VER='25.7';
+const APP_VER='25.8';
 $('#verLine').textContent=`الإصدار ${ar(APP_VER).replace('.','٫')} · ${ar(ALLQ.length)} سؤالًا`;
 renderHome();
 if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 </script>
-<script src="online.js?v=25.7"></script>
-<script src="bayt.js?v=25.7"></script>
-<script src="nafsak.js?v=25.7"></script>
-<script src="hifz.js?v=25.7"></script>
-<script src="jannah.js?v=25.7"></script>
-<script src="baytrace.js?v=25.7"></script>
-<script src="wird.js?v=25.7"></script>
-<script src="sawt.js?v=25.7"></script>
-<script src="salah.js?v=25.7"></script>
-<script src="adhan.js?v=25.7"></script>
-<script src="alqab.js?v=25.7"></script>
-<script src="binaa.js?v=25.7"></script>
-<script src="madina.js?v=25.7"></script>
-<script src="mujassam.js?v=25.7"></script>
-<script src="idara.js?v=25.7"></script>
-<script src="parent.js?v=25.7"></script>
-<script src="qisas.js?v=25.7"></script>
-<script src="bookdl.js?v=25.7"></script>
-<script src="ramz.js?v=25.7"></script>
-<script src="sighar.js?v=25.7"></script>
-<script src="wajiha.js?v=25.7"></script>
-<script src="hamas.js?v=25.7"></script>
+<script src="online.js?v=25.8"></script>
+<script src="bayt.js?v=25.8"></script>
+<script src="nafsak.js?v=25.8"></script>
+<script src="hifz.js?v=25.8"></script>
+<script src="jannah.js?v=25.8"></script>
+<script src="baytrace.js?v=25.8"></script>
+<script src="wird.js?v=25.8"></script>
+<script src="sawt.js?v=25.8"></script>
+<script src="salah.js?v=25.8"></script>
+<script src="adhan.js?v=25.8"></script>
+<script src="alqab.js?v=25.8"></script>
+<script src="binaa.js?v=25.8"></script>
+<script src="madina.js?v=25.8"></script>
+<script src="mujassam.js?v=25.8"></script>
+<script src="idara.js?v=25.8"></script>
+<script src="parent.js?v=25.8"></script>
+<script src="qisas.js?v=25.8"></script>
+<script src="bookdl.js?v=25.8"></script>
+<script src="ramz.js?v=25.8"></script>
+<script src="sighar.js?v=25.8"></script>
+<script src="wajiha.js?v=25.8"></script>
+<script src="hamas.js?v=25.8"></script>
 <script>/* (v21.5) إذا لم يُعرف الجهاز من مواصفاته: نقيس سرعة الرسم مرّة على الرئيسية؛ أقل من ٣٢ إطارًا بالثانية = تلفون بسيط */
 (function(){var K='jannah_lowfx';try{if(localStorage.getItem(K)!==null||document.documentElement.classList.contains('lowfx'))return}catch(e){return}
 addEventListener('load',function(){setTimeout(function(){var h=document.getElementById('home');if(document.hidden||!h||!h.classList.contains('on'))return;
