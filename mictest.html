@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>فحص المايك</title><meta name="robots" content="noindex">
+<style>
+body{font-family:system-ui,Tahoma,sans-serif;background:#f3f8f4;color:#123;margin:0;padding:14px;max-width:760px;margin:auto}
+h1{font-size:22px;margin:6px 0}p{line-height:1.7;margin:6px 0}
+button{font:inherit;font-weight:800;font-size:18px;border:0;border-radius:14px;padding:12px 18px;background:#1fa463;color:#fff;box-shadow:0 4px 0 #13744a;cursor:pointer;margin:4px}
+select{font:inherit;font-size:15px;padding:6px;border-radius:10px;max-width:100%}
+.row{background:#fff;border-radius:14px;padding:8px 10px;margin:8px 0;box-shadow:0 3px 0 #d5e6da}
+.nm{font-weight:800;font-size:15px}.bar{height:18px;background:#e4eee7;border-radius:9px;overflow:hidden;margin:4px 0}
+.bar i{display:block;height:100%;width:0;background:#1fa463;transition:width .08s}
+.v{font-size:13px;color:#456;direction:ltr;text-align:left;font-family:monospace}
+#info{font-size:12px;direction:ltr;text-align:left;white-space:pre-wrap;background:#fff;border-radius:12px;padding:8px;font-family:monospace}
+</style></head><body>
+<h1>🎤 فحص المايك</h1>
+<p>اضغط «ابدأ الفحص» واسمح للمايك، ثم قل «سبحان الله» عدّة مرات بصوتك العادي لمدّة ١٠ ثوانٍ. بعدها صوّر الشاشة كلّها وأرسلها.</p>
+<div><select id="dev"><option value="">المايك الافتراضي</option></select></div>
+<button id="go">▶️ ابدأ الفحص</button>
+<div id="rows"></div>
+<div id="info"></div>
+<script>
+const $=s=>document.querySelector(s),rows=$('#rows'),info=$('#info');let running=[],ac=null;
+const CF=[
+ ['أ) عادي (مع تنظيف الضوضاء)',{echoCancellation:true,noiseSuppression:true,autoGainControl:true}],
+ ['ب) خام بلا معالجة',{echoCancellation:false,noiseSuppression:false,autoGainControl:false}],
+ ['ج) خام، قناة واحدة',{echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:1}],
+ ['د) فقط رفع الصوت التلقائي',{echoCancellation:false,noiseSuppression:false,autoGainControl:true}]];
+const db=x=>x>0?(20*Math.log10(x)).toFixed(0):'-∞';
+function meter(name,an,ch){const d=document.createElement('div');d.className='row';d.innerHTML=`<div class="nm">${name}</div><div class="bar"><i></i></div><div class="v"></div>`;rows.appendChild(d);
+  const bar=d.querySelector('i'),v=d.querySelector('.v'),buf=new Float32Array(an.fftSize);let mx=0,mn=1,t0=performance.now();
+  return ()=>{an.getFloatTimeDomainData(buf);let s=0;for(const x of buf)s+=x*x;const r=Math.sqrt(s/buf.length);
+    if(performance.now()-t0>400){mx=Math.max(mx,r);mn=Math.min(mn,r)}
+    bar.style.width=Math.min(100,Math.max(0,(20*Math.log10(r+1e-9)+80)/70*100))+'%';
+    v.textContent=`now ${db(r)} dB | max ${db(mx)} | min ${db(mn)} | ratio ${(mx/(mn||1e-9)).toFixed(1)}${ch?' | '+ch:''}`}}
+async function start(){running.forEach(s=>s.getTracks().forEach(t=>t.stop()));running=[];rows.innerHTML='';
+  try{if(ac)ac.close()}catch(e){}ac=new (window.AudioContext||window.webkitAudioContext)();await ac.resume();
+  const dev=$('#dev').value,fns=[],lines=['ua: '+navigator.userAgent,'ac: '+ac.sampleRate+' Hz, '+ac.state];
+  for(const [nm,c] of CF){const cc=Object.assign({},c);if(dev)cc.deviceId={exact:dev};
+    try{const s=await navigator.mediaDevices.getUserMedia({audio:cc});running.push(s);const tr=s.getAudioTracks()[0],st=tr.getSettings?tr.getSettings():{};
+      lines.push(nm.slice(0,2)+' '+tr.label+' | ch '+st.channelCount+' sr '+st.sampleRate+' ec '+st.echoCancellation+' ns '+st.noiseSuppression+' agc '+st.autoGainControl+' muted '+tr.muted);
+      const src=ac.createMediaStreamSource(s),an=ac.createAnalyser();an.fftSize=1024;src.connect(an);fns.push(meter(nm,an,'ch '+st.channelCount));
+      if(nm.startsWith('ب')&&(st.channelCount||1)>1){const sp=ac.createChannelSplitter(st.channelCount);src.connect(sp);
+        for(let k=0;k<st.channelCount;k++){const a2=ac.createAnalyser();a2.fftSize=1024;sp.connect(a2,k);fns.push(meter('   ب'+(k+1)+') القناة '+(k+1)+' وحدها',a2))}}}
+    catch(e){lines.push(nm.slice(0,2)+' ERROR '+e.name+' '+e.message)}}
+  try{const ds=await navigator.mediaDevices.enumerateDevices();const sel=$('#dev'),cur=sel.value;sel.innerHTML='<option value="">المايك الافتراضي</option>';
+    ds.filter(d=>d.kind=='audioinput').forEach(d=>{const o=document.createElement('option');o.value=d.deviceId;o.textContent=d.label||d.deviceId.slice(0,8);sel.appendChild(o);lines.push('dev: '+d.label)});sel.value=cur}catch(e){}
+  lines.push('SR: '+!!(window.SpeechRecognition||window.webkitSpeechRecognition));info.textContent=lines.join('\n');
+  (function loop(){fns.forEach(f=>f());requestAnimationFrame(loop)})()}
+$('#go').onclick=start;$('#dev').onchange=()=>{if(running.length)start()};
+</script></body></html>
