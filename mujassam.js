@@ -232,13 +232,17 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();farmAt(V?!!V.p
   // (v13.6) أشجار أكثر واقعية (طلب الشيخ): جذع متدرّج بلحاء وأغصان، وتاج من كتل أوراق متعرّجة بدرجات أخضر طبيعية.
   // ثلاثة أنواع حسب المكان: شجرة مستديرة، شجرة طويلة (كالكالبتوس)، وشجرة برتقال بثمارها. وقليل منها مزهر بالوردي.
   const tgMk=dt=>[1,2.7,4.3].map(sd=>{const g=new T.IcosahedronGeometry(1,dt),p=g.attributes.position,v=new T.Vector3();
-    const nr=[];for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i);v.normalize();nr.push(v.x,v.y*.8+.2,v.z);v.multiplyScalar(1+.13*Math.sin(v.x*5.3+sd)*Math.cos(v.y*4.1+sd*2)+.07*Math.sin(v.z*9+sd));p.setXYZ(i,v.x,v.y,v.z)}
-    g.setAttribute('normal',new T.Float32BufferAttribute(nr,3));g.normalizeNormals();return g}); // (v24.7) أعمدة ناعمة (اتجاه الكرة) فتبدو كتلة أوراق لا صخرة مضلّعة
+    const nr=[],cl=[];for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i);v.normalize();nr.push(v.x,v.y*.8+.2,v.z);
+      // (v24.8) كتلة أوراق: سطح متكتّل (عناقيد صغيرة) + ظلّ داخلي أسفلها وضوء أعلاها + تبرقش ورق
+      const sp=Math.sin(v.x*17+sd*3)*Math.sin(v.y*15+sd)*Math.sin(v.z*16+sd*2);
+      cl.push(...[0,0,0].map(()=>Math.max(.5,Math.min(1.15,.8+.24*v.y+.13*sp+.05*Math.sin(v.x*31+v.z*27)))));
+      v.multiplyScalar(1+.13*Math.sin(v.x*5.3+sd)*Math.cos(v.y*4.1+sd*2)+.07*Math.sin(v.z*9+sd)+.07*sp);p.setXYZ(i,v.x,v.y,v.z)}
+    g.setAttribute('normal',new T.Float32BufferAttribute(nr,3));g.normalizeNormals();g.setAttribute('color',new T.Float32BufferAttribute(cl,3));return g}); // (v24.7) أعمدة ناعمة (اتجاه الكرة) فتبدو كتلة أوراق لا صخرة مضلّعة
   // (v17.8) فحص التعليق: أوراق الشجر كانت أثقل شيء في المدينة (٣٢٠ مثلثًا لكل كتلة، ×٢ للظل) ← الأشجار البعيدة والسياج بكتل أخفّ (٨٠)
   const TG=tgMk(2),TGL=tgMk(1);
   const TRK=new T.CylinderGeometry(.13,.22,1,8),BRG=new T.CylinderGeometry(.045,.085,1,6),FRG=new T.SphereGeometry(.075,8,6);
   const bark=M(night?0x4a3626:0x6b4a2f,{roughness:1});
-  const LVm=n=>({color:n,roughness:.9}); // (v24.7) تظليل ناعم: الأوراق كانت مضلّعة كالصخر
+  const LVm=n=>({color:n,roughness:.9,vertexColors:true}); // (v24.7) تظليل ناعم: الأوراق كانت مضلّعة كالصخر
   // (v14.5) ألوان الأوراق حسب الفصل الحقيقي: خريف أصفر وبرتقالي، شتاء أخضر هادئ، ربيع وصيف أخضر زاهٍ (وأزهار أكثر في الربيع)
   // (v24.7) كل شجرة بلون واحد (درجة غامقة وأخرى فاتحة منه) بدل خليط الأصفر والبرتقالي والأخضر في الشجرة نفسها
   const SEA=season(),SCL={au:[[0xd49a2c,0xd0702a,0x8f9a3a,0x5f8f38],[0xf0c04a,0xec9446,0xb2b452,0x7aaa48]],wi:[[0x4a7d42,0x557f3e,0x3d6e3d,0x5f8a48],[0x5f8f4e,0x6a9450,0x4f8048,0x76a058]]}[SEA]||[[0x3f8f3a,0x4f9e3c,0x2f7d3a,0x5aa845],[0x5aa848,0x66b34a,0x449545,0x74bd52]];
@@ -249,9 +253,12 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();farmAt(V?!!V.p
     const tall=kind===1,th=tall?1.75:1.15,m1=LF[h%4],m2=bl?BLS:LF2[h%4];
     const tk=add(TRK,bark,0,th/2,0,G);tk.scale.set(1,th,1);
     [[.55,0],[-.5,2.2],[.45,4.1]].forEach(([lean,ry])=>{const b=new T.Group();b.position.set(0,th*.82,0);b.rotation.set(0,ry,0);G.add(b);const m=add(BRG,bark,0,.3,0,b);m.scale.set(1,.65,1);b.children[0].rotation.z=lean;m.position.x=-Math.sin(lean)*.3});
-    const cl=tall?[[0,2.35,0,.72,1.35],[.32,1.85,.18,.58,1],[-.3,1.95,-.2,.58,1],[0,3.05,0,.48,.9],[.1,2.6,-.35,.45,.9]]
-      :[[0,1.95,0,.95,.78],[.55,1.75,.2,.65,.72],[-.5,1.8,-.25,.7,.72],[.1,1.72,-.55,.6,.72],[-.15,1.78,.55,.6,.72],[.05,2.45,.05,.62,.72]];
-    const tg=Math.hypot(x,z)>26?TGL:TG;cl.forEach(([a,b,c,r,sy],i)=>{const m=add(tg[(h+i)%3],bl?(i>2?m2:m1):b>=(tall?2.3:1.9)?m2:m1,a,b,c,G);m.scale.set(r,r*sy,r);m.rotation.y=i*1.3});
+    // (v24.8) طلب الشيخ: شجر أكثر واقعية → تاج غير منتظم من عناقيد أوراق كثيرة صغيرة حول قلب أغمق، يظهر منه الجذع والأغصان
+    let hs=h*9301+49297;const rn=()=>{hs=(hs*16807)%2147483647;return hs/2147483647};
+    const far=Math.hypot(x,z)>26,CY=tall?2.5:1.95,RX=tall?.62:.92,RY=tall?1.05:.72,nS=far?6:tall?10:9;
+    const core=add(TG[h%3],m1,0,CY-.05,0,G);core.scale.set(RX*.82,RY*.8,RX*.82);
+    for(let i=0;i<nS;i++){const yy=.92-1.55*(i+.5)/nS,rr=Math.sqrt(Math.max(.1,1-yy*yy)),ph=i*2.399+h,sz=(.36+rn()*.2)*(tall?1:1.25);
+      const m=add((far?TGL:TG)[(h+i)%3],bl?(yy>-.1?m2:m1):yy>.05?m2:m1,Math.cos(ph)*rr*RX*.82,CY+yy*RY*.85,Math.sin(ph)*rr*RX*.82,G);m.scale.set(sz,sz*(.8+rn()*.25),sz);m.rotation.set(rn()*3,rn()*3,0)}
     if(kind===2&&!bl)for(let i=0;i<9;i++){const a=i*2.4+h,y=1.45+(i*37%10)/10*.95,r=Math.sqrt(Math.max(.05,1-((y-1.95)/.8)**2))*.98;add(FRG,FRT,Math.cos(a)*r,y,Math.sin(a)*r,G)}};
   const anim=[];S.userData.anim=anim;
   // (v13.6) نخلة واقعية: جذع منحنٍ بحلقات، وسعف متدلٍّ، وعذوق تمر
@@ -2202,14 +2209,14 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
   const cam=new T.PerspectiveCamera(45,W/H,.6,950);let S=makeScene(night);
   if(!cam0.dist)cam0.dist=Math.min(92,Math.max(48,40/(W/H))); // (v15.5) طلب الشيخ: الكاميرا أبعد قليلًا لتُرى المدينة أكثر، والطفل يقرّب بإصبعيه
   let {th,ph,dist}=cam0,drag=null,pinch=0,down=null;const pts=new Map(),MAXD=110;let mid=null;
-  // City3D.debugLook=[x,y,z,dist] للتجربة فقط: يدور حول نقطة قريبة (مثل المزرعة)
+  // City3D.debugLook=[x,y,z,dist,pitch?] للتجربة فقط: يدور حول نقطة قريبة (مثل المزرعة)
   // (v15.3) طلب الشيخ: تقليب المدينة صعب على الموبايل → الكاميرا تطير بنعومة إلى مكان (flyTo) ثم تدور حوله، وترجع للمدينة كلها
   const C0=[0,0,0],LK0=[0,1.5,-5],CC=C0.slice(),LK=LK0.slice();let goal=null,foc=null;
   function flyTo(g){goal=g}
   function stepFly(dt){if(!goal)return;const k=Math.min(1,dt*2.6),lr=(a,b)=>a+(b-a)*k;for(let i=0;i<3;i++){CC[i]=lr(CC[i],goal.c[i]);LK[i]=lr(LK[i],goal.l[i])}
     let da=goal.th-th;da=Math.atan2(Math.sin(da),Math.cos(da));th+=da*k;ph=lr(ph,goal.ph);dist=lr(dist,goal.dist);
     if(Math.abs(da)<.003&&Math.abs(dist-goal.dist)<.05&&Math.hypot(CC[0]-goal.c[0],CC[2]-goal.c[2])<.03)goal=null}
-  const place=()=>{const L=window.City3D&&City3D.debugLook,c=L||CC,d=L?L[3]:dist;cam.position.set(c[0]+d*Math.sin(th)*Math.sin(ph),c[1]+d*Math.cos(ph),c[2]+d*Math.cos(th)*Math.sin(ph));L?cam.lookAt(c[0],c[1],c[2]):cam.lookAt(LK[0],LK[1],LK[2])};
+  const place=()=>{const L=window.City3D&&City3D.debugLook,c=L||CC,d=L?L[3]:dist,P=L&&L[4]!=null?L[4]:ph;cam.position.set(c[0]+d*Math.sin(th)*Math.sin(P),c[1]+d*Math.cos(P),c[2]+d*Math.cos(th)*Math.sin(P));L?cam.lookAt(c[0],c[1],c[2]):cam.lookAt(LK[0],LK[1],LK[2])};
   // الشخصية: تبدأ عند باب البيت
   let bKey=(window.Binaa?Binaa.code()+'|'+(Binaa.job?Binaa.job.p+(Binaa.job.ready?'r':''):''):'')+'|'+dirtLv();
   const life=makeLife(night);S.add(life.g);let prC=null,prAt=0;const sounds=makeSounds(night);if(window.City3D)City3D._life=life;
