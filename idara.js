@@ -440,6 +440,7 @@ async function panel(){const API=O();heroes=null;all=null;view='main';
       <button id="tNreq" style="grid-column:1/-1"><span>📨</span><b>طلبات تغيير الأسماء</b><small id="idNreqN">⏳</small></button>
       <button id="tFb" style="grid-column:1/-1"><span>📬</span><b>رسائل الأطفال</b><small id="idFbN">⏳</small></button>
       <button id="tReps" style="grid-column:1/-1"><span>🚩</span><b>بلاغات الأسماء</b><small id="idRepN">⏳</small></button>
+      <button id="tYt" style="grid-column:1/-1"><span>📺</span><b>أحدث فيديو للأهل</b><small>ضع رابط فيديو يوتيوب فيظهر في صفحة «للأهل»</small></button>
       <button id="tVoice" style="grid-column:1/-1"><span>🎙️</span><b>صوتي للأطفال</b><small>اقرأ العبارة بصوتك فيسمعها الأطفال عند كل إنجاز</small></button>
     </div>
     <div class="idbox"><h3>📊 إحصائيات التطبيق</h3><div id="idStats"><p class="tip">⏳</p></div></div>
@@ -452,7 +453,7 @@ async function panel(){const API=O();heroes=null;all=null;view='main';
   $('#tFb').onclick=()=>openFb();loadFb(API).then(()=>{const e=$('#idFbN');if(e)e.textContent=fbSum()});
   loadReqs(API).then(()=>{const e=$('#idNreqN');if(e)e.textContent=reqSum()});
   $('#tFind').onclick=()=>{if(!all)return;openKids();setTimeout(()=>{const i=$('#kQ');if(i)i.focus()},150)};
-  $('#tMsg').onclick=()=>sendNews(API,0);$('#tPin').onclick=()=>sendNews(API,1);$('#tGift').onclick=()=>giftAll(API);$('#tRep').onclick=()=>report(API);$('#tVoice').onclick=()=>{if(window.Hamas)Hamas.recorder()};
+  $('#tMsg').onclick=()=>sendNews(API,0);$('#tPin').onclick=()=>sendNews(API,1);$('#tGift').onclick=()=>giftAll(API);$('#tRep').onclick=()=>report(API);$('#tVoice').onclick=()=>{if(window.Hamas)Hamas.recorder()};$('#tYt').onclick=()=>ytSet(API);
   await loadKids(API);{const c=$('#idCnt'),n=(all||[]).length,g=(all||[]).filter(gone).length,u=(all||[]).filter(x=>!x.seen).length;
     const k=(i,v)=>{const e=$('#idK'+i);if(e)e.textContent=ar(v)};k(1,n);k(2,(all||[]).filter(p=>p.since&&Date.now()-p.since<864e5).length);k(3,(all||[]).filter(onNow).length);
     const fr=lastV?(all||[]).filter(fresh).length:0,nb=$('#idNew');
@@ -487,6 +488,19 @@ function giftAll(API){const n=(all||[]).length,opt=(a,u)=>a.map(v=>`<option valu
     <div class="nav"><button class="btn sec" data-close>إلغاء</button><button class="btn gold" id="gGo">🎁 أرسل الهدية</button></div>`,()=>{
     $('#gGo').onclick=async()=>{const j=+$('#gJ').value,x=+$('#gX').value,title=$('#gT').value.trim()||'🎁 هدية من المدير',msg=$('#gM').value.trim()||'هدية من الإدارة 🤍';
       try{await API.db.ref('news').push({title,msg,j,x,ts:firebase.database.ServerValue.TIMESTAMP});closeModal();API.toast('أُرسلت الهدية ✓');panel()}catch(e){API.toast('تعذّر الإرسال')}}})}
+// v25.3 (الشيخ): «📺 أحدث فيديو» يظهر للأهل في صفحة «للأهل». يُحفظ في voices/yt (مسار يكتبه المدير فقط ويقرؤه الجميع، بلا تغيير في القواعد،
+// ولا يُضاف إلى voicesIdx فلا يُعامَل كتسجيل صوتي). الصيغة: a = 'yt:<id>|<العنوان>'
+const ytId=u=>{u=(u||'').trim();const m=u.match(/(?:youtu\.be\/|[?&]v=|\/shorts\/|\/live\/|\/embed\/)([\w-]{11})/)||u.match(/^([\w-]{11})$/);return m?m[1]:''};
+async function ytSet(API){let cur=null;try{cur=(await API.db.ref('voices/yt').get()).val()}catch(e){}
+  const c=cur&&typeof cur.a=='string'&&cur.a.startsWith('yt:')?cur.a.slice(3).split('|'):null;
+  modal(`<div style="font-size:50px">📺</div><h3 style="margin:2px 0">أحدث فيديو للأهل</h3><p style="font-size:14px;margin:2px 0">يظهر في صفحة «للأهل» بصورته وعنوانه، ويفتح في يوتيوب</p>
+    ${c?`<p style="font-size:13.5px;margin:6px 0">الآن: <b>${esc(c[1]||'')}</b></p>`:''}
+    <label class="idlb">🔗 رابط الفيديو (انسخه من يوتيوب: مشاركة ← نسخ الرابط)</label><input class="inp" id="ytU" dir="ltr" placeholder="https://youtu.be/..." value="${c?'https://youtu.be/'+esc(c[0]):''}">
+    <label class="idlb">📝 عنوان قصير</label><input class="inp" id="ytT" maxlength="80" style="text-align:right" value="${c?esc(c[1]||''):''}" placeholder="مثل: تعليم الوضوء للأطفال">
+    <div class="nav">${c?'<button class="btn sec" id="ytDel">🗑️ احذفه</button>':''}<button class="btn sec" data-close>إلغاء</button><button class="btn gold" id="ytGo">✔ احفظ</button></div>`,()=>{
+    $('#ytGo').onclick=async()=>{const id=ytId($('#ytU').value),t=$('#ytT').value.replace(/[<>|]/g,'').trim().slice(0,80);if(!id){API.toast('الرابط غير صحيح — انسخه من زر «مشاركة» في يوتيوب');return}
+      try{await API.db.ref('voices/yt').set({a:'yt:'+id+'|'+(t||'فيديو جديد من قناتنا'),t:Date.now()});closeModal();API.toast('تمّ ✓ يظهر الآن في صفحة «للأهل»')}catch(e){API.toast('تعذّر الحفظ')}};
+    const d=$('#ytDel');if(d)d.onclick=async()=>{try{await API.db.ref('voices/yt').remove();closeModal();API.toast('حُذف ✓')}catch(e){API.toast('تعذّر الحذف')}}})}
 async function report(API){const L=all||[],t=Date.now(),D1=864e5,c=f=>ar(L.filter(f).length);
   let dl='—';try{dl=ar((await API.db.ref('stats/bookDl').get()).val()|0)}catch(e){}
   const txt=`📊 تقرير «جنّتي الصغيرة» — ${new Date().toLocaleDateString('ar-IQ',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}

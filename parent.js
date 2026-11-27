@@ -1,6 +1,11 @@
 /* 👨‍👩‍👧 تقرير الأهل: يسجّل عدد الأسئلة وصحّتها كل يوم (على هذا الجهاز فقط)، ويعرض للأهل ملخّص آخر ٧ أيام.
    الزر في أسفل الرئيسية، ويحميه سؤال حساب بسيط حتى لا يفتحه الطفل بالغلط. لا يرسل شيئًا إلى الإنترنت. */
 (function(){
+// v25.3: «📺 أحدث فيديو» يضعه المدير من الإدارة (voices/yt = 'yt:<id>|<عنوان>')
+function ytLast(){const el=document.getElementById('pgYt');if(!el)return;const A=window.OnlineAPI;if(!A||!A.db)return;
+  A.db.ref('voices/yt').get().then(s=>{const v=s.val();if(!v||typeof v.a!='string'||!v.a.startsWith('yt:'))return;const [id,t]=v.a.slice(3).split('|');if(!/^[\w-]{11}$/.test(id))return;
+    const e=x=>String(x||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    el.innerHTML=`<a class="pyv" href="https://youtu.be/${id}" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" alt="" loading="lazy"><span><small>🆕 أحدث فيديو من قناتنا</small><b>${e(t)}</b><i>▶️ شاهده الآن</i></span></a>`}).catch(()=>{})}
 const DAY=864e5,KEEP=21;
 state.act=state.act||{};state.stat=state.stat||{};
 const dkey=(t=Date.now())=>{const d=new Date(t);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
@@ -19,6 +24,7 @@ css.textContent=`
 .prow{display:flex;justify-content:space-between;gap:8px;padding:9px 4px;border-bottom:1px dashed var(--line);font-size:16px}.prow b{color:var(--ink);direction:rtl;unicode-bidi:isolate}
 .pbars{display:flex;gap:5px;justify-content:center;align-items:flex-end;height:70px;margin:8px 0 2px}.pbars span{flex:1;max-width:34px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;font-size:11px;color:var(--muted);height:100%}
 .pbars i{display:block;width:100%;border-radius:8px 8px 3px 3px;background:#c9d8cf;min-height:4px}.pbars span.on i{background:linear-gradient(#3fbf6f,#14794f)}
+.pyv{display:flex;gap:10px;align-items:center;margin:10px 0 4px;padding:8px;border-radius:16px;background:#fff;border:2px solid #ffd0cc;text-decoration:none;color:#3a2a2a;box-shadow:0 4px 0 #f0b4ae,0 8px 14px #0002,inset 0 2px 0 #fff}.pyv img{width:120px;aspect-ratio:16/9;object-fit:cover;border-radius:10px;flex:none;background:#eee}.pyv span{display:flex;flex-direction:column;gap:2px;min-width:0;text-align:right}.pyv small{font-size:12px;font-weight:800;color:#e2231a}.pyv b{font-size:15px;font-weight:900;line-height:1.35}.pyv i{font-style:normal;font-size:13px;font-weight:800;color:#e2231a}
 .pyt{display:block;margin:10px 0 4px;padding:11px 12px;border-radius:16px;background:linear-gradient(180deg,#ff5a4f,#e2231a);color:#fff;font-weight:900;font-size:17px;text-decoration:none;text-align:center;box-shadow:0 4px 0 #a5140e,0 8px 14px #0002,inset 0 2px 0 #ffffff55}.pyt small{display:block;font-size:12.5px;font-weight:700;opacity:.92}.pyt:active{transform:translateY(3px);box-shadow:0 1px 0 #a5140e}
 .ptip{background:#fff8e6;border:2px solid #f2d88a;border-radius:16px;padding:10px 12px;margin:10px 0;font-size:15px;line-height:1.8;text-align:right}
 `;
@@ -72,10 +78,11 @@ function report(){
     <p style="font-size:12px;color:var(--muted);margin:4px 0">الأرقام محفوظة على هذا الجهاز فقط، وتبدأ من يوم تحديث التطبيق.</p>
     <div class="nav"><button class="btn gold" id="pgTask">📝 مهمة لطفلي</button><button class="btn gold" id="pgRem">🔔 تذكير يومي</button></div>
     <button class="btn sec" id="pgLow" style="width:100%;margin-top:6px">📱 وضع التلفونات البسيطة: <b>${window.isLow&&isLow()?'شغّال ✔':'مطفأ'}</b><small style="display:block;font-size:12px;font-weight:700">إذا التطبيق يعلّق: يوقف الحركات الزخرفية ويخفّف المدينة</small></button>
+    <div id="pgYt"></div>
     <a class="pyt" href="https://www.youtube.com/@jannati-kids" target="_blank" rel="noopener">📺 قناتنا على YouTube<small>شرح التطبيق ودروس من الكتاب</small></a>
     <a href="privacy.html" target="_blank" rel="noopener" style="display:block;text-align:center;font-size:14px;font-weight:700;color:var(--muted);margin:4px 0">🔒 سياسة الخصوصية</a>
     <div class="nav"><button class="btn gold" id="pgSend">📤 أرسل التقرير</button><button class="btn sec" data-close>إغلاق</button></div>`,
-    ()=>{$('#pgTask').onclick=()=>{if(window.Hamas)Hamas.parentTask()};$('#pgRem').onclick=()=>{if(window.Hamas)Hamas.reminder()};$('#pgLow').onclick=()=>{const on=!(window.isLow&&isLow());try{localStorage.setItem('jannah_lowfx',on?'1':'0');localStorage.removeItem('usul5_m3lite')}catch(e){}
+    ()=>{ytLast();$('#pgTask').onclick=()=>{if(window.Hamas)Hamas.parentTask()};$('#pgRem').onclick=()=>{if(window.Hamas)Hamas.reminder()};$('#pgLow').onclick=()=>{const on=!(window.isLow&&isLow());try{localStorage.setItem('jannah_lowfx',on?'1':'0');localStorage.removeItem('usul5_m3lite')}catch(e){}
         document.documentElement.classList.toggle('lowfx',on);$('#pgLow b').textContent=on?'شغّال ✔':'مطفأ'};$('#pgSend').onclick=()=>{const t=text(d);
       if(navigator.share)navigator.share({text:t}).catch(()=>{});else window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank')}})}
 function gate(){
