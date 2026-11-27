@@ -7,6 +7,9 @@ App name (chosen by the owner, v2.8): «جنّتي الصغيرة». Children's 
 - Origin of the idea: the owner read a narration that when the Imam appears, the currency people buy with will be the salawat on Muhammad and his family. So in the app the salawat/tasbih/memorising are the «money»: the palace, the car, the city grow only by dhikr, hifz and good deeds — the child learns they are a treasure, not a burden. (Claude does not know the narration's source; if it is ever quoted in the app, take the exact text and source from the owner — never guess.)
 - He is NOT against developing and adding more («ما بالي أطوّر»): many city features are fine as long as each one leads the child to a verse, dhikr or a good manner. Test for any new idea: «هاي شنو تعلّم الطفل؟». Memorising and correct reading should stay the most valuable thing (biggest rewards).
 
+## Other app of the owner: «تطبيق إدارة المدرسة الأهلية»
+When the owner says «تطبيق إدارة المدرسة الأهلية» he means the school accounts app for his friend's school (مدرسة الأوائل), NOT this kids app. It lives in repo `alaa1981q-droid/alaa1981q-droid.github.io`, folder `madrasa/` (live: https://alaa1981q-droid.github.io/madrasa/); read that repo's CLAUDE.md first (attach it with add_repo if it is not in the session).
+
 ## Where it lives
 - Live app (PWA, the link families use): https://alaa1981q-droid.github.io/usool-deeni/ — GitHub Pages from `main`, root.
 - Android APK: built by `.github/workflows/android.yml` on every push, published to Release `latest` → `releases/download/latest/usool-deeni.apk`. Families prefer the link (APK triggers Play Protect warnings).
