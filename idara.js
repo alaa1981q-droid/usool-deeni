@@ -250,9 +250,12 @@ let bans={};
 const sexOf=av=>/👧|🧕|👩|👸/.test(av||'')?'g':/👦|🧒|👨|👲|🤴/.test(av||'')?'b':'';
 const banOf=id=>{const b=bans[id];return b&&b.until>Date.now()?b:null};
 // يتعمّد الأخطاء؟ دقّة أقل من ٣٥٪ بعد ١٦ سؤالًا أونلاين، أو مباراتان بلا أي إجابة صحيحة
-const accOf=p=>{const a=p.acc||{};return a.q?a.r/a.q:null};
+const accOf=p=>{const a=accToday(p);return a.q?a.r/a.q:null};
 const MONTH=30*864e5,gone=p=>!!(p&&p.seen&&Date.now()-p.seen>MONTH),goneDays=p=>Math.floor((Date.now()-p.seen)/864e5);
-const wrong=p=>{const a=p.acc||{};return (a.q>=16&&a.r/a.q<.35)||(a.z|0)>=2}; // v21.3: يتعمّد الغلط بالأونلاين
+const today=()=>Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5);
+// v25.2 (الشيخ): «يتعمّدون الغلط» لليوم فقط؛ في اليوم التالي يخرج من القائمة إلا إذا كرّر الغلط
+const accToday=p=>{const a=p.acc||{};return a.d===today()?a:{}};
+const wrong=p=>{const a=accToday(p);return (a.q>=16&&a.r/a.q<.35)||(a.z|0)>=2}; // v21.3: يتعمّد الغلط بالأونلاين
 const sus=p=>wrong(p)||cheat(p);
 const cheat=p=>((p.sm&&p.sm.tp)|0)>0; // v20.9: غيّر أرقامه من خارج التطبيق (seal.js)
 function ago(t){if(!t)return 'لم يُسجَّل بعد';const m=Math.round((Date.now()-t)/60000);
@@ -287,7 +290,7 @@ async function kidCard(id){const API=O();let p=(all||[]).find(x=>x.id==id);
   // v8.2: بيت الطفل كما يراه، وملخّص تقدّمه (sm)
   let hv=null,sm=null,pf=null;try{pf=(await API.db.ref('profiles/'+id).get()).val()}catch(e){}try{hv=(await API.db.ref('houses/'+id).get()).val()}catch(e){}try{sm=(await API.db.ref('profiles/'+id+'/sm').get()).val()}catch(e){}
   const HL=hv&&window.Deco&&Deco.cleanLook?Deco.cleanLook(hv):null;
-  const b=banOf(id),a=p.acc||{},ac=accOf(p);
+  const b=banOf(id),a=accToday(p),ac=accOf(p);
   const md=String(p.md||'').split(',').filter(Boolean).map(x=>{const [k,t]=x.split(':');return `${['','🥉','🥈','🥇','💎'][t|0]||''}${{usul:'📚',pray:'🤲',fiqh:'🕌',hifz:'📖',tilawa:'🎤',sal:'💚',tas:'📿',champ:'⚔️',akhlaq:'🌷',wird:'🔥',banna:'🏡',garden:'🌱'}[k]||''}`}).join(' ');
   modal(`${HL&&window.Bayt?`<div class="bhouse" style="height:170px;margin-bottom:6px">${Bayt.houseSVG(HL.f,-1,0,true,false,HL)}</div>`:''}
     <div style="font-size:${HL?40:56}px;line-height:1.2">${esc(p.av)}</div><h3 style="margin:2px 0">${esc(p.nick)}</h3>
@@ -297,7 +300,7 @@ async function kidCard(id){const API=O();let p=(all||[]).find(x=>x.id==id);
     <div style="text-align:right;font-size:15px;line-height:1.9;background:#f6fbf8;border-radius:14px;padding:6px 10px">
       ${on?'🟢 متصل الآن':`🕒 آخر دخول: <b>${ago(p.seen)}</b>`}<br>
       🏆 ${ar(p.wins)} فوز من ${ar(p.games)} مباراة أونلاين<br>
-      🎯 دقّة الإجابات: <b>${ac!=null?ar(Math.round(ac*100))+'٪':'—'}</b>${a.q?` (${ar(a.r|0)} صحيحة من ${ar(a.q)})`:''}${a.z?`<br>⚠️ ${ar(a.z)} مباراة بلا أي إجابة صحيحة`:''}<br>
+      🎯 دقّة إجاباته اليوم: <b>${ac!=null?ar(Math.round(ac*100))+'٪':'—'}</b>${a.q?` (${ar(a.r|0)} صحيحة من ${ar(a.q)})`:''}${a.z?`<br>⚠️ ${ar(a.z)} مباراة بلا أي إجابة صحيحة`:''}<br>
       🔑 الرمز: <b dir="ltr">${esc(p.code)}</b>${p.sx?` · ${p.sx=='g'?'👧 بنت':'👦 ولد'}`:''}
       ${p.since?`<br>📅 سجّل: ${new Date(p.since).toLocaleDateString('ar-IQ')}`:''}
       ${p.hist?`<br>✏️ أسماؤه السابقة: <b>${esc(p.hist.split('|').join('، '))}</b>${p.nts?` (آخر تغيير ${ago(p.nts)})`:''}`:''}

@@ -618,7 +618,9 @@
     const w = week(), winInc = win && !tie ? 1 : 0;
     profile.wins = (profile.wins || 0) + winInc; profile.games = (profile.games || 0) + 1;
     // دقّة الإجابات: تساعد الإدارة على معرفة من يتعمّد الإجابات الخاطئة
-    const acc = profile.acc || {}; profile.acc = { r: (acc.r | 0) + a.right, q: (acc.q | 0) + N_Q, z: (acc.z | 0) + (a.right === 0 ? 1 : 0) };
+    // v25.2 (الشيخ): الدقّة لليوم فقط — من يتعمّد الغلط يظهر يومه، وفي يوم جديد تبدأ من صفر (d = رقم اليوم المحلي)
+    const dN = Math.floor((Date.now() - new Date().getTimezoneOffset() * 6e4) / 864e5);
+    const acc0 = profile.acc || {}, acc = acc0.d === dN ? acc0 : {}; profile.acc = { r: (acc.r | 0) + a.right, q: (acc.q | 0) + N_Q, z: (acc.z | 0) + (a.right === 0 ? 1 : 0), d: dN };
     // v21.0: السيرفر يقبل +1 فوز/مباراة كل 30 ثانية (tg = وقت السيرفر)؛ إذا رُفض نرجع لأرقام السيرفر
     db.ref('profiles/' + me).update({ wins: profile.wins, games: profile.games, acc: profile.acc, tg: firebase.database.ServerValue.TIMESTAMP, seen: firebase.database.ServerValue.TIMESTAMP })
       .catch(() => db.ref('profiles/' + me).get().then(s => { const v = s.val() || {}; profile.wins = v.wins | 0; profile.games = v.games | 0; }).catch(() => {}));
