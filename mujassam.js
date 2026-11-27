@@ -1768,7 +1768,6 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
   const Z0=-600,Z1=600,TN=night?5:liteOn()?14:40,RU=night?0:liteOn()?8:25; // (v14.8) تظهر وتختفي على بُعد ٦٠٠ (داخل الضباب) فلا يُرى ظهورها
   const traffic=[];[1,-1].forEach(dir=>{for(let k=0;k<TN;k++){const v=car(CC[(traffic.length*3)%CC.length],traffic.length%3===1),z=Z0+(k+(dir<0?.5:0))*(Z1-Z0)/TN;
     v.rotation.y=dir>0?0:Math.PI;v.position.set(dir,0,z);v.userData.lane=k%2;const ru=RU>0&&![0,3,5].includes(k%8);traffic.push({v,dir,z,sp:(k%2?6.5:7.5)+Math.random()*2,ru})}});
-  traffic.forEach(c=>{if(c.ru){c.on=rushNow();c.v.visible=c.on}});
   // (v14.7) طلب الشيخ: 🚌 باصات المدينة تقف عند الموقف، ينزل ناس ويصعد آخرون. باص أبيض بخطّ أخضر، نوافذ على الجانبين، وباب على جهة الرصيف.
   function cityBus(col){const V=new T.Group(),w=M(0xf4f4f0,{roughness:.4}),st=M(col),gl=new T.MeshStandardMaterial({color:night?0x3a4a5a:0x223344,roughness:.1,metalness:.5});
     add(new T.BoxGeometry(2,1.9,6.2),w,0,1.35,0,V);add(new T.BoxGeometry(2.02,.25,6.22),st,0,.75,0,V);add(new T.BoxGeometry(2.02,.12,6.22),st,0,2.12,0,V);
@@ -1782,6 +1781,14 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
   const stops=BSTOP.map(([dir,z,sx,wx])=>({dir,z,sx,wx,q:[],t:2+Math.random()*4}));
   {const L=Z1-Z0;[1,-1].forEach(dir=>[0,1,2].forEach(j=>{const v=cityBus([0x1fa463,0x2f6fd0,0x1fa463][j]),z=Z0+((j*13+(dir>0?.5:1))*(L/TN))%L;v.rotation.y=dir>0?0:Math.PI;v.position.set(dir,0,z);v.userData.lane=1;
     traffic.push({v,dir,z,sp:6,cb:1,st:stops.find(o=>o.dir===dir)})}))}
+  // (v24.3) طلب الشيخ: حركة السير تختلف بالساعة — منتصف الليل شبه معدومة (≈٥٪) ولا باصات، وبالنهار تزيد وتقلّ من حين لآخر.
+  // كل سيارة لها رقم ثابت q، وتكون على الطريق إذا q < كثافة الساعة؛ التغيير يحدث فقط عند طرفي الطريق (داخل الضباب) فلا تختفي سيارة أمام العين.
+  {let n=0;traffic.forEach(c=>{if(!c.ru&&!c.cb)c.q=(n++*0.6180339887)%1})}
+  const trDen=()=>{const d=window.City3D&&City3D.debugTraffic;if(d!=null)return d;const h=hourNow();
+    if(h<4.5)return .05;if(h<5.5)return .2;if(h>=23)return .25;if(h>=22)return .45;if(night)return .9;
+    const b=h<6.5?.45:h<9?.85:h<11?.6:h<14?.8:h<16?.5:h<19?.9:.7;return Math.max(.3,Math.min(1,b*(.9+.15*Math.sin(Date.now()/4e5)+.07*Math.sin(Date.now()/1.3e5))))};
+  const trLive=(c,rush,dn)=>c.cb?hourNow()>=6&&hourNow()<22:(c.ru?rush:true)&&c.q<(c.ru?1:dn);
+  {const dn=trDen(),r=rushNow();traffic.forEach(c=>{c.on=trLive(c,r,dn);c.v.visible=c.on})}
   const ppl=()=>{const r=Math.random();return person(r<.5?'man':r<.85?'woman':'kid',Math.floor(Math.random()*12))};
   function busArrive(c){const st=c.st,dx=st.dir*2.05;
     const n=Math.floor(Math.random()*4);for(let i=0;i<n;i++)setTimeout(()=>{const p=ppl();if(p.userData.bag)p.userData.bag.visible=false;p.userData.bs=p.scale.x;p.scale.setScalar(.01);
@@ -1935,11 +1942,11 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       if(K&&o.kidWait)yz(K.x,K.z,true);
       traffic.concat(c.dir<0?cars.filter(s=>s.v.visible).map(s=>({dir:-1,z:s.v.position.z,v:s.v})):[]).concat(o.kcar&&o.kcar.on?[{dir:o.kcar.dir,z:o.kcar.z,v:KCV}]:[]).forEach(d=>{if(d!==c&&d.dir===c.dir&&d.v.visible&&(d.v.userData.lane|0)===(c.v.userData.lane|0)){const gp=(d.z-c.z)*c.dir;if(gp>0&&gp<(c.cb?3:1.4)+(d.cb?3:d.v===cars[0].v?2.3:1.4)+.8)block=true}});
       // (v14.7) 🚌 باص المدينة يقف عند الموقف ٧ ثوانٍ (من ٦ صباحًا إلى ١١ ليلًا): ينزل ركّاب ويصعد المنتظرون
-      if(c.cb){const sc=c.st.z-2.1*c.dir;if(c.hold>0||c.hold>-8&&walkers.some(w=>w.bus===c&&g.children.includes(w.P))){c.hold-=dt;block=true}else if(!c.done&&!block&&h>=6&&h<23&&!o.sleep){const ah=(sc-c.z)*c.dir;if(ah>=0&&ah<=c.sp*dt*1.6+.05){c.z=sc;c.hold=6;c.done=1;block=true;busArrive(c)}}}
+      if(c.cb){const sc=c.st.z-2.1*c.dir;if(c.hold>0||c.hold>-8&&walkers.some(w=>w.bus===c&&g.children.includes(w.P))){c.hold-=dt;block=true}else if(!c.done&&!block&&c.v.visible&&h>=6&&h<23&&!o.sleep){const ah=(sc-c.z)*c.dir;if(ah>=0&&ah<=c.sp*dt*1.6+.05){c.z=sc;c.hold=6;c.done=1;block=true;busArrive(c)}}}
       if(c.dir<0&&phase&&c.z>=Z1&&cars.some(s=>s.v.visible&&s.v.position.z>530))block=true; // لا تدخل سيارة فوق الباص لحظة ظهوره
       {const L=sig();if(L!=='g'&&!o.sleep)[-4.6,4.6].forEach(zc=>{const stop=zc-c.dir*1.35,front=c.z+c.dir*(c.cb?3:1.4),ah=(stop-front)*c.dir;if(ah>-.05&&ah<(L==='y'?2.2:3.2)&&!(L==='y'&&ah<.6))block=true})}
       if(!block)c.z+=c.dir*c.sp*(rush?.45:1)*dt;
-      if(c.dir>0&&c.z>Z1||c.dir<0&&c.z<Z0){c.z=c.dir>0?Z0:Z1;c.done=0;if(c.ru){c.on=rush;c.v.visible=rush}}c.v.position.z=c.z});
+      if(c.dir>0&&c.z>Z1||c.dir<0&&c.z<Z0){c.z=c.dir>0?Z0:Z1;c.done=0;c.on=trLive(c,rush,trDen());c.v.visible=c.on}c.v.position.z=c.z});
     // (v14.5) الوالدان والجارة بالنهار، والأطفال يلعبون الكرة العصر
     [father,mother].forEach(P=>{P.visible=day&&!o.sleep});
     {const sc=String(o.sd||'0000'),dy=day&&!o.sleep;for(const q of SDQ)q.P.visible=dy&&sc[SDL.indexOf(q.k)]==='3';
@@ -1950,7 +1957,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
     if(baker.visible)baker.rotation.x=Math.max(0,Math.sin(t*.9))*.25;
     {const play=day&&!o.sleep&&footNow();ball.visible=play;SB.visible=play;if(!play)FBK.forEach(p=>p.visible=false);FAN.forEach(p=>p.visible=play&&footHol());if(play)football(t,dt);}
     // (v14.7) 🚌 ناس يأتون إلى الموقف وينتظرون الباص (حتى ٤ في كل موقف)
-    stops.forEach(st=>{st.t-=dt;if(st.t>0)return;st.t=6+Math.random()*8;if(h<6||h>=22.5||o.sleep||st.q.length>=4)return;
+    stops.forEach(st=>{st.t-=dt;if(st.t>0)return;st.t=6+Math.random()*8;if(h<6||h>=21.6||o.sleep||st.q.length>=4)return;
       const p=ppl();if(p.userData.bag)p.userData.bag.visible=false;const from=st.z+(Math.random()<.5?-1:1)*(18+Math.random()*12),i=st.q.length;
       walk(p,[[st.sx,from],[st.sx,st.z+(i-1.5)*.62],[st.wx,st.z+(i-1.5)*.62]],1.2+Math.random()*.3,'wait');st.q.push(walkers[walkers.length-1])});
     // الجيران على الأرصفة
