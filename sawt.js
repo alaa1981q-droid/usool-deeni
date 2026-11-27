@@ -75,8 +75,8 @@ function stopAll(){if(cur){try{cur.stop()}catch(e){}cur=null}}
 /* استماع واحد مع التصحيح: يرجع وعدًا بـ {texts:[...]} أو {err} */
 function hear(onLevel){stopAll();return new Promise(res=>{let rec;try{rec=new SR()}catch(e){return res({err:'nosr'})}
   rec.lang='ar-SA';rec.interimResults=true;rec.continuous=true;rec.maxAlternatives=4;
-  let finals=[],interim=[],done=false,silence=0,heard=false;
-  const end=r=>{if(done)return;done=true;clearTimeout(silence);clearTimeout(hard);try{rec.stop()}catch(e){}cur=null;res(r)};
+  let finals=[],interim=[],done=false,silence=0,heard=false,started=false;
+  const end=r=>{if(done)return;done=true;clearTimeout(silence);clearTimeout(hard);clearTimeout(wd);try{rec.stop()}catch(e){}cur=null;res(r)};
   const out=()=>{const f=finals.length?finals:[];const all=[];
     // نجمع النص كله مع كل الاحتمالات للمقطع الأخير
     const base=f.map(a=>a[0]).join(' '),lastAlt=interim.length?interim:[''];lastAlt.forEach(x=>all.push((base+' '+x).trim()));
@@ -87,6 +87,9 @@ function hear(onLevel){stopAll();return new Promise(res=>{let rec;try{rec=new SR
     onLevel&&onLevel(1,norm(finals.map(a=>a[0]).join(' ')+' '+(interim[0]||'')));
     clearTimeout(silence);silence=setTimeout(()=>end(out()),1600)};
   rec.onspeechstart=()=>{onLevel&&onLevel(1)};
+  // بعض متصفحات الحاسوب (Brave/Opera/Chromium…) فيها التعرّف لكنه لا يبدأ أبدًا ولا يعطي خطأ → نتحوّل لكاشف الصوت
+  rec.onstart=rec.onaudiostart=()=>{started=true};
+  const wd=setTimeout(()=>{if(!started&&!heard)end({err:'nostart'})},3500);
   rec.onerror=e=>end(heard?out():{err:e.error||'err'});
   rec.onend=()=>end(heard?out():{err:'no-speech'});
   const hard=setTimeout(()=>end(heard?out():{err:'no-speech'}),20000);
@@ -114,15 +117,23 @@ function micHelp(e){const n=(e&&e.name)||'err';
   if(n=='NotFoundError'||n=='OverconstrainedError')return 'لم نجد مايكًا في هذا الجهاز';
   if(n=='NotReadableError'||n=='AbortError')return 'المايك مشغول بتطبيق آخر (مكالمة أو تسجيل). أغلقه وجرّب';
   return 'لم نستطع فتح المايك';}
-async function vad({onLevel,onUtter,minMs=650}){
+/* المايك مفتوح لكن لا يصل منه صوت (مكتوم، أو المتصفح اختار مايكًا آخر في الحاسوب) */
+function quietMsg(dead){return dead
+  ?(/Android|iPhone|iPad|Mobile/.test(navigator.userAgent)||IOS)?'🎤 المايك لا يوصل أي صوت. تأكّد أن فتحة المايك غير مغطّاة وأنه غير مشغول بمكالمة أو تطبيق آخر، ثم أعد المحاولة'
+  :'🎤 المايك لا يوصل أي صوت. في الحاسوب: اضغط 🔒 بجانب الرابط ← الميكروفون واختر المايك الصحيح، وتأكّد أنه غير مكتوم (زر الكتم في السمّاعة أو الكيبورد)، ثم أعد المحاولة'
+  :B('لا أسمعك جيدًا 🎤 اقترب من المايك وارفع صوتك قليلًا','لا أسمعكِ جيدًا 🎤 اقتربي من المايك وارفعي صوتك قليلًا')}
+async function vad({onLevel,onUtter,onQuiet,minMs=650}){
   const stream=await openMic();
   let ac=preAC;preAC=null;if(!ac||ac.state=='closed')ac=new (window.AudioContext||window.webkitAudioContext)();
   if(ac.state=='suspended')await Promise.race([ac.resume(),new Promise(r=>setTimeout(r,1500))]);
   const src=ac.createMediaStreamSource(stream),an=ac.createAnalyser();an.fftSize=1024;src.connect(an);
-  const buf=new Float32Array(an.fftSize);let floor=[],thr=.02,talking=false,start=0,lastLoud=0,raf=0,stopped=false;const t0=performance.now();
+  const buf=new Float32Array(an.fftSize);let floor=[],thr=.02,talking=false,start=0,lastLoud=0,raf=0,stopped=false,quietT=0,peak=0;const t0=performance.now();
   function loop(){if(stopped)return;an.getFloatTimeDomainData(buf);let s=0;for(const v of buf)s+=v*v;const rms=Math.sqrt(s/buf.length),t=performance.now();
     if(t-t0<500){floor.push(rms)}else if(floor){floor.sort((a,b)=>a-b);thr=Math.max(.012,(floor[Math.floor(floor.length/2)]||0)*3.2);floor=null}
     const loud=!floor&&rms>thr;onLevel&&onLevel(Math.min(1,rms/(thr*3)),loud);
+    if(rms>peak)peak=rms;
+    // ٨ ثوانٍ بلا أي صوت → غالبًا المايك مكتوم أو غير موصول أو المتصفح اختار مايكًا آخر
+    if(!lastLoud&&t-t0>8000&&t-quietT>8000){quietT=t;onQuiet&&onQuiet(peak<.002)}
     if(loud){lastLoud=t;if(!talking){talking=true;start=t}}
     else if(talking&&t-lastLoud>480){talking=false;const d=lastLoud-start;if(d>=minMs)onUtter&&onUtter(d)}
     raf=requestAnimationFrame(loop)}
@@ -178,15 +189,17 @@ function reciteBox(el,text,opts={}){const T=words(text),raw=String(text).split(/
         if(partial){const c=compare(text,[partial]);c.ok.forEach((v,i)=>{const s=spans[map[i]];if(s&&v)s.classList.add('ok')})}});
       busy=false;mic.classList.remove('on');
       if(r.err){if(r.err=='no-speech'||r.err=='aborted')ns++;
-        if(r.err=='not-allowed'||r.err=='service-not-allowed'||r.err=='audio-capture'||r.err=='network'||r.err=='nosr'||r.err=='start'||r.err=='language-not-supported'||ns>=2){mode='vad';
-          el.querySelector('.vnote').textContent='🔈 تصحيح الكلمات لا يعمل على هذا الجهاز الآن، سنسمع صوتك فقط.';say(B('اضغط المايك مرة أخرى','اضغطي المايك مرة أخرى'),'mid')}
-        else say(B('لم أسمع شيئًا، اقترب من التلفون وارفع صوتك قليلًا','لم أسمع شيئًا، اقتربي من التلفون وارفعي صوتك قليلًا'),'mid');return}
+        if(r.err=='not-allowed'||r.err=='service-not-allowed'||r.err=='audio-capture'||r.err=='network'||r.err=='nosr'||r.err=='start'||r.err=='nostart'||r.err=='language-not-supported'||ns>=2){mode='vad';
+          el.querySelector('.vnote').textContent='🔈 تصحيح الكلمات لا يعمل على هذا الجهاز الآن، سنسمع صوتك فقط.';
+          if(r.err=='nostart')return mic.onclick();say(B('اضغط المايك مرة أخرى','اضغطي المايك مرة أخرى'),'mid')}
+        else say(B('لم أسمع شيئًا، اقترب من المايك وارفع صوتك قليلًا','لم أسمع شيئًا، اقتربي من المايك وارفعي صوتك قليلًا'),'mid');return}
       ns=0;const c=compare(text,r.texts);paint(c.ok);const miss=c.ok.filter(v=>!v).length;
       if(c.score>=pass){chime();say(c.score==1?B('ممتاز! قرأتَها كلّها صحيحة 🌟','ممتاز! قرأتِها كلّها صحيحة 🌟'):B(`أحسنت! 👍 لكن انتبه ${miss==1?'للكلمة الحمراء':'للكلمات الحمراء'} وأعدها`,`أحسنتِ! 👍 لكن انتبهي ${miss==1?'للكلمة الحمراء':'للكلمات الحمراء'} وأعيديها`),'ok')}
       else{buzz();say(miss<=2?`قريب جدًا! ${B('انتبه','انتبهي')} للكلمات الحمراء ثم ${B('أعد','أعيدي')} 💪`:`${B('حاول','حاولي')} مرة أخرى، ${B('اقرأ','اقرئي')} على مهل 💪`,'bad')}
       opts.onResult&&opts.onResult(c.score,'sr',c)}
     else{say(B('أسمعك… اقرأ الآن، ثم اسكت قليلًا','أسمعكِ… اقرئي الآن، ثم اسكتي قليلًا'),'mid');
       try{vh=await vad({minMs:Math.min(2500,350*T.length),onLevel:(l,loud)=>{ring.style.opacity=loud?.9:0;ring.style.transform=`scale(${1+l*.35})`},
+        onQuiet:d=>say(quietMsg(d),'bad'),
         onUtter:()=>{if(!vh)return;vh.stop();vh=null;busy=false;mic.classList.remove('on');ring.style.opacity=0;chime();
           say(B('سمعتك! أحسنت 👍 هل قرأتَ كل الكلمات صحيحة؟','سمعتكِ! أحسنتِ 👍 هل قرأتِ كل الكلمات صحيحة؟'),'ok');
           el.querySelector('.tx').classList.remove('hide');opts.onResult&&opts.onResult(1,'vad')}})}
@@ -209,20 +222,25 @@ function countPhrase(phrase,text){const T=words(phrase),H=words(text),n=T.length
     if(e){c++;i+=e}else i++}
   return c}
 /* استماع متواصل: جلسة قصيرة بعد جلسة (أسلم من continuous في أندرويد الذي يكرّر النص) */
-function listenLoop({onText,onFail}){let stopped=false,rec=null,finals=[],quick=0;
-  const go=()=>{if(stopped)return;let fatal=null,t0=Date.now(),interim='',got=false;
+function listenLoop({onText,onFail}){let stopped=false,rec=null,finals=[],quick=0,ever=false,wd=0;const T0=Date.now();
+  const fail=er=>{if(stopped)return;stopped=true;clearTimeout(wd);if(rec){try{rec.abort()}catch(e){}rec=null}onFail(er)};
+  const go=()=>{if(stopped)return;let fatal=null,t0=Date.now(),interim='',got=false,started=false;
     try{rec=new SR()}catch(e){stopped=true;return onFail('nosr')}
+    rec.onstart=rec.onaudiostart=()=>{started=true};
+    // لا يبدأ أبدًا (بعض متصفحات الحاسوب)، أو لم يلتقط كلمة واحدة في ١٢ ثانية → كاشف الصوت
+    clearTimeout(wd);wd=setTimeout(()=>{if(!started&&!got)fail('nostart');else if(!ever&&Date.now()-T0>12000)fail('silent')},3500);
     rec.lang='ar-SA';rec.interimResults=true;rec.continuous=false;rec.maxAlternatives=1;
-    rec.onresult=e=>{got=true;interim='';let fin=false;for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];
+    rec.onresult=e=>{got=true;ever=true;interim='';let fin=false;for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];
         if(r.isFinal){finals.push(r[0].transcript);fin=true}else interim+=' '+r[0].transcript}
       onText(finals.join(' ')+' '+interim,fin)};
     rec.onerror=e=>{const er=e.error||'err';if(/not-allowed|service-not-allowed|network|audio-capture|language-not-supported/.test(er))fatal=er};
     rec.onend=()=>{rec=null;if(stopped)return;if(fatal){stopped=true;return onFail(fatal)}
       quick=(!got&&Date.now()-t0<400)?quick+1:0;if(quick>=6){stopped=true;return onFail('loop')}
+      if(!ever&&Date.now()-T0>12000){stopped=true;return onFail('silent')}
       setTimeout(go,120)};
     try{rec.start()}catch(e){stopped=true;onFail('start')}};
   go();
-  return {stop(){stopped=true;if(rec){try{rec.abort()}catch(e){}rec=null}}}}
+  return {stop(){stopped=true;clearTimeout(wd);if(rec){try{rec.abort()}catch(e){}rec=null}}}}
 function counter(el,{phrase,target=10,emoji='💚',onDone}){let n=0,vh=null,doneF=false,useSR=canCorrect(),fails=0;
   const nw=words(phrase).length;
   el.innerHTML=`<div class="vx"><div class="tx" style="font-size:24px">${phrase}</div>
@@ -237,7 +255,7 @@ function counter(el,{phrase,target=10,emoji='💚',onDone}){let n=0,vh=null,done
     el.querySelector('#vcN').textContent=ar(n);tone(523+n*60,.12,'triangle',.14);if(n%5==0)fly(emoji);
     if(n>=target&&!doneF){doneF=true;halt();say(B('ما شاء الله! أكملتَ العدد 🌟','ما شاء الله! أكملتِ العدد 🌟'),'ok');hd.textContent='';onDone&&onDone(n)}};
   const startVad=async()=>{hd.textContent=B('ملاحظة: هنا نسمع صوتك فقط ولا نستطيع التأكد من الكلمات، فقلها صحيحة 🤍','ملاحظة: هنا نسمع صوتكِ فقط ولا نستطيع التأكد من الكلمات، فقوليها صحيحة 🤍');
-    vh=await vad({minMs:Math.max(650,nw*230),onLevel:(l,loud)=>{ring.style.opacity=loud?.9:0;ring.style.transform=`scale(${1+l*.35})`},onUtter:()=>bump(1)})};
+    vh=await vad({minMs:Math.max(650,nw*230),onLevel:(l,loud)=>{ring.style.opacity=loud?.9:0;ring.style.transform=`scale(${1+l*.35})`},onQuiet:d=>{if(!n)say(quietMsg(d),'bad')},onUtter:()=>{if(!n||msg.classList.contains('bad'))say(B('أسمعك… أكمل 👂','أسمعكِ… أكملي 👂'),'mid');bump(1)}})};
   let base=0;// ما عُدّ قبل هذه الجلسة
   const startSR=()=>{base=n;let atFin=0;// atFin: العدد عند آخر مقطع نهائي
     vh=listenLoop({onText:(t,fin)=>{ring.style.opacity=.9;ring.style.transform='scale(1.15)';setTimeout(()=>{ring.style.opacity=0},400);
@@ -246,7 +264,7 @@ function counter(el,{phrase,target=10,emoji='💚',onDone}){let n=0,vh=null,done
         if(fin&&!doneF){if(c>atFin)say(B('أحسنت! قلها مرة أخرى 👂','أحسنتِ! قوليها مرة أخرى 👂'),'mid');
           else say(B('لم تُحسب 🙂 قل: ','لم تُحسب 🙂 قولي: ')+phrase,'bad');atFin=c}},
       onFail:async er=>{vh=null;if(doneF)return;
-        if(er=='not-allowed'||er=='service-not-allowed'||er=='audio-capture'||er=='network'||er=='nosr'||er=='start'||er=='loop'||er=='language-not-supported'){useSR=false;
+        if(er=='not-allowed'||er=='service-not-allowed'||er=='audio-capture'||er=='network'||er=='nosr'||er=='start'||er=='loop'||er=='nostart'||er=='silent'||er=='language-not-supported'){useSR=false;
           try{await startVad()}catch(e){halt();say(micHelp(e),'bad')}}
         else{halt();say(micHelp({name:'NotFoundError'}),'bad')}}})};
   mic.onclick=async()=>{if(doneF)return;if(vh){halt();say(B('توقّف المايك. اضغط لتكمل','توقّف المايك. اضغطي لتكملي'));return}
