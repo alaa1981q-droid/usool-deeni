@@ -121,7 +121,11 @@ function micHelp(e){const n=(e&&e.name)||'err';
   if(n=='NotReadableError'||n=='AbortError')return 'المايك مشغول بتطبيق آخر (مكالمة أو تسجيل). أغلقه وجرّب';
   return 'لم نستطع فتح المايك';}
 /* المايك مفتوح لكن لا يصل منه صوت (مكتوم، أو المتصفح اختار مايكًا آخر في الحاسوب) */
-function quietMsg(dead){return dead
+const MOB=/Android|iPhone|iPad|Mobile/.test(navigator.userAgent)||IOS,FFX=/Firefox\//.test(navigator.userAgent);
+/* بعض لابتوبات HP (مايك Intel Smart Sound بأربع قنوات) يصل صوتها خربانًا إلى Chrome/Edge، ويعمل في Firefox (v25.9) */
+const FFTIP=' — وإذا بقي لا يسمعك، افتح التطبيق بمتصفح Firefox فهو يقرأ مايك بعض الحواسيب بشكل صحيح';
+function quietMsg(dead){return (!MOB&&!FFX?quietMsg0(dead)+FFTIP:quietMsg0(dead))}
+function quietMsg0(dead){return dead
   ?(/Android|iPhone|iPad|Mobile/.test(navigator.userAgent)||IOS)?'🎤 المايك لا يوصل أي صوت. تأكّد أن فتحة المايك غير مغطّاة وأنه غير مشغول بمكالمة أو تطبيق آخر، ثم أعد المحاولة'
   :'🎤 المايك لا يوصل أي صوت. في الحاسوب: اضغط 🔒 بجانب الرابط ← الميكروفون واختر المايك الصحيح، وتأكّد أنه غير مكتوم (زر الكتم في السمّاعة أو الكيبورد)، ثم أعد المحاولة'
   :B('لا أسمعك جيدًا 🎤 اقترب من المايك وارفع صوتك قليلًا','لا أسمعكِ جيدًا 🎤 اقتربي من المايك وارفعي صوتك قليلًا')}
