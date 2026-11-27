@@ -183,6 +183,34 @@ function flagTex(e){const T=THREE,a=document.createElement('canvas');a.width=a.h
   const c=document.createElement('canvas');c.width=256;c.height=160;const y=c.getContext('2d');y.fillStyle='#fff';y.fillRect(0,0,256,160);
   if(X1-X0>40&&Y1-Y0>20)y.drawImage(a,X0+3,Y0+3,X1-X0-6,Y1-Y0-6,0,0,256,160);else{y.font='120px sans-serif';y.textAlign='center';y.textBaseline='middle';y.fillText(e,128,84)}
   const t=new T.CanvasTexture(c);return t}
+// (v24.6) عشب أجمل: نسيج مرسوم مرّة واحدة (بقع بدرجات الأخضر + أعواد صغيرة، متّصل الأطراف ليتكرّر بلا خطوط)
+let GTX=null;
+function grassTex(T){if(GTX)return GTX;const N=256,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');x.fillStyle='#63b552';x.fillRect(0,0,N,N);
+  let sd=11;const r=()=>{sd=(sd*16807)%2147483647;return sd/2147483647};
+  const wrap=(f,px,py,m)=>{for(const ox of [0,-N,N])for(const oy of [0,-N,N]){if(px+ox<-m||px+ox>N+m||py+oy<-m||py+oy>N+m)continue;f(px+ox,py+oy)}};
+  const BL=['#4f9e42','#72c45c','#5aab4a','#86cf68','#46903c','#6bbb55'];
+  for(let i=0;i<160;i++){const px=r()*N,py=r()*N,rd=6+r()*22;x.fillStyle=BL[i%BL.length];x.globalAlpha=.18;wrap((a,b)=>{x.beginPath();x.arc(a,b,rd,0,7);x.fill()},px,py,rd)}
+  x.lineCap='round';x.lineWidth=1.3;
+  for(let i=0;i<2600;i++){const px=r()*N,py=r()*N,l=3+r()*5,d=(r()-.5)*3;x.strokeStyle=i%3?(i%2?'#4a963e':'#3f8a36'):'#8fd870';x.globalAlpha=.55;wrap((a,b)=>{x.beginPath();x.moveTo(a,b);x.lineTo(a+d,b-l);x.stroke()},px,py,9)}
+  x.globalAlpha=1;const t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(240,240);t.anisotropy=4;GTX=t;return t}
+// خصلة عشب = ٥ أعواد مائلة للخارج، تُرسم كلّها بـ InstancedMesh واحدة
+let TFG=null;
+function tuftGeo(T){if(TFG)return TFG;const ps=[],o=new T.Object3D();for(let b=0;b<5;b++){const g=new T.ConeGeometry(.032,.3+(b%3)*.06,3,1,true);g.translate(0,.15,0);const a=b/5*Math.PI*2+.4;
+    o.position.set(Math.cos(a)*.05,0,Math.sin(a)*.05);o.rotation.set(Math.sin(a)*.42,a,-Math.cos(a)*.42);o.updateMatrix();g.applyMatrix4(o.matrix);ps.push(...g.toNonIndexed().attributes.position.array)}
+  TFG=new T.BufferGeometry();TFG.setAttribute('position',new T.Float32BufferAttribute(ps,3));TFG.computeVertexNormals();return TFG}
+function tufts(T,S,L,night){if(!L.length)return;const G=['#4f9e42','#5fae4b','#3f8a36','#6cbc55','#56a446'],im=new T.InstancedMesh(tuftGeo(T),new T.MeshStandardMaterial({roughness:1,side:T.DoubleSide,flatShading:true}),L.length),o=new T.Object3D(),col=new T.Color();
+  L.forEach(([x,z,s],i)=>{o.position.set(x,0,z);o.rotation.set(0,(i*2.39)%6.28,0);o.scale.set(s,s*(.8+(i%4)*.12),s);o.updateMatrix();im.setMatrixAt(i,o.matrix);col.set(G[i%G.length]);if(night)col.multiplyScalar(.7);im.setColorAt(i,col)});
+  im.frustumCulled=false;S.add(im);return im}
+// زهرة: ساق، بتلات مفلطحة ملوّنة، وسط أصفر، وخصلة أوراق عند قاعدتها — [x,z,لون,حجم]
+let FWG=null;
+function flowers(T,S,L){if(!L.length)return;if(!FWG){const p=new T.SphereGeometry(.12,10,4);p.scale(1,.38,1);FWG={st:new T.CylinderGeometry(.013,.016,.28,4),p,c:new T.SphereGeometry(.045,8,4)}}
+  const n=L.length,st=new T.InstancedMesh(FWG.st,new T.MeshStandardMaterial({color:0x3f8f37,roughness:.9}),n),pe=new T.InstancedMesh(FWG.p,new T.MeshStandardMaterial({roughness:.55}),n),
+    ce=new T.InstancedMesh(FWG.c,new T.MeshStandardMaterial({roughness:.6}),n),o=new T.Object3D(),col=new T.Color(),TF=[];
+  L.forEach(([x,z,c,s],i)=>{const tl=Math.sin(i*1.7)*.12;o.rotation.set(tl,0,Math.cos(i*1.3)*.12);o.scale.setScalar(s);
+    o.position.set(x,.14*s,z);o.updateMatrix();st.setMatrixAt(i,o.matrix);
+    o.position.set(x+tl*.28*s,.29*s,z);o.updateMatrix();pe.setMatrixAt(i,o.matrix);pe.setColorAt(i,col.setHex(c));
+    o.position.y=.31*s;o.updateMatrix();ce.setMatrixAt(i,o.matrix);ce.setColorAt(i,col.setHex(c===0xffd23f?0xff8a1f:0xffd93a));TF.push([x,z,.55*s])});
+  [st,pe,ce].forEach(m=>{m.frustumCulled=false;S.add(m)});tufts(T,S,TF)}
 function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();farmAt(V?!!V.pq:palaceMe());
   const Md=window.Madina,lv=V?V.lv:mLvs(),job=V||ADMF()?null:(Md?Md.st.job:null),need=(p,l)=>Md&&Md.need?Md.need(p,l):'';
   const LV=p=>Math.max(0,Math.min(3,lv[p]|0));
@@ -236,10 +264,12 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();farmAt(V?!!V.p
       const f2=new T.Group();f2.position.z=1.2;f2.rotation.x=.55;f.add(f2);const l2=add(FRDG,k%2?frd:frd2,0,0,.5,f2);l2.scale.set(.16,.025,.55)}
     for(let i=0;i<7;i++){const a=i*.9;add(DTG,dtm,Math.cos(a)*.16,-.12-(i%3)*.06,Math.sin(a)*.16,C)}};
   // الأرض والطرق
-  const g=add(new T.CircleGeometry(900,64),M(night?0x3f9149:0x5cc455),0,-.06,0); // (v17.6) أخفض قليلًا: من مقعد السائق كان العشب يظهر فوق الإسفلت (دقّة العمق)
+  // (v24.6) طلب الشيخ: العشب كان أخضر مسطّحًا «غير جميل» → نسيج عشب حقيقي (درجات وأعواد)، خصل عشب بارزة، وزهور بساق وبتلات ووسط أصفر
+  const GT=grassTex(T);
+  const g=add(new T.CircleGeometry(900,64),M(night?0x7f9a96:0xffffff,{map:GT,roughness:1}),0,-.06,0); // (v17.6) أخفض قليلًا: من مقعد السائق كان العشب يظهر فوق الإسفلت (دقّة العمق)
  g.rotation.x=-Math.PI/2;
   // بقع عشب بدرجات مختلفة
-  const pM=[M(night?0x4aa052:0x72d460),M(night?0x37853f:0x4fb44c)];
+  const pM=[M(night?0x86a890:0xf2ffd8,{map:GT,roughness:1}),M(night?0x6a8a7a:0xc4dcbc,{map:GT,roughness:1})];
   for(let i=0;i<26;i++){const a=i*2.4,r=8+(i*37%22);if(Math.abs(Math.cos(a)*r)<S0+2+i%3+.3)continue;const p=add(new T.CircleGeometry(2+i%3,20),pM[i%2],Math.cos(a)*r,.004,Math.sin(a)*r);p.rotation.x=-Math.PI/2;p.receiveShadow=true;p.castShadow=false}
   // (v12.4) سهل أخضر ممتد بلا نهاية: سلسلة جبال واقعية غربًا (عشب ← صخر ← ثلج)، وبحر متدرّج شرقًا، والطريق يغيب في الأفق
   const WIN=winter();
@@ -311,12 +341,13 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();farmAt(V?!!V.p
     for(let i=0;i<n;i++){o.position.set(x,.02,RZ+RL/2-1-i*3);o.updateMatrix();im.setMatrixAt(i,o.matrix)}S.add(im)});
     [-.13,.13].forEach(x=>{const l=RDf(add(new T.PlaneGeometry(.09,RL),line,x,.021,RZ));l.rotation.x=-Math.PI/2;l.castShadow=false})}
   // زهور ملوّنة كثيرة على العشب
-  {const fl=[0xff5c8a,0xffd23f,0xb07cff,0xff8c42,0xffffff,0x4fc3ff,0xff4f4f],geo=new T.SphereGeometry(.13,6,4),im=new T.InstancedMesh(geo,new T.MeshStandardMaterial({roughness:.6}),240);
-    const o=new T.Object3D(),col=new T.Color();let n=0,k=0;
-    const bad=(x,z)=>x<-2.6&&x>XLc-.4&&z>-HZ-.35&&z<HZNc+.35||Math.abs(x)<2.8||x<-2.4&&x>-11.2&&z<-14.8&&z>-25||Math.abs(Math.abs(z)-4.6)<1.4&&Math.abs(x)<15||Object.values(SPOT).some(([a,b])=>Math.hypot(x-a,z-b)<3.9)||Math.hypot(x,z)>34||x>17||NOFL(x,z)||Math.abs(x-FARM[0])<3.6&&Math.abs(z-FARM[1])<3.8;
-    while(n<240&&k<4000){k++;const a=Math.random()*Math.PI*2,r=3+Math.random()*31,x=Math.cos(a)*r,z=Math.sin(a)*r;if(bad(x,z))continue;
-      o.position.set(x,.09,z);o.scale.setScalar(.7+Math.random()*.6);o.updateMatrix();im.setMatrixAt(n,o.matrix);im.setColorAt(n,col.setHex(fl[n%fl.length]));n++}
-    im.count=n;S.add(im)}
+  {const fl=[0xff5c8a,0xffd23f,0xb07cff,0xff8c42,0xffffff,0x4fc3ff,0xff4f4f],FL=[];let n=0,k=0;
+    const bad=(x,z)=>x<-2.6&&x>XLc-.4&&z>-HZ-.35&&z<HZNc+.35||Math.abs(x)<2.8||x<-2.4&&x>-11.2&&z<-14.8&&z>-25||Math.abs(Math.abs(z)-4.6)<1.4&&Math.abs(x)<15||Object.values(SPOT).some(([a,b])=>Math.hypot(x-a,z-b)<3.9)||x>17||NOFL(x,z)||Math.abs(x-FARM[0])<3.6&&Math.abs(z-FARM[1])<3.8;
+    while(n<240&&k<4000){k++;const a=Math.random()*Math.PI*2,r=3+Math.random()*31,x=Math.cos(a)*r,z=Math.sin(a)*r;if(bad(x,z))continue;FL.push([x,z,fl[n%fl.length],1+Math.random()*.5]);n++}
+    flowers(T,S,FL);
+    // خصل عشب بارزة متفرّقة على السهل (رسمة واحدة)
+    const TF=[];k=0;while(TF.length<(liteOn()?700:1500)&&k<9000){k++;const a=Math.random()*Math.PI*2,r=3+Math.random()*44,x=Math.cos(a)*r,z=Math.sin(a)*r;if(bad(x,z)||Math.hypot(x-PWR[0],z-PWR[1])<9||Math.hypot(x-PKC[0],z-PKC[1])<9.5||Math.hypot(x-HSP[0],z-HSP[1])<6||Math.hypot(x-FLK[0],z-FLK[1])<6||x<-3&&x>-21&&z>32&&z<41||Math.abs(z-NBZ)<3&&Math.abs(Math.abs(x)-7)<3)continue;TF.push([x,z,.7+Math.random()*.7])}
+    tufts(T,S,TF,night)}
   // شجيرات صغيرة على أطراف الطرق
   const bush=M(0x4cc35e);[[-3,10.5],[3,-10.5],[-3,-11.5],[3,11.5],[-12,6.2],[12,-6.2],[-7,6.2],[7,-6.2],[7,6.2],[-7,-6.2]].forEach(([x,z])=>{const b=add(new T.SphereGeometry(.55,12,8),bush,x,.35,z);b.scale.set(1.3,.8,1)});
   if(!night){
@@ -1354,12 +1385,9 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();farmAt(V?!!V.p
   // 🌷 (v15.9) ٩ المدينة تزهر بأعمال الطفل: وردة لكل عمل صالح (حتى ٤٠٠) وشجرة صغيرة لكل ١٠ أعمال (حتى ٣٠)
   {const n=V?0:Math.min(400,BLOOM.n|0),nt=V?0:Math.min(30,Math.floor((BLOOM.n|0)/10));let sd=7;const rnd=()=>{sd=(sd*16807)%2147483647;return sd/2147483647};
     const bad=(x,z)=>x<-2.6&&x>XLc-.4&&z>-HZ-.35&&z<HZNc+.35||Math.abs(x)<3||x<-2.4&&x>-11.2&&z<-14.8&&z>-25||Math.abs(Math.abs(z)-4.6)<1.4&&Math.abs(x)<16||Object.values(SPOT).some(([a,b])=>Math.hypot(x-a,z-b)<3.9)||x>17.5||NOFL(x,z)||Math.abs(x-FARM[0])<3.8&&Math.abs(z-FARM[1])<4||x<-3&&x>-21&&z>32&&z<41||Math.hypot(x-PKC[0],z-PKC[1])<9||Math.hypot(x-HSP[0],z-HSP[1])<6||Math.hypot(x-FLK[0],z-FLK[1])<6||Math.abs(z-NBZ)<3&&Math.abs(Math.abs(x)-7)<3;
-    if(n){const fl=[0xff4f7a,0xffd23f,0xc58bff,0xff8c42,0xffffff,0xff6fb5,0x4fc3ff],hd=new T.InstancedMesh(new T.SphereGeometry(.15,8,6),new T.MeshStandardMaterial({roughness:.5}),n),
-        lv=new T.InstancedMesh(new T.SphereGeometry(.2,6,4),M(0x3f9a3e),n),o=new T.Object3D(),col=new T.Color();let k=0,i=0;
-      while(i<n&&k<20000){k++;const a=rnd()*Math.PI*2,r=4+rnd()*36,x=Math.cos(a)*r,z=Math.sin(a)*r;if(bad(x,z))continue;
-        o.position.set(x,.2,z);o.rotation.set(0,0,0);o.scale.setScalar(1);o.updateMatrix();hd.setMatrixAt(i,o.matrix);hd.setColorAt(i,col.setHex(fl[i%fl.length]));
-        o.position.set(x,.07,z);o.scale.set(1.4,.35,1.4);o.updateMatrix();lv.setMatrixAt(i,o.matrix);i++}
-      hd.count=lv.count=i;S.add(hd,lv);S.userData.bloomN=i}
+    if(n){const fl=[0xff4f7a,0xffd23f,0xc58bff,0xff8c42,0xffffff,0xff6fb5,0x4fc3ff],FL=[];let k=0;
+      while(FL.length<n&&k<20000){k++;const a=rnd()*Math.PI*2,r=4+rnd()*36,x=Math.cos(a)*r,z=Math.sin(a)*r;if(bad(x,z))continue;FL.push([x,z,fl[FL.length%fl.length],1.35])}
+      flowers(T,S,FL);S.userData.bloomN=FL.length}
     let k=0,i=0;sd=99;while(i<nt&&k<5000){k++;const a=rnd()*Math.PI*2,r=12+rnd()*30,x=Math.cos(a)*r,z=Math.sin(a)*r;if(bad(x,z)||Math.abs(x)<5)continue;tree(x,z,null,.75+((i*7)%4)*.08);i++}}
   // 🚦 (v16.3) أعمدة الإشارات: لكل ممرّ عمودان (واحد لكل اتجاه) بذراع فوق الحارتين، وإشارة المشاة (رجل أحمر/أخضر) تواجه الطرف الآخر
   {const pm=M(0x3a3f47,{metalness:.5,roughness:.4}),hm=M(0x15171a),L=[];
