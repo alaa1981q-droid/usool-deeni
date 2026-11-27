@@ -350,7 +350,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();farmAt(V?!!V.p
   // زهور ملوّنة كثيرة على العشب
   {const fl=[0xff5c8a,0xffd23f,0xb07cff,0xff8c42,0xffffff,0x4fc3ff,0xff4f4f],FL=[];let n=0,k=0;
     const bad=(x,z)=>x<-2.6&&x>XLc-.4&&z>-HZ-.35&&z<HZNc+.35||Math.abs(x)<2.8||x<-2.4&&x>-11.2&&z<-14.8&&z>-25||Math.abs(Math.abs(z)-4.6)<1.4&&Math.abs(x)<15||Object.values(SPOT).some(([a,b])=>Math.hypot(x-a,z-b)<3.9)||x>17||NOFL(x,z)||Math.abs(x-FARM[0])<3.6&&Math.abs(z-FARM[1])<3.8;
-    while(n<240&&k<4000){k++;const a=Math.random()*Math.PI*2,r=3+Math.random()*31,x=Math.cos(a)*r,z=Math.sin(a)*r;if(bad(x,z))continue;FL.push([x,z,fl[n%fl.length],1+Math.random()*.5]);n++}
+    const SN=season();if(SN==='sp'||SN==='su')while(n<240&&k<4000){k++;const a=Math.random()*Math.PI*2,r=3+Math.random()*31,x=Math.cos(a)*r,z=Math.sin(a)*r;if(bad(x,z))continue;FL.push([x,z,fl[n%fl.length],1+Math.random()*.5]);n++}
     flowers(T,S,FL);
     // خصل عشب بارزة متفرّقة على السهل (رسمة واحدة)
     const TF=[];k=0;if(season()==='sp')while(TF.length<(liteOn()?700:1500)&&k<9000){k++;const a=Math.random()*Math.PI*2,r=3+Math.random()*44,x=Math.cos(a)*r,z=Math.sin(a)*r;if(bad(x,z)||Math.hypot(x-PWR[0],z-PWR[1])<9||Math.hypot(x-PKC[0],z-PKC[1])<9.5||Math.hypot(x-HSP[0],z-HSP[1])<6||Math.hypot(x-FLK[0],z-FLK[1])<6||x<-3&&x>-21&&z>32&&z<41||Math.abs(z-NBZ)<3&&Math.abs(Math.abs(x)-7)<3)continue;TF.push([x,z,.7+Math.random()*.7])}
