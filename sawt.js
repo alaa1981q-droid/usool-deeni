@@ -95,6 +95,11 @@ function hear(onLevel){stopAll();return new Promise(res=>{let rec;try{rec=new SR
 
 /* كاشف الصوت (بلا إنترنت): يعدّ المقاطع المنطوقة. يرجع كائنًا فيه stop() */
 const IN_APK=location.host=='appassets.androidplatform.net';
+const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform=='MacIntel'&&navigator.maxTouchPoints>1);
+/* آيباد/آيفون (Safari): AudioContext يجب أن يُنشأ ويُشغَّل داخل لمسة الطفل نفسها، وإلا يبقى صامتًا (المايك يُفتح لكن لا نسمع شيئًا).
+   لذلك نُحضّره فورًا عند الضغط على المايك، قبل انتظار إذن المايك. */
+let preAC=null;
+function warm(){try{if(!preAC||preAC.state=='closed')preAC=new (window.AudioContext||window.webkitAudioContext)();if(preAC.state=='suspended')preAC.resume()}catch(e){preAC=null}}
 async function openMic(){
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw {name:'NoMedia'};
   try{return await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}})}
@@ -104,13 +109,14 @@ async function openMic(){
 function micHelp(e){const n=(e&&e.name)||'err';
   if(n=='NotAllowedError'||n=='SecurityError')return IN_APK
     ?'المايك ممنوع عن التطبيق. افتح إعدادات الهاتف ← التطبيقات ← جنّتي الصغيرة ← الأذونات ← الميكروفون ← سماح'
-    :'المتصفح منع المايك. اضغط 🔒 بجانب رابط الموقع ← الأذونات ← الميكروفون ← سماح، ثم أعد فتح الصفحة';
+    :IOS?'الآيباد منع المايك. افتح الإعدادات ← Safari ← الميكروفون ← سماح (أو اضغط «ᴀA» بجانب الرابط ← إعدادات موقع الويب ← الميكروفون ← سماح)، ثم أعد فتح الصفحة'
+    :'المتصفح منع المايك. اضغط 🔒 بجانب رابط الموقع ← الأذونات ← الميكروفون ← سماح، ثم أعد فتح الصفحة. وتأكّد أن الحاسوب فيه مايك (أو سمّاعة بمايك) مُشغَّل';
   if(n=='NotFoundError'||n=='OverconstrainedError')return 'لم نجد مايكًا في هذا الجهاز';
   if(n=='NotReadableError'||n=='AbortError')return 'المايك مشغول بتطبيق آخر (مكالمة أو تسجيل). أغلقه وجرّب';
   return 'لم نستطع فتح المايك';}
 async function vad({onLevel,onUtter,minMs=650}){
   const stream=await openMic();
-  const ac=new (window.AudioContext||window.webkitAudioContext)();
+  let ac=preAC;preAC=null;if(!ac||ac.state=='closed')ac=new (window.AudioContext||window.webkitAudioContext)();
   if(ac.state=='suspended')await Promise.race([ac.resume(),new Promise(r=>setTimeout(r,1500))]);
   const src=ac.createMediaStreamSource(stream),an=ac.createAnalyser();an.fftSize=1024;src.connect(an);
   const buf=new Float32Array(an.fftSize);let floor=[],thr=.02,talking=false,start=0,lastLoud=0,raf=0,stopped=false;const t0=performance.now();
@@ -155,7 +161,7 @@ const buzz=()=>{try{tone(330,.18,'sine',.1);tone(262,.25,'sine',.1,.15)}catch(e)
 /* ---------- صندوق «اقرأ بصوتك» لنص واحد ----------
    el: العنصر، text: النص، opts: {quran, hide, pass:0.8, onResult(score,mode)} */
 function reciteBox(el,text,opts={}){const T=words(text),raw=String(text).split(/\s+/).filter(Boolean);
-  const pass=opts.pass||.8;let busy=false,mode=canCorrect()?'sr':'vad';
+  const pass=opts.pass||.8;let busy=false,ns=0,mode=canCorrect()?'sr':'vad';
   el.innerHTML=`<div class="vx"><div class="tx ${opts.quran?'q':''} ${opts.hide?'hide':''}">${raw.map((w,k)=>`<span class="w" data-k="${k}">${w}</span>`).join(' ')}</div>
     <button class="vmic" aria-label="ابدأ القراءة بصوتك"><span class="ring"></span>🎤</button>
     <div class="vmsg">${B('اضغط','اضغطي')} على المايك و${B('اقرأ','اقرئي')} بصوتٍ واضح</div>
@@ -166,15 +172,16 @@ function reciteBox(el,text,opts={}){const T=words(text),raw=String(text).split(/
   const say=(t,c)=>{msg.className='vmsg '+(c||'');msg.textContent=t};
   const paint=ok=>{spans.forEach(s=>s.classList.remove('ok','no'));ok.forEach((v,i)=>{const s=spans[map[i]];if(s)s.classList.add(v?'ok':'no')})};
   mic.onclick=async()=>{if(busy){stopAll();if(vh){vh.stop();vh=null}return}
-    busy=true;mic.classList.add('on');spans.forEach(s=>s.classList.remove('ok','no'));
+    warm();busy=true;mic.classList.add('on');spans.forEach(s=>s.classList.remove('ok','no'));
     if(mode=='sr'){say(B('أسمعك… اقرأ الآن 👂','أسمعكِ… اقرئي الآن 👂'),'mid');
       const r=await hear((lv,partial)=>{ring.style.opacity=.9;ring.style.transform='scale(1.15)';setTimeout(()=>{ring.style.opacity=0;ring.style.transform='none'},180);
         if(partial){const c=compare(text,[partial]);c.ok.forEach((v,i)=>{const s=spans[map[i]];if(s&&v)s.classList.add('ok')})}});
       busy=false;mic.classList.remove('on');
-      if(r.err){if(r.err=='not-allowed'||r.err=='service-not-allowed'){say('اسمح للتطبيق باستعمال المايك 🎤','bad')}
-        else if(r.err=='network'||r.err=='nosr'||r.err=='start'||r.err=='language-not-supported'){mode='vad';el.querySelector('.vnote').textContent='🔈 تصحيح الكلمات يحتاج إنترنت. سنسمع صوتك فقط الآن.';say(B('اضغط المايك مرة أخرى','اضغطي المايك مرة أخرى'),'mid')}
+      if(r.err){if(r.err=='no-speech'||r.err=='aborted')ns++;
+        if(r.err=='not-allowed'||r.err=='service-not-allowed'||r.err=='audio-capture'||r.err=='network'||r.err=='nosr'||r.err=='start'||r.err=='language-not-supported'||ns>=2){mode='vad';
+          el.querySelector('.vnote').textContent='🔈 تصحيح الكلمات لا يعمل على هذا الجهاز الآن، سنسمع صوتك فقط.';say(B('اضغط المايك مرة أخرى','اضغطي المايك مرة أخرى'),'mid')}
         else say(B('لم أسمع شيئًا، اقترب من التلفون وارفع صوتك قليلًا','لم أسمع شيئًا، اقتربي من التلفون وارفعي صوتك قليلًا'),'mid');return}
-      const c=compare(text,r.texts);paint(c.ok);const miss=c.ok.filter(v=>!v).length;
+      ns=0;const c=compare(text,r.texts);paint(c.ok);const miss=c.ok.filter(v=>!v).length;
       if(c.score>=pass){chime();say(c.score==1?B('ممتاز! قرأتَها كلّها صحيحة 🌟','ممتاز! قرأتِها كلّها صحيحة 🌟'):B(`أحسنت! 👍 لكن انتبه ${miss==1?'للكلمة الحمراء':'للكلمات الحمراء'} وأعدها`,`أحسنتِ! 👍 لكن انتبهي ${miss==1?'للكلمة الحمراء':'للكلمات الحمراء'} وأعيديها`),'ok')}
       else{buzz();say(miss<=2?`قريب جدًا! ${B('انتبه','انتبهي')} للكلمات الحمراء ثم ${B('أعد','أعيدي')} 💪`:`${B('حاول','حاولي')} مرة أخرى، ${B('اقرأ','اقرئي')} على مهل 💪`,'bad')}
       opts.onResult&&opts.onResult(c.score,'sr',c)}
@@ -239,11 +246,11 @@ function counter(el,{phrase,target=10,emoji='💚',onDone}){let n=0,vh=null,done
         if(fin&&!doneF){if(c>atFin)say(B('أحسنت! قلها مرة أخرى 👂','أحسنتِ! قوليها مرة أخرى 👂'),'mid');
           else say(B('لم تُحسب 🙂 قل: ','لم تُحسب 🙂 قولي: ')+phrase,'bad');atFin=c}},
       onFail:async er=>{vh=null;if(doneF)return;
-        if(er=='not-allowed'||er=='service-not-allowed'||er=='network'||er=='nosr'||er=='start'||er=='loop'||er=='language-not-supported'){useSR=false;
+        if(er=='not-allowed'||er=='service-not-allowed'||er=='audio-capture'||er=='network'||er=='nosr'||er=='start'||er=='loop'||er=='language-not-supported'){useSR=false;
           try{await startVad()}catch(e){halt();say(micHelp(e),'bad')}}
         else{halt();say(micHelp({name:'NotFoundError'}),'bad')}}})};
   mic.onclick=async()=>{if(doneF)return;if(vh){halt();say(B('توقّف المايك. اضغط لتكمل','توقّف المايك. اضغطي لتكملي'));return}
-    try{mic.classList.add('on');say(B('أسمعك… قلها الآن 👂','أسمعكِ… قوليها الآن 👂'),'mid');
+    warm();try{mic.classList.add('on');say(B('أسمعك… قلها الآن 👂','أسمعكِ… قوليها الآن 👂'),'mid');
       if(useSR&&canCorrect())startSR();else await startVad()}
     catch(e){mic.classList.remove('on');vh=null;say(micHelp(e),'bad')}};
   return {stop(){halt()}}}
