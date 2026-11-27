@@ -1825,9 +1825,13 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
   // (v14.5) 👨‍👩‍👦 والدا الطفل عند باب البيت (بالنهار): الأمّ تحمل أكياسًا، والأب يستقبله
   const father=person('man',2),mother=person('woman',5);father.position.set(-3.15,0,-.35);mother.position.set(-3.15,0,2.35);[father,mother].forEach(P=>{P.rotation.y=Math.PI/2;P.userData.act='parents'});
   // (v18.7) 💂 حرّاس القصر: اثنان عند البوابة واثنان عند باب القصر، بأيديهم رماح ذهبية الرأس (يظهرون حين يكون البيت قصرًا)
-  // (v18.9) طلب الشيخ: الحرّاس يتحرّكون — ٢ يذرعان البوابة، ٢ يطوفان حول القصر، ٢ يذرعان أمام بابه. بزيّ أحمر وخوذة وحزام ودرع ذهبية ورمح (×١٫٤٥)
-  const PGW=[[[-3.6,-1.4],[-4.5,-1.4]],[[-3.6,3.15],[-4.5,3.15]],[[-8.4,3.15],[-18.3,3.15],[-18.3,-3.15],[-8.4,-3.15]],[[-18.3,-3.15],[-8.4,-3.15],[-8.4,3.15],[-18.3,3.15]],[[-8.0,1.3],[-8.0,2.5]],[[-8.0,-1.3],[-8.0,-2.5]]];let pgZ=null; // تُزاح حسب مكان القصر والبوابة (pgFit)
-  function pgFit(){const zc=PZC();if(pgZ===zc)return;pgZ=zc;const G1=PALZ?2.35:-1.4,G2=PALZ?6.85:3.15;palG.forEach((P,i)=>{const w=PGW[i].map(q=>[q[0],i<2?(i?G2:G1):q[1]+zc]);P.userData.pw.w=w;P.userData.pw.k=1;P.position.set(w[0][0],0,w[0][1])})}
+  // (v18.9) الحرّاس بزيّ أحمر وخوذة وحزام ودرع ذهبية ورمح (×١٫٤٥)
+  // (v24.4) طلب الشيخ: «الحارس يدخل بالجدار، قلّلهم: اثنان بالنهار ويزيدون بالليل» → لا أحد يطوف حول القصر (كانوا يخترقون الأبراج والدرج)
+  //  ٠،١ نهارًا وليلًا: واقفان أمام درج القصر · ٢،٣ ليلًا: يذرعان خطوات قصيرة داخل البوابة · ٤،٥ ليلًا: واقفان في الحديقة الأمامية على الجانبين
+  //  كل نقطة مقيسة بعيدًا عن الجدار والأعمدة والمسلّات والمصابيح والأشجار (نصف قطر الحارس ≈ .4). (x,z) محلّية للقصر: x+SPOT.home، z+مركز الأرض
+  const PGL=[[[-1.3,-.55]],[[-1.3,.55]],[[2.25,3.1,1],[1.85,3.1,1]],[[2.25,6.15,1],[1.85,6.15,1]],[[-.4,-4.45],[.8,-4.45]],[[-.4,4.45],[.8,4.45]]];
+  const PGW=PGL.map(w=>w.map(q=>[q[0]+SPOT.home[0],q[1]]));let pgZ=null; // z تُزاح حسب مكان القصر (pgFit)؛ النقاط ذات العلم ٣ = z مطلقة (البوابة ثابتة عند ٢٫٨–٦٫٤)
+  function pgFit(){const zc=PZC();if(pgZ===zc)return;pgZ=zc;palG.forEach((P,i)=>{const w=PGL[i].map(q=>[q[0]+SPOT.home[0],q[2]?q[1]:q[1]+zc]);P.userData.pw.w=w;P.userData.pw.k=w.length>1?1:0;P.position.set(w[0][0],0,w[0][1]);P.rotation.y=Math.PI/2})}
   const palG=PGW.map((w,i)=>{const P=person('guard',i);if(P.userData.lamp){P.userData.lamp.parent.remove(P.userData.lamp);delete P.userData.lamp}P.position.set(w[0][0],0,w[0][1]); // (v19.6) حرّاس القصر بلا ضوء حقيقي (٦ أضواء كانت تثقل المدينة)
     P.rotation.y=Math.PI/2;P.userData.act='guards';P.userData.pw={w,k:1,p:Math.random()*2};
     try{P.children[0].material=M(0xb3202a)}catch(e){}const gold=new T.MeshStandardMaterial({color:0xf0bf2a,metalness:.3,roughness:.35,emissive:0x5a3e00,emissiveIntensity:.3});
@@ -1952,8 +1956,10 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
     {const sc=String(o.sd||'0000'),dy=day&&!o.sleep;for(const q of SDQ)q.P.visible=dy&&sc[SDL.indexOf(q.k)]==='3';
       for(let i=0;i<2;i++)if(SWS[i].visible)SWS[i].rotation.x=Math.sin(t*2.1+i*1.3)*.5;
       if(SWK.visible){const w=SWW[SWK.userData.wk],dx=w[0]-SWK.position.x,dz=w[1]-SWK.position.z,d=Math.hypot(dx,dz);if(d<.15)SWK.userData.wk=(SWK.userData.wk+1)%SWW.length;
-        else{const v=Math.min(d,.7*dt);SWK.position.x+=dx/d*v;SWK.position.z+=dz/d*v;SWK.rotation.y=Math.atan2(dx,dz)}}}if(o.pal)pgFit();palG.forEach((P,i)=>{P.visible=!!o.pal;if(!P.visible)return;const q=P.userData.pw,u=P.userData;if(q.p>0){q.p-=dt;u.hyT=Math.sin(t*.6+i)*.7;return}
-      const tg=q.w[q.k];if(glide(P,u,tg[0],tg[1],i<2||i>3?.55:.75,dt,t)){q.k=(q.k+1)%q.w.length;q.p=i<2||i>3?1.6+Math.random()*1.8:(q.k%2?.6:1.4)}});mother.userData.bags.forEach(b=>b.visible=!o.bagsDone);baker.visible=day&&!o.sleep;
+        else{const v=Math.min(d,.7*dt);SWK.position.x+=dx/d*v;SWK.position.z+=dz/d*v;SWK.rotation.y=Math.atan2(dx,dz)}}}if(o.pal)pgFit();palG.forEach((P,i)=>{P.visible=!!o.pal&&(i<2||night);if(!P.visible)return;const q=P.userData.pw,u=P.userData;
+      if(q.w.length<2){turn(P,Math.PI/2,dt,2);u.hyT=Math.sin(t*.35+i*2)*.6;return} // حارس واقف: يواجه الشارع ويلتفت برأسه
+      if(q.p>0){q.p-=dt;u.hyT=Math.sin(t*.6+i)*.7;return}
+      const tg=q.w[q.k];if(glide(P,u,tg[0],tg[1],.45,dt,t)){q.k=(q.k+1)%q.w.length;q.p=2+Math.random()*2.5}});mother.userData.bags.forEach(b=>b.visible=!o.bagsDone);baker.visible=day&&!o.sleep;
     if(baker.visible)baker.rotation.x=Math.max(0,Math.sin(t*.9))*.25;
     {const play=day&&!o.sleep&&footNow();ball.visible=play;SB.visible=play;if(!play)FBK.forEach(p=>p.visible=false);FAN.forEach(p=>p.visible=play&&footHol());if(play)football(t,dt);}
     // (v14.7) 🚌 ناس يأتون إلى الموقف وينتظرون الباص (حتى ٤ في كل موقف)
