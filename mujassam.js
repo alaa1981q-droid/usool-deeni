@@ -2824,7 +2824,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8;
     if(cam.fov!==64){cam.fov=64;cam.updateProjectionMatrix()}cam.position.set(X+fz*o-fx*.15,1.08,Z-fx*o-fz*.15);cam.lookAt(X+fx*14+fz*o,.8,Z+fz*14-fx*o);
     const w=ck.querySelector('.whl');w.style.transform=`translateX(-50%) rotate(${Math.max(-140,Math.min(140,-cS.st*90)).toFixed(1)}deg)`;ck.querySelector('.spd').textContent=`${arn(Math.round(cS.sp*9))} كم/س`}
   // 🗺️ مشاويري بالسيارة: يختار الطفل المكان فتسوق السيارة وحدها إليه، تقف في موقفه، ينزل ويكمل مشيًا
-  const CTRIP=()=>[['🏡','بيتي',SIDEP.home,()=>go({x:-3.4,z:1,via:null},()=>tap({p:'home'}))],['🕌','الجامع',SIDEP.m,()=>A.mosque()],['🎒','مدرستي',PADS.sc,()=>A.mySchool()],
+  const CTRIP=()=>[['🏡','بيتي',SIDEP.home,()=>go({x:-3.4,z:1,via:null},()=>tap({p:'home'}))],['🕌','الجامع',SIDEP.m,()=>A.mosque()],...(schoolDay()?[['🎒','مدرستي',PADS.sc,()=>A.mySchool()]]:[]), // (v25.1) لا مشوار للمدرسة في العطلة
     ['🛒','السوق',PADS.mk,()=>card('🛒 أيّ دكّان؟',[...MKT.map(m=>[m[4],()=>follow(()=>A.mk(m[0]))]),['لاحقًا',null,'sec']])],['🎡','مدينة الألعاب',PADS.pk,()=>A.park()],
     ...(hpLv()>0?[['🏥','المستشفى',PADS.hp,()=>A.hospital()]]:[])];
   function trips(){if(!drv)return;card(`🗺️ إلى أين ${B('تذهب','تذهبين')} بالسيارة؟`,CTRIP().map(([e,n,p,f])=>[`${e} ${n}`,()=>{life.say(myCar,`🚗 إلى ${n}`,2.5,2.2);fol=1;foc='kid';
@@ -2852,11 +2852,14 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8;
   const MSL=()=>[['hj','👴','أوصل الحاج من السوق إلى الجامع',PADS.mk,'السوق',SIDEP.m,'man','👴 «السلام عليكم… أريد الذهاب إلى الجامع للصلاة»','إعانة الكبير واحترامه من أخلاق المسلم'],
     ['fd','🧺','أوصل سلّة الطعام لعائلة محتاجة',PADS.mk,'السوق',SIDEP.bl,null,'🧺 '+B('حملتَ','حملتِ')+' سلّة الطعام في السيارة','إطعام المحتاج من أحبّ الأعمال إلى اللَّه','woman'],
     ['mm','👩','أوصل '+B('أمّك','أمّكِ')+' إلى السوق',SIDEP.home,'البيت',PADS.mk,'woman','👩 «بارك اللَّه فيك'+yaN()+'»','برّ الوالدين طريقٌ إلى الجنة'],
-    ['fr','🎒','أوصل '+B('صديقك','صديقتكِ')+' إلى المدرسة',SIDEP.bl,'الشارع الفرعي',PADS.sc,'kid','🎒 «شكرًا! تأخّرتُ على المدرسة»','مساعدة الصديق من الوفاء'],
+    ...(schoolDay()?[['fr','🎒','أوصل '+B('صديقك','صديقتكِ')+' إلى المدرسة',SIDEP.bl,'الشارع الفرعي',PADS.sc,'kid','🎒 «شكرًا! تأخّرتُ على المدرسة»','مساعدة الصديق من الوفاء']]:[]), // (v25.1) الشيخ: الجمعة والسبت والعطل لا دوام
     ...(hpLv()>0?[['sk','🤒','أوصل جارك المريض إلى المستشفى',SIDEP.br,'الشارع الفرعي',PADS.hp,'man','🤒 «تعبان قليلًا… جزاك اللَّه خيرًا»','مساعدة المريض عمل صالح كبير']]:[]),
     ...(parkOpen()?[['pk','🧒','خذ أخاك الصغير إلى مدينة الألعاب',SIDEP.home,'البيت',PADS.pk,'kid','🧒 «يااا! مدينة الألعاب!»','إسعاد الصغار والرحمة بهم من الأخلاق']]:[])];
   function todayMs(){const D=day(),L=MSL();if(!D.ms){const s=seed(),pk=[];for(let i=0;i<40&&pk.length<Math.min(3,L.length);i++){const m=L[(s+i*7)%L.length];if(!pk.includes(m[0]))pk.push(m[0])}D.ms={l:pk,d:{}};dsv()}
-    return D.ms.l.map(id=>L.find(m=>m[0]===id)).filter(Boolean)}
+    // (v25.1) إن سقط مشوار من قائمة اليوم (مثل المدرسة في العطلة) نكمل العدد بمشوار آخر متاح
+    let M=D.ms.l.map(id=>L.find(m=>m[0]===id)).filter(Boolean);const want=Math.min(3,L.length);
+    if(M.length<want){L.forEach(m=>{if(M.length<want&&!M.includes(m))M.push(m)});D.ms.l=M.map(m=>m[0]);dsv()}
+    return M}
   function missions(){if(!drv){follow(()=>A.mycar());return}const M=todayMs(),dn=day().ms.d,n=M.filter(m=>dn[m[0]]).length;
     card(`🤝 مشاوير الخير اليوم (${arn(n)} من ${arn(M.length)})<br><small>${B('أوصل','أوصلي')} الناس ${B('بسيارتك','بسيارتكِ')}… كل مشوار عمل صالح 🤍</small>`,M.map(m=>[`${dn[m[0]]?'✔':m[1]} ${m[2]}`,dn[m[0]]?missions:()=>mission(m)]).concat([['لاحقًا',null,'sec']]));try{ui.card.querySelector('.row').style.flexWrap='wrap'}catch(e){}}
   let msP=null;const pSpot=p=>p.side?{x:p.x,z:p.z-sign(p.z)*.7}:{x:sign(p.x)*2.5,z:p.z+1.6};
