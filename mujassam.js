@@ -115,7 +115,7 @@ const FB=[13.6,-19.5];
 const HSP=[10.5,36];
 const PKC=[-12.5,-37]; // (v15.4) 🎡 مدينة الألعاب يسار الطريق بعد المدرسة، بوابتها على الرصيف (x≈-5) // (v15.2) 🏥 مستشفى المدينة: يمين الطريق بعد النهر وبيوت الجيران، بابه نحو الطريق
 // (v14.7) 🚌 موقفا باص المدينة على جانبي الشارع الرئيسي (قبل الجسر): [اتجاه الحارة، z، رصيف الانتظار x، مكان الوقوف داخل المظلّة x]
-const BSTOP=[[1,16.6,2.85,3.45],[-1,16.6,-2.75,-3.45]]; // (v14.5) ملعب كرة القدم
+const BSTOP=[[1,16.6,2.85,3.45],[-1,16.6,-2.6,-3.45]]; // (v14.5) ملعب كرة القدم
 // (v16.9) طلب الشيخ: 👮 مركز الشرطة يمين الطريق مقابل مدينة الألعاب، و⚡ محطة الكهرباء (شمس ورياح) في السهل الغربي
 const POL=[10.5,-34],PWR=[-34,-17],TAPP=[3.25,-6.6],IFT=[9.6,3.7],SHK=[-2.95,8.3];
 const WALLETS=[[-2.5,-9.5],[2.6,-12.5],[-2.5,14.5],[2.6,10.5],[-2.5,-27],[2.6,-27.5]];
@@ -934,7 +934,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();farmAt(V?!!V.p
     if(LV('m')>0){const SB=new T.Group();SB.position.set(7.6,0,3.3);SB.userData.act='sadaqa';S.add(SB);box(.12,.6,.12,M(0x777777),0,.3,0,SB);box(.55,.45,.4,M(0x1f8a5a),0,.82,0,SB);box(.3,.03,.06,M(0x151515),0,1.055,0,SB);box(.57,.08,.42,M(0xc9a227,{metalness:.6,roughness:.35}),0,1.06,0,SB);
       if(!V&&!D2.sdq)mark(SB,'💝','#d94f8a',1.9,0,.75)}
     // ❤️ علامة فوق الوالدين عند باب البيت حتى يبرّهما الطفل اليوم
-    if(!V&&!night){const br=D2.br||{};if(!(br.s&&br.b&&br.h)){const PM=new T.Group();PM.position.set(-3.1,0,1);PM.userData.act='parents';S.add(PM);mark(PM,'❤️','#e2504a',2.9,0,.85)}}}
+    if(!V&&!night){const br=D2.br||{};if(!(br.s&&br.b&&br.h)){const PM=new T.Group();PM.position.set(PALZ?-3.6:-3.1,0,PALZ?4.6:1);PM.userData.act='parents';S.add(PM);mark(PM,'❤️','#e2504a',2.9,0,.85)}}}
   // ---- (v16.9) طلب الشيخ: 👮 مركز الشرطة، ⚡ محطة الكهرباء، وأماكن الأعمال الجديدة ----
   {const D3=V?{}:day();
     // 👮 مركز الشرطة: مبنى أبيض بطابقين وأشرطة زرقاء، واجهته (محليًا +z) نحو الطريق، وسيارة شرطة بأضواء تومض
@@ -1983,7 +1983,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       if(!block)c.z+=c.dir*c.sp*(rush?.45:1)*dt;
       if(c.dir>0&&c.z>Z1||c.dir<0&&c.z<Z0){c.z=c.dir>0?Z0:Z1;c.done=0;c.on=trLive(c,rush,trDen());c.v.visible=c.on}c.v.position.z=c.z});
     // (v14.5) الوالدان والجارة بالنهار، والأطفال يلعبون الكرة العصر
-    [father,mother].forEach(P=>{P.visible=day&&!o.sleep});
+    [father,mother].forEach(P=>{P.visible=day&&!o.sleep});if(PALZ!==father.userData.pz){father.userData.pz=PALZ;father.position.set(PALZ?-3.6:-3.15,0,PALZ?3.75:-.35);mother.position.set(PALZ?-3.6:-3.15,0,PALZ?5.45:2.35)} // (v25.4) مع القصر: الوالدان داخل البوابة لا في السور
     {const sc=String(o.sd||'0000'),dy=day&&!o.sleep;for(const q of SDQ)q.P.visible=dy&&sc[SDL.indexOf(q.k)]==='3';
       for(let i=0;i<2;i++)if(SWS[i].visible)SWS[i].rotation.x=Math.sin(t*2.1+i*1.3)*.5;
       if(SWK.visible){const w=SWW[SWK.userData.wk],dx=w[0]-SWK.position.x,dz=w[1]-SWK.position.z,d=Math.hypot(dx,dz);if(d<.15)SWK.userData.wk=(SWK.userData.wk+1)%SWW.length;
@@ -2050,7 +2050,9 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       const ux=dx/d,uz=dz/d,ov=(md-d),k=Math.min(1,ov),sx=(ux+uz*.45)*k,sz=(uz-ux*.45)*k,wa=a.mv/(a.mv+b.mv),wb=b.mv/(a.mv+b.mv),f=.35;
       if(a.P){a.P.position.x-=sx*wa*f;a.P.position.z-=sz*wa*f}if(b.P){b.P.position.x+=sx*wb*f;b.P.position.z+=sz*wb*f}}}
     // (v19.2) الدفع لا يُنزل أحدًا من الرصيف إلى الشارع (إلا عند ممرّ المشاة)
-    for(const a of L){if(!a.P||!a.mv||a.ox)continue;const P=a.P,x0=Math.abs(a.x0);if(x0>=2.16&&x0<3.2&&Math.abs(P.position.x)<2.16&&Math.abs(Math.abs(P.position.z)-4.9)>1)P.position.x=(a.x0<0?-1:1)*2.16}}
+    for(const a of L){if(!a.P||!a.mv||a.ox)continue;const P=a.P,x0=Math.abs(a.x0);if(x0>=2.16&&x0<3.2&&Math.abs(P.position.x)<2.16&&Math.abs(Math.abs(P.position.z)-4.9)>1)P.position.x=(a.x0<0?-1:1)*2.16
+      // (v25.4) طلب الشيخ: «ناس تدخل بجدار القصر» → الدفع لا يُدخل أحدًا من الرصيف الأيسر في سور البيت/القصر (XF) ولا من بوابته
+      if(a.x0>XF&&P.position.x<-2.72&&P.position.z>-HZ-.5&&P.position.z<HZNc+.5)P.position.x=Math.min(a.x0,-2.72)}}
   // ================= (v15.4) 🎡 مدينة الألعاب =================
   // دولاب هواء كبير، دوّامة بخيول، زحليقة، ميزان (سيسو)، كشك غزل البنات، أعلام ملوّنة وبالونات عند البوابة.
   // يوم الفتح: الألعاب تدور والأطفال يركبون ويلعبون، وعائلات تأتي من الطريق والقرية وتدخل، وأخرى تخرج. غير ذلك: متوقفة ولوحة «مغلقة».
@@ -2126,7 +2128,7 @@ function makeLife(night){const T=THREE,g=new T.Group(),M=c=>new T.MeshStandardMa
       if(glide(P,u,u.t[0],u.t[1],P.userData.legs?1.15:.85,dt,t)){u.w=1+Math.random()*3;u.t=PKW[Math.floor(Math.random()*PKW.length)]}});
     // 👨‍👧‍👦 عائلات تأتي إلى مدينة الألعاب (من الطريق والقرية) وأخرى ترجع
     pkT-=dt;if(pkT<=0&&h<20.3){pkT=6+Math.random()*6;if(walkers.filter(w=>w.pk).length<14){const back=Math.random()<.35,n=1+Math.floor(Math.random()*2),GX=PKC[0]+8.6,GZ=PKC[1];
-      const r=Math.random(),src=r<.4?[[L2,-75]]:r<.75?[[L2,8],[L2,-6]]:[VL[0],[VL[0][0]+4,VL[0][1]],[L2,VL[0][1]]];
+      const r=Math.random(),src=r<.4?[[L2,-75]]:r<.75?(PALZ?[[-4.5,NBZ],[L2,NBZ],[L2,-6]]:[[L2,8],[L2,-6]]):[VL[0],[VL[0][0]+4,VL[0][1]],[L2,VL[0][1]]];
       for(let i=0;i<=n;i++){const kid2=i>0,P=person(kid2?'kid':Math.random()<.55?'man':'woman',Math.floor(Math.random()*12)),o2=(i-.5)*.32;
         let pts=src.map(q=>[q[0]+(Math.abs(q[0])<4?o2:0),q[1]]).concat([[L2+o2,GZ+.3*i],[GX,GZ+o2],[GX-2.4,GZ+o2*2]]);if(back)pts=pts.reverse();
         P.userData.bs=P.scale.x;if(back)P.scale.setScalar(.01);walk(P,pts,kid2?1.35:1.2,back?'gone':'enter');const w=walkers[walkers.length-1];w.pk=1;if(back)w.grow=0}}}}
@@ -2445,7 +2447,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8;
         if(k==='b'){L.say(kid,'عنكِ يا أمّي 🛍️',2.5,2.4);br.b=br.b||0;setTimeout(()=>{carry=1;kidBags.forEach(b=>b.visible=true);L.say(L.mother,'اللَّه يرضى عليك 🤲',3,2.3);
           setTimeout(()=>{carry=0;kidBags.forEach(b=>b.visible=false);ok('b',2,`🛍️ ${B('حملتَ','حملتِ')} الأغراض عن ${B('أمّك','أمّكِ')} وأدخلتها البيت`,'مساعدة الأمّ من أحبّ الأعمال إلى اللَّه 🤍')},1500)},600)}
         if(k==='h'){L.say(kid,'🤲',2,2.4);joyT=1.1;setTimeout(()=>{L.say(L.father,'رضي اللَّهُ عنك يا '+B('ولدي','ابنتي')+' 🤲',3.2,2.4);ok('h',2,`🤲 ${B('قبّلتَ','قبّلتِ')} يد ${B('أبيك','أبيكِ')} فدعا لك`,'احترام الوالدين وطاعتهما بابٌ إلى الجنّة 🤍')},1000)}};
-      go(door('home'),()=>{const left=[['s','👋 السلام عليكم يا أمّي ويا أبي'],['b','🛍️ أحمل الأغراض عن أمّي'],['h','🤲 أقبّل يد أبي']].filter(x=>!br[x[0]]);
+      go(PALZ?{x:-2.55,z:4.6,via:null}:door('home'),()=>{const left=[['s','👋 السلام عليكم يا أمّي ويا أبي'],['b','🛍️ أحمل الأغراض عن أمّي'],['h','🤲 أقبّل يد أبي']].filter(x=>!br[x[0]]);
         if(!left.length){card(`👨‍👩‍👦 والداك يدعوان لك ويقولان: الله يحفظك 🤲<br><small>${B('برَرتَ','برَرتِ')} بهما اليوم، ${B('تعال','تعالي')} غدًا من جديد 🤍</small>`,[['الحمد لله',null]]);return}
         card(`👨‍👩‍👦 ${B('أبوك','أبوكِ')} و${B('أمّك','أمّكِ')} عند باب البيت… ${B('أمّك','أمّكِ')} تحمل أكياسًا ثقيلة 🛍️<br><small>ماذا ${B('تفعل','تفعلين')}؟</small>`,left.map(x=>[x[1],()=>act(x[0])]).concat([['لاحقًا',null,'sec']]))})},
     football(){const D=day();if(night||sleeping||!footNow()){card(`⚽ الملعب فارغ الآن… ${rainNow()?'الجوّ ممطر اليوم 🌧️':'يلعب أطفال الحيّ بعد المدرسة حتى المغرب، وفي العطل من الصباح'} 🙂`);setTimeout(()=>card(''),2400);return}
@@ -3021,7 +3023,8 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8;
     if(fps<40&&PR>1){PR=Math.max(1,+(PR-.25).toFixed(2));R.setPixelRatio(PR);fpGood=0}
     else if(fps<(LITE?22:28)&&PR<=1){if(++fpBad>=2){fpBad=0;if(R.shadowMap.enabled){R.shadowMap.enabled=false;const mu=o=>{const m=o.material;if(m)(Array.isArray(m)?m:[m]).forEach(x=>x.needsUpdate=true)};S.traverse(mu);life.g.traverse(mu);kid.traverse(mu);qSet(1)}else if(PR>.75){PR=.75;R.setPixelRatio(PR);qSet(2)}}}else if(fps>55&&PR<PRM){if(++fpGood>=3){PR=Math.min(PRM,+(PR+.25).toFixed(2));R.setPixelRatio(PR);fpGood=0}fpBad=0}else{fpGood=0;fpBad=0}}
   // الناس البعيدون جدًا عن الكاميرا (أكثر من ٥٥) لا يُرسمون (صغار جدًا لا يُرَون)، ويُعادون بعد الرسم
-  const HV=[];
+  // (v25.4) طلب الشيخ: «ناس تختفي فجأة» → بين ٥٨ و٧٢ يصغرون بالتدريج ثم يغيبون، بدل الاختفاء المفاجئ عند ٥٥
+  const HV=[],HS=[];
   // (v17.5) «المناطق»: ما هو بعيد جدًّا عن الكاميرا (حسب حجمه) لا يُرسم، ويرجع حين تقترب. القائمة تُبنى مرّة لكل مشهد.
   let ZS=null,ZN=[];const ZH=[],zsp=new T.Sphere(),zb=new T.Box3();
   function zones(){if(ZS!==S){ZS=S;ZN=[];S.updateMatrixWorld(true);S.children.forEach(o=>{if(o===life.g||o===kid||o.isLight||o.isPoints||(o.userData&&o.userData.rd)||o.frustumCulled===false)return;
@@ -3030,8 +3033,8 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8;
     ZH.length=0;const p=cam.position,F=LITE?95:125;for(const [o,c,r] of ZN){if(!o.visible)continue;const lim=F+r*6;if(c.distanceToSquared(p)>lim*lim){o.visible=false;ZH.push(o)}}}
   const RM=[];function rMap(){zones();adapt();if(R.shadowMap.enabled&&++shF>=120){shF=0;const nc=o=>{if(o.castShadow)o.castShadow=false};life.g.traverse(nc);kid.traverse(nc);R.shadowMap.needsUpdate=true} // (v19.0) الظلال ثابتة تُحدَّث كل ١٢٠ إطارًا والأشياء المتحرّكة بلا ظلّ: كان رسمها كل ثالث إطار يسبّب «تعليقًا» متقطّعًا
     RM.length=0;HV.length=0;const g=life.g;for(const c of g.children){const x=c.position.x;RM.push(c,x);c.position.x=c.userData.lane!=null?(x<0?-1:1)*(c.userData.lane?LO:LI):fX(x)}
-    {const cx=cam.position.x,cz=cam.position.z;for(const c of life.g.children){if(c.visible&&c.userData.arms){const dx=c.position.x-cx,dz=c.position.z-cz;if(dx*dx+dz*dz>3025){c.visible=false;HV.push(c)}}}}
-    RM.push(kid,kid.position.x);kid.position.x=fX(kid.position.x);R.render(S,cam);for(let i=0;i<RM.length;i+=2)RM[i].position.x=RM[i+1];for(const c of HV)c.visible=true;for(const o of ZH)o.visible=true}
+    {const cx=cam.position.x,cz=cam.position.z;for(const c of life.g.children){if(c.visible&&c.userData.arms){const dx=c.position.x-cx,dz=c.position.z-cz;const d2=dx*dx+dz*dz;if(d2>5184){c.visible=false;HV.push(c)}else if(d2>3364){const f=Math.max(.02,(72-Math.sqrt(d2))/14);HS.push(c,c.scale.x,c.scale.y,c.scale.z);c.scale.multiplyScalar(f)}}}}
+    RM.push(kid,kid.position.x);kid.position.x=fX(kid.position.x);R.render(S,cam);for(let i=0;i<RM.length;i+=2)RM[i].position.x=RM[i+1];for(const c of HV)c.visible=true;for(let i=0;i<HS.length;i+=4)HS[i].scale.set(HS[i+1],HS[i+2],HS[i+3]);HS.length=0;for(const o of ZH)o.visible=true}
   function lookPt(x,z){x=fX(x);fol=0;flyTo({c:[x,0,z],l:[x,.6,z],th,ph:Math.min(ph,.9),dist:20});foc='spot';hosLbl()}
   // ٩ وردة تنبت أمام الطفل مع كل عمل صالح
   function bloomPop(){try{const f=new T.Group(),a=Math.random()*Math.PI*2;f.position.set(fX(kid.position.x+Math.cos(a)*.9),0,kid.position.z+Math.sin(a)*.9);
