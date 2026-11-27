@@ -210,7 +210,7 @@ function flowers(T,S,L){if(!L.length)return;if(!FWG){const p=new T.SphereGeometr
     o.position.set(x,.14*s,z);o.updateMatrix();st.setMatrixAt(i,o.matrix);
     o.position.set(x+tl*.28*s,.29*s,z);o.updateMatrix();pe.setMatrixAt(i,o.matrix);pe.setColorAt(i,col.setHex(c));
     o.position.y=.31*s;o.updateMatrix();ce.setMatrixAt(i,o.matrix);ce.setColorAt(i,col.setHex(c===0xffd23f?0xff8a1f:0xffd93a));TF.push([x,z,.55*s])});
-  [st,pe,ce].forEach(m=>{m.frustumCulled=false;S.add(m)});tufts(T,S,TF)}
+  [st,pe,ce].forEach(m=>{m.frustumCulled=false;S.add(m)});if(season()==='sp')tufts(T,S,TF)}
 function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();farmAt(V?!!V.pq:palaceMe());
   const Md=window.Madina,lv=V?V.lv:mLvs(),job=V||ADMF()?null:(Md?Md.st.job:null),need=(p,l)=>Md&&Md.need?Md.need(p,l):'';
   const LV=p=>Math.max(0,Math.min(3,lv[p]|0));
@@ -232,25 +232,26 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();farmAt(V?!!V.p
   // (v13.6) أشجار أكثر واقعية (طلب الشيخ): جذع متدرّج بلحاء وأغصان، وتاج من كتل أوراق متعرّجة بدرجات أخضر طبيعية.
   // ثلاثة أنواع حسب المكان: شجرة مستديرة، شجرة طويلة (كالكالبتوس)، وشجرة برتقال بثمارها. وقليل منها مزهر بالوردي.
   const tgMk=dt=>[1,2.7,4.3].map(sd=>{const g=new T.IcosahedronGeometry(1,dt),p=g.attributes.position,v=new T.Vector3();
-    for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i);v.multiplyScalar(1+.13*Math.sin(v.x*5.3+sd)*Math.cos(v.y*4.1+sd*2)+.07*Math.sin(v.z*9+sd));p.setXYZ(i,v.x,v.y,v.z)}
-    g.computeVertexNormals();return g});
+    const nr=[];for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i);v.normalize();nr.push(v.x,v.y*.8+.2,v.z);v.multiplyScalar(1+.13*Math.sin(v.x*5.3+sd)*Math.cos(v.y*4.1+sd*2)+.07*Math.sin(v.z*9+sd));p.setXYZ(i,v.x,v.y,v.z)}
+    g.setAttribute('normal',new T.Float32BufferAttribute(nr,3));g.normalizeNormals();return g}); // (v24.7) أعمدة ناعمة (اتجاه الكرة) فتبدو كتلة أوراق لا صخرة مضلّعة
   // (v17.8) فحص التعليق: أوراق الشجر كانت أثقل شيء في المدينة (٣٢٠ مثلثًا لكل كتلة، ×٢ للظل) ← الأشجار البعيدة والسياج بكتل أخفّ (٨٠)
   const TG=tgMk(2),TGL=tgMk(1);
   const TRK=new T.CylinderGeometry(.13,.22,1,8),BRG=new T.CylinderGeometry(.045,.085,1,6),FRG=new T.SphereGeometry(.075,8,6);
   const bark=M(night?0x4a3626:0x6b4a2f,{roughness:1});
-  const LVm=n=>({color:n,roughness:.85,flatShading:true});
+  const LVm=n=>({color:n,roughness:.9}); // (v24.7) تظليل ناعم: الأوراق كانت مضلّعة كالصخر
   // (v14.5) ألوان الأوراق حسب الفصل الحقيقي: خريف أصفر وبرتقالي، شتاء أخضر هادئ، ربيع وصيف أخضر زاهٍ (وأزهار أكثر في الربيع)
-  const SEA=season(),SCL={au:[[0xd9a23a,0x9a9e3c,0xe0802c,0x6f9a3a],[0xf0c445,0xc98f2e,0xd8622a,0xa8b04a]],wi:[[0x4a7d42,0x557f3e,0x3d6e3d,0x5f8a48],[0x5f8f4e,0x6a9450,0x4f8048,0x76a058]]}[SEA]||[[0x3f8f3a,0x4f9e3c,0x2f7d3a,0x5aa845],[0x5aa848,0x66b34a,0x449545,0x74bd52]];
+  // (v24.7) كل شجرة بلون واحد (درجة غامقة وأخرى فاتحة منه) بدل خليط الأصفر والبرتقالي والأخضر في الشجرة نفسها
+  const SEA=season(),SCL={au:[[0xd49a2c,0xd0702a,0x8f9a3a,0x5f8f38],[0xf0c04a,0xec9446,0xb2b452,0x7aaa48]],wi:[[0x4a7d42,0x557f3e,0x3d6e3d,0x5f8a48],[0x5f8f4e,0x6a9450,0x4f8048,0x76a058]]}[SEA]||[[0x3f8f3a,0x4f9e3c,0x2f7d3a,0x5aa845],[0x5aa848,0x66b34a,0x449545,0x74bd52]];
   const nC=c=>night?new T.Color(c).multiplyScalar(.66).getHex():c;
   const LF=SCL[0].map(c=>new T.MeshStandardMaterial(LVm(nC(c)))),LF2=SCL[1].map(c=>new T.MeshStandardMaterial(LVm(nC(c))));
   const BLS=new T.MeshStandardMaterial(LVm(night?0xc0789a:0xf590b8)),FRT=M(0xff9a1f,{roughness:.5});
-  const tree=(x,z,p,s=1)=>{const h=Math.abs(Math.round(x*7+z*13)),kind=h%3,bl=h%(SEA==='sp'?3:9)===0,G=new T.Group();G.position.set(x,0,z);G.scale.setScalar(s);G.rotation.y=h*.7;(p||S).add(G);
-    const tall=kind===1,th=tall?1.75:1.15,m1=LF[h%4],m2=bl?BLS:LF2[(h>>2)%4];
+  const tree=(x,z,p,s=1)=>{const h=Math.abs(Math.round(x*7+z*13)),kind=h%3,bl=SEA==='sp'&&h%3===0,G=new T.Group();G.position.set(x,0,z);G.scale.setScalar(s);G.rotation.y=h*.7;(p||S).add(G);
+    const tall=kind===1,th=tall?1.75:1.15,m1=LF[h%4],m2=bl?BLS:LF2[h%4];
     const tk=add(TRK,bark,0,th/2,0,G);tk.scale.set(1,th,1);
     [[.55,0],[-.5,2.2],[.45,4.1]].forEach(([lean,ry])=>{const b=new T.Group();b.position.set(0,th*.82,0);b.rotation.set(0,ry,0);G.add(b);const m=add(BRG,bark,0,.3,0,b);m.scale.set(1,.65,1);b.children[0].rotation.z=lean;m.position.x=-Math.sin(lean)*.3});
     const cl=tall?[[0,2.35,0,.72,1.35],[.32,1.85,.18,.58,1],[-.3,1.95,-.2,.58,1],[0,3.05,0,.48,.9],[.1,2.6,-.35,.45,.9]]
       :[[0,1.95,0,.95,.78],[.55,1.75,.2,.65,.72],[-.5,1.8,-.25,.7,.72],[.1,1.72,-.55,.6,.72],[-.15,1.78,.55,.6,.72],[.05,2.45,.05,.62,.72]];
-    const tg=Math.hypot(x,z)>26?TGL:TG;cl.forEach(([a,b,c,r,sy],i)=>{const m=add(tg[(h+i)%3],i%2||(bl&&i>2)?m2:m1,a,b,c,G);m.scale.set(r,r*sy,r);m.rotation.y=i*1.3});
+    const tg=Math.hypot(x,z)>26?TGL:TG;cl.forEach(([a,b,c,r,sy],i)=>{const m=add(tg[(h+i)%3],bl?(i>2?m2:m1):b>=(tall?2.3:1.9)?m2:m1,a,b,c,G);m.scale.set(r,r*sy,r);m.rotation.y=i*1.3});
     if(kind===2&&!bl)for(let i=0;i<9;i++){const a=i*2.4+h,y=1.45+(i*37%10)/10*.95,r=Math.sqrt(Math.max(.05,1-((y-1.95)/.8)**2))*.98;add(FRG,FRT,Math.cos(a)*r,y,Math.sin(a)*r,G)}};
   const anim=[];S.userData.anim=anim;
   // (v13.6) نخلة واقعية: جذع منحنٍ بحلقات، وسعف متدلٍّ، وعذوق تمر
@@ -264,12 +265,11 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();farmAt(V?!!V.p
       const f2=new T.Group();f2.position.z=1.2;f2.rotation.x=.55;f.add(f2);const l2=add(FRDG,k%2?frd:frd2,0,0,.5,f2);l2.scale.set(.16,.025,.55)}
     for(let i=0;i<7;i++){const a=i*.9;add(DTG,dtm,Math.cos(a)*.16,-.12-(i%3)*.06,Math.sin(a)*.16,C)}};
   // الأرض والطرق
-  // (v24.6) طلب الشيخ: العشب كان أخضر مسطّحًا «غير جميل» → نسيج عشب حقيقي (درجات وأعواد)، خصل عشب بارزة، وزهور بساق وبتلات ووسط أصفر
-  const GT=grassTex(T);
-  const g=add(new T.CircleGeometry(900,64),M(night?0x7f9a96:0xffffff,{map:GT,roughness:1}),0,-.06,0); // (v17.6) أخفض قليلًا: من مقعد السائق كان العشب يظهر فوق الإسفلت (دقّة العمق)
+  // (v24.7) الشيخ فضّل الأخضر الواحد الأوّل: لا نسيج للأرض، وخصل العشب في الربيع فقط؛ وبقيت الزهور بساق وبتلات
+  const g=add(new T.CircleGeometry(900,64),M(night?0x3f9149:0x5cc455),0,-.06,0); // (v17.6) أخفض قليلًا: من مقعد السائق كان العشب يظهر فوق الإسفلت (دقّة العمق)
  g.rotation.x=-Math.PI/2;
   // بقع عشب بدرجات مختلفة
-  const pM=[M(night?0x86a890:0xf2ffd8,{map:GT,roughness:1}),M(night?0x6a8a7a:0xc4dcbc,{map:GT,roughness:1})];
+  const pM=[M(night?0x4aa052:0x72d460),M(night?0x37853f:0x4fb44c)];
   for(let i=0;i<26;i++){const a=i*2.4,r=8+(i*37%22);if(Math.abs(Math.cos(a)*r)<S0+2+i%3+.3)continue;const p=add(new T.CircleGeometry(2+i%3,20),pM[i%2],Math.cos(a)*r,.004,Math.sin(a)*r);p.rotation.x=-Math.PI/2;p.receiveShadow=true;p.castShadow=false}
   // (v12.4) سهل أخضر ممتد بلا نهاية: سلسلة جبال واقعية غربًا (عشب ← صخر ← ثلج)، وبحر متدرّج شرقًا، والطريق يغيب في الأفق
   const WIN=winter();
@@ -346,7 +346,7 @@ function makeScene(night,V){const T=THREE,S=new T.Scene(),D=day();farmAt(V?!!V.p
     while(n<240&&k<4000){k++;const a=Math.random()*Math.PI*2,r=3+Math.random()*31,x=Math.cos(a)*r,z=Math.sin(a)*r;if(bad(x,z))continue;FL.push([x,z,fl[n%fl.length],1+Math.random()*.5]);n++}
     flowers(T,S,FL);
     // خصل عشب بارزة متفرّقة على السهل (رسمة واحدة)
-    const TF=[];k=0;while(TF.length<(liteOn()?700:1500)&&k<9000){k++;const a=Math.random()*Math.PI*2,r=3+Math.random()*44,x=Math.cos(a)*r,z=Math.sin(a)*r;if(bad(x,z)||Math.hypot(x-PWR[0],z-PWR[1])<9||Math.hypot(x-PKC[0],z-PKC[1])<9.5||Math.hypot(x-HSP[0],z-HSP[1])<6||Math.hypot(x-FLK[0],z-FLK[1])<6||x<-3&&x>-21&&z>32&&z<41||Math.abs(z-NBZ)<3&&Math.abs(Math.abs(x)-7)<3)continue;TF.push([x,z,.7+Math.random()*.7])}
+    const TF=[];k=0;if(season()==='sp')while(TF.length<(liteOn()?700:1500)&&k<9000){k++;const a=Math.random()*Math.PI*2,r=3+Math.random()*44,x=Math.cos(a)*r,z=Math.sin(a)*r;if(bad(x,z)||Math.hypot(x-PWR[0],z-PWR[1])<9||Math.hypot(x-PKC[0],z-PKC[1])<9.5||Math.hypot(x-HSP[0],z-HSP[1])<6||Math.hypot(x-FLK[0],z-FLK[1])<6||x<-3&&x>-21&&z>32&&z<41||Math.abs(z-NBZ)<3&&Math.abs(Math.abs(x)-7)<3)continue;TF.push([x,z,.7+Math.random()*.7])}
     tufts(T,S,TF,night)}
   // شجيرات صغيرة على أطراف الطرق
   const bush=M(0x4cc35e);[[-3,10.5],[3,-10.5],[-3,-11.5],[3,11.5],[-12,6.2],[12,-6.2],[-7,6.2],[7,-6.2],[7,6.2],[-7,-6.2]].forEach(([x,z])=>{const b=add(new T.SphereGeometry(.55,12,8),bush,x,.35,z);b.scale.set(1.3,.8,1)});
