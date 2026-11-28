@@ -1,0 +1,1527 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ميادين النصر</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Cairo:wght@400;600;800&display=swap">
+<style>
+/* لعبة استراتيجية: شاشة واحدة بعرض الهاتف، خريطة صحراوية بلون الرق، أزرار ثلاثية الأبعاد */
+:root{
+  --sand:#e9d7ae; --sand2:#d9c08a; --ink:#3b2a14; --ink2:#6b5332;
+  --green:#1f7a4d; --green2:#145236; --red:#9b2c22; --red2:#6d1d16;
+  --gold:#c9962b; --gold2:#8f6a17; --paper:#f7ecd2; --night:#1d1a14;
+  --fd:"Amiri","Cairo",system-ui,sans-serif; --fb:"Cairo",system-ui,sans-serif;
+  color-scheme:light;
+}
+html,body{height:100%}
+body{margin:0;background:var(--night);color:var(--ink);font-family:var(--fb);direction:rtl;overflow:hidden;-webkit-tap-highlight-color:transparent}
+.scr{position:fixed;inset:0;display:none;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.scr.on{display:flex}
+#menu,#brief,#players{background:radial-gradient(ellipse at 50% 0%,#f6e6bf 0%,var(--sand) 55%,var(--sand2) 100%);overflow-y:auto}
+.wrap{width:100%;max-width:560px;margin:0 auto;padding-block:18px 28px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));box-sizing:border-box;display:flex;flex-direction:column;gap:14px}
+h1{font-family:var(--fd);font-weight:700;font-size:40px;margin:6px 0 0;text-align:center;color:var(--green2);text-shadow:0 2px 0 #fff8,0 4px 0 #0001;text-wrap:balance}
+.sub{text-align:center;font-weight:600;color:var(--ink2);margin:0;font-size:15px}
+.bt{font-family:var(--fb);font-weight:800;font-size:16px;border:0;border-radius:14px;padding:12px 16px;cursor:pointer;color:#fff;background:var(--c,var(--green));box-shadow:0 4px 0 var(--d,var(--green2)),0 6px 12px #0003,inset 0 2px 0 #ffffff40;transition:transform .08s}
+.bt:active{transform:translateY(3px);box-shadow:0 1px 0 var(--d,var(--green2)),0 2px 6px #0003,inset 0 2px 0 #ffffff40}
+.bt:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.bt.gold{--c:var(--gold);--d:var(--gold2)}
+.bt.red{--c:var(--red);--d:var(--red2)}
+.bt.plain{--c:#fff6e2;--d:#cdb37c;color:var(--ink)}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{background:var(--paper);border-radius:16px;padding:12px;box-shadow:0 4px 0 #c6a96c,0 8px 16px #0002,inset 0 2px 0 #fff;cursor:pointer;display:flex;flex-direction:column;gap:4px;min-width:0;border:0;text-align:right;font-family:var(--fb);color:var(--ink)}
+.card b{font-family:var(--fd);font-size:22px;color:var(--green2)}
+.card small{font-weight:600;color:var(--ink2);font-size:13px}
+.card .yr{font-size:12px;font-weight:800;color:var(--gold2)}
+.card:last-child:nth-child(odd){grid-column:1/-1}
+.card.lock{opacity:.6;cursor:default}
+.card .st{font-size:15px;letter-spacing:2px}
+.note{background:#fff6e2;border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.9;box-shadow:0 3px 0 #d8bf86,inset 0 2px 0 #fff}
+.brief h2{font-family:var(--fd);font-size:32px;margin:0;color:var(--green2);text-align:center}
+.brief p{margin:0;line-height:2;font-size:15.5px}
+.nums{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.num{border-radius:14px;padding:10px;text-align:center;color:#fff;box-shadow:0 4px 0 var(--d),inset 0 2px 0 #ffffff40;background:var(--c)}
+.num b{display:block;font-size:24px;font-family:var(--fd)}
+.num span{font-size:13px;font-weight:700}
+.goal{display:flex;gap:8px;align-items:flex-start;font-weight:700;font-size:14.5px;line-height:1.8}
+/* game */
+#game{background:var(--night)}
+.hud{display:flex;gap:8px;align-items:center;padding:8px max(10px,env(safe-area-inset-right,0px)) 6px max(10px,env(safe-area-inset-left,0px));background:#2a241a;color:#f4e6c4}
+.bars{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0}
+.bar{height:14px;border-radius:7px;background:#0005;position:relative;overflow:hidden}
+.bar i{position:absolute;inset:0 auto 0 0;right:auto;border-radius:7px;transition:width .3s}
+.bar.m i{background:linear-gradient(#3fb27a,var(--green))}
+.bar.q i{background:linear-gradient(#d4574b,var(--red))}
+.bar em{position:absolute;inset:0;font-style:normal;font-size:11px;font-weight:800;line-height:14px;padding:0 8px;color:#fff;text-shadow:0 1px 1px #000a;white-space:nowrap}
+.hb{width:40px;height:40px;padding:0;font-size:18px;border-radius:12px}
+#stage{flex:1;position:relative;overflow:hidden;background:#cdb47f}
+canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
+.tip{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);max-width:calc(100% - 24px);background:#fff6e2f0;color:var(--ink);font-weight:700;font-size:14px;padding:8px 14px;border-radius:12px;box-shadow:0 3px 0 #c6a96c,0 6px 12px #0003;text-align:center;line-height:1.7;pointer-events:none;box-sizing:border-box}
+.dock{display:flex;flex-direction:column;gap:7px;align-items:stretch;padding:8px max(10px,env(safe-area-inset-right,0px)) 10px max(10px,env(safe-area-inset-left,0px));background:#2a241a;color:#f4e6c4;flex-wrap:wrap}
+#sel{min-width:0;font-weight:800;font-size:14px;line-height:1.4;text-align:center;color:#f1c96a}
+.grp{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.gb{font-family:var(--fb);font-weight:800;font-size:12px;border:0;border-radius:12px;padding:6px 2px;color:#fff;background:var(--green);box-shadow:0 3px 0 var(--green2),inset 0 2px 0 #ffffff40;cursor:pointer;line-height:1.3;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.gb b{display:block;font-size:17px}
+.gb.on{background:#f1c96a;color:#3b2a14;box-shadow:0 3px 0 var(--gold2),0 0 0 3px #fff}
+.gb:disabled{opacity:.45}
+.ord{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.ob{padding:6px 0;font-size:18px;border-radius:12px;line-height:1.2}
+.ob span{display:block;font-size:12px}
+.ob:disabled{opacity:.4}
+#sel small{display:block;font-weight:600;opacity:.8;font-size:12px}
+.modal{position:fixed;inset:0;background:#0009;display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+.modal.on{display:flex}
+.modal .in{background:var(--paper);border-radius:20px;max-width:460px;width:100%;max-height:calc(100% - 20px);overflow:auto;padding:18px;box-shadow:0 6px 0 #c6a96c,0 16px 40px #0006,inset 0 2px 0 #fff;display:flex;flex-direction:column;gap:12px;box-sizing:border-box}
+.modal h3{font-family:var(--fd);font-size:26px;margin:0;color:var(--green2);text-align:center}
+.modal p{margin:0;line-height:2;font-size:15.5px}
+.modal .nav{display:flex;gap:10px;flex-wrap:wrap;position:sticky;bottom:0}
+.modal .nav .bt{flex:1}
+.stars{text-align:center;font-size:34px;letter-spacing:6px}
+.fn{font-size:12.5px;color:var(--ink2);border-top:1px solid #c6a96c;padding-top:8px;line-height:1.8}
+.l3{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.u3l,.t3l{position:absolute;left:0;top:0;white-space:nowrap;will-change:transform}
+.u3l{display:flex;flex-direction:column;align-items:center;gap:2px}
+.u3l b{font:800 10px var(--fb);color:#fff;padding:0 5px;border-radius:7px;line-height:1.5;background:rgba(15,61,39,.82);box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.u3l.q b{background:rgba(90,21,16,.85)}
+.u3l.sel b{background:#f1c96a;color:#3b2a14;box-shadow:0 0 0 2px #fff}
+.u3l i{display:block;width:30px;height:4px;border-radius:3px;background:rgba(0,0,0,.4);overflow:hidden}
+.u3l i s{display:block;height:100%;background:#4cc287}
+.u3l.q i s{background:#e2665a}
+.u3l.p b{background:rgba(110,80,40,.85)}.u3l.p i{display:none}
+.cert{background:linear-gradient(#fffaf0,#f6e7c3);border:4px double #c9962b;border-radius:18px;padding:14px 12px;text-align:center;line-height:1.9;color:#3b2a14}
+.cert .t{display:block;font-family:var(--fd);font-size:27px;color:var(--green2)}.cert .nm{font-family:var(--fd);font-size:32px;color:#8a5a00;line-height:1.4}.cert p{margin:4px 0;font-size:14px;font-weight:700}.cert small{font-weight:800;color:#6b5332}
+.u3l.duel b{font-size:11px;background:rgba(201,150,43,.95);color:#2a1a08}
+.u3l.duel.q b{background:rgba(90,21,16,.9);color:#fff}
+.t3l{font:700 13px var(--fd);color:#4a3418;text-shadow:0 0 6px #f5e7c6,0 0 2px #f5e7c6;opacity:.9}
+.camb{position:absolute;top:8px;left:max(8px,env(safe-area-inset-left,0px));z-index:3}
+/* صور مكان المعركة اليوم */
+.phs{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;border-radius:16px;scrollbar-width:none}
+.phs::-webkit-scrollbar{display:none}
+.ph{flex:0 0 100%;margin:0;scroll-snap-align:center;position:relative;border-radius:16px;overflow:hidden;box-shadow:0 4px 0 #c6a96c,0 8px 16px #0003;background:#cdb47f}
+.ph img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}
+.ph figcaption{position:absolute;inset:auto 0 0 0;padding:22px 12px 8px;background:linear-gradient(transparent,#000b);color:#fff;font-weight:800;font-size:14.5px;line-height:1.6}
+.ph figcaption small{display:block;font-weight:600;font-size:10.5px;opacity:.8}
+.where{display:flex;gap:8px;align-items:center;font-weight:800;color:var(--ink2);font-size:14.5px;justify-content:center;text-align:center}
+.dots{display:flex;gap:6px;justify-content:center;margin-top:-6px}
+.dots i{width:8px;height:8px;border-radius:50%;background:#0002}.dots i.on{background:var(--gold)}
+/* اللاعبون */
+.me{display:flex;align-items:center;gap:10px;background:var(--paper);border-radius:16px;padding:10px 12px;box-shadow:0 4px 0 #c6a96c,0 8px 16px #0002,inset 0 2px 0 #fff}
+.me .av{font-size:30px;width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:var(--green);box-shadow:0 3px 0 var(--green2),inset 0 2px 0 #ffffff40;flex:none}
+.me div{flex:1;min-width:0}.me b{display:block;font-family:var(--fd);font-size:22px;color:var(--green2);line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.me small{font-weight:700;color:var(--ink2);font-size:13px}
+.me .bt{padding:8px 12px;font-size:13px}
+.plist{display:flex;flex-direction:column;gap:10px}
+.pl{display:flex;align-items:center;gap:10px;width:100%;text-align:right}
+.pl .av{font-size:26px}.pl .x{margin-inline-start:auto;font-size:13px;opacity:.75;padding:4px 8px}
+.avs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.avs button{font-size:26px;width:50px;height:50px;border-radius:14px;border:0;background:#fff6e2;box-shadow:0 3px 0 #d8bf86;cursor:pointer}
+.avs button.on{background:#f1c96a;box-shadow:0 3px 0 var(--gold2),0 0 0 3px #fff}
+.inp{font:800 18px var(--fb);padding:12px 14px;border-radius:14px;border:2px solid #d8bf86;background:#fff;color:var(--ink);text-align:center;width:100%;box-sizing:border-box}
+.inp:focus{outline:3px solid var(--gold);outline-offset:1px}
+.err{color:var(--red);font-weight:800;font-size:13.5px;text-align:center;min-height:1em}
+.pname{font:800 12px var(--fb);color:#f1c96a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px}
+/* العمر، الرحلة، البطاقات، الهدايا */
+.ages{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.ages button{font:800 16px var(--fb);height:42px;border-radius:12px;border:0;background:#fff6e2;box-shadow:0 3px 0 #d8bf86;cursor:pointer;color:var(--ink)}
+.ages button.on{background:#f1c96a;box-shadow:0 3px 0 var(--gold2),0 0 0 3px #fff}
+.trip{grid-template-columns:1fr!important;gap:18px!important;position:relative}
+.trip .card{flex-direction:row;align-items:center;gap:12px;position:relative}
+.trip .card+.card::before{content:'';position:absolute;top:-19px;right:38px;height:20px;border-right:4px dotted #b9955a}
+.trip .nod{flex:none;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-size:26px;background:var(--green);box-shadow:0 3px 0 var(--green2),inset 0 2px 0 #ffffff40}
+.trip .lock .nod{background:#b9a27a;box-shadow:0 3px 0 #8d7650}
+.trip .card>span:nth-child(2){flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.trip .card.now{box-shadow:0 4px 0 #c6a96c,0 0 0 3px #f1c96a,0 8px 16px #0002}
+.gate{background:#fff6e2;border-radius:18px;padding:18px;text-align:center;line-height:2;font-weight:700;box-shadow:0 4px 0 #d8bf86}
+.gate .big{font-size:56px;line-height:1.2}
+.cardsg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hc{background:linear-gradient(160deg,#1f7a4d,#0f4d31);color:#fff;border-radius:16px;padding:12px 10px;text-align:center;box-shadow:0 4px 0 #0b3a25,inset 0 2px 0 #ffffff30}
+.hc i{font-style:normal;font-size:34px;display:block}.hc b{display:block;font-family:var(--fd);font-size:19px;color:#ffe39a}.hc small{display:block;font-size:12px;line-height:1.7;opacity:.95}
+.hc.no{background:#cdb991;color:#6b5332;box-shadow:0 4px 0 #a88f63}.hc.no b{color:#6b5332}
+.gtoast{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:30;background:linear-gradient(#fff8e2,#f6e3b0);color:#3b2a14;border-radius:16px;padding:10px 16px;font-weight:800;font-size:15px;box-shadow:0 4px 0 #c9962b,0 10px 24px #0005;text-align:center;line-height:1.6;max-width:88vw;pointer-events:none;animation:gt 3.4s ease forwards}
+.gtoast small{display:block;font-size:12px;font-weight:700;opacity:.8}
+@keyframes gt{0%{opacity:0;transform:translate(-50%,-20px) scale(.9)}10%,80%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-10px)}}
+.qz{display:flex;flex-direction:column;gap:8px}.qz .bt{text-align:right}.qz .bt.ok{--c:#2f9a62;--d:#1d6b42;color:#fff}.qz .bt.no{--c:var(--red);--d:var(--red2);color:#fff}
+.qn{text-align:center;font-weight:800;color:var(--gold2);font-size:13px}
+.basins{display:flex;gap:10px;justify-content:center}.basin{width:70px;height:90px;border-radius:0 0 18px 18px;border:4px solid #8c8070;border-top:0;position:relative;overflow:hidden;background:#f3e6c6}
+.basin i{position:absolute;inset:auto 0 0 0;height:0;background:linear-gradient(#5fb0e6,#2f7fc0);transition:height .2s}
+.volley{display:none}.volley.on{display:block}
+.homeapp{text-align:center}
+@media (prefers-reduced-motion:reduce){.bt{transition:none}}
+</style>
+
+<!-- القائمة -->
+<section class="scr on" id="menu">
+  <div class="wrap">
+    <h1>ميادين النصر</h1>
+    <p class="sub">قُد جيش المسلمين في غزوات النبيّ ﷺ، وتعلّم من كل معركة درسًا، وابنِ بيتك في الجنة 🏡</p>
+    <p class="sub" style="font-size:12.5px;color:var(--gold2)">للأشبال من ٩ سنين فما فوق</p>
+    <div class="me" id="meBox"></div>
+    <div id="meExtra"></div>
+    <div class="cards trip" id="cards"></div>
+    <div class="note">كيف تلعب؟ المس مجموعة من جيشك لتختارها، ثم المس المكان الذي تريد أن تذهب إليه، أو المس جيش العدو لتهاجمه. قبل المعركة رتّب جيشك في أحسن المواقع، ثم اضغط «ابدأ المعركة».</div>
+  </div>
+</section>
+
+<!-- اللاعبون: لكل لاعب اسمه ونجومه -->
+<section class="scr" id="players">
+  <div class="wrap" id="playersIn"></div>
+</section>
+
+<!-- التمهيد -->
+<section class="scr" id="brief">
+  <div class="wrap brief" id="briefIn"></div>
+</section>
+
+<!-- اللعب -->
+<section class="scr" id="game">
+  <div class="hud">
+    <button class="bt plain hb" id="bBack" aria-label="رجوع">→</button>
+    <div class="bars">
+      <div class="bar m"><i id="mBar"></i><em id="mTxt"></em></div>
+      <div class="bar q"><i id="qBar"></i><em id="qTxt"></em></div>
+    </div>
+    <button class="bt plain hb" id="bPic" aria-label="صور المكان">📷</button>
+    <button class="bt plain hb" id="bPause" aria-label="إيقاف مؤقت">⏸</button>
+    <button class="bt plain hb" id="bFast" aria-label="تسريع">⏩</button>
+    <button class="bt plain hb" id="bSnd" aria-label="الصوت">🔊</button>
+  </div>
+  <div id="stage"><canvas id="cv"></canvas><div class="tip" id="tip"></div></div>
+  <div class="dock">
+    <div id="sel">١- اختر مجموعة من جيشك</div>
+    <div class="grp" id="grp"></div>
+    <div class="ord" id="ord">
+      <button class="bt ob" data-o="down">⬆️<span>تقدّم</span></button>
+      <button class="bt ob" data-o="up">⬇️<span>تراجع</span></button>
+      <button class="bt ob" data-o="right">➡️<span>يمين</span></button>
+      <button class="bt ob" data-o="left">⬅️<span>يسار</span></button>
+      <button class="bt ob red" data-o="atk">⚔️<span>هاجم</span></button>
+      <button class="bt ob" data-o="stop">✋<span>اثبت</span></button>
+    </div>
+    <button class="bt red volley" id="bVolley">🏹 رشقة تحذير أمام الخيل</button>
+    <button class="bt gold" id="bGo">⚔️ ابدأ المعركة</button>
+  </div>
+</section>
+
+<div class="modal" id="modal"><div class="in" id="modalIn"></div></div>
+
+<script src="../vendor/three.min.js"></script>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const AR=n=>Math.round(n).toLocaleString('ar-EG');
+/* اللاعبون: كل لاعب له اسم ورمز ونجومه الخاصة (محفوظة في هذا الجهاز) */
+const PK='maydan_players_v1',AVS=['🛡️','⚔️','🏹','🐎','🌙','⭐','🗡️','🦅','🐪','🌴'];
+let PL={list:[],cur:null};try{PL=JSON.parse(localStorage.getItem(PK)||'null')||PL}catch(e){}
+let old={};try{old=JSON.parse(localStorage.getItem('maydan_v1')||'{}')}catch(e){} // نجوم ما قبل اللاعبين تذهب لأول لاعب
+let save={};const me=()=>PL.list.find(p=>p.id===PL.cur)||null;
+const pStars=p=>Object.values(p.s||{}).reduce((a,b)=>a+b,0);
+const rank=n=>n>=6?'قائد الميادين 🏆':n>=4?'قائد':n>=2?'فارس':'جندي';
+const store=()=>{const p=me();if(p)p.s=save;try{localStorage.setItem(PK,JSON.stringify(PL))}catch(e){}};
+function usePlayer(id){PL.cur=id;save=(me()||{}).s||{};store()}
+if(me())save=me().s||{};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* العمر: اللعبة للأشبال من ٩ سنين فما فوق (طلب الشيخ). أقلّ من ٩ لا يدخل المعارك. ٩–١١ مستوى سهل، ١٣+ يقدر يختار «وضع القائد» */
+const MINAGE=9,AGES=[6,7,8,9,10,11,12,13,14,15,16,17,18,19];
+const ageTxt=a=>a>=19?'١٩+':AR(a);
+const agesHTML=sel=>`<div class="ages" id="pAge">${AGES.map(a=>`<button data-g="${a}" class="${a===sel?'on':''}">${ageTxt(a)}</button>`).join('')}</div>`;
+function bindAges(cb){$('pAge').onclick=e=>{const b=e.target.closest('button');if(!b)return;$('pAge').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));cb(+b.dataset.g)}}
+function askAge(p,done){ // لاعب قديم بلا عمر
+  modal('كم عمرك يا '+esc(p.nm)+'؟',['اختر عمرك حتى نجهّز لك اللعبة المناسبة.'],[['✅ تمّ','gold',()=>{if(p.age){store();done()}else askAge(p,done)}]],agesHTML(0),true);
+  bindAges(a=>{p.age=a})}
+function players(mode){
+  show('players');let av=AVS[PL.list.length%AVS.length],age=0;
+  const list=PL.list.map(p=>`<button class="card pl" data-p="${p.id}"><span class="av">${p.av}</span><span><b>${esc(p.nm)}</b><small style="display:block">${rank(pStars(p))} · ⭐ ${AR(pStars(p))}${p.age?' · '+ageTxt(p.age)+' سنة':''}</small></span><span class="x bt plain" data-del="${p.id}" role="button" aria-label="احذف">🗑</span></button>`).join('');
+  $('playersIn').innerHTML=`<h1 style="font-size:34px">مَن يلعب الآن؟</h1>
+    ${PL.list.length?`<div class="plist">${list}</div><p class="sub">أو أنشئ لاعبًا جديدًا:</p>`:'<p class="sub">اكتب اسمك يا بطل، فلكل لاعب نجومه ورتبته</p>'}
+    <input class="inp" id="pNm" maxlength="16" placeholder="اسمك في اللعبة" autocomplete="off">
+    <p class="sub">اختر رمزك:</p>
+    <div class="avs" id="pAv">${AVS.map(a=>`<button class="${a===av?'on':''}" data-a="${a}">${a}</button>`).join('')}</div>
+    <p class="sub">كم عمرك؟</p>${agesHTML(0)}
+    <div class="err" id="pErr"></div>
+    <button class="bt gold" id="pAdd">✅ ابدأ باسمي</button>
+    ${me()?'<button class="bt plain" id="pBack">→ رجوع</button>':''}`;
+  $('pAv').onclick=e=>{const b=e.target.closest('button');if(!b)return;av=b.dataset.a;$('pAv').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))};
+  bindAges(a=>{age=a});
+  $('pAdd').onclick=()=>{const nm=$('pNm').value.replace(/\s+/g,' ').trim();
+    if(nm.length<2){$('pErr').textContent='اكتب اسمًا من حرفين على الأقل';return}
+    if(!/^[ء-ي٠-٩a-zA-Z0-9 ]+$/.test(nm)){$('pErr').textContent='استعمل الحروف والأرقام فقط';return}
+    if(PL.list.some(p=>p.nm===nm)){$('pErr').textContent='هذا الاسم موجود، المسه من القائمة أو اختر اسمًا آخر';return}
+    if(!age){$('pErr').textContent='اختر عمرك من الأرقام';return}
+    const p={id:'p'+Date.now().toString(36),nm,av,age,s:{},c:{}};
+    if(!PL.list.length&&Object.keys(old).length){p.s=old;old={}} // نجوم قديمة
+    PL.list.push(p);usePlayer(p.id);menu()};
+  $('pNm').onkeydown=e=>{if(e.key==='Enter')$('pAdd').click()};
+  if($('pBack'))$('pBack').onclick=menu;
+  $('playersIn').querySelectorAll('.pl').forEach(b=>b.onclick=e=>{
+    const d=e.target.closest('[data-del]');
+    if(d){const p=PL.list.find(x=>x.id===d.dataset.del);
+      modal('حذف لاعب',[`هل تريد حذف «${esc(p.nm)}» ونجومه؟ لا يمكن إرجاعه.`],[['🗑 احذف','red',()=>{PL.list=PL.list.filter(x=>x!==p);if(PL.cur===p.id){PL.cur=null;save={}}store();players()}],['لا','',()=>players()]],'',true);return}
+    usePlayer(b.dataset.p);const p=me();if(!p.age)askAge(p,menu);else menu()});
+}
+/* هدايا لبيت الطفل في الجنة (تطبيق «جنّتي الصغيرة» على نفس الموقع يقرأ maydan_gifts ويعطي الجواهر مرّة واحدة لكل هدية) */
+const GK='maydan_gifts';
+function gift(key,j,txt){let q=[];try{q=JSON.parse(localStorage.getItem(GK)||'[]')}catch(e){}
+  const fresh=q.indexOf(key)<0;if(fresh){q.push(key);try{localStorage.setItem(GK,JSON.stringify(q))}catch(e){}}
+  const t=document.createElement('div');t.className='gtoast';t.innerHTML=`🏡 ${txt}<br>${fresh?`+${AR(j)} 💎 لبيتك في الجنة`:'عملٌ صالح جميل 🌱'}<small>${fresh?'تصلك في تطبيق «جنّتي الصغيرة»':'سبق أن وصلت هديتها لبيتك'}</small>`;
+  document.body.appendChild(t);setTimeout(()=>t.remove(),3500);try{SND.chime()}catch(e){}}
+const FROMAPP=true; // (v26.3) اللعبة صارت داخل التطبيق: زر الرجوع إلى «جنّتي» دائمًا
+/* بطاقات الأبطال: بلا وجوه، رمز فقط. النصوص من السيرة، يراجعها الشيخ */
+const HEROES={
+  hubab:['💡','الحُباب بن المنذر','صاحب الرأي: أشار يوم بدر أن ينزل المسلمون عند أقرب ماء من القوم، فأُخذ برأيه.'],
+  ali:['⚔️','عليّ بن أبي طالب','خرج للمبارزة يوم بدر فغلب، وثبت يوم أُحُد يدافع عن النبيّ ﷺ، وغلب عمرو بن عبد ودّ يوم الخندق.'],
+  ubayda:['🛡️','عُبيدة بن الحارث','أحد الثلاثة الذين خرجوا للمبارزة يوم بدر، وجُرح فيها.'],
+  hamza:['🦁','حمزة بن عبد المطلب','عمّ النبيّ ﷺ وأسد الله، بارز يوم بدر، واستُشهد يوم أُحُد فسُمّي سيّد الشهداء.'],
+  jubayr:['🏹','عبد الله بن جُبير','قائد الرماة يوم أُحُد، ثبت على أمر النبيّ ﷺ مع قلّة بقيت معه.'],
+  salman:['⛏️','سلمان الفارسي','جاء من بلاد فارس يبحث عن الحق حتى أسلم، وأشار يوم الأحزاب بحفر الخندق، وقال فيه النبيّ ﷺ: «سلمان منّا أهل البيت».'],
+  hudhayfa:['🌙','حُذيفة بن اليمان','أرسله النبيّ ﷺ في ليلة باردة مظلمة ليعرف خبر الأحزاب، فرجع بخبر رحيلهم بعد الريح.'],
+  bilal:['📢','بلال بن رباح','مؤذّن النبيّ ﷺ، صبر على العذاب في مكة، ويوم الفتح صعد فوق الكعبة فأذّن.']
+};
+function certHTML(p){return `<div class="cert"><div style="font-size:46px;line-height:1.2">🏅</div><b class="t">شهادة «قائد الرحمة»</b><p>تشهد «ميادين النصر» أنّ</p><div class="nm">${esc(p.nm)}</div>
+  <p>سار في رحلة غزوات النبيّ ﷺ حتى فتح مكة، فتعلّم الشورى والطاعة والتعاون والثبات، وختمها بالرحمة والعفو كما عفا النبيّ ﷺ عن أهل مكة: «اذهبوا فأنتم الطلقاء».</p>
+  <small>⭐ ${AR(pStars(p))} ${(n=>n===1?"نجمة":n===2?"نجمتان":n<=10?"نجوم":"نجمة")(pStars(p))} · ${new Date().toLocaleDateString('ar-EG',{year:'numeric',month:'long',day:'numeric'})}</small></div>`}
+function album(){const c=(me()||{}).c||{},ids=Object.keys(HEROES),n=ids.filter(k=>c[k]).length;
+  modal('🃏 بطاقات الأبطال',[`جمعت ${AR(n)} من ${AR(ids.length)}. كل غزوة تنتصر فيها أو تثبت فيها تعطيك بطاقات جديدة.`],[['رجوع','gold',()=>{}]],
+    `<div class="cardsg">${ids.map(k=>{const h=HEROES[k];return c[k]?`<div class="hc"><i>${h[0]}</i><b>${h[1]}</b><small>${h[2]}</small></div>`:`<div class="hc no"><i>❔</i><b>بطاقة مخفية</b><small>العب الغزوات لتكشفها</small></div>`}).join('')}</div>`,true)}
+
+const W=900,H=1200;
+const KIND={
+  inf:{sp:34,pow:1,r:34,ico:'🛡️',nm:'مشاة'},
+  arc:{sp:32,pow:.55,r:32,rng:190,ico:'🏹',nm:'رماة'},
+  cav:{sp:78,pow:1.5,r:34,ico:'🐎',nm:'فرسان'},
+  ppl:{sp:26,pow:0,r:30,ico:'👪',nm:'أهل مكة'}
+};
+
+/* ===================== المعارك ===================== */
+const BATTLES=[
+ {id:'badr',name:'بدر',year:'السنة الثانية للهجرة',m:313,q:'نحو ١٠٠٠',
+  story:['خرج المسلمون من المدينة المنورة وعددهم ثلاثمئة وبضعة عشر رجلًا، ومعهم فرسان قليلان وسبعون بعيرًا، وجاءت قريش بنحو ألف مقاتل ومعهم الخيل والسلاح.',
+         'نزل المسلمون بالعدوة الدنيا القريبة من المدينة، ونزلت قريش بالعدوة القصوى البعيدة. وأشار الحُباب بن المنذر أن ينزل المسلمون عند أقرب ماء من القوم، فيكون الماء لهم.'],
+  goals:['💧 ضع مجموعة من جيشك عند آبار بدر قبل أن تبدأ المعركة.','🧱 اجعل مجموعاتك متقاربة، فالصفوف المتراصّة أقوى.','⚔️ اصبر حتى يتراجع جيش قريش.'],
+  where:'وادي بدر، بين مكّة والمدينة المنوّرة، على بُعد نحو ١٥٠ كم من المدينة',
+  pics:[['badr1','ميدان بدر اليوم، وفيه مقبرة شهداء بدر','Richard Mortel، CC BY 2.0، ويكيميديا كومنز'],['badr2','رمال وادي بدر وكثبانه اليوم','Richard Mortel، CC BY 2.0، ويكيميديا كومنز']],
+  deployMaxY:640,
+  units:[
+   ['m','inf','القلب',450,250,100],['m','inf','الميمنة',300,280,80],['m','inf','الميسرة',600,280,80],['m','arc','الرماة',450,170,50],
+   ['q','inf','القلب',450,980,140],['q','inf','الميمنة',600,960,130],['q','inf','الميسرة',300,960,130],
+   ['q','inf','المقدّمة',450,880,120],['q','arc','الرماة',450,1080,80],['q','cav','الخيّالة',180,1020,100],['q','inf','الساقة',700,1060,120]
+  ],
+  wells:{x:450,y:520,r:85},
+  more:'خرج المسلمون أول الأمر يريدون قافلة قريش التي يقودها أبو سفيان، فنجت القافلة وجاء جيش قريش. فاستشار النبيّ ﷺ أصحابه، فتكلّم المهاجرون، ثم تكلّم سعد بن معاذ عن الأنصار بأنهم معه أينما مضى، فسُرّ النبيّ ﷺ بذلك.',
+  heroes:['hubab','ali','ubayda'],
+  quiz:[['من أشار على المسلمين أن ينزلوا عند أقرب ماء من القوم؟',['الحُباب بن المنذر','خالد بن الوليد','عبد الله بن جُبير']],
+        ['كم كان عدد المسلمين في بدر تقريبًا؟',['ثلاثمئة وبضعة عشر','ألف','سبعمئة']],
+        ['بماذا سمّى الله يوم بدر؟',['يوم الفرقان','يوم الأحزاب','يوم الفتح']]]
+ },
+ {id:'uhud',name:'أُحُد',year:'السنة الثالثة للهجرة',m:700,q:'نحو ٣٠٠٠',
+  story:['جاءت قريش بنحو ثلاثة آلاف مقاتل، فخرج المسلمون نحو سبعمئة، وجعلوا جبل أُحُد خلف ظهورهم.',
+         'ووضع النبيّ ﷺ خمسين من الرماة على جبل صغير اسمه جبل الرماة، وأمرهم ألّا يتركوا مكانهم مهما حدث، حتى لا تلتفّ خيل قريش من خلف المسلمين.'],
+  goals:['🏹 ضع الرماة فوق جبل الرماة.','⚔️ قاتل حتى تتراجع قريش، وانتبه لما يحدث بعدها.','⛰️ إذا تفرّق الجيش: اجمعه واصعد به إلى شِعب جبل أُحُد.'],
+  more:'أشار النبيّ ﷺ أول الأمر بالبقاء في المدينة، ورغب كثير من الشباب في الخروج للقاء العدو، فخرج. وفي الطريق رجع عبد الله بن أُبيّ بنحو ثلث الجيش، فبقي مع النبيّ ﷺ نحو سبعمئة.',
+  heroes:['hamza','jubayr'],
+  shib:{x:470,y:175,r:150},
+  quiz:[['أين وضع النبيّ ﷺ الرماة يوم أُحُد؟',['على جبل الرماة','عند آبار الماء','داخل المدينة']],
+        ['لماذا لم ينتصر المسلمون في أُحُد؟',['لأن أكثر الرماة نزلوا للغنائم وتركوا أمر النبيّ ﷺ','لأن عددهم كان أكبر من قريش','لأن المطر منعهم من القتال']],
+        ['من الذي استُشهد يوم أُحُد وسُمّي سيّد الشهداء؟',['حمزة بن عبد المطلب','الحُباب بن المنذر','عُبيدة بن الحارث']]],
+  where:'شمال المدينة المنوّرة، عند جبل أُحُد، على بُعد نحو ٥ كم من المسجد النبويّ',
+  pics:[['uhud1','جبل أُحُد اليوم بصخوره الحمراء','Adiput، ملكية عامة، ويكيميديا كومنز'],['uhud2','جبل الرماة (التلّ الصغير) وخلفه جبل أُحُد','Tahir mq، CC BY-SA 4.0، ويكيميديا كومنز']],
+  deployMaxY:620,
+  units:[
+   ['m','inf','القلب',470,380,230],['m','inf','الميمنة',640,400,210],['m','inf','الميسرة',330,410,210],['m','arc','الرماة',470,280,50],
+   ['q','inf','القلب',470,960,420],['q','inf','الميمنة',300,940,380],['q','inf','الميسرة',640,940,380],
+   ['q','inf','المقدّمة',470,860,360],['q','arc','الرماة',480,1080,140],['q','cav','خيّالة الميمنة',150,1000,200],['q','cav','خيّالة الميسرة',760,1020,160]
+  ],
+  hill:{x:215,y:560,r:70}
+ },
+ {id:'khandaq',name:'الخندق',year:'السنة الخامسة للهجرة',m:3000,q:'نحو ١٠٠٠٠',qLab:'الأحزاب',qShort:'الأحزاب',
+  story:['في السنة الخامسة للهجرة تجمّعت قبائل كثيرة من العرب مع قريش، نحو عشرة آلاف مقاتل، يريدون أن يقضوا على المسلمين في المدينة المنوّرة، فسُمّوا «الأحزاب».',
+         'فاستشار النبيّ ﷺ أصحابه، فأشار سلمان الفارسي أن يحفروا خندقًا من جهة الشمال حيث الأرض مفتوحة، أمّا الجهات الأخرى فتحميها الحِرار (صخور سوداء بركانية) والبيوت والنخيل. فحفر المسلمون الخندق معًا، وكان النبيّ ﷺ يحفر معهم وينقل التراب.'],
+  goals:['⛏️ احفر الخندق كلّه قبل أن يصل الأحزاب: اسحب إصبعك على خطّ الخندق ذهابًا وإيابًا.','🛡️ ضع جيشك عند الثغرات 🔴 والأماكن الضيّقة ⚠️، فالخيل تبحث عن مكان تعبر منه.','🤲 اصبر واحرس الخندق حتى يأتي نصر الله.'],
+  more:'وفي أثناء الحصار نقضت بنو قريظة عهدها مع المسلمين، فاشتدّ الخوف، واشتدّ البرد والجوع حتى ربط بعضهم الحجر على بطنه، وصبر المؤمنون. ثم جاء نُعيم بن مسعود وقد أسلم سرًّا، ففرّق بين الأحزاب وبني قريظة بحيلة، فلم يعد يثق بعضهم ببعض.',
+  where:'شمال المدينة المنوّرة، عند جبل سَلْع، حيث «المساجد السبعة» اليوم',
+  heroes:['salman','hudhayfa'],val:'التعاون: حفرتَ الخندق كاملًا',
+  trench:{y:560,x0:200,sw:50,n:10,narrow:[3,7]},
+  deployMaxY:520,
+  units:[
+   ['m','inf','المهاجرون',300,410,110],['m','inf','الأنصار',600,410,110],['m','inf','القلب',450,380,100],['m','arc','الرماة',450,310,60],['m','inf','الحرس',200,380,80],
+   ['q','inf','قريش',300,770,300],['q','inf','غطفان',620,770,280],['q','inf','بنو سُليم وأسد',460,900,240],['q','arc','رماة الأحزاب',460,690,40],
+   ['q','cav','خيل عمرو بن عبد ودّ',300,1010,40,{wave:6,amr:1}],['q','cav','خيّالة قريش',150,1060,90,{wave:34}],['q','cav','خيّالة غطفان',760,1060,90,{wave:58}],['q','cav','خيّالة الأحزاب',460,1110,100,{wave:80}]
+  ],
+  quiz:[['من أشار على النبيّ ﷺ بحفر الخندق؟',['سلمان الفارسي','الحُباب بن المنذر','عبد الله بن جُبير']],
+        ['لماذا سُمّيت غزوة الخندق «غزوة الأحزاب»؟',['لأن قبائل كثيرة تجمّعت معًا على المسلمين','لأنها كانت عند جبل أُحُد','لأن المسلمين كانوا متفرّقين']],
+        ['كيف انتهى حصار الأحزاب للمدينة؟',['أرسل الله عليهم ريحًا شديدة فرحلوا','دخلوا المدينة','بقوا فيها سنة كاملة']]]
+ },
+ {id:'khaybar',name:'خيبر',year:'السنة السابعة للهجرة',lock:1},
+ {id:'hunayn',name:'حُنَين',year:'السنة الثامنة للهجرة',lock:1},
+ {id:'fath',name:'فتح مكة',year:'السنة الثامنة للهجرة',peace:1,m:10000,q:'🕊️',qLab:'دخولٌ بالرحمة بلا قتال',
+  story:['في السنة الثامنة للهجرة نقضت قريش صلح الحُديبية، فأعانت حلفاءها على قبيلة خُزاعة حليفة المسلمين. فخرج النبيّ ﷺ بنحو عشرة آلاف من المسلمين إلى مكة.',
+         'وأراد النبيّ ﷺ أن يدخلها بلا قتال، فجعل الجيش كتائب تدخل من جهاتها الأربع، ونادى: «من دخل المسجد فهو آمن، ومن دخل دار أبي سفيان فهو آمن، ومن أغلق عليه بابه فهو آمن».'],
+  goals:['🕊️ ادخل مكة بكتائبك الأربع من جهاتها الأربع، ولا قتال اليوم.','🏠 اقترب من أهل مكة 👪 لتطمئنهم، فيذهبون إلى أماكن الأمان.','🕋 بعدها اجمع الكتائب الأربع عند المسجد الحرام.'],
+  more:'وفي الطريق أسلم أبو سفيان بن حرب زعيم قريش. ولمّا دخل المسلمون مكة لم يقع إلا قتالٌ قليل في جهة الخندمة، حين اعترض نفرٌ من أهل مكة كتيبةَ خالد بن الوليد، ثم دخل الجميع في الأمان. وطاف النبيّ ﷺ بالكعبة، وأزال الأصنام من حولها، وصعد بلال فوق الكعبة فأذّن.',
+  where:'مكّة المكرّمة، حول المسجد الحرام والكعبة المشرّفة',
+  heroes:['bilal'],val:'الرحمة: «اليوم يوم المرحمة»',
+  masjid:{x:450,y:600,r:115},darAS:{x:650,y:430,r:60},shib:{x:450,y:600,r:115},
+  units:[
+   ['m','inf','الكتيبة الخضراء',450,50,120],['m','cav','كتيبة الزبير',50,600,80],['m','inf','كتيبة خالد',850,600,90],['m','inf','كتيبة أبي عبيدة',450,1150,90],
+   ['p','ppl','أسرة',260,360,40,{dest:'m'}],['p','ppl','أهل السوق',640,300,50,{dest:'d'}],['p','ppl','شيوخ مكة',240,830,40,{dest:'b'}],['p','ppl','تجّار',690,860,40,{dest:'m'}],
+   ['p','ppl','أمهات وأطفال',340,1010,40,{dest:'m'}],['p','ppl','رعاة الغنم',560,190,40,{dest:'b'}],['p','ppl','سقاة الماء',190,580,30,{dest:'m'}],['p','ppl','أهل الحيّ',730,720,40,{dest:'d'}]
+  ],
+  quiz:[['في أيّ سنة كان فتح مكة؟',['السنة الثامنة للهجرة','السنة الثانية للهجرة','السنة الخامسة للهجرة']],
+        ['ماذا قال النبيّ ﷺ لأهل مكة بعد الفتح؟',['اذهبوا فأنتم الطلقاء','سنعاقبكم على ما فعلتم','اخرجوا من مكة']],
+        ['أين جعل النبيّ ﷺ الأمان لأهل مكة يوم الفتح؟',['في المسجد، ودار أبي سفيان، ومن أغلق بابه','في السوق فقط','خارج مكة فقط']]]
+ }
+];
+BATTLES[0].val='الشورى: النزول عند الآبار';BATTLES[1].val='الطاعة: الرماة فوق الجبل في البداية';
+const PLAY=BATTLES.filter(b=>!b.lock);
+const prevPlay=b=>{const i=BATTLES.indexOf(b);for(let j=i-1;j>=0;j--)if(!BATTLES[j].lock)return BATTLES[j];return null};
+const isOpen=b=>{if(b.lock)return false;const p=prevPlay(b);return !p||(save[p.id]||0)>=1};
+const nextPlay=b=>BATTLES.slice(BATTLES.indexOf(b)+1).find(x=>!x.lock);
+
+/* ===================== القائمة ===================== */
+function menu(){
+  if(!me()){players();return}
+  show('menu');
+  const p=me(),n=pStars(p);
+  $('meBox').innerHTML=`<span class="av">${p.av}</span><div><b>${esc(p.nm)}</b><small>${rank(n)} · ⭐ ${AR(n)} من ${AR(BATTLES.filter(b=>!b.lock).length*3)}</small></div><button class="bt plain" id="bWho">👥 تبديل</button>`;
+  $('bWho').onclick=()=>players();
+  const appBtn=FROMAPP?`<button class="bt plain" id="bApp" style="width:100%">🏡 رجوع إلى «جنّتي الصغيرة»</button>`:'';
+  if((p.age||0)<MINAGE){ // أقل من ٩ سنين: لا يدخل المعارك
+    $('meExtra').innerHTML=`<div class="gate"><div class="big">🦁</div>«ميادين النصر» للأشبال من ٩ سنين فما فوق.<br>اكبر شويّة يا ${esc(p.nm)} وتعال قُد الجيش إن شاء الله 🌱<br>والآن اقرأ قصص الأنبياء والعب في «ركن الصغار» في تطبيق «جنّتي الصغيرة».</div>
+      <a class="bt gold" style="display:block;text-align:center;text-decoration:none;margin-top:12px" href="../index.html">🏡 اذهب إلى «جنّتي الصغيرة»</a>`;
+    $('cards').innerHTML='';return}
+  const c=p.c||{},nc=Object.keys(HEROES).filter(k=>c[k]).length,hardOk=p.age>=13;
+  $('meExtra').innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="bt plain" id="bAlbum" style="flex:1">🃏 أبطالي ${AR(nc)}/${AR(Object.keys(HEROES).length)}</button>
+    ${hardOk?`<button class="bt ${p.hard?'red':'plain'}" id="bHard" style="flex:1">${p.hard?'⚔️ وضع القائد: مُفعّل':'⚔️ وضع القائد (أصعب)'}</button>`:''}
+    ${save.fath>=1?`<button class="bt gold" id="bCert" style="flex:1">🏅 شهادتي</button>`:''}</div>${appBtn}`;
+  $('bAlbum').onclick=album;if($('bCert'))$('bCert').onclick=()=>modal('🏅 شهادتك',[],[['رجوع','gold',()=>{}]],certHTML(p),true);if($('bApp'))$('bApp').onclick=()=>{location.href='../index.html'};
+  if($('bHard'))$('bHard').onclick=()=>{p.hard=!p.hard;store();menu();tip0(p.hard?'وضع القائد: العدو أقوى، والتلميحات أقل 💪':'رجعت إلى الوضع العادي')};
+  const firstOpen=BATTLES.find(b=>isOpen(b)&&!(save[b.id]>=1));
+  $('cards').innerHTML=BATTLES.map((b,i)=>{
+    const s=save[b.id]||0,open=isOpen(b),prev=prevPlay(b);
+    const sub=b.lock?'قريبًا إن شاء الله':!open?`🔒 اربح نجمة في غزوة ${prev.name} لتفتحها`:b.peace?'آخر الرحلة: '+AR(b.m)+' مسلم يدخلون مكة بالرحمة بلا قتال 🕊️':(AR(b.m)+' مسلم أمام '+b.q);
+    return `<button class="card ${open?'':'lock'} ${b===firstOpen?'now':''}" data-id="${b.id}"><span class="nod">${open?(s?'✅':b.peace?'🕊️':'⚔️'):'🔒'}</span><span>
+      <span class="yr">المحطة ${AR(i+1)} — ${b.year}</span><b>${b.peace?'':'غزوة '}${b.name}</b>
+      <small>${sub}</small>
+      ${open?`<span class="st">${'⭐'.repeat(s)}${'☆'.repeat(3-s)}</span>`:''}</span></button>`}).join('');
+  document.querySelectorAll('#cards .card').forEach(c=>c.onclick=()=>{const b=BATTLES.find(x=>x.id===c.dataset.id);if(isOpen(b))brief(b)});
+}
+function tip0(t){const d=document.createElement('div');d.className='gtoast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),3400)}
+function brief(b){
+  show('brief');
+  $('briefIn').innerHTML=`<p class="sub" style="color:var(--gold2)">${b.year}</p><h2>${b.peace?'':'غزوة '}${b.name}</h2>
+   ${b.pics?picsHTML(b):''}<div class="where">📍 ${b.where}</div>
+   <div class="nums"><div class="num" style="--c:var(--green);--d:var(--green2)"><b>${AR(b.m)}</b><span>جيش المسلمين تقريبًا</span></div>
+   <div class="num" style="--c:${b.peace?'var(--gold)':'var(--red)'};--d:${b.peace?'var(--gold2)':'var(--red2)'}"><b>${b.q}</b><span>${b.qLab||'جيش قريش'}</span></div></div>
+   <div class="note">${b.story.map(t=>`<p>${t}</p>`).join('')}</div>
+   ${(me()||{}).age>=13&&b.more?`<details class="note"><summary style="font-weight:800;cursor:pointer">📜 للكبار: تفاصيل أكثر</summary><p>${b.more}</p></details>`:''}
+   <div class="note">${b.goals.map(g=>`<div class="goal">${g}</div>`).join('')}</div>
+   <button class="bt gold" id="bStart">🗺️ ادخل الميدان</button>
+   <button class="bt plain" id="bMenu">→ الغزوات</button>`;
+  $('bStart').onclick=()=>start(b);$('bMenu').onclick=menu;picsDots($('briefIn'));
+}
+/* صور المكان الحقيقي اليوم (من ويكيميديا كومنز برخصة حرّة) */
+function picsHTML(b){return `<div class="phs">${b.pics.map(p=>`<figure class="ph"><img src="img/${p[0]}.jpg" alt="${p[1]}" loading="lazy"><figcaption>📷 ${p[1]}<small>تصوير: ${p[2]}</small></figcaption></figure>`).join('')}</div><div class="dots">${b.pics.map((p,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</div>`}
+function picsDots(root){const s=root.querySelector('.phs');if(!s)return;const d=root.querySelectorAll('.dots i');s.onscroll=()=>{const i=Math.round(Math.abs(s.scrollLeft)/s.clientWidth);d.forEach((x,k)=>x.classList.toggle('on',k===i))}}
+function show(id){document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id===id))}
+
+/* ===================== حالة اللعب ===================== */
+let G=null;
+function start(b){
+  const P=me();if(!P||(P.age||0)<MINAGE||!isOpen(b)){menu();return}
+  let id=0;
+  G={b,t:0,phase:'deploy',speed:1,paused:false,sel:null,ev:{},over:false,
+     diff:P.hard?'hard':P.age<=11?'easy':'normal',
+     units:b.units.map(u=>{const k=KIND[u[1]];return{id:id++,side:u[0],kind:u[1],name:u[2],x:u[3],y:u[4],tx:u[3],ty:u[4],n:u[5],max:u[5],face:u[0]==='m'?1:-1,st:'ok',hold:u[0]==='q',ai:0,hit:0,...k,...(u[6]||{}),hx:u[3],hy:u[4]}})};
+  G.home={x:450,y:{uhud:230,khandaq:250}[b.id]||150};
+  if(b.trench){G.dig=new Array(b.trench.n).fill(0);for(const u of G.units)if(u.side==='q'){u.st='gone';u.away=1}}
+  show('game');resize();$('bGo').textContent=b.peace?'🕊️ ادخلوا مكة':'⚔️ ابدأ المعركة';$('bVolley').classList.remove('on');
+  $('ord').querySelector('[data-o=atk]').hidden=!!b.peace;$('bPic').hidden=!b.pics;
+  if(R3.ok){try{R3.build()}catch(e){console.error(e)}}
+  $('bGo').hidden=false;$('bPause').textContent='⏸';
+  updSel();
+  if(b.id==='khandaq'){ // مشورة سلمان: نحفر الخندق
+    $('bGo').hidden=true;
+    setTimeout(()=>{if(!G||G.b!==b||G.phase!=='deploy')return;
+      modal('مشورة سلمان 💡',['جاءت الأحزاب بنحو عشرة آلاف مقاتل، فأشار سلمان الفارسي: كنّا في بلاد فارس إذا حوصرنا حفرنا خندقًا حولنا.','ماذا يفعل المسلمون؟'],
+        [['⛏️ نحفر الخندق','gold',startDig],
+         ['نخرج لقتالهم في الصحراء','',()=>modal('فكّر جيّدًا 🤔',['عدد الأحزاب أكثر من ثلاثة أضعاف المسلمين! والخندق فكرة ذكية تمنع خيلهم من الوصول إلى المدينة، فأخذ النبيّ ﷺ برأي سلمان.'],[['⛏️ نحفر الخندق','gold',startDig]],'',true)]],'',true)},2400);
+  }else if(b.id==='fath'){ // لحظة قرار: يوم المرحمة
+    $('bGo').hidden=true;
+    setTimeout(()=>{if(!G||G.b!==b||G.phase!=='deploy')return;
+      modal('راية الأنصار 🚩',['كان سعد بن عبادة يحمل راية الأنصار، فلمّا اقتربوا من مكة قال: «اليوم يوم الملحمة» (يعني يوم القتال).','وأنت القائد: ماذا تريد لهذا اليوم؟'],
+        [['🕊️ اليوم يوم المرحمة','gold',()=>{G.ev.rahma=1;gift('fath_rahma',10,'اخترتَ الرحمة: «اليوم يوم المرحمة» 🕊️');setupBattle()}],
+         ['⚔️ اليوم يوم الملحمة','',()=>modal('بل اليوم يوم المرحمة 🕊️',['لمّا سمع النبيّ ﷺ كلمة سعد قال: «اليوم يوم المرحمة»، وأمر أن تؤخذ الراية من سعد.','فالفاتح الحقيقي يرحم الناس، ولا يريد الانتقام.'],[['🕊️ ندخل مكة بالرحمة','gold',setupBattle]],'',true)]],'',true)},2400);
+  }else if(b.id==='badr'){ // لحظة قرار: مشورة الحُباب
+    setTimeout(()=>{if(!G||G.b!==b||G.phase!=='deploy')return;
+      modal('مشورة الحُباب 💡',['جاء الحُباب بن المنذر وأشار: ننزل عند أقرب ماء من القوم، فيكون الماء لنا ولا يشربون منه.','ماذا يفعل الجيش؟'],
+        [['💧 نأخذ بالمشورة','gold',()=>{const u=G.units[0];u.tx=b.wells.x;u.ty=b.wells.y;G.ev.shuraOk=1;tip('أحسنت! الشورى خير 💧 «القلب» يتحرّك إلى الآبار');updSel()}],
+         ['نبقى مكاننا','',()=>tip('فكّر جيّدًا… الماء مهمّ في الصحراء! تقدر تحرّك مجموعة إلى دائرة الآبار 💧')]],'',true)},2600);
+  }else tip('رتّب جيشك: ضع الرماة فوق جبل الرماة 🏹 (المس «الرماة» ثم المس الجبل)');
+}
+const mUnits=()=>G.units.filter(u=>u.side==='m');
+const qUnits=()=>G.units.filter(u=>u.side==='q'&&u.st!=='gone');
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+const inC=(u,c)=>c&&Math.hypot(u.x-c.x,u.y-c.y)<c.r;
+/* الخندق: ١٠ أجزاء، والجزءان الضيّقان أرضهما صخرية فلا يُحفران أكثر من ٦٠٪ */
+const segX=i=>{const T=G.b.trench;return T.x0+T.sw*(i+.5)};
+const segAt=x=>{const T=G.b.trench;return Math.floor((x-T.x0)/T.sw)};
+const digCap=i=>G.b.trench.narrow.includes(i)?.6:1;
+const weakSeg=i=>{const T=G.b.trench;if(i<0||i>=T.n)return false;return T.narrow.includes(i)||G.dig[i]<.95};
+function startDig(){
+  const b=G.b,T=b.trench;G.phase='dig';G.digMax=G.digT=G.diff==='easy'?48:G.diff==='hard'?34:40;$('bGo').hidden=false;$('bGo').textContent='✅ انتهى الحفر';
+  const xs=[230,340,450,560,670];mUnits().forEach((u,i)=>{u.tx=xs[i%5];u.ty=T.y-70;u.dig=1});
+  if(R3.ok)R3.look(450,T.y-20,100,.42,0);
+  tip('⛏️ اسحب إصبعك على خطّ الخندق ذهابًا وإيابًا لتحفر');
+}
+let digTipT=0;
+function digAt(p,q){
+  const T=G.b.trench;if(!G||G.phase!=='dig'||G.paused||!p||!q)return;
+  if(Math.abs(q.y-T.y)>75)return;
+  const i=segAt(q.x);if(i<0||i>=T.n)return;
+  const mv=Math.hypot(q.x-p.x,q.y-p.y);if(mv<1)return;
+  const cap=digCap(i),was=G.dig[i];
+  G.dig[i]=Math.min(cap,was+Math.min(.03,mv*.0013)*(G.diff==='easy'?1.3:1));
+  if(R3.ok)R3.dirt(q);
+  if(was<cap&&G.dig[i]>=cap){try{SND.splash()}catch(e){}
+    if(cap<1&&G.t>digTipT){digTipT=G.t+4;tip('⚠️ الأرض صخرية هنا، فصار الخندق أضيق… احرسه جيّدًا')}}
+  if(G.dig.every((d,k)=>d>=digCap(k))&&!G.ev.digAll){G.ev.digAll=1;tip('🎉 اكتمل الخندق! اضغط «انتهى الحفر»')}
+}
+function endDig(){
+  if(!G||G.phase!=='dig')return;const b=G.b,T=b.trench;G.phase='deploy';$('bGo').textContent='🛡️ ابدأ الدفاع';
+  let s=0,k=0;G.dig.forEach((d,i)=>{if(!T.narrow.includes(i)){s+=d;k++}});const pc=s/k;G.ev.dig=pc>=.9?1:0;
+  mUnits().forEach(u=>{u.dig=0;u.tx=u.hx;u.ty=u.hy}); // رجع الحفّارون إلى المعسكر عند جبل سلع
+  if(G.ev.dig)gift('khandaq_dig',10,'تعاونتَ مع المسلمين في حفر الخندق ⛏️');
+  if(R3.ok)R3.home();
+  const gaps=G.dig.filter((d,i)=>!T.narrow.includes(i)&&d<.95).length;
+  modal('وصل الأحزاب! 🐎',[G.ev.dig?'أحسنتم! حفرتم الخندق معًا ⛏️ فتعجّب الأحزاب، فالعرب لم تعرف الخندق في حروبها من قبل.':`حفرتم ${AR(pc*100)}٪ من الخندق، وبقيت فيه ${AR(gaps)} ثغرة (الدوائر الحمراء 🔴). احرسها جيّدًا!`,
+    'وفي الخندق مكانان ضيّقان ⚠️ لأن الأرض صخرية هناك، والخيل ستحاول أن تعبر منها.','ضع مجموعاتك قرب الثغرات والأماكن الضيّقة، ثم اضغط «ابدأ الدفاع».'],
+    [['🛡️ رتّب جيشك','gold',()=>{for(const u of G.units)if(u.side==='q'&&u.away){u.away=0;u.st='ok';u.y=H-25}tip('ضع مجموعاتك قرب الثغرات 🔴 والأماكن الضيّقة ⚠️')}]]);
+}
+/* خيل الأحزاب: تبحث عن ثغرة في الخندق، فإن كان عميقًا وقفت ورجعت تبحث عن غيره */
+function pickSeg(u){const T=G.b.trench;let best=0,bs=1e9;
+  for(let i=0;i<T.n;i++){if(!weakSeg(i))continue;const taken=G.units.some(o=>o!==u&&o.seg===i&&o.st==='ok');
+    const s=G.dig[i]+Math.random()*.35+Math.abs(segX(i)-u.x)/1800+(taken?.35:0)+(i===u.lastSeg?.5:0);if(s<bs){bs=s;best=i}}
+  return best}
+function kAI(u){
+  const T=G.b.trench;if(G.t<u.wait)return;
+  if(u.seg==null){u.seg=u.amr?T.narrow[0]:pickSeg(u);if(!u.told){u.told=1;tip(`🐎 «${u.name}» تبحث عن ثغرة في الخندق!`)}}
+  const X=segX(u.seg);
+  if(u.y>T.y-60){
+    if(u.y<T.y+42&&u.y>T.y+28&&!weakSeg(u.seg)&&Math.abs(u.x-X)<30){u.lastSeg=u.seg;u.seg=null;u.tries=(u.tries||0)+1;u.tx=u.x;u.ty=T.y+130;
+      if(u.tries===1)tip('🐎 الخيل وقفت عند الخندق العميق، ولم تقدر أن تعبره!');
+      if(u.tries>3){u.st='rout';u.tx=u.x;u.ty=H+120;tip(`«${u.name}» يئست من عبور الخندق فرجعت`)}return}
+    u.tx=X;u.ty=T.y-95;return}
+  if(!u.crossed){u.crossed=1;if(!u.amr){G.breach=(G.breach||0)+1; // عبرت الخندق من ثغرة لم يحرسها أحد
+    tip(G.breach>=2?'😟 عبرت الخيل الخندق مرّة ثانية!':'⚠️ عبرت خيل الخندق من ثغرة لم يحرسها أحد! ضع جيشك عند الثغرات')}}
+  u.tx=450;u.ty=100;
+  if(u.y<215){u.st='rout';u.tx=X;u.ty=H+120;tip('رجعت الخيل خائبة من أطراف المدينة')}
+}
+function wind(){
+  G.wind=1;G.windT=G.t;$('bVolley').classList.remove('on');
+  modal('الريح 🌪️',['طال الحصار نحو شهر، واشتدّ البرد والجوع، وصبر المؤمنون ودعوا الله.','ثم أرسل الله على الأحزاب في ليلة باردة مظلمة ريحًا شديدة، فقلبت قدورهم، وأطفأت نيرانهم، واقتلعت خيامهم.','وأرسل النبيّ ﷺ حُذيفة بن اليمان ليعرف خبرهم، فسمع أبا سفيان يقول لقومه: ارحلوا.'],
+    [['🌪️ انظر!','gold',()=>{for(const u of G.units)if(u.side==='q'&&u.st!=='gone'){u.st='rout';u.eng=null;u.tx=u.x;u.ty=H+150}tip('🌪️ الريح تقتلع خيام الأحزاب، وهم يرحلون!')}]]);
+}
+/* فتح مكة: من تقترب منهم كتيبة يطمئنّون ويذهبون إلى مكان الأمان */
+function guide(){
+  const b=G.b;
+  for(const p of G.units){if(p.side!=='p'||p.st==='gone'||p.safe)continue;
+    if(!p.guide){const m=mUnits().find(m=>m.st==='ok'&&dist(m,p)<150);
+      if(m){p.guide=1;try{SND.chime()}catch(e){}
+        if(p.dest==='b'){p.tx=p.x;p.ty=p.y;p.goneAt=G.t+2.4;tip(`🚪 «${p.name}» أغلقوا عليهم أبوابهم، فهم آمنون`)}
+        else{const c=p.dest==='m'?b.masjid:b.darAS,a=Math.random()*6.28,r=Math.random()*c.r*.45;p.tx=c.x+Math.cos(a)*r;p.ty=c.y+Math.sin(a)*r;
+          tip(`🕊️ «${m.name}» طمأنت «${p.name}»: ${p.dest==='m'?'من دخل المسجد فهو آمن':'من دخل دار أبي سفيان فهو آمن'}`)}}
+      else{p.wt=(p.wt||0)-G.dt;if(p.wt<=0){p.wt=2.5+Math.random()*2;p.tx=p.hx+(Math.random()-.5)*70;p.ty=p.hy+(Math.random()-.5)*70}}}
+    else if(p.goneAt){if(G.t>p.goneAt){p.safe=1;p.st='gone'}}
+    else if(inC(p,p.dest==='m'?b.masjid:b.darAS)){p.safe=1;p.tx=p.x;p.ty=p.y}}
+}
+function afw(){
+  if(G.afw)return;G.afw=1;
+  modal('عند باب الكعبة 🕋',['دخل النبيّ ﷺ مكة متواضعًا لله، مطأطئًا رأسه على ناقته.','وطاف بالكعبة، واجتمع عنده أهل مكة الذين آذوه وأخرجوه من بلده، فقال لهم: «ما تظنّون أنّي فاعلٌ بكم؟» قالوا: خيرًا، أخٌ كريم وابنُ أخٍ كريم.','فقال ﷺ: «اذهبوا فأنتم الطلقاء».'],
+    [['🤲 ما أعظم العفو!','gold',()=>end('peace')]]);
+}
+
+/* ===================== المحاكاة ===================== */
+function step(dt){
+  const b=G.b;G.t+=dt;
+  const us=G.units;G.dt=dt;
+  if(G.phase==='dig'){G.digT-=dt;if(G.digT<=0){G.digT=0;endDig()}}
+  if(b.peace&&G.phase==='battle')guide();
+  // ذكاء العدو
+  if(G.phase==='battle'){
+    for(const u of us){ if(u.side!=='q'||u.st!=='ok')continue;
+      u.ai-=dt; if(u.ai>0)continue; u.ai=.8;
+      if(u.script){u.script(u);continue}
+      if(u.hold&&G.t<u.wait)continue;
+      let best=null,bd=1e9;
+      for(const m of us){if(m.side!=='m'||m.st!=='ok')continue;if(G.regroup&&inC(m,b.shib))continue;const d=dist(u,m)+(m.y<300?120:0);if(d<bd){bd=d;best=m}}
+      if(best){ if(u.kind==='arc'){const d=dist(u,best);if(d>u.rng*.9){const f=(d-u.rng*.85)/d;u.tx=u.x+(best.x-u.x)*f;u.ty=u.y+(best.y-u.y)*f}else{u.tx=u.x;u.ty=u.y}}
+                else{u.tx=best.x;u.ty=best.y} }
+    }
+    // (أحد) قريش لا تصعد إلى شِعب الجبل: هدفها يُدفع خارج الدائرة
+    if(G.regroup)for(const u of us){if(u.side!=='q')continue;const c=b.shib,d=Math.hypot(u.tx-c.x,u.ty-c.y),R=c.r+40;
+      if(d<R){const k=d>1?R/d:1;u.tx=c.x+(u.tx-c.x)*k;u.ty=d>1?c.y+(u.ty-c.y)*k:c.y+R}}
+  }
+  // الاشتباك
+  for(const u of us)u.eng=null;
+  if(G.phase==='battle'){
+    for(const a of us){ if(a.st==='gone'||a.side!=='m')continue;
+      for(const e of us){ if(e.side!=='q'||e.st==='gone')continue;
+        if(a.st!=='ok'||e.st!=='ok')continue;
+        if(b.trench&&(a.y<b.trench.y)!==(e.y<b.trench.y))continue; // الخندق بينهما
+        if(dist(a,e)<a.r+e.r+6){ if(a.st==='ok')a.eng=e; if(e.st==='ok')e.eng=a; }
+      }}
+    for(const u of us){ if(u.st!=='ok'||!u.eng)continue;
+      const e=u.eng; const dmg=0.2*u.pow*mult(u,e)*Math.sqrt(u.n)*dt*(u.kind==='arc'?.6:1);
+      e.n-=dmg; e.hit=.25;
+    }
+    // الرمي
+    for(const u of us){ if(u.kind!=='arc'||u.st!=='ok'||u.eng)continue;
+      if(Math.hypot(u.tx-u.x,u.ty-u.y)>6)continue;
+      let rng=u.rng*(u.side==='m'&&inC(u,b.hill)?1.25:1);
+      let best=null,bd=rng;
+      for(const e of us){if(e.side===u.side||e.st!=='ok')continue;const d=dist(u,e);if(d<bd){bd=d;best=e}}
+      if(best){const dmg=0.16*u.pow*mult(u,best)*Math.sqrt(u.n)*dt*(best.kind==='cav'?1.6:1);best.n-=dmg;best.hit=.25;u.shot=(u.shot||0)+dt;u.aim=best}
+      else u.aim=null;
+    }
+    // الحالات: من تعب أو فقد عزيمته ينسحب (لا موت في اللعبة)
+    for(const u of us){
+      if(u.n<=0)u.n=0;
+      if(u.side==='m'){
+        if(u.st==='ok'&&u.n<u.max*.28){u.st='tired';u.rests=(u.rests||0)+1;u.tx=G.home.x+(u.id%3-1)*60;u.ty=G.home.y;if(G.sel===u)G.sel=null;tip(`«${u.name}» تعب، فرجع إلى المعسكر${u.rests>3?'، ولن يعود بعد هذه المرّة 🤕':' ليستريح ثم يعود 💪'}`)}
+        if(u.st==='tired'){ if(u.rests<=3&&dist(u,G.home)<170){u.n=Math.min(u.max,u.n+u.max*.07*dt); if(u.n>=u.max*.6){u.st='ok';tip(`«${u.name}» استراح، وهو جاهز من جديد`)}} }
+      } else {
+        if(u.side==='p')continue;
+        if(u.st==='ok'&&u.n<u.max*(b.trench&&u.kind==='cav'?.6:G.t>300?.4:.25)){u.st='rout';u.tx=u.x+(u.x<450?-80:80);u.ty=H+120}
+        if(u.st==='rout'&&u.y>H+60)u.st='gone';
+      }
+    }
+    rules(dt);
+  }
+  // الحركة
+  for(const u of us){ if(u.st==='gone')continue;
+    if(u.eng&&u.st==='ok')continue;
+    const dx=u.tx-u.x,dy=u.ty-u.y,d=Math.hypot(dx,dy);
+    if(d>2){let sp=u.sp*(u.st==='rout'?1.2:u.st==='tired'?.9:1);
+      if(b.id==='badr'&&u.side==='q'&&G.rain&&u.y>620)sp*=.6;
+      if(b.id==='uhud'&&u.side==='q'&&u.kind==='cav'&&inC(u,{x:b.hill.x,y:b.hill.y,r:b.hill.r+40})&&G.archOn&&G.archOn())sp*=.5;
+      if(u.slow>G.t)sp*=.25;                 // رشقة التحذير أوقفت الخيل
+      const T=b.trench;if(T&&u.side==='q'&&Math.abs(u.y-T.y)<45)sp*=.35; // النزول في الخندق والصعود منه بطيء
+      const y0=u.y,s=Math.min(d,sp*dt);u.x+=dx/d*s;u.y+=dy/d*s;u.face=dy>=0?1:-1;
+      if(T){ // الخندق: المسلمون خلفه، وخيل الأحزاب لا تعبر إلا من الثغرات والأماكن الضيّقة
+        if(u.side==='m'&&y0<=T.y-35&&u.y>T.y-35)u.y=T.y-35;
+        if(u.side==='q'&&u.st==='ok'&&y0>=T.y+35&&u.y<T.y+35&&(u.kind!=='cav'||!weakSeg(segAt(u.x))))u.y=T.y+35}}
+  }
+  // تباعد المجموعات من نفس الجهة
+  for(let i=0;i<us.length;i++)for(let j=i+1;j<us.length;j++){const a=us[i],c=us[j];
+    if(a.side!==c.side||a.st==='gone'||c.st==='gone')continue;const d=dist(a,c),m=a.r+c.r;
+    if(d<m&&d>.01){const p=(m-d)/2;const nx=(a.x-c.x)/d,ny=(a.y-c.y)/d;a.x+=nx*p;a.y+=ny*p;c.x-=nx*p;c.y-=ny*p}}
+  for(const u of us){u.x=Math.max(20,Math.min(W-20,u.x));if(u.st!=='rout')u.y=Math.max(20,Math.min(H-20,u.y));if(u.hit>0)u.hit-=dt}
+  checkEnd();
+}
+function mult(u,e){
+  let m=1; const b=G.b;
+  if(u.side==='m'){
+    m*=b.id==='badr'?2.0:b.id==='khandaq'?2.2:2.5;              // ثبات الإيمان والصبر
+    m*=G.diff==='easy'?1.15:G.diff==='hard'?.85:1; // حسب العمر / وضع القائد
+    const near=G.units.some(o=>o!==u&&o.side==='m'&&o.st==='ok'&&dist(o,u)<160);
+    if(near)m*=1.2;                          // الصفوف المتراصّة
+    if(b.id==='uhud'&&u.kind==='arc'&&inC(u,b.hill))m*=1.6;
+  }else{
+    if(b.id==='badr'&&!G.wells)m*=1.45;
+    if(b.id==='badr'&&G.wells)m*=.8;        // العطش
+    if(b.id==='khandaq')m*=.7;              // الخندق والتراب يحميان المسلمين
+    if(b.id==='uhud'&&e.kind==='arc'&&inC(e,b.hill))m*=.5;
+    if(b.id==='uhud'&&u.kind==='cav'&&G.behind&&u.y<e.y)m*=1.6;  // الالتفاف من الخلف
+  }
+  return m;
+}
+
+/* قواعد كل معركة */
+function rules(dt){
+  const b=G.b;
+  if(b.id==='uhud'){
+    const inf=qUnits().filter(u=>u.kind!=='cav');
+    const tot=inf.reduce((s,u)=>s+u.n,0),max=b.units.filter(u=>u[0]==='q'&&u[1]!=='cav').reduce((s,u)=>s+u[5],0);
+    if(!G.ev.spoils&&(tot<max*.55||G.t>170)){G.ev.spoils=1;spoils();}   // أحد كما وقعت: الغنائم تأتي دائمًا
+    // رشقة التحذير: تظهر حين تقترب خيل قريش من جبل الرماة والرماة فوقه
+    const show=!G.regroup&&G.archOn&&G.archOn()&&G.units.some(u=>u.side==='q'&&u.kind==='cav'&&u.st==='ok'&&dist(u,b.hill)<340)&&!(G.volT>G.t);
+    $('bVolley').classList.toggle('on',!!show);
+  }
+  if(b.id==='khandaq'&&!G.wind){
+    const T=b.trench,bt=G.t-G.t0,amr=G.units.find(u=>u.amr);
+    if(amr&&!G.ev.amr&&(amr.st==='rout'||(amr.st==='ok'&&amr.y<T.y-25))){G.ev.amr=1;amr.st='rout';amr.eng=null;amr.tx=segX(T.narrow[0]);amr.ty=H+120;
+      modal('عمرو بن عبد ودّ 🐎',['عبر عمرو بن عبد ودّ، وهو من أشهر فرسان العرب، مع بعض الفرسان من مكان ضيّق في الخندق، ونادى: من يبارز؟','فخرج إليه عليّ بن أبي طالب فغلبه، وقال النبيّ ﷺ يومها: «برز الإيمان كلّه إلى الشرك كلّه».','فرجع من كان معه هاربين إلى معسكرهم.'],
+        [['🛡️ نحرس الخندق','gold',()=>tip('ستأتي خيل أخرى… احرس الثغرات والأماكن الضيّقة')]])}
+    const cavOk=G.units.some(u=>u.side==='q'&&u.kind==='cav'&&u.st==='ok');
+    if((bt>95&&!cavOk)||bt>170)wind();
+  }
+}
+function setupBattle(){
+  const b=G.b;
+  if(b.id==='badr'){
+    G.wells=mUnits().some(u=>inC(u,b.wells));G.rain=true;
+    const night=()=>modal('ليلة بدر',['ونزل المطر تلك الليلة، فثبتت الأرض تحت أقدام المسلمين، وصارت أرض قريش موحلة يمشون فيها ببطء.','وبدأت المعركة بالمبارزة: خرج من المسلمين عليّ بن أبي طالب وحمزة بن عبد المطلب وعُبيدة بن الحارث، فغلبوا من خرج لهم من قريش.'],[['⚔️ إلى الميدان','gold',()=>R3.ok?R3.duel(go):go()]]);
+    if(G.wells){gift('badr_shura',10,'عملتَ بالشورى، فنزلتَ عند الآبار 💧');bucket(night)}
+    else modal('ليلة بدر',['لم تنزل عند الآبار، فصار الماء لقريش وهم أقوى الآن. انتبه للمرة القادمة!'],[['متابعة','gold',night]]);
+  }else if(b.id==='khandaq'){
+    for(const u of G.units)if(u.side==='q'){u.hold=true;u.script=u.kind==='cav'?kAI:()=>{};if(u.kind==='cav')u.wait=G.t+(u.wave||0)}
+    go();tip('🛡️ احرس الخندق! الخيل ستبحث عن ثغرة');
+  }else if(b.peace){
+    G.phase='battle';G.t0=G.t;G.limit=G.diff==='easy'?300:G.diff==='hard'?200:250;G.paused=false;$('bGo').hidden=true;SND.init();updSel();tip('🕊️ ادخلوا مكة: اختر كتيبة ثم المس أهل مكة 👪 لتطمئنهم');
+  }else{
+    G.archOn=()=>{const a=mUnits().find(u=>u.kind==='arc');return a&&a.st==='ok'&&inC(a,b.hill)};
+    const on=G.archOn();G.ev.arch=on?1:0;
+    for(const u of G.units)if(u.side==='q'&&u.kind==='cav'){u.hold=true;u.wait=on?22:8;u.script=cavAI}
+    if(on)gift('uhud_arch',10,'وضعتَ الرماة حيث أمر النبيّ ﷺ 🏹');
+    modal('صباح أُحُد',[on?'الرماة فوق الجبل، يحمون ظهر الجيش. أمرهم النبيّ ﷺ: لا تتركوا الجبل مهما حدث.':'الرماة ليسوا على الجبل! خيل قريش ستحاول أن تلتفّ من خلفكم. أسرِع وضعهم فوق الجبل.'],[['⚔️ إلى الميدان','gold',go]]);
+  }
+  function go(){SND.init();SND.start();G.phase='battle';G.t0=G.t;G.paused=false;$('bGo').hidden=true;updSel();tip('المس مجموعة، ثم المس المكان أو العدو')}
+}
+/* لعبة صغيرة في بدر: املأ الأحواض قبل أن تصل قريش */
+function bucket(done){
+  let f=[0,0,0],k=0,left=14,over=false;
+  modal('🪣 املأ الأحواض!',['بنى المسلمون حوضًا عند الماء وملؤوه. اضغط الدلو بسرعة حتى تمتلئ الأحواض الثلاثة قبل أن ينتهي الوقت.'],[['⏭ تخطَّ','plain',()=>{over=true;done()}]],
+    `<div class="basins">${f.map((x,i)=>`<div class="basin"><i id="bs${i}"></i></div>`).join('')}</div><div class="qn" id="bsT">⏱️ ${AR(left)}</div><button class="bt gold" id="bsGo" style="font-size:20px">🪣 اسحب الدلو</button>`,true);
+  const fin=ok=>{if(over)return;over=true;clearInterval(iv);$('modal').classList.remove('on');if(G)G.paused=false;
+    tip(ok?'امتلأت الأحواض 💧 الماء للمسلمين':'لا بأس، صار عندكم بعض الماء 💧');setTimeout(done,ok?700:300)};
+  const iv=setInterval(()=>{if(over){clearInterval(iv);return}left--;const t=$('bsT');if(t)t.textContent='⏱️ '+AR(Math.max(0,left));if(left<=0)fin(false)},1000);
+  $('bsGo').onclick=()=>{if(over)return;f[k]=Math.min(100,f[k]+14);const e=$('bs'+k);if(e)e.style.height=f[k]+'%';try{SND.splash()}catch(_){}
+    if(f[k]>=100)k++;if(k>2)fin(true)};
+}
+/* خيل قريش في أحد: تنتظر، ثم تحاول الالتفاف من غرب جبل الرماة إلى خلف المسلمين */
+function cavAI(u){
+  const b=G.b;
+  if(G.t<u.wait)return;
+  if(!u.way){u.way=u.x<450?[[80,700],[80,330],[300,250]]:[[860,700],[860,330],[640,250]];u.wi=0}
+  const blocked=u.x<450&&G.archOn();
+  if(blocked&&u.y<760&&u.y>380&&!u.backed&&u.n<u.max*.7){u.backed=1;u.tx=u.x+40;u.ty=1000;u.wait=G.t+18;u.way=null;tip('خيل قريش تراجعت، فسهام الرماة فوق الجبل منعتها 🏹');return}
+  if(u.backed&&G.t<u.wait)return;
+  if(u.wi<u.way.length){const p=u.way[u.wi];u.tx=p[0];u.ty=p[1];if(Math.hypot(u.x-p[0],u.y-p[1])<30)u.wi++;if(u.wi===u.way.length&&u.x<450)G.behind=true;return}
+  let best=null,bd=1e9;for(const m of G.units){if(m.side!=='m'||m.st!=='ok')continue;if(G.regroup&&inC(m,b.shib))continue;const d=dist(u,m);if(d<bd){bd=d;best=m}}
+  if(best){u.tx=best.x;u.ty=best.y}
+}
+/* رشقة تحذير: السهام تقع على الأرض أمام الخيل فتتوقف (بلا إصابات) */
+function volley(){
+  if(!G||G.over||!G.archOn||!G.archOn())return;const b=G.b,a=mUnits().find(u=>u.kind==='arc');
+  const cs=G.units.filter(u=>u.side==='q'&&u.kind==='cav'&&u.st==='ok'&&dist(u,b.hill)<340);if(!cs.length)return;
+  G.volT=G.t+9;G.ev.vol=(G.ev.vol||0)+1;$('bVolley').classList.remove('on');
+  for(const c of cs){c.slow=G.t+6;const pt={x:c.x+(a.x-c.x)*.18,y:c.y+(a.y-c.y)*.18};if(R3.ok)R3.volley(a,pt)}
+  try{SND.volley()}catch(e){}
+  tip('🏹 وقعت السهام أمام الخيل فتوقّفت! هكذا يحمي الرماة ظهر الجيش');
+}
+function spoils(){
+  G.paused=true;if(R3.ok)R3.gold();$('bVolley').classList.remove('on');
+  modal('الغنائم!',['بدأ جيش قريش يتراجع، وترك وراءه الغنائم. فنادى بعض الرماة: الغنيمة الغنيمة! وظنّوا أن المعركة انتهت.','فذكّرهم قائدهم عبد الله بن جُبير بأمر النبيّ ﷺ ألّا يتركوا الجبل، لكن أكثرهم نزلوا، وبقي معه نفر قليل.'],
+   [['😟 وماذا حدث بعدها؟','red',()=>{G.paused=false;descend()}]]);
+}
+function descend(){
+  const b=G.b,a=mUnits().find(u=>u.kind==='arc');if(a){a.tx=470;a.ty=760;a.n=Math.max(a.n*.5,1);if(G.sel===a)G.sel=null}
+  // تعود خيل قريش وتلتفّ من خلف المسلمين، ويرجع جيشهم
+  let cav=G.units.find(u=>u.side==='q'&&u.kind==='cav'&&u.x<450);
+  if(!cav||cav.st!=='ok'){cav={id:G.units.length,side:'q',kind:'cav',name:'خيّالة الميمنة',x:60,y:1100,tx:60,ty:1100,n:200,max:200,face:-1,st:'ok',hold:true,ai:0,hit:0,...KIND.cav};G.units.push(cav)}
+  cav.backed=0;cav.wait=G.t+2;cav.way=[[80,330],[300,250]];cav.wi=0;cav.script=cavAI;cav.x=Math.min(cav.x,120);
+  for(const u of G.units)if(u.side==='q'&&u.kind!=='cav'&&u.st!=='gone'){u.n=Math.min(u.max,u.n+u.max*.35);if(u.st==='rout'){u.st='ok';u.y=Math.min(u.y,H-40)}}
+  tip('نزل الرماة… فالتفّت خيل قريش من خلف الجبل! 😟');
+  // المهمة الحقيقية: اجمع الجيش واصعد إلى شِعب أحد
+  setTimeout(()=>{if(!G||G.b!==b||G.over)return;G.regroup=1;G.regT=G.t;G.sel='all';updSel();if(R3.ok)R3.look(470,360,80,.95,Math.PI);
+    modal('⛰️ اثبت واجمع الجيش!',['تفرّق جيش المسلمين، وثبت النبيّ ﷺ ومعه نفر من أصحابه يدافعون عنه.','مهمّتك الآن: اجمع جيشك كلّه واصعد به إلى شِعب جبل أُحُد (الدائرة الذهبية)، فقريش لا تقدر أن تصعد إليكم هناك.'],
+      [['🛡️ هيّا نثبت','gold',()=>tip('اختر «الكل» ثم المس الدائرة الذهبية على جبل أُحُد ⛰️')]])},3500);
+}
+function checkEnd(){
+  if(G.over||G.phase!=='battle')return;
+  const b=G.b;
+  const qa=qUnits().filter(u=>u.st==='ok'),mOk=mUnits().filter(u=>u.st==='ok');
+  const qn=qa.reduce((s,u)=>s+u.n,0),qmax=G.units.filter(u=>u.side==='q').reduce((s,u)=>s+u.max,0);
+  const mn=mUnits().reduce((s,u)=>s+u.n,0),mmax=mUnits().reduce((s,u)=>s+u.max,0);
+  G.allT=mOk.length===0?(G.allT||0)+G.dt:0;
+  if(b.peace){ // فتح مكة: بلا قتال. النجاح أن يأمن أهل مكة كلّهم ثم تجتمع الكتائب عند المسجد الحرام
+    const P=G.units.filter(u=>u.side==='p');
+    if(!G.meet&&P.every(u=>u.safe)){G.meet=1;G.regroup=1;G.meetT=G.t;G.sel='all';updSel();if(R3.ok)R3.look(450,600,70,.9);
+      modal('🕊️ كل أهل مكة في أمان!',['لم يُرعَب أحد، ودخل الناس أماكن الأمان كما أمر النبيّ ﷺ.','مهمّتك الآن: اجمع الكتائب الأربع عند المسجد الحرام (الدائرة الذهبية حول الكعبة).'],
+        [['🕋 هيّا','gold',()=>tip('«الكل» مختار: المس الدائرة الذهبية عند الكعبة 🕋')]])}
+    if(G.meet&&G.t-G.meetT>3&&mUnits().every(u=>inC(u,b.shib)))return afw();
+    if(G.t-G.t0>G.limit)return end('lose');
+    return}
+  if(b.id==='khandaq'){ // الخندق: لا معركة كبيرة. النجاح أن تحرس الخندق حتى تأتي الريح
+    if((G.breach||0)>=2||mn<mmax*.15)return end('lose');
+    if(G.wind&&(qUnits().length===0||G.t-G.windT>15))return end('win');
+    return}
+  if(b.id==='uhud'){ // أحد: لا نصر فيها، النجاح أن تثبت وتجمع الجيش في الشِّعب
+    if(mn<mmax*.12)return end('lose');
+    if(G.regroup){const alive=mUnits().filter(u=>u.st!=='gone'&&u.n>0);
+      if(G.t-G.regT>6&&alive.length&&alive.every(u=>inC(u,b.shib)))return end('held');
+      if(G.t-G.regT>240)return end('lose')}
+    return}
+  if(qa.length===0||qn<qmax*.12)end('win');
+  else if(G.allT>25||mn<mmax*.15)end('lose');
+  else if(G.t>300){ if(mn/mmax>qn/qmax){tip('انسحبت قريش من الميدان');end('win')} else end('lose'); }
+}
+/* النهاية: درس السيرة، ثم أسئلة الفهم، ثم النجوم والهدايا والبطاقات */
+function end(res){
+  G.over=true;G.paused=true;res==='lose'?SND.lose():SND.win();$('bVolley').classList.remove('on');
+  const b=G.b,nm=me()?esc(me().nm):'';
+  if(res==='lose'){
+    modal(b.peace?'انتهى الوقت ⏱️':'لم تنجح هذه المرّة',[`لا بأس يا ${nm||'بطل'}، ${{uhud:'اجمع جيشك أسرع واصعد به إلى شِعب الجبل.',khandaq:'احفر الخندق كاملًا، وضع جيشك عند الثغرات والأماكن الضيّقة قبل أن تصل الخيل.',fath:'حرّك كتائبك الأربع معًا نحو أهل مكة لتطمئنهم أسرع، ثم اجمعها عند المسجد الحرام.'}[b.id]||'رتّب جيشك من جديد، وتذكّر الشورى والصفوف المتراصّة.'}`,'كل قائد يتعلّم من المحاولة 💪'],
+      [['🔁 حاول مرّة أخرى','gold',()=>start(b)],['🗺️ الرحلة','',menu]]);return}
+  const hist={
+    badr:['انسحبت قريش، وانتصر المسلمون في بدر نصرًا عظيمًا مع قلّة عددهم، وسمّاها الله يوم الفرقان لأنها فرّقت بين الحق والباطل.','الدرس: القلّة مع الإيمان والصبر والشورى وحسن التدبير تغلب الكثرة.'],
+    uhud:['لم ينتصر المسلمون في أُحُد، لأن أكثر الرماة نزلوا للغنائم وتركوا أمر النبيّ ﷺ، فالتفّت خيل قريش من الخلف، واستُشهد سبعون من الصحابة منهم حمزة سيّد الشهداء.','لكنّ الثابتين جمعوا الجيش وصعدوا إلى الجبل، فرجعت قريش إلى مكة. ومن عجائب السيرة أنّ خالد بن الوليد الذي قاد خيل قريش يومها أسلم بعد ذلك، وصار من قادة المسلمين.','الدرس: طاعة أمر النبيّ ﷺ سبب النصر، وحبّ الدنيا يُضيّع النصر، والثبات بعد الخطأ يحفظ الجماعة.'],
+    khandaq:['رحل الأحزاب بعد حصار نحو شهر بلا معركة كبيرة، فقد أرسل الله عليهم ريحًا شديدة باردة، فانتصر المسلمون.','وقال النبيّ ﷺ بعدها: «الآن نغزوهم ولا يغزوننا»، فلم تأتِ قريش إلى المدينة بعدها أبدًا.','الدرس: التعاون والتخطيط والصبر، والأخذ برأي أهل الخبرة ولو جاء من بلد بعيد كسلمان الفارسي.'],
+    fath:['هكذا فُتحت مكة بلا قتال يُذكر، وعفا النبيّ ﷺ عن أهلها، فأسلم كثير منهم، وصعد بلال فوق الكعبة فأذّن.','الدرس: القوّة الحقيقية في الرحمة والعفو، والقائد العظيم يعفو عمّن آذاه.']
+  }[b.id];
+  if(b.id==='badr')gift('badr_win',20,'نصرٌ في بدر بالصبر وحسن التدبير ⚔️');
+  else if(b.id==='uhud')gift('uhud_held',20,'ثبتَّ مع المؤمنين في أُحُد 🛡️');
+  else if(b.id==='khandaq')gift('khandaq_win',20,'صبرتَ وحرستَ الخندق يوم الأحزاب 🌪️');
+  else gift('fath_aman',20,'أدخلتَ أهل مكة في الأمان 🕋');
+  const head={win:b.id==='khandaq'?`أحسنت يا ${nm||'قائد'}! حفرتَ وحرستَ وصبرتَ حتى جاء نصر الله.`:`أحسنت يا ${nm||'قائد'}! قُدتَ جيشك بحكمة.`,held:`أحسنت يا ${nm||'بطل'}! جمعتَ الجيش وثبتَّ.`,peace:`أحسنت يا ${nm||'قائد'}! دخلتَ مكة بالرحمة، وأمِن الناس كلّهم.`}[res];
+  modal({win:'نصرٌ من الله 🌟',held:'ثبتَّ مع المؤمنين 🤲',peace:'فتحُ مكّة بالرحمة 🕊️'}[res],[head,...hist],
+    [['📖 أسئلة الدرس (نجمة إضافية)','gold',()=>quiz(b,res)]]);
+}
+function quiz(b,res){
+  const Q=b.quiz.map(q=>{const o=q[1].map((t,i)=>({t,ok:i===0}));for(let i=o.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[o[i],o[j]]=[o[j],o[i]]}return{q:q[0],o}});
+  let i=0,good=0;
+  const ask=()=>{const q=Q[i];
+    modal('📖 سؤال '+AR(i+1)+' من '+AR(Q.length),[],[],`<p style="font-weight:800;font-size:17px;text-align:center">${q.q}</p><div class="qz">${q.o.map((o,k)=>`<button class="bt plain" data-k="${k}">${o.t}</button>`).join('')}</div>`,true);
+    const nav=$('modalIn').querySelector('.nav');if(nav)nav.remove();
+    $('modalIn').querySelectorAll('.qz .bt').forEach(x=>x.onclick=()=>{const o=q.o[+x.dataset.k];if(x.parentNode.dataset.done)return;x.parentNode.dataset.done=1;
+      $('modalIn').querySelectorAll('.qz .bt').forEach((y,k)=>{if(q.o[k].ok)y.classList.add('ok')});if(!o.ok)x.classList.add('no');else{good++;try{SND.chime()}catch(e){}}
+      setTimeout(()=>{i++;if(i<Q.length)ask();else finish()},o.ok?800:1600)})};
+  const finish=()=>{
+    const P=me(),k1=!!{badr:G.wells,uhud:G.ev.arch,khandaq:G.ev.dig,fath:G.ev.rahma}[b.id],k2=good>=2;
+    const s=1+(k1?1:0)+(k2?1:0),prev=save[b.id]||0;
+    if(k2)gift(b.id+'_quiz',10,'تعلّمتَ سيرة نبيّك ﷺ 📖');
+    if(s>prev){save[b.id]=s;store()}
+    P.c=P.c||{};const nw=b.heroes.filter(h=>!P.c[h]);nw.forEach(h=>P.c[h]=1);store();
+    const nx=BATTLES[BATTLES.indexOf(b)+1],np=nextPlay(b),unl=prev<1&&nx;
+    const why=[`⭐ ${{win:'النصر',held:'الثبات وجمع الجيش',peace:'كل أهل مكة في أمان'}[res]}`,`${k1?'⭐':'☆'} ${b.val}`,`${k2?'⭐':'☆'} فهم الدرس (${AR(good)} من ${AR(Q.length)})`];
+    modal('نجومك في '+b.name,b.peace?[]:why,
+      [['🗺️ أكمل الرحلة','gold',menu],['🔁 أعد','',()=>start(b)]],
+      `<div class="stars">${'⭐'.repeat(s)}${'☆'.repeat(3-s)}</div>
+       ${nw.length?`<div class="qn">🃏 بطاقات جديدة: ${nw.map(h=>HEROES[h][0]+' '+HEROES[h][1]).join('، ')}</div>`:''}
+       ${unl?`<div class="note" style="text-align:center;font-weight:800">${np?`🔓 انفتحت محطة «${np.name}»!${nx!==np?` (و«${nx.name}» قريبًا إن شاء الله)`:''}`:`🔜 المحطة التالية «${nx.name}» قريبًا إن شاء الله`}</div>`:''}
+       ${b.peace?why.map(t=>`<p>${t}</p>`).join("")+certHTML(P):''}
+       <div class="note" style="font-size:13px">🌱 طلب العلم عملٌ صالح، وتعلّمك سيرة نبيّك ﷺ يبني بيتك في الجنة. طبّق ما تعلّمته في حياتك: الشورى، والطاعة، والتعاون، والثبات، والرحمة.</div>`,true);
+    try{SND.win()}catch(e){}
+  };
+  ask();
+}
+
+
+
+/* ===================== أصوات الحرب (تُصنع بالمتصفح، بلا ملفات) ===================== */
+const SND=(()=>{
+  let A=null,M=null,on=true,lvl=1,nb=null,drumT=0,clashT=0,arrT=0,horseT=0,roar=null;
+  const VOL=[0,.55,1.1];try{const v=localStorage.getItem('maydan_vol');lvl=v!=null?+v:(localStorage.getItem('maydan_snd')==='0'?0:1);on=lvl>0}catch(e){} // مستوى الصوت: 0 مكتوم، 1 واطي (الافتراضي)، 2 عالي
+  function init(){ if(A){if(A.state==='suspended')A.resume();return}
+    try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+    try{A=new (window.AudioContext||window.webkitAudioContext)()}catch(e){return}
+    if(A.state==='suspended')A.resume();
+    // ضاغط حتى يرتفع الصوت بسماعة الموبايل بلا تشويش
+    const C=A.createDynamicsCompressor();C.threshold.value=-18;C.knee.value=10;C.ratio.value=6;C.attack.value=.003;C.release.value=.15;C.connect(A.destination);
+    M=A.createGain();M.gain.value=VOL[lvl];M.connect(C);
+    // في الآيفون: تشغيل صوت صامت يفتح الصوت حتى لو كان الجهاز على الصامت
+    try{const au=new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');au.play().catch(()=>{})}catch(e){}
+    nb=A.createBuffer(1,A.sampleRate*2,A.sampleRate);const d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+    // ضجيج الجيش البعيد
+    const n=A.createBufferSource();n.buffer=nb;n.loop=true;const f=A.createBiquadFilter();f.type='bandpass';f.frequency.value=420;f.Q.value=.7;
+    roar=A.createGain();roar.gain.value=0;n.connect(f);f.connect(roar);roar.connect(M);n.start();}
+  const env=(g,t,a,peak,dec)=>{g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+a);g.gain.exponentialRampToValueAtTime(.001,t+a+dec)};
+  function noise(t,freq,q,peak,dec,type='bandpass',a=.003){const n=A.createBufferSource();n.buffer=nb;const f=A.createBiquadFilter();f.type=type;f.frequency.value=freq;f.Q.value=q;const g=A.createGain();env(g,t,a,peak,dec);n.connect(f);f.connect(g);g.connect(M);n.start(t,Math.random()*1.5);n.stop(t+a+dec+.05);return f}
+  function tone(t,freq,peak,dec,type='sine',to){const o=A.createOscillator();o.type=type;o.frequency.setValueAtTime(freq,t);if(to)o.frequency.exponentialRampToValueAtTime(to,t+dec);const g=A.createGain();env(g,t,.004,peak,dec);o.connect(g);g.connect(M);o.start(t);o.stop(t+dec+.05)}
+  const drum=(t,big)=>{tone(t,big?150:210,big?.9:.6,big?.45:.25,'triangle',big?80:110);tone(t,big?75:100,.7,.4,'sine',45);noise(t,big?900:1400,1.2,big?.6:.4,.09)};
+  const clash=t=>{noise(t,2600+Math.random()*2000,3,.7,.16);tone(t,1500+Math.random()*700,.22,.35,'triangle');tone(t,2400+Math.random()*900,.16,.3,'triangle');tone(t,3600+Math.random()*600,.08,.25,'sine')};
+  const arrow=t=>{const f=noise(t,800,2,.45,.35,'bandpass',.08);f.frequency.setValueAtTime(600,t);f.frequency.exponentialRampToValueAtTime(3000,t+.35)};
+  const hoof=t=>{for(const d of [0,.09,.17]){tone(t+d,230,.45,.08,'triangle',120);noise(t+d,1200,1,.25,.05)}};
+  return{
+    init,
+    get on(){return on},get lvl(){return lvl},
+    toggle(){lvl=(lvl+1)%3;on=lvl>0;try{localStorage.setItem('maydan_vol',lvl)}catch(e){}init();if(M)M.gain.value=VOL[lvl];if(on)this.test();return lvl},
+    test(){if(!A)return;const t=A.currentTime+.05;drum(t,true);drum(t+.25,false);clash(t+.5)},
+    start(){if(!A)return;const t=A.currentTime;for(let i=0;i<4;i++)drum(t+i*.4,i%2===0);roar.gain.cancelScheduledValues(t);roar.gain.setValueAtTime(roar.gain.value,t);roar.gain.linearRampToValueAtTime(.25,t+1.5);roar.gain.linearRampToValueAtTime(.1,t+4)},
+    stop(){if(!A||!roar)return;const t=A.currentTime;roar.gain.cancelScheduledValues(t);roar.gain.setValueAtTime(roar.gain.value,t);roar.gain.linearRampToValueAtTime(0,t+.6)},
+    tick(dt,G){ if(!A||!on||G.phase!=='battle'||G.paused)return; const t=A.currentTime;
+      if(G.b.peace||G.wind){if(roar)roar.gain.value=G.wind?.12:.03;return} // فتح مكة: لا طبول حرب
+      drumT-=dt;if(drumT<=0){drum(t,true);drum(t+.3,false);drumT=2.6}
+      const eng=G.units.filter(u=>u.eng&&u.st==='ok').length;
+      clashT-=dt;if(eng&&clashT<=0){clash(t);clashT=1/Math.min(eng,3)+Math.random()*.4}
+      arrT-=dt;if(arrT<=0&&G.units.some(u=>u.kind==='arc'&&u.aim&&u.st==='ok')){arrow(t);arrT=.5+Math.random()*.5}
+      horseT-=dt;if(horseT<=0&&G.units.some(u=>u.kind==='cav'&&u.st!=='gone'&&Math.hypot(u.tx-u.x,u.ty-u.y)>10)){hoof(t);horseT=.3}
+      if(roar)roar.gain.value=.08+Math.min(.14,eng*.03);
+    },
+    chime(){if(!A||!on)return;const t=A.currentTime;[784,988,1319].forEach((q,i)=>tone(t+i*.08,q,.25,.35,'sine'))},
+    splash(){if(!A||!on)return;const t=A.currentTime;noise(t,700,1.5,.35,.18,'lowpass',.01);tone(t,320,.15,.12,'sine',180)},
+    volley(){if(!A||!on)return;const t=A.currentTime;for(let i=0;i<5;i++)arrow(t+i*.07)},
+    win(){if(!A||!on)return;this.stop();const t=A.currentTime;[392,494,587,784].forEach((f,i)=>{tone(t+i*.18,f,.5,.6,'triangle');tone(t+i*.18,f/2,.3,.6,'triangle')});drum(t,true);drum(t+.72,true)},
+    lose(){if(!A||!on)return;this.stop();const t=A.currentTime;[392,349,311,262].forEach((f,i)=>tone(t+i*.35,f,.45,.8,'triangle'));drum(t+1.4,true)}
+  };
+})();
+
+/* ===================== الرسم ===================== */
+const cv=$('cv'),cx=cv.getContext('2d');let sc=1,ox=0,oy=0,dpr=1;
+function resize(){const r=$('stage').getBoundingClientRect();dpr=Math.min(2,devicePixelRatio||1);cv.width=r.width*dpr;cv.height=r.height*dpr;sc=Math.min(r.width/W,r.height/H);ox=(r.width-W*sc)/2;oy=(r.height-H*sc)/2;bg=null}
+addEventListener('resize',()=>{if(G){resize();if(R3.ok)R3.resize()}});
+let bg=null;
+function terrain(){
+  const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');const b=G.b;
+  const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#ead7a6');gr.addColorStop(1,'#dcc08a');g.fillStyle=gr;g.fillRect(0,0,W,H);
+  // حبيبات الرمل
+  let s=7;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
+  for(let i=0;i<2600;i++){g.fillStyle=`rgba(${120+rnd()*60},${90+rnd()*40},40,${.05+rnd()*.07})`;g.fillRect(rnd()*W,rnd()*H,2,2)}
+  const dune=(x,y,rx,ry,col)=>{for(let k=4;k>=0;k--){g.beginPath();g.ellipse(x,y,rx*(1-k*.16),ry*(1-k*.16),0,0,7);g.fillStyle=col(k);g.fill()}};
+  const hill=(x,y,rx,ry)=>dune(x,y,rx,ry,k=>`hsl(32,${30+k*4}%,${46+k*7}%)`);
+  const LB=[];const label=(t,x,y,sz=26,col='#5a4220')=>LB.push([t,x,y,sz,col]);
+  if(b.id==='badr'){
+    // كثبان العدوتين
+    for(const d of [[90,250,120,90],[820,230,110,80],[90,1000,130,90],[820,1010,120,90],[160,620,70,40],[760,640,80,45]])dune(...d,k=>`hsl(38,${45+k*4}%,${62+k*5}%)`);
+    // الوحل جنوبًا
+    g.fillStyle='rgba(110,80,45,.18)';g.fillRect(0,640,W,H-640);
+    for(let i=0;i<60;i++){g.beginPath();g.ellipse(rnd()*W,660+rnd()*520,10+rnd()*24,4+rnd()*7,0,0,7);g.fillStyle='rgba(95,70,40,.22)';g.fill()}
+    // الآبار
+    const w=b.wells;for(const p of [[w.x-40,w.y-10],[w.x+35,w.y+20],[w.x-5,w.y+45],[w.x+60,w.y-40]]){g.beginPath();g.arc(p[0],p[1],14,0,7);g.fillStyle='#8a7350';g.fill();g.beginPath();g.arc(p[0],p[1],9,0,7);g.fillStyle='#3d8fc6';g.fill()}
+    label('آبار بدر',w.x,w.y-100,24,'#1d5f8f');
+    label('العدوة الدنيا',450,70,30);label('العدوة القصوى',450,1170,30);
+    label('نحو المدينة المنوّرة',700,40,20,'#145236');label('نحو مكّة',780,1185,20,'#6d1d16');
+    label('طريق القافلة نحو الساحل',190,560,18,'#6b5332');
+  }else if(b.id==='khandaq'){
+    for(let i=0;i<40;i++){g.fillStyle=['#c9b48a','#bfa67a','#d6c39a'][i%3];g.fillRect(230+(i%10)*48,40+Math.floor(i/10)*30,34,22)} // بيوت المدينة
+    hill(330,290,110,80);label('جبل سَلْع',330,210,22);
+    g.fillStyle='rgba(50,40,35,.35)';g.fillRect(0,250,190,700);g.fillRect(710,250,190,700);
+    label('المدينة المنوّرة',450,30,28,'#145236');label('حرّة الوبرة',70,640,18,'#3a2e28');label('حرّة واقم',830,640,18,'#3a2e28');label('معسكر الأحزاب',450,1170,26,'#6d1d16');
+  }else if(b.id==='fath'){
+    for(const r of [[0,0,170,1200],[730,0,170,1200]]){g.fillStyle='rgba(90,75,60,.35)';g.fillRect(...r)}
+    let k=0;for(let i=0;i<220&&k<90;i++){const x=rnd()*900,y=rnd()*1200;if(Math.hypot(x-450,y-600)<150||Math.abs(x-450)<45||Math.abs(y-600)<45)continue;k++;g.fillStyle=['#c9b48a','#bfa67a','#d6c39a'][k%3];g.fillRect(x-14,y-11,28,22)}
+    g.beginPath();g.arc(450,600,115,0,7);g.fillStyle='#f2ede2';g.fill();g.fillStyle='#1a1a1a';g.fillRect(432,582,36,36);g.fillStyle='#c9a43a';g.fillRect(432,590,36,5);
+    label('المسجد الحرام',450,470,24,'#145236');label('دار أبي سفيان',650,360,20,'#6b5332');label('أعلى مكة',450,30,22);label('أسفل مكة',450,1180,22);
+  }else{
+    // جبل أحد في الأعلى
+    for(let i=0;i<9;i++)hill(60+i*100,40+Math.sin(i*1.7)*25,110,120);
+    label('جبل أُحُد',450,70,30,'#4a3418');
+    // جبل الرماة
+    hill(b.hill.x,b.hill.y,95,70);label('جبل الرماة',b.hill.x,b.hill.y-105,22);
+    // الممر الغربي
+    g.setLineDash([12,10]);g.strokeStyle='#8a6a3a';g.lineWidth=4;g.beginPath();g.moveTo(80,1100);g.lineTo(70,700);g.lineTo(80,330);g.lineTo(300,250);g.stroke();g.setLineDash([]);
+    label('ممرّ خلف الجبل',95,830,17,'#6b5332');
+    label('نحو المدينة المنوّرة',700,1130,18,'#145236');label('معسكر قريش',470,1180,22,'#6d1d16');
+  }
+  // نقلب الخريطة: جيش اللاعب في الأسفل والعدو في الطرف المقابل
+  const c2=document.createElement('canvas');c2.width=W;c2.height=H;const g2=c2.getContext('2d');
+  g2.translate(0,H);g2.scale(1,-1);g2.drawImage(c,0,0);g2.setTransform(1,0,0,1,0,0);
+  for(const [t,x,y,sz0,col] of LB){const sz=sz0*1.45,yy=H-y+sz*.35;g2.font=`700 ${sz}px Amiri, Cairo, sans-serif`;g2.textAlign='center';g2.lineWidth=5;g2.strokeStyle='#f5e7c6cc';g2.strokeText(t,x,yy);g2.fillStyle=col;g2.fillText(t,x,yy)}
+  return c2;
+}
+const FY=y=>H-y;
+function draw(){
+  const r=cv.width,h=cv.height;cx.setTransform(1,0,0,1,0,0);cx.fillStyle='#cdb47f';cx.fillRect(0,0,r,h);
+  cx.setTransform(sc*dpr,0,0,sc*dpr,ox*dpr,oy*dpr);
+  if(!bg)bg=terrain();cx.drawImage(bg,0,0);
+  const b=G.b,t=performance.now()/1000;
+  // مناطق الأهداف
+  const ring=(c,col)=>{cx.save();cx.setLineDash([10,8]);cx.lineDashOffset=-t*20;cx.lineWidth=4;cx.strokeStyle=col;cx.beginPath();cx.arc(c.x,FY(c.y),c.r,0,7);cx.stroke();cx.restore()};
+  if(b.wells&&G.phase==='deploy')ring(b.wells,'#1d74b8');
+  if(b.hill&&(G.phase==='deploy'||(G.archOn&&!G.archOn())))ring(b.hill,'#c9962b');
+  if(b.shib&&G.regroup)ring(b.shib,'#f1c96a');
+  if(b.trench){const T=b.trench;for(let i=0;i<T.n;i++){const d=G.dig[i],x=segX(i);cx.fillStyle=d>.05?`rgb(${150-d*90},${115-d*70},${70-d*45})`:'rgba(120,90,50,.25)';cx.fillRect(x-T.sw/2+2,FY(T.y)-4-d*14,T.sw-4,8+d*28);
+    if(G.phase!=='dig'&&!G.wind&&weakSeg(i)){cx.font='26px sans-serif';cx.textAlign='center';cx.fillText(T.narrow.includes(i)?'⚠️':'🔴',x,FY(T.y)-26)}}
+    if(G.phase==='dig'){cx.strokeStyle='rgba(241,201,106,.8)';cx.setLineDash([12,8]);cx.lineWidth=4;cx.strokeRect(T.x0,FY(T.y)-40,T.sw*T.n,80);cx.setLineDash([])}}
+  if(G.phase==='deploy'){cx.fillStyle='rgba(31,122,77,.08)';cx.fillRect(0,H-b.deployMaxY,W,b.deployMaxY);cx.strokeStyle='rgba(31,122,77,.5)';cx.setLineDash([14,10]);cx.lineWidth=3;cx.beginPath();cx.moveTo(0,H-b.deployMaxY);cx.lineTo(W,H-b.deployMaxY);cx.stroke();cx.setLineDash([])}
+  if(b.id==='badr'&&G.rain&&G.t<14){cx.strokeStyle='rgba(80,120,170,.35)';cx.lineWidth=2;for(let i=0;i<80;i++){const x=(i*97+t*240)%W,y=(i*53+t*600)%H;cx.beginPath();cx.moveTo(x,y);cx.lineTo(x-6,y+16);cx.stroke()}}
+  // خطوط الأوامر
+  for(const u of G.units){if(u.side!=='m'||u.st==='gone')continue;if(Math.hypot(u.tx-u.x,u.ty-u.y)>8){cx.strokeStyle=isSel(u)?'#fff':'rgba(255,255,255,.45)';cx.setLineDash([8,8]);cx.lineWidth=3;cx.beginPath();cx.moveTo(u.x,FY(u.y));cx.lineTo(u.tx,FY(u.ty));cx.stroke();cx.setLineDash([]);cx.beginPath();cx.arc(u.tx,FY(u.ty),7,0,7);cx.fillStyle='#fff';cx.fill()}}
+  // السهام
+  for(const u of G.units){if(u.kind==='arc'&&u.aim&&u.st==='ok'&&G.phase==='battle'&&!G.paused){const e=u.aim;for(let k=0;k<3;k++){const p=((t*1.6+k/3+u.id*.13)%1);const x=u.x+(e.x-u.x)*p,y=FY(u.y+(e.y-u.y)*p)-Math.sin(p*Math.PI)*40;const a=Math.atan2(u.y-e.y,e.x-u.x);cx.strokeStyle='#3b2a14';cx.lineWidth=2;cx.beginPath();cx.moveTo(x,y);cx.lineTo(x-Math.cos(a)*12,y-Math.sin(a)*12);cx.stroke()}}}
+  for(const u of G.units)if(u.st!=='gone')unit(u,t);
+}
+function unit(u,t){
+  const Y=FY(u.y);
+  const m=u.side==='m',pp=u.side==='p',col=m?'#1f7a4d':pp?'#9c7a54':'#9b2c22',dark=m?'#0f3d27':pp?'#4a3418':'#5a1510';
+  const alpha=u.st==='rout'?.45:u.st==='tired'?.7:1;cx.globalAlpha=alpha;
+  // ظل
+  cx.beginPath();cx.ellipse(u.x,Y+6,u.r+8,u.r*.55+6,0,0,7);cx.fillStyle='rgba(60,40,15,.18)';cx.fill();
+  if(isSel(u)){cx.beginPath();cx.ellipse(u.x,Y+4,u.r+14,u.r*.6+12,0,0,7);cx.strokeStyle='#fff';cx.lineWidth=4;cx.stroke()}
+  if(u.hit>0){cx.beginPath();cx.ellipse(u.x,Y+4,u.r+10,u.r*.6+8,0,0,7);cx.fillStyle='rgba(255,220,120,.35)';cx.fill()}
+  // الجنود: نقاط بلا وجوه
+  const dots=Math.max(1,Math.round(16*u.n/u.max)),cols=4;
+  for(let i=0;i<dots;i++){const row=Math.floor(i/cols),c=i%cols;const x=u.x+(c-1.5)*15+(row%2)*4,y=Y+(row-1.5)*12*-u.face;
+    const bob=(u.eng||Math.hypot(u.tx-u.x,u.ty-u.y)>3)?Math.sin(t*9+i)*1.5:0;
+    cx.beginPath();cx.ellipse(x,y+4+bob,6,7.5,0,0,7);cx.fillStyle=col;cx.fill();
+    cx.beginPath();cx.arc(x,y-5+bob,4.6,0,7);cx.fillStyle=m?'#f4f1e6':'#2c2018';cx.fill();
+    if(u.kind==='cav'){cx.fillStyle='#7a4f2a';cx.fillRect(x-8,y+7+bob,16,5)}}
+  // الراية
+  const fx=u.x+u.r-4,fy=Y-u.r-6;cx.strokeStyle='#4a3418';cx.lineWidth=3;cx.beginPath();cx.moveTo(fx,fy+30);cx.lineTo(fx,fy-12);cx.stroke();
+  const wv=Math.sin(t*4+u.id)*3;cx.beginPath();cx.moveTo(fx,fy-12);cx.quadraticCurveTo(fx-12,fy-8+wv,fx-24,fy-10);cx.lineTo(fx-24,fy+2);cx.quadraticCurveTo(fx-12,fy+4+wv,fx,fy);cx.closePath();cx.fillStyle=m?'#fff':'#2a1a12';cx.fill();cx.strokeStyle=dark;cx.lineWidth=1.5;cx.stroke();
+  // الاسم والعدد
+  cx.font='800 25px Cairo, sans-serif';cx.textAlign='center';const lab=`${KIND[u.kind].ico} ${u.name}`;
+  cx.lineWidth=4;cx.strokeStyle='rgba(255,248,230,.9)';cx.strokeText(lab,u.x,Y+u.r+30);cx.fillStyle=dark;cx.fillText(lab,u.x,Y+u.r+30);
+  // شريط القوة
+  const bw=70,p=u.n/u.max;cx.fillStyle='rgba(0,0,0,.35)';cx.fillRect(u.x-bw/2,Y+u.r+38,bw,9);cx.fillStyle=p>.5?(m?'#3fb27a':'#d4574b'):'#e2a33a';cx.fillRect(u.x-bw/2,Y+u.r+38,bw*p,9);
+  if(u.st==='tired'){cx.font='20px sans-serif';cx.fillText('💤',u.x,Y-u.r-14)}
+  cx.globalAlpha=1;
+}
+
+/* ===================== الميدان المجسّم (three.js) ===================== */
+const R3=(()=>{
+  const T3=window.THREE;
+  const ok=!!T3&&(()=>{try{const c=document.createElement('canvas');return !!(c.getContext('webgl')||c.getContext('experimental-webgl'))}catch(e){return false}})();
+  if(!ok)return{ok:false};
+  const SC=.1,MPF=10;
+  const wx=x=>(x-450)*SC,wz=y=>(600-y)*SC,sx=X=>X/SC+450,sy=Z=>600-Z/SC;
+  /* ضوضاء للأرض */
+  const hash=(i,j)=>{let h=(Math.imul(i,374761393)+Math.imul(j,668265263))|0;h=Math.imul(h^(h>>>13),1274126177);return((h^(h>>>16))>>>0)/4294967296};
+  const vn=(x,y)=>{const i=Math.floor(x),j=Math.floor(y),fx=x-i,fy=y-j,u=fx*fx*(3-2*fx),v=fy*fy*(3-2*fy);const a=hash(i,j),b=hash(i+1,j),c=hash(i,j+1),d=hash(i+1,j+1);return a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v};
+  const fbm=(x,y)=>vn(x,y)*.5+vn(x*2.1,y*2.1)*.25+vn(x*4.3,y*4.3)*.125;
+  const DUNES=[[90,250,170,120,3.2],[820,230,160,110,3],[90,1000,180,130,3.6],[820,1010,170,120,3.6],[160,620,100,60,1.2],[760,640,110,60,1.3]];
+  let bid='badr';
+  function hS(x,y){ // ارتفاع الأرض بإحداثيات المحاكاة
+    let h=fbm(x/110,y/110)*1.4-.6;
+    const ex=Math.max(0,-x,x-900)/120,ey=Math.max(0,-y,y-1200)/120;
+    const e2=ex*ex+ey*ey,e3=Math.min(e2,7);h+=e3*8*(.7+.6*fbm(x/260,y/260))+Math.max(0,e2-7)*2;
+    if(e2>0){const rd=1-Math.abs(vn(x/120,y/120)*2-1);h+=Math.min(1,e2)*(rd*rd*16+fbm(x/90,y/90)*6)} // قمم وشقوق صخرية
+
+    if(bid==='badr'){
+      for(const d of DUNES){const q=((x-d[0])/d[2])**2+((y-d[1])/d[3])**2;if(q<1)h+=d[4]*(1-q)**2*(.8+.4*fbm(x/30,y/30))}
+    }else if(bid==='khandaq'){
+      const q=((x-330)**2+(y-290)**2)/(115*115);if(q<1)h+=9*Math.pow(1-q,1.5)*(.8+.4*fbm(x/25,y/25)); // جبل سلع
+      const hr=Math.max(0,(190-x)/150,(x-710)/150);if(hr>0&&y>250&&y<1000)h+=Math.min(1,hr)*(1.4+vn(x/14,y/14)*2.4); // الحرّتان
+      const d=Math.abs(y-560);if(d<75&&x>170&&x<730){const k=d<48?0:(d-48)/27;h=h*k+.05*(1-k)} // أرض مستوية حول الخندق
+    }else if(bid==='fath'){
+      const pass=Math.exp(-(((y-600)/130)**2)),wr=Math.max(0,(210-x)/210),er=Math.max(0,(x-690)/210);
+      h+=(wr*wr*15+er*er*17)*(1-.8*pass)*(.75+.5*fbm(x/60,y/60))+(wr+er)*vn(x/20,y/20)*1.5*(1-.8*pass);
+      const q=((x-790)**2+(y-860)**2)/(120*120);if(q<1)h+=10*Math.pow(1-q,1.4)*(.8+.4*fbm(x/25,y/25)); // جبل أبي قبيس
+      const dm=Math.hypot(x-450,y-600);if(dm<150){const k=dm<118?0:(dm-118)/32;h=h*k+.05*(1-k)} // ساحة المسجد الحرام
+    }else{
+      if(y<280){const m=(280-y)/280,rd=1-Math.abs(vn(x/85,y/70)*2-1);h+=Math.pow(m,1.25)*34*(.7+.6*fbm(x/110,y/80))+m*(rd*rd*8+vn(x/30,y/30)*2)} // جبل أحد بقمم وشِعاب
+      const q=((x-215)**2+(y-560)**2)/(100*100);if(q<1)h+=5*(1-q)**2*(.85+.3*fbm(x/25,y/25));
+    }
+    return h;
+  }
+  const hW=(X,Z)=>hS(sx(X),sy(Z));
+
+  /* المشهد */
+  const R=new T3.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+  R.setPixelRatio(Math.min(2,devicePixelRatio||1));
+  R.shadowMap.enabled=true;R.shadowMap.type=T3.PCFSoftShadowMap;
+  R.domElement.style.cssText='position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block';
+  const cam=new T3.PerspectiveCamera(48,1,.5,1200);
+  let S=null,world=null,ter=null;
+  const lab=document.createElement('div');lab.className='l3';
+  const camBtn=document.createElement('button');camBtn.className='bt plain hb camb';camBtn.textContent='🎥';camBtn.setAttribute('aria-label','رجّع المنظر');
+  const tgt=new T3.Vector3(),sph={r:100,phi:.92,th:0};let fly=null;
+  const V=new T3.Vector3(),M4=new T3.Matrix4(),M5=new T3.Matrix4(),Mb=new T3.Matrix4();
+
+  /* الأجسام المشتركة */
+  const GEO={
+    robe:new T3.CylinderGeometry(.17,.29,.8,12).translate(0,.4,0),
+    sash:new T3.CylinderGeometry(.225,.235,.09,12).translate(0,.5,0),
+    cape:new T3.CylinderGeometry(.2,.31,.62,12,1,true,Math.PI*.55,Math.PI*.9).translate(0,.42,0),
+    head:new T3.SphereGeometry(.135,14,10).translate(0,.93,0),
+    wrap:new T3.CylinderGeometry(.14,.15,.1,10).translate(0,1.0,0),
+    shield:new T3.CylinderGeometry(.25,.25,.05,14).rotateX(Math.PI/2).translate(-.22,.55,.17),
+    spear:new T3.CylinderGeometry(.022,.022,1.9,5).translate(0,.95,0),
+    tip:new T3.ConeGeometry(.05,.18,6).translate(0,1.99,0),
+    bow:new T3.TorusGeometry(.34,.02,4,14,Math.PI).rotateZ(-Math.PI/2).translate(.2,.62,.14),
+    hBody:new T3.CylinderGeometry(.23,.21,1.05,9).rotateX(Math.PI/2).translate(0,.86,0),
+    hNeck:new T3.CylinderGeometry(.1,.15,.6,7).rotateX(.65).translate(0,1.12,.5),
+    hHead:new T3.BoxGeometry(.15,.18,.42).rotateX(.55).translate(0,1.33,.8),
+    hLeg:new T3.CylinderGeometry(.055,.04,.8,5).translate(0,-.4,0),
+    hTail:new T3.CylinderGeometry(.035,.012,.55,5).rotateX(-.5).translate(0,.8,-.62)
+  };
+  const MAT=k=>new T3.MeshLambertMaterial({color:0xffffff});
+  const C=(h)=>new T3.Color(h);
+  const PAL={
+    m:{robe:[0xf3ecda,0xe9dfc4,0xdcd0b0,0xf6f1e4],head:[0xffffff,0xf0e8d2,0x2b2b2b,0xece4cc],shield:[0x8a5a2b,0x7a4e26,0x9a6a38]},
+    q:{robe:[0x7a1f1a,0x5e1712,0x8b3a22,0x3e2a22,0x6b2a1e],head:[0x6e6e70,0x2a1d17,0x8a8a8e,0x4a3a30],shield:[0x3e2a1c,0x5a3a22,0x4a4a4c]},
+    p:{robe:[0xd9c9a3,0x9c7a54,0x6a7fa0,0xb85c3c,0x8a8f5a,0xe8dcc0],head:[0xf0e8d2,0x2b2b2b,0x8a6a4a,0xd9d0bc],shield:[0x8a5a2b,0x8a5a2b,0x8a5a2b]},
+    horse:[0x6b4226,0x8a5a32,0x3d2a1d,0xcfc3b0,0x5a3a26],
+    sash:{m:[0x1f7a4d,0x17663f,0x2a8a58],q:[0x1c1410,0x2a1a14,0x3a1410],p:[0x8a6a4a,0x5a4a3a,0x9a3a2a]},
+    cape:{m:[0xb89a6a,0xa88a5c,0xc9b088,0x8f7450],q:[0x3a1410,0x4a1c14,0x2a201c,0x5a2a1a],p:[0xc9b088,0x7a6a5a,0xa88a5c,0x6a5040]}
+  };
+  let IM={},cap=0,capH=0;
+  function mkInst(name,geo,mat,n,shadow=true){const m=new T3.InstancedMesh(geo,mat,n);m.instanceMatrix.setUsage(T3.DynamicDrawUsage);m.castShadow=shadow;m.frustumCulled=false;if(!mat.__fixed){const w=C(0xffffff);for(let i=0;i<n;i++)m.setColorAt(i,w)}m.count=0;world.add(m);IM[name]=m;return m}
+
+  /* الشخص المنفرد (للمبارزة) */
+  function person(side,kind){
+    const g=new T3.Group(),p=PAL[side];
+    const add=(geo,col)=>{const m=new T3.Mesh(geo,new T3.MeshLambertMaterial({color:col}));m.castShadow=true;g.add(m);return m};
+    add(GEO.robe,p.robe[0]);add(GEO.head,p.head[0]);add(GEO.wrap,p.head[0]);add(GEO.shield,p.shield[0]);
+    const sp=new T3.Group();sp.position.set(.25,.72,.05);const s1=new T3.Mesh(GEO.spear,new T3.MeshLambertMaterial({color:0x6b4a2a}));s1.position.y=-.7;const s2=new T3.Mesh(GEO.tip,new T3.MeshLambertMaterial({color:0xd0d4da}));s2.position.y=-.7;sp.add(s1,s2);g.add(sp);g.userData.arm=sp;
+    g.scale.setScalar(1.9);return g;
+  }
+
+  /* بناء الميدان */
+  let tents=[],pits=[],shibM=null,units3=[],fallen=[],dust=null,dustP=[],arrows=[],rain=null,flags=[],rings=[],tgts=[],tlabs=[],gold=null,duelS=null,sun=null;
+  function clear(){tents=[];pits=[];if(world){S.remove(world);world.traverse(o=>{if(o.geometry&&!Object.values(GEO).includes(o.geometry))o.geometry.dispose()})}lab.innerHTML='';units3=[];fallen=[];dustP=[];arrows=[];flags=[];rings=[];tgts=[];tlabs=[];gold=null;duelS=null;IM={}}
+  function build(){
+    bid=G.b.id;
+    if(!S){S=new T3.Scene();
+      const st=$('stage');st.appendChild(R.domElement);st.appendChild(lab);st.appendChild(camBtn);bindInput();
+      camBtn.onclick=()=>home(true);
+    }
+    clear();$('cv').style.display='none';R.domElement.style.display='block';lab.style.display='';camBtn.style.display='';
+    world=new T3.Group();S.add(world);
+    // السماء والضباب
+    S.background=C(0xcfe0ea);S.fog=new T3.Fog(0xe3cfa6,150,420);
+    const sky=new T3.Mesh(new T3.SphereGeometry(600,24,12),new T3.ShaderMaterial({side:T3.BackSide,depthWrite:false,fog:false,uniforms:{},vertexShader:'varying vec3 p;void main(){p=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'varying vec3 p;void main(){float h=clamp(p.y/600.,0.,1.);vec3 a=vec3(.89,.81,.65),b=vec3(.36,.56,.8);gl_FragColor=vec4(mix(a,b,pow(h,.45)),1.);}'}));
+    world.add(sky);sky.userData.sky=1;
+    world.add(new T3.HemisphereLight(0xfff1d6,0x7a5a36,.55));
+    const fill=new T3.DirectionalLight(0xa9c4e8,.28);fill.position.set(-60,40,-50);world.add(fill); // ضوء أزرق خفيف من الجهة الأخرى: يُظهر التجسيم
+    // غيوم بعيدة
+    {const cc=document.createElement('canvas');cc.width=128;cc.height=64;const x=cc.getContext('2d');for(let i=0;i<9;i++){const gx=20+i*11,gy=34+Math.sin(i*1.7)*8,gr=x.createRadialGradient(gx,gy,2,gx,gy,24);gr.addColorStop(0,'rgba(255,255,255,.85)');gr.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=gr;x.fillRect(0,0,128,64)}
+     const ct=new T3.CanvasTexture(cc);for(let i=0;i<9;i++){const s=new T3.Sprite(new T3.SpriteMaterial({map:ct,transparent:true,opacity:.75,depthWrite:false,fog:false}));const a=i/9*Math.PI*2+.3;s.position.set(Math.cos(a)*260,95+Math.sin(i*2.3)*25,Math.sin(a)*260);s.scale.set(120,48,1);world.add(s)}}
+    sun=new T3.DirectionalLight(0xffe2b8,1.05);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);const sc=sun.shadow.camera;sc.left=sc.bottom=-55;sc.right=sc.top=55;sc.near=10;sc.far=260;sun.shadow.bias=-.0008;world.add(sun,sun.target);
+    // الأرض
+    const g=new T3.PlaneGeometry(320,330,210,216);g.rotateX(-Math.PI/2);
+    const pos=g.attributes.position,col=new Float32Array(pos.count*3);
+    for(let i=0;i<pos.count;i++){const X=pos.getX(i),Z=pos.getZ(i),x=sx(X),y=sy(Z),h=hS(x,y);pos.setY(i,h);
+      const n=fbm(x/40,y/40),n2=vn(x/9,y/9);let r=.8,gg=.69,b=.5;
+      r*=.9+.16*n+.05*n2;gg*=.9+.15*n+.05*n2;b*=.88+.15*n;
+      if(bid==='badr'){
+        if(y>660&&y<1250&&x>-40&&x<940){const k=Math.min(1,(y-660)/60)*.55*(.7+.6*vn(x/25,y/25));r=r*(1-k)+.58*k;gg=gg*(1-k)+.46*k;b=b*(1-k)+.33*k}
+        const dw=Math.hypot(x-450,y-520);if(dw<110){const k=(1-dw/110)*.35;r-=k*.18;gg-=k*.1;b-=k*.05}
+      }else if(bid==='khandaq'){
+        const hr=Math.max(0,(190-x)/150,(x-710)/150);if(hr>0&&y>230&&y<1020){const k=Math.min(1,hr*1.6)*.8,st=.8+.3*vn(x/12,y/12);r=r*(1-k)+.27*st*k;gg=gg*(1-k)+.24*st*k;b=b*(1-k)+.22*st*k} // صخور سوداء
+        if(y<230){const k=Math.min(1,(230-y)/120)*.25;r-=k*.15;gg-=k*.02;b-=k*.12} // بساتين المدينة
+        if(Math.hypot(x-330,y-290)<120&&h>1.5){const k=Math.min(1,(h-1.5)/5)*.7;r=r*(1-k)+.55*k;gg=gg*(1-k)+.42*k;b=b*(1-k)+.32*k}
+      }else if(bid==='fath'){
+        r*=.93;gg*=.93;b*=.95;
+        if(h>2){const k=Math.min(1,(h-2)/7)*.8,st=.75+.4*vn(x/40,h*.6);r=r*(1-k)+.42*st*k;gg=gg*(1-k)+.36*st*k;b=b*(1-k)+.31*st*k} // جبال مكة السمراء
+      }else{
+        if(h>2.5&&(y<330||Math.hypot(x-215,y-560)<110)){ // جبل أحد: صخر أحمر داكن بخطوط كما في الصورة
+          const k=Math.min(1,(h-2.5)/(y<330?6:9)),st=.78+.4*vn(x/70,h*.7),hill=Math.hypot(x-215,y-560)<110&&y>=330;
+          const R0=hill?.66:.5*st,G0=hill?.5:.3*st,B0=hill?.36:.22*st;r=r*(1-k)+R0*k;gg=gg*(1-k)+G0*k;b=b*(1-k)+B0*k}
+        const pts=[[80,1100],[70,700],[80,330],[300,250]];let dm=1e9;for(let k=0;k<3;k++){const a=pts[k],c=pts[k+1];const vx=c[0]-a[0],vy=c[1]-a[1];const t=Math.max(0,Math.min(1,((x-a[0])*vx+(y-a[1])*vy)/(vx*vx+vy*vy)));dm=Math.min(dm,Math.hypot(x-a[0]-vx*t,y-a[1]-vy*t))}
+        if(dm<22){const k=(1-dm/22)*.5;r+=k*.07;gg+=k*.07;b+=k*.08}
+      }
+      const ex=Math.max(0,-x,x-900,-y,y-1200);if(ex>0){ // الجبال المحيطة بالميدان: صخور بنّية حمراء مخطّطة (أحد أحمر، بدر بنّي مع رمال)
+        const k=Math.min(1,ex/160)*.85,st=.75+.45*vn(x/80,h*.5),sand=bid==='badr'&&fbm(x/160,y/160)>.52;
+        const R0=sand?.82:(bid==='uhud'?.5:.55)*st,G0=sand?.66:(bid==='uhud'?.31:.38)*st,B0=sand?.45:(bid==='uhud'?.23:.28)*st;
+        r=r*(1-k)+R0*k;gg=gg*(1-k)+G0*k;b=b*(1-k)+B0*k}
+      col[i*3]=r;col[i*3+1]=gg;col[i*3+2]=b}
+    g.setAttribute('color',new T3.BufferAttribute(col,3));g.computeVertexNormals();
+    // حبيبات الرمل والحصى: نسيج صغير يتكرّر فوق الألوان فتصير الأرض أوضح عند التقريب
+    const gc=document.createElement('canvas');gc.width=gc.height=256;const gx=gc.getContext('2d');gx.fillStyle='#f2f2f2';gx.fillRect(0,0,256,256);
+    for(let i=0;i<5200;i++){const v=200+(Math.random()*55|0);gx.fillStyle=`rgb(${v},${v-6},${v-14})`;gx.fillRect(Math.random()*256,Math.random()*256,1+Math.random()*1.6,1+Math.random()*1.6)}
+    for(let i=0;i<70;i++){const v=150+(Math.random()*60|0);gx.fillStyle=`rgb(${v},${v-12},${v-24})`;gx.beginPath();gx.ellipse(Math.random()*256,Math.random()*256,1.5+Math.random()*2.5,1+Math.random()*1.8,Math.random()*3,0,7);gx.fill()}
+    const gt=new T3.CanvasTexture(gc);gt.wrapS=gt.wrapT=T3.RepeatWrapping;gt.repeat.set(70,73);gt.anisotropy=Math.min(8,R.capabilities.getMaxAnisotropy());
+    ter=new T3.Mesh(g,new T3.MeshLambertMaterial({vertexColors:true,map:gt}));ter.receiveShadow=true;world.add(ter);
+    // صخور وشجيرات
+    const rk=new T3.InstancedMesh(new T3.DodecahedronGeometry(1,0),new T3.MeshLambertMaterial({color:0x9a8466}),140);rk.castShadow=true;rk.receiveShadow=true;
+    const sh=new T3.InstancedMesh(new T3.IcosahedronGeometry(1,0),new T3.MeshLambertMaterial({color:0x7d8a4a}),220);sh.castShadow=true;
+    // نخيل: جذع طويل وسعف متدلٍّ كالمظلّة
+    const tr=new T3.InstancedMesh(new T3.CylinderGeometry(.16,.26,5.2,7).translate(0,2.6,0),new T3.MeshLambertMaterial({color:0x7a5a3a}),40);tr.castShadow=true;
+    const fr=new T3.ConeGeometry(2.6,1.5,9,1,true);{const p=fr.attributes.position;for(let i=0;i<p.count;i++){const a=Math.atan2(p.getZ(i),p.getX(i)),d=Math.hypot(p.getX(i),p.getZ(i));p.setY(i,p.getY(i)-(Math.cos(a*9)*.5+.5)*d*.28)}fr.translate(0,4.85,0);fr.computeVertexNormals()}
+    const cr=new T3.InstancedMesh(fr,new T3.MeshLambertMaterial({color:0x4f7a32,side:T3.DoubleSide}),40);cr.castShadow=true;
+    let seed={badr:11,uhud:29,khandaq:41,fath:53}[bid];const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+    const freeP=(x,y)=>!(x>60&&x<840&&y>120&&y<1120&&rnd()<.75)&&Math.hypot(x-450,y-520)>120&&!(bid==='khandaq'&&Math.abs(y-560)<80)&&!(bid==='fath'&&(Math.abs(x-450)<60||Math.abs(y-600)<60));
+    let n=0;for(let i=0;i<400&&n<140;i++){const x=rnd()*1300-200,y=rnd()*1600-200;if(!freeP(x,y))continue;const s=.3+rnd()*rnd()*1.6;M4.compose(V.set(wx(x),hS(x,y)+s*.3,wz(y)),new T3.Quaternion().setFromEuler(new T3.Euler(rnd()*3,rnd()*3,rnd()*3)),new T3.Vector3(s*(1+rnd()),s*(.5+rnd()*.5),s*(1+rnd())));rk.setMatrixAt(n++,M4)}rk.count=n;
+    n=0;for(let i=0;i<500&&n<220;i++){const x=rnd()*1200-150,y=rnd()*1500-150;if(Math.hypot(x-450,y-520)<100||((bid==='khandaq'||bid==='fath')&&!freeP(x,y)))continue;if(x>150&&x<750&&y>200&&y<1050&&rnd()<.6)continue;const s=.25+rnd()*.35;M4.compose(V.set(wx(x),hS(x,y)+s*.4,wz(y)),new T3.Quaternion(),new T3.Vector3(s*1.4,s*.8,s*1.4));sh.setMatrixAt(n++,M4)}sh.count=n;
+    // بساتين نخيل صغيرة عند أطراف الميدان (في بدر قرب الآبار والعدوة الدنيا، وفي أحد جهة المدينة)
+    const grove={badr:[[130,140],[780,120],[720,40],[60,1150]],uhud:[[820,1150],[700,1230],[40,1180],[880,700]],khandaq:[[90,120],[800,150],[620,-20],[180,-40]],fath:[[-60,1250],[960,-40]]}[bid];
+    n=0;for(const gp of grove)for(let i=0;i<10&&n<40;i++){const x=gp[0]+(rnd()-.5)*110,y=gp[1]+(rnd()-.5)*90;if(bid==='badr'&&Math.hypot(x-450,y-520)<110)continue;const s=.85+rnd()*.4;
+      M4.compose(V.set(wx(x),hS(x,y)-.1,wz(y)),new T3.Quaternion().setFromEuler(new T3.Euler((rnd()-.5)*.14,rnd()*6.3,(rnd()-.5)*.14)),new T3.Vector3(s,s*(.85+rnd()*.35),s));tr.setMatrixAt(n,M4);cr.setMatrixAt(n,M4);n++}tr.count=cr.count=n;
+    world.add(rk,sh,tr,cr);
+    // شِعب أحد: عمود ذهبي شفاف يظهر وقت مهمة «اجمع الجيش»
+    shibM=null;if(G.b.shib){const c=G.b.shib,X=wx(c.x),Z=wz(c.y);shibM=new T3.Mesh(new T3.CylinderGeometry(c.r*SC,c.r*SC,26,48,1,true),new T3.MeshBasicMaterial({color:0xf1c96a,transparent:true,opacity:.4,side:T3.DoubleSide,depthWrite:false,fog:false}));
+      shibM.position.set(X,hS(c.x,c.y)+4,Z);shibM.visible=false;shibM.renderOrder=3;world.add(shibM)}
+    // آبار بدر
+    if(bid==='badr'){const w=G.b.wells;for(const p of [[w.x-40,w.y-10],[w.x+35,w.y+20],[w.x-5,w.y+45],[w.x+60,w.y-40]]){const X=wx(p[0]),Z=wz(p[1]),h=hS(p[0],p[1]);
+        const ring=new T3.Mesh(new T3.TorusGeometry(.95,.32,6,14).rotateX(Math.PI/2),new T3.MeshLambertMaterial({color:0x8c8070}));ring.position.set(X,h+.25,Z);ring.castShadow=true;
+        const wat=new T3.Mesh(new T3.CircleGeometry(.75,14).rotateX(-Math.PI/2),new T3.MeshLambertMaterial({color:0x3d8fc6,emissive:0x0a2a44}));wat.position.set(X,h+.3,Z);world.add(ring,wat)}}
+    // خيام معسكر قريش (وفي الخندق: معسكر الأحزاب الكبير)
+    const tentG=new T3.ConeGeometry(1.6,2.2,6).translate(0,1.1,0);
+    const TN=bid==='khandaq'?22:bid==='fath'?0:9;
+    for(let i=0;i<TN;i++){const x=bid==='khandaq'?110+(i%11)*68+(i>10?34:0):180+i*68+(i%2)*20,y=bid==='khandaq'?1110+(i>10?60:0)+(i%3)*14:1150+(i%3)*28;const t=new T3.Mesh(tentG,new T3.MeshLambertMaterial({color:[0xd8c7a0,0x9b5a3a,0xcdb48a][i%3]}));t.position.set(wx(x),hS(x,y)-.1,wz(y));t.castShadow=true;world.add(t);tents.push({m:t,v:.6+Math.random()*.8,s:Math.random()*6})}
+    // بيوت من طين وحجر: المدينة في الخندق، ومكة حول المسجد الحرام
+    if(bid==='khandaq'||bid==='fath'){
+      const HN=bid==='fath'?190:110,hm=new T3.InstancedMesh(new T3.BoxGeometry(1,1,1).translate(0,.5,0),new T3.MeshLambertMaterial({color:0xffffff}),HN);hm.castShadow=true;hm.receiveShadow=true;
+      const HC=[0xd6c39a,0xc9b48a,0xbfa67a,0xe0d2b0,0xb59a70].map(c=>C(c));let k=0;
+      for(let i=0;i<3000&&k<HN;i++){let x,y;
+        if(bid==='khandaq'){x=210+rnd()*520;y=10+rnd()*190;if(Math.hypot(x-330,y-290)<130)continue}
+        else{x=150+rnd()*600;y=80+rnd()*1040;if(Math.hypot(x-450,y-600)<160||Math.abs(x-450)<55||Math.abs(y-600)<55||hS(x,y)>3||Math.hypot(x-650,y-430)<70)continue}
+        const w=2+rnd()*1.8,d=2+rnd()*1.8,hh=1.5+rnd()*1.5;M4.compose(V.set(wx(x),hS(x,y)-.2,wz(y)),new T3.Quaternion().setFromEuler(new T3.Euler(0,(rnd()-.5)*.5,0)),new T3.Vector3(w,hh,d));hm.setMatrixAt(k,M4);hm.setColorAt(k,HC[k%5]);k++}
+      hm.count=k;world.add(hm)}
+    if(bid==='fath'){ // المسجد الحرام والكعبة المشرّفة ودار أبي سفيان
+      const c=G.b.masjid,X=wx(c.x),Z=wz(c.y),h=hS(c.x,c.y);
+      const pl=new T3.Mesh(new T3.CircleGeometry(c.r*SC,48).rotateX(-Math.PI/2),new T3.MeshLambertMaterial({color:0xf3efe4}));pl.position.set(X,h+.06,Z);pl.receiveShadow=true;world.add(pl);
+      const kb=new T3.Mesh(new T3.BoxGeometry(4.2,5.2,4.6).translate(0,2.6,0),new T3.MeshLambertMaterial({color:0x161514}));kb.position.set(X,h,Z);kb.castShadow=true;world.add(kb);
+      const band=new T3.Mesh(new T3.BoxGeometry(4.3,.45,4.7),new T3.MeshLambertMaterial({color:0xc9a43a,emissive:0x3a2a08}));band.position.set(X,h+3.9,Z);world.add(band);
+      const door=new T3.Mesh(new T3.BoxGeometry(.9,1.7,.08),new T3.MeshLambertMaterial({color:0xc9a43a,emissive:0x3a2a08}));door.position.set(X+.8,h+1.7,Z+2.33);world.add(door);
+      const a=G.b.darAS,ah=new T3.Mesh(new T3.BoxGeometry(7,3.6,6).translate(0,1.8,0),new T3.MeshLambertMaterial({color:0xe6d6b0}));ah.position.set(wx(a.x),hS(a.x,a.y)-.1,wz(a.y));ah.castShadow=true;ah.receiveShadow=true;world.add(ah);
+      for(const s of [c,a]){const rg=new T3.Mesh(new T3.RingGeometry(s.r*SC-.35,s.r*SC,48).rotateX(-Math.PI/2),new T3.MeshBasicMaterial({color:0x2f9a62,transparent:true,opacity:.55,depthWrite:false}));rg.position.set(wx(s.x),hS(s.x,s.y)+.12,wz(s.y));rg.renderOrder=2;world.add(rg)}
+    }
+    if(bid==='khandaq'){ // الخندق: لكل جزء حفرة تكبر مع الحفر، وتراب على جهة المسلمين، وحلقة حمراء للثغرة
+      const T=G.b.trench,Zt=wz(T.y),pitM=new T3.BoxGeometry(1,1,1);
+      for(let i=0;i<T.n;i++){const x=T.x0+T.sw*(i+.5),X=wx(x),h=hS(x,T.y);
+        const pit=new T3.Mesh(pitM,new T3.MeshLambertMaterial({color:0x8a6a44}));pit.position.set(X,h+.04,Zt);pit.receiveShadow=true;
+        const mound=new T3.Mesh(pitM,new T3.MeshLambertMaterial({color:0xa58658}));mound.position.set(X,h,Zt+2.6);mound.castShadow=true;mound.receiveShadow=true;
+        const nar=T.narrow.includes(i),ring=new T3.Mesh(new T3.RingGeometry(2.6,3.3,28).rotateX(-Math.PI/2),new T3.MeshBasicMaterial({color:nar?0xf0a020:0xe03a2a,transparent:true,opacity:.85,depthWrite:false}));ring.position.set(X,h+.2,Zt+.3);ring.renderOrder=2;ring.visible=false;
+        world.add(pit,mound,ring);pits.push({pit,mound,ring,h,nar})}
+      const gd=new T3.Mesh(new T3.PlaneGeometry(T.sw*T.n*SC,7.5).rotateX(-Math.PI/2),new T3.MeshBasicMaterial({color:0xf1c96a,transparent:true,opacity:.22,depthWrite:false}));gd.position.set(wx(T.x0+T.sw*T.n/2),.25,Zt);gd.renderOrder=1;world.add(gd);pits.guide=gd;
+    }
+    // الأسماء على الأرض
+    const TL={badr:[['العدوة الدنيا',450,90],['العدوة القصوى',450,1210],['آبار بدر',450,425],['نحو المدينة المنوّرة',780,30],['نحو مكّة',800,1240],['طريق القافلة نحو الساحل',110,560]],
+      uhud:[['جبل أُحُد',450,40],['جبل الرماة',215,470],['ممرّ خلف الجبل',70,840],['معسكر قريش',470,1230],['نحو المدينة المنوّرة',780,1180]],
+      khandaq:[['المدينة المنوّرة',470,40],['جبل سَلْع',330,300,9],['الخندق',235,625],['حرّة الوبرة',60,640],['حرّة واقم',840,640],['معسكر الأحزاب',460,1230],['⚠️ مكان ضيّق',375,628],['⚠️ مكان ضيّق',575,628]],
+      fath:[['الكعبة المشرّفة',450,600,6.6],['المسجد الحرام',450,470],['دار أبي سفيان',650,430,4.6],['جبل أبي قُبيس',790,860,10],['أعلى مكة',450,-20],['أسفل مكة',450,1230]]}[bid];
+    for(const t of TL){const d=document.createElement('div');d.className='t3l';d.textContent=t[0];lab.appendChild(d);tlabs.push({d,v:new T3.Vector3(wx(t[1]),hS(t[1],t[2])+(t[3]||1.2),wz(t[2]))})}
+    // الجنود (مُكرّرة)
+    cap=0;capH=0;for(const u of G.units){const f=Math.ceil(u.max/MPF);cap+=f;if(u.kind==='cav')capH+=f}cap+=140;capH+=60;
+    const fix=(c)=>{const m=new T3.MeshLambertMaterial({color:c});m.__fixed=1;return m};
+    mkInst('robe',GEO.robe,MAT(),cap);mkInst('sash',GEO.sash,MAT(),cap,false);{const cm=MAT();cm.side=T3.DoubleSide;mkInst('cape',GEO.cape,cm,cap)}mkInst('head',GEO.head,MAT(),cap);mkInst('wrap',GEO.wrap,MAT(),cap,false);mkInst('shield',GEO.shield,MAT(),cap);
+    mkInst('spear',GEO.spear,fix(0x6b4a2a),cap);mkInst('tip',GEO.tip,fix(0xd0d4da),cap,false);mkInst('bow',GEO.bow,fix(0x5a3a1e),cap,false);
+    mkInst('hBody',GEO.hBody,MAT(),capH);mkInst('hNeck',GEO.hNeck,MAT(),capH);mkInst('hHead',GEO.hHead,MAT(),capH);mkInst('hLeg',GEO.hLeg,MAT(),capH*4);mkInst('hTail',GEO.hTail,MAT(),capH,false);
+    // الغبار
+    const dc=document.createElement('canvas');dc.width=dc.height=64;const dg=dc.getContext('2d');const rg=dg.createRadialGradient(32,32,2,32,32,30);rg.addColorStop(0,'rgba(255,255,255,.9)');rg.addColorStop(1,'rgba(255,255,255,0)');dg.fillStyle=rg;dg.fillRect(0,0,64,64);
+    const dgeo=new T3.BufferGeometry();dgeo.setAttribute('position',new T3.BufferAttribute(new Float32Array(400*3).fill(-999),3));
+    dust=new T3.Points(dgeo,new T3.PointsMaterial({map:new T3.CanvasTexture(dc),size:3.2,color:0xd9c49c,transparent:true,opacity:.5,depthWrite:false}));dust.frustumCulled=false;world.add(dust);
+    for(let i=0;i<400;i++)dustP.push({l:0});
+    // السهام
+    const ag=new T3.CylinderGeometry(.03,.03,.9,4).rotateX(Math.PI/2),am=new T3.MeshLambertMaterial({color:0x2e2010});
+    for(let i=0;i<60;i++){const a=new T3.Mesh(ag,am);a.visible=false;world.add(a);arrows.push({m:a,l:0})}
+    // المطر
+    const rgeo=new T3.BufferGeometry(),rp=new Float32Array(1400*6);for(let i=0;i<1400;i++){const x=Math.random()*160-80,y=Math.random()*70,z=Math.random()*160-80;rp.set([x,y,z,x-.15,y-1.4,z],i*6)}
+    rgeo.setAttribute('position',new T3.BufferAttribute(rp,3));rain=new T3.LineSegments(rgeo,new T3.LineBasicMaterial({color:0x9db4cc,transparent:true,opacity:.55}));rain.visible=false;rain.frustumCulled=false;world.add(rain);
+    for(const u of G.units)addUnit(u);
+    home(false);resize();
+    // لقطة افتتاحية: نرى المكان (جبل أحد / وادي بدر) من جهة العدو، ثم تدور الكاميرا إلى خلف جيشنا
+    const H0={...sph};sph.th=Math.PI*.9;sph.r=H0.r*1.25;sph.phi=1.02;tgt.z+=bid==='uhud'?14:6;
+    fly={x:0,z:HZ(),r:H0.r,phi:H0.phi,th:0,s:-.35,dur:3.2,from:{x:tgt.x,z:tgt.z,r:sph.r,phi:sph.phi,th:sph.th}};
+  }
+  function addUnit(u){
+    const p=PAL[u.side];
+    const o={u,f:[],A:u.side==='m'?Math.PI:0,lab:null};
+    const F=Math.ceil(u.n/MPF);
+    for(let i=0;i<F;i++)o.f.push(newFig(u,o,true));
+    // الراية
+    const fg=new T3.Group();fg.scale.setScalar(1.9);const pole=new T3.Mesh(new T3.CylinderGeometry(.05,.05,3.6,5).translate(0,1.8,0),new T3.MeshLambertMaterial({color:0x4a3418}));pole.castShadow=true;
+    const flag=new T3.Mesh(new T3.PlaneGeometry(1.5,.95,6,1).translate(.75,0,0),new T3.MeshLambertMaterial({color:u.side==='m'?0xffffff:0x3a1a12,side:T3.DoubleSide}));flag.position.y=3.1;flag.castShadow=true;fg.add(pole,flag);fg.userData.flag=flag;world.add(fg);o.fg=fg;
+    // الاسم
+    const d=document.createElement('div');d.className='u3l '+u.side;lab.appendChild(d);o.lab=d;
+    // حلقة الاختيار والهدف
+    const ring=new T3.Mesh(new T3.RingGeometry(3.6,4.2,32).rotateX(-Math.PI/2),new T3.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.85,depthWrite:false}));ring.visible=false;ring.renderOrder=2;world.add(ring);o.ring=ring;
+    if(u.side==='m'){const tr=new T3.Mesh(new T3.RingGeometry(.6,1,20).rotateX(-Math.PI/2),new T3.MeshBasicMaterial({color:0xffffff,depthWrite:false}));tr.visible=false;world.add(tr);
+      const lg=new T3.BufferGeometry().setFromPoints([new T3.Vector3(),new T3.Vector3(1,0,0)]);const ln=new T3.Line(lg,new T3.LineDashedMaterial({color:0xffffff,dashSize:1,gapSize:.8}));ln.visible=false;ln.frustumCulled=false;world.add(ln);o.tr=tr;o.ln=ln}
+    units3.push(o);u._3=o;
+  }
+  function newFig(u,o,init){
+    const P=PAL[u.side],r=Math.random;
+    const f={x:wx(u.x)+(r()-.5)*4,z:wz(u.y)+(r()-.5)*4,yaw:o?o.A:0,ph:r()*6.3,c:[P.robe[(r()*P.robe.length)|0],P.head[(r()*P.head.length)|0],P.shield[(r()*P.shield.length)|0],PAL.horse[(r()*PAL.horse.length)|0],PAL.sash[u.side][(r()*3)|0],PAL.cape[u.side][(r()*4)|0]],sc:2.05+r()*.2,rt:0};
+    if(!init&&o){ // يدخل من الخلف
+      const bx=Math.sin(o.A),bz=Math.cos(o.A);f.x-=bx*5;f.z-=bz*5}
+    return f;
+  }
+  /* تحديث كل مجموعة */
+  function syncUnit(o,dt,t){
+    const u=o.u;
+    const want=u.st==='gone'?0:Math.ceil(Math.max(0,u.n)/MPF);
+    while(o.f.length>want){ // سقوط مقاتل
+      let k=0;
+      if(u.st!=='gone'&&u.eng){let bd=1e9;const ex=wx(u.eng.x),ez=wz(u.eng.y);o.f.forEach((f,i)=>{const d=(f.x-ex)**2+(f.z-ez)**2;if(d<bd){bd=d;k=i}})}
+      else k=(Math.random()*o.f.length)|0;
+      const f=o.f.splice(k,1)[0];
+      if(u.st!=='gone'&&u.st!=='rout'||u.n<=0)fallen.push({...f,kind:u.kind,side:u.side,t:0,dir:Math.random()<.5?1:-1});
+    }
+    while(o.f.length<want)o.f.push(newFig(u,o,false));
+    // الاتجاه
+    const cx=wx(u.x),cz=wz(u.y);let dx=0,dz=0;
+    if(u.eng){dx=wx(u.eng.x)-cx;dz=wz(u.eng.y)-cz}
+    else if(Math.hypot(u.tx-u.x,u.ty-u.y)>6){dx=wx(u.tx)-cx;dz=wz(u.ty)-cz}
+    else if(u.kind==='arc'&&u.aim){dx=wx(u.aim.x)-cx;dz=wz(u.aim.y)-cz}
+    if(dx||dz){let A=Math.atan2(dx,dz),d=A-o.A;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;o.A+=d*Math.min(1,dt*2.2)}
+    const moving=Math.hypot(u.tx-u.x,u.ty-u.y)>4&&!u.eng;
+    const F=o.f.length,cols=u.kind==='cav'?Math.min(6,Math.max(3,Math.ceil(Math.sqrt(F*1.5)))):Math.min(9,Math.max(3,Math.round(Math.sqrt(F*2.4)))),sp=u.kind==="cav"?2.45:1.55;
+    const rows=Math.ceil(F/cols),fx=Math.sin(o.A),fz=Math.cos(o.A),rx=Math.cos(o.A),rz=-Math.sin(o.A);
+    const k=Math.min(1,dt*(moving?2.6:3.4));
+    o.f.forEach((f,i)=>{
+      const row=Math.floor(i/cols),c=i%cols,inRow=Math.min(cols,F-row*cols);
+      const lx=(c-(inRow-1)/2)*sp+(row%2?sp*.25:0),lz=-(row-(rows-1)/2)*sp;
+      const jx=(hash(i,7)-.5)*.25,jz=(hash(i,9)-.5)*.25;
+      let gx=cx+rx*(lx+jx)+fx*(lz+jz),gz=cz+rz*(lx+jx)+fz*(lz+jz);
+      if(u.st==='rout'){gx+=(hash(i,3)-.5)*3;gz+=(hash(i,4)-.5)*3}
+      f.x+=(gx-f.x)*k;f.z+=(gz-f.z)*k;
+      let ty=u.st==='rout'?o.A:o.A;let d=ty-f.yaw;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;f.yaw+=d*Math.min(1,dt*4);
+      f.mv=moving||u.st==='rout';f.fight=(u.eng||(u.dig&&!moving))&&row<2;f.cav=u.kind==='cav';f.arc=u.kind==='arc';f.side=u.side;f.shoot=u.kind==='arc'&&u.aim&&!moving;
+    });
+    // الراية والاسم والحلقة
+    const back=(rows/2+.6)*sp;const bx=cx-fx*back,bz=cz-fz*back;
+    o.fg.visible=u.st!=='gone'&&F>0&&u.side!=='p';o.fg.position.set(bx,hW(bx,bz)+(u.kind==='cav'?.8:0),bz);
+    const fl=o.fg.userData.flag;fl.rotation.y=Math.sin(t*3+u.id)*.35-o.A+Math.PI/2;
+    o.ring.visible=isSel(u)&&u.st==='ok';if(o.ring.visible){o.ring.position.set(cx,hW(cx,cz)+.25,cz);const s=Math.max(1.3,Math.sqrt(F)/2.3);o.ring.scale.setScalar(s)}
+    if(o.tr){const show=u.st!=='gone'&&Math.hypot(u.tx-u.x,u.ty-u.y)>10&&u.st==='ok';o.tr.visible=o.ln.visible=show;
+      if(show){const X=wx(u.tx),Z=wz(u.ty),hy=hW(X,Z)+.3;o.tr.position.set(X,hy,Z);const p=o.ln.geometry.attributes.position;p.setXYZ(0,cx,hW(cx,cz)+.4,cz);p.setXYZ(1,X,hy,Z);p.needsUpdate=true;o.ln.computeLineDistances();o.ln.material.opacity=isSel(u)?1:.5;o.ln.material.transparent=true}}
+  }
+  /* رسم الجنود */
+  const Q=new T3.Quaternion(),E=new T3.Euler(),Sv=new T3.Vector3(),cols={};
+  function put(name,i,m,col){const im=IM[name];im.setMatrixAt(i,m);if(col!=null&&im.instanceColor){if(!cols[col])cols[col]=C(col);im.setColorAt(i,cols[col])}}
+  function drawFigs(t){
+    let n=0,h=0,lg=0;
+    const one=(f,tilt,sink)=>{
+      const hy=hW(f.x,f.z)-(sink||0);
+      const bob=f.mv?Math.abs(Math.sin(t*9+f.ph))*.07:0;
+      let lunge=0,arm=.12;
+      if(f.fight){const s=Math.sin(t*6.5+f.ph);lunge=Math.max(0,s)*.22;arm=1.05+s*.45}
+      else if(f.mv)arm=.35;
+      Mb.makeRotationY(f.yaw);if(tilt){M5.makeRotationX(tilt);Mb.multiply(M5)}
+      Mb.setPosition(f.x+Math.sin(f.yaw)*lunge,hy+bob,f.z+Math.cos(f.yaw)*lunge);
+      if(f.sc!==1){M5.makeScale(f.sc,f.sc,f.sc);Mb.multiply(M5)}
+      let base=Mb;
+      if(f.cav){ // الحصان
+        put('hBody',h,Mb,f.c[3]);M4.copy(Mb);put('hNeck',h,M4,f.c[3]);put('hHead',h,M4,f.c[3]);put('hTail',h,M4,f.c[3]);
+        for(let L=0;L<4;L++){const lx=L%2?.14:-.14,lz=L<2?.36:-.36;const sw=f.mv?Math.sin(t*12+f.ph+L*1.7)*.6:0;M5.makeRotationX(sw);M5.setPosition(lx,.8,lz);M4.multiplyMatrices(Mb,M5);put('hLeg',lg++,M4,f.c[3])}
+        h++;M5.makeTranslation(0,.72,-.05);base=new T3.Matrix4().multiplyMatrices(Mb,M5);M5.makeScale(1,.8,1);base.multiply(M5);
+      }
+      put('robe',n,base,f.c[0]);put('sash',n,base,f.c[4]);put('cape',n,base,f.c[5]);put('head',n,base,f.c[1]);put('wrap',n,base,f.c[1]);
+      if(f.side==='p'){M4.makeScale(0,0,0);put('shield',n,M4,f.c[2]);put('spear',n,M4,null);put('tip',n,M4,null);put('bow',n,M4,null)} // أهل مكة بلا سلاح
+      else if(f.arc){M4.copy(base);if(f.shoot){M5.makeRotationX(-.25);M4.multiply(M5)}put('bow',n,M4,null);M4.makeScale(0,0,0);put('shield',n,M4,f.c[2]);put('spear',n,M4,null);put('tip',n,M4,null)}
+      else{put('shield',n,base,f.c[2]);M5.makeRotationX(arm);M5.setPosition(.25,.72,.05);M4.multiplyMatrices(base,M5);M5.makeTranslation(0,-.7,0);M4.multiply(M5);put('spear',n,M4,null);put('tip',n,M4,null);M4.makeScale(0,0,0);put('bow',n,M4,null)}
+      n++;
+    };
+    for(const o of units3)for(const f of o.f){if(n>=cap)break;one(f,0,0)}
+    for(let i=fallen.length-1;i>=0;i--){const f=fallen[i];if(n>=cap)break;f.yaw=f.side==='m'?0:Math.PI;f.fight=false;f.mv=true;f.shoot=false;const s0=f.sc;f.sc=s0*Math.max(0,Math.min(1,(4.2-f.t)/1.2));one(f,0,0);f.sc=s0} // (v10) لا سقوط: ينسحب ويختفي
+    for(const k in IM){const im=IM[k];im.count=k==='hLeg'?lg:k[0]==='h'?h:n;im.instanceMatrix.needsUpdate=true;if(im.instanceColor)im.instanceColor.needsUpdate=true}
+  }
+  /* المؤثرات */
+  let arT=0,dsT=0;
+  function effects(dt,t){
+    const battle=G.phase==='battle'&&!G.paused;
+    // غبار الاشتباك والحركة
+    if(battle){dsT-=dt;if(dsT<=0){dsT=.05;
+      for(const o of units3){const u=o.u;if(u.st==='gone'||!o.f.length)continue;
+        const fight=u.eng&&u.st==='ok',mv=Math.hypot(u.tx-u.x,u.ty-u.y)>6;
+        if(!(fight||(mv&&(u.kind==='cav'||Math.random()<.25))))continue;
+        const f=o.f[(Math.random()*o.f.length)|0];const p=dustP.find(p=>p.l<=0);if(!p)continue;
+        Object.assign(p,{x:f.x+(Math.random()-.5),y:hW(f.x,f.z)+.2,z:f.z+(Math.random()-.5),vx:(Math.random()-.5)*.8,vy:.6+Math.random()*.6,vz:(Math.random()-.5)*.8,l:1.4+Math.random()})}}}
+    const dp=dust.geometry.attributes.position;
+    dustP.forEach((p,i)=>{if(p.l>0){p.l-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt;p.vy*=.98;dp.setXYZ(i,p.x,p.y,p.z)}else dp.setXYZ(i,0,-999,0)});dp.needsUpdate=true;
+    // السهام
+    if(battle){arT-=dt;if(arT<=0){arT=.14;
+      for(const o of units3){const u=o.u;if(u.kind!=='arc'||!u.aim||u.st!=='ok'||u.eng||!o.f.length)continue;if(Math.random()<.45)continue;
+        const a=arrows.find(a=>a.l<=0);if(!a)break;const f=o.f[(Math.random()*o.f.length)|0];const e=u.aim._3;if(!e||!e.f.length)continue;const g=e.f[(Math.random()*e.f.length)|0];
+        Object.assign(a,{l:1,d:.9+Math.random()*.3,x0:f.x,y0:hW(f.x,f.z)+1.6,z0:f.z,x1:g.x,y1:hW(g.x,g.z)+.9,z1:g.z,hh:4+Math.random()*3})}}}
+    for(const a of arrows){if(a.l<=0){a.m.visible=false;continue}a.l-=dt/a.d;const p=1-a.l;
+      const at=s=>[a.x0+(a.x1-a.x0)*s,a.y0+(a.y1-a.y0)*s+Math.sin(s*Math.PI)*a.hh,a.z0+(a.z1-a.z0)*s];
+      const P=at(p),N=at(Math.min(1,p+.02));a.m.visible=a.l>0;a.m.position.set(...P);a.m.lookAt(N[0],N[1],N[2])}
+    // المطر
+    const rOn=bid==='badr'&&G.rain&&(G.phase==='duel'||G.t<14);rain.visible=rOn;
+    if(rOn){rain.position.set(tgt.x,0,tgt.z);const rp=rain.geometry.attributes.position;for(let i=0;i<rp.count;i+=2){let y=rp.getY(i)-dt*42;if(y<-2)y+=72;rp.setY(i,y);rp.setY(i+1,y-1.4)}rp.needsUpdate=true}
+    if(gold){gold.children.forEach((c,i)=>{c.material.emissiveIntensity=.35+.25*Math.sin(t*4+i)})}
+  }
+  /* الكاميرا */
+  function home(anim){
+    const r=$('stage').getBoundingClientRect(),asp=r.width/Math.max(1,r.height);
+    const to={x:0,z:HZ(),r:Math.min(98,70/Math.sqrt(Math.min(1,asp))),phi:.84,th:0};
+    if(anim)fly={...to,s:0,from:{x:tgt.x,z:tgt.z,r:sph.r,phi:sph.phi,th:sph.th}};else{tgt.set(to.x,0,to.z);Object.assign(sph,to)}
+  }
+  function HZ(){return {uhud:-2,khandaq:4,fath:0}[bid]??9}
+  function flyTo(x,z,r,phi){fly={x,z,r,phi:phi??sph.phi,th:sph.th,s:0,from:{x:tgt.x,z:tgt.z,r:sph.r,phi:sph.phi,th:sph.th}}}
+  function camUpd(dt){
+    if(fly){fly.s=Math.min(1,fly.s+dt/(fly.dur||1.3));const q=Math.max(0,fly.s),e=q<.5?2*q*q:1-Math.pow(-2*q+2,2)/2,F=fly.from;
+      tgt.x=F.x+(fly.x-F.x)*e;tgt.z=F.z+(fly.z-F.z)*e;sph.r=F.r+(fly.r-F.r)*e;sph.phi=F.phi+(fly.phi-F.phi)*e;sph.th=F.th+(fly.th-F.th)*e;if(fly.s>=1)fly=null}
+    tgt.x=Math.max(-40,Math.min(40,tgt.x));tgt.z=Math.max(-52,Math.min(52,tgt.z));
+    sph.r=Math.max(11,Math.min(100,sph.r));sph.phi=Math.max(.28,Math.min(1.3,sph.phi));
+    tgt.y=hW(tgt.x,tgt.z)*.5;
+    {const ox=sph.r*Math.sin(sph.phi)*Math.sin(sph.th),oz=sph.r*Math.sin(sph.phi)*Math.cos(sph.th); // (v9) الكاميرا نفسها تبقى فوق الميدان، فلا يُرى طرف الخريطة
+     const cx0=Math.max(-55,Math.min(55,tgt.x+ox)),cz0=Math.max(-72,Math.min(72,tgt.z+oz));tgt.x=Math.max(-40,Math.min(40,cx0-ox));tgt.z=Math.max(-52,Math.min(52,cz0-oz));tgt.y=hW(tgt.x,tgt.z)*.5;
+     cam.position.set(tgt.x+ox,tgt.y+sph.r*Math.cos(sph.phi),tgt.z+oz)}
+    const gh=hW(cam.position.x,cam.position.z)+2;if(cam.position.y<gh)cam.position.y=gh;
+    cam.lookAt(tgt);
+    sun.position.set(tgt.x+45,95,tgt.z+35);sun.target.position.copy(tgt);
+  }
+  /* الأسماء فوق الجيوش */
+  const pv=new T3.Vector3();
+  function proj(v){pv.copy(v).project(cam);const r=R.domElement;return{x:(pv.x+1)/2*r.clientWidth,y:(1-pv.y)/2*r.clientHeight,z:pv.z}}
+  function labels(){
+    const W2=R.domElement.clientWidth,H2=R.domElement.clientHeight;
+    for(const o of units3){const u=o.u,d=o.lab;if(u.st==='gone'||!o.f.length){d.style.display='none';continue}
+      const cx=wx(u.x),cz=wz(u.y);const p=proj(pv.set(cx,hW(cx,cz)+(u.kind==="cav"?8:6.6),cz));
+      if(p.z>1||p.x<-60||p.x>W2+60||p.y<-30||p.y>H2+30){d.style.display='none';continue}
+      d.style.display='';d.style.transform=`translate(${p.x|0}px,${p.y|0}px) translate(-50%,-100%)`;
+      const pc=Math.max(0,u.n/u.max*100)|0,full=isSel(u)||sph.r<55,html=u.side==='p'?`<b>${u.safe?'🕊️':u.guide?'🚶':'👪'}${full?' '+u.name:''}</b>`:`<b>${u.st==='tired'?'💤':KIND[u.kind].ico}${full?' '+u.name:''}</b><i><s style="width:${pc}%"></s></i>`;
+      if(d._h!==html){d.innerHTML=html;d._h=html}
+      d.classList.toggle('sel',isSel(u));
+    }
+    for(const l of tlabs){const p=proj(l.v);if(p.z>1){l.d.style.display='none';continue}l.d.style.display='';l.d.style.transform=`translate(${p.x|0}px,${p.y|0}px) translate(-50%,-50%)`}
+    if(duelS)for(const d of duelS.p){const p=proj(pv.set(d.g.position.x,d.g.position.y+3.8,d.g.position.z));d.l.style.display=p.z>1||d.dead?'none':'';d.l.style.transform=`translate(${p.x|0}px,${p.y|0}px) translate(-50%,-100%)`}
+  }
+  /* اللمس: نقرة = اختيار/أمر، سحب بإصبع = تحريك المنظر، إصبعان = تكبير وتدوير */
+  const ptr=new Map();let tap=null,g2=null,ray=new T3.Raycaster(),nd=new T3.Vector2();
+  function ground(cx,cy){const r=R.domElement.getBoundingClientRect();nd.set((cx-r.left)/r.width*2-1,-(cy-r.top)/r.height*2+1);ray.setFromCamera(nd,cam);const hit=ray.intersectObject(ter,false)[0];return hit?{x:sx(hit.point.x),y:sy(hit.point.z)}:null}
+  function unitAt(cx,cy,side){const r=R.domElement.getBoundingClientRect();let best=null,bd=48;
+    for(const o of units3){const u=o.u;if(u.st==='gone'||(side&&u.side!==side)||!o.f.length)continue;const p=proj(pv.set(wx(u.x),hW(wx(u.x),wz(u.y))+1,wz(u.y)));const d=Math.hypot(p.x-(cx-r.left),p.y-(cy-r.top));const rad=Math.max(48,Math.sqrt(o.f.length)*1.2*900/sph.r*.35);if(d<rad&&d<bd+rad-48){bd=d;best=u}}return best}
+  function bindInput(){
+    const el=R.domElement;
+    el.addEventListener("pointerdown",e=>{if(!G)return;try{el.setPointerCapture(e.pointerId)}catch(_){}ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      if(ptr.size===1&&G.phase==='dig'&&e.button!==2){tap={dig:1,lp:ground(e.clientX,e.clientY)};return}
+      if(ptr.size===1){fly=null;const u=G.over?null:unitAt(e.clientX,e.clientY,'m');tap={x:e.clientX,y:e.clientY,u,pan:false,btn:e.button};
+        if(u&&u.st==='ok'&&!u.locked){G.sel=u;updSel()}}
+      else{tap=null;const [a,b]=[...ptr.values()];g2={d:Math.hypot(a.x-b.x,a.y-b.y),a:Math.atan2(b.y-a.y,b.x-a.x),my:(a.y+b.y)/2}}});
+    el.addEventListener('pointermove',e=>{if(!ptr.has(e.pointerId))return;const prev=ptr.get(e.pointerId);const dx=e.clientX-prev.x,dy=e.clientY-prev.y;ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      if(ptr.size===2&&g2){const [a,b]=[...ptr.values()];const d=Math.hypot(a.x-b.x,a.y-b.y),an=Math.atan2(b.y-a.y,b.x-a.x),my=(a.y+b.y)/2;
+        sph.r*=g2.d/Math.max(1,d);let da=an-g2.a;if(da>Math.PI)da-=2*Math.PI;if(da<-Math.PI)da+=2*Math.PI;sph.th-=da;sph.phi+=(my-g2.my)*.004;g2={d,a:an,my};return}
+      if(!tap)return;
+      if(tap.dig){const p=ground(e.clientX,e.clientY);digAt(tap.lp,p);if(p)tap.lp=p;return}
+      if(tap.btn===2){sph.th-=dx*.006;sph.phi-=dy*.004;tap.pan=true;return}
+      if(!tap.pan&&Math.hypot(e.clientX-tap.x,e.clientY-tap.y)>10&&!(tap.u&&G.sel===tap.u))tap.pan=true;
+      if(tap.pan){const k=sph.r*.0019;const c=Math.cos(sph.th),s=Math.sin(sph.th);tgt.x-=(dx*c+dy*s*1.25)*k;tgt.z-=(-dx*s+dy*c*1.25)*k}});
+    const up=e=>{if(!ptr.has(e.pointerId))return;ptr.delete(e.pointerId);if(ptr.size<2)g2=null;
+      if(!tap||!G||G.over){tap=null;return}const T=tap;tap=null;if(T.dig||T.pan||T.btn===2)return;
+      const moved=Math.hypot(e.clientX-T.x,e.clientY-T.y)>18;const s=G.sel;if(!s)return;
+      if(T.u&&!moved)return;
+      let p=null;const en=G.phase==='battle'&&unitAt(e.clientX,e.clientY,'q');if(en)p={x:en.x,y:en.y};else p=ground(e.clientX,e.clientY);if(!p)return;
+      if(s==='all'){const L=selList(),c=L.reduce((a,u)=>({x:a.x+u.x/L.length,y:a.y+u.y/L.length}),{x:0,y:0});L.forEach(u=>order(u,{x:p.x+u.x-c.x,y:p.y+u.y-c.y},1));tip(en?'الجيش كله يهاجم ⚔️':'الجيش كله يتحرّك')}
+      else order(s,p);
+    };
+    el.addEventListener('pointerup',up);el.addEventListener('pointercancel',e=>{ptr.delete(e.pointerId);tap=null;g2=null});
+    el.addEventListener('wheel',e=>{e.preventDefault();sph.r*=Math.exp(e.deltaY*.0012)},{passive:false});
+    el.addEventListener('contextmenu',e=>e.preventDefault());
+  }
+  /* المبارزة في بدر */
+  function duel(done){
+    G.phase='duel';G.paused=false;$('bGo').hidden=false;$('bGo').textContent='⏭ تخطَّ المبارزة';
+    const mF=Math.min(...mUnits().map(u=>u.y))+0,ms=mUnits().filter(u=>u.st==='ok');const my=Math.max(...ms.map(u=>u.y))+40,qy=Math.min(...qUnits().map(u=>u.y))-40;
+    const midY=(my+qy)/2,midX=450;
+    const N=[['عليّ',-1],['حمزة',0],['عُبيدة',1]],QN=['الوليد','عتبة','شيبة'];
+    const p=[];
+    N.forEach((n,i)=>{const g=person('m');world.add(g);const l=document.createElement('div');l.className='u3l m duel';l.innerHTML=`<b>${n[0]}</b>`;lab.appendChild(l);p.push({g,l,side:'m',sx:midX+n[1]*40,sy:my,ex:midX+n[1]*40,ey:midY-14})});
+    QN.forEach((n,i)=>{const g=person('q');world.add(g);const l=document.createElement('div');l.className='u3l q duel';l.innerHTML=`<b>${n}</b>`;lab.appendChild(l);p.push({g,l,side:'q',sx:midX+(i-1)*40,sy:qy,ex:midX+(i-1)*40,ey:midY+14})});
+    duelS={p,t:0,done,midY};
+    for(const d of p){const X=wx(d.sx),Z=wz(d.sy);d.g.position.set(X,hW(X,Z),Z);d.g.rotation.y=d.side==='m'?Math.PI:0}
+    flyTo(0,wz(midY),34,.95);
+    tip('المبارزة: خرج من المسلمين عليّ وحمزة وعُبيدة ⚔️');
+  }
+  function duelTick(dt,t){
+    const D=duelS;D.t+=dt;const T=D.t;
+    for(const d of D.p){const k=Math.min(1,T/3.2);const x=d.sx+(d.ex-d.sx)*k,y=d.sy+(d.ey-d.sy)*k;let X=wx(x),Z=wz(y);
+      let arm=.15,bob=T<3.2?Math.abs(Math.sin(t*9))*.08:0;
+      if(T>3.2&&T<7){const s=Math.sin(t*7+(d.side==='m'?0:1.5));arm=1.1+s*.5;const f=d.side==='m'?-1:1;Z+=f*Math.max(0,s)*.3}
+      if(d.side==='q'&&T>7){d.dead=true;const r=T-7;d.g.rotation.y=Math.PI;Z-=r*2.6;d.g.position.set(X,hW(X,Z)+Math.abs(Math.sin(t*9))*.08,Z);d.g.scale.setScalar(1.9*Math.max(0,Math.min(1,1-(r-2)/1.2)))} // ينسحب ولا يسقط
+      else d.g.position.set(X,hW(X,Z)+bob,Z);
+      d.g.userData.arm.rotation.x=arm;
+      if(d.side==='m'&&T>8){d.g.position.y+=Math.abs(Math.sin(t*8))*.25}
+    }
+    if(T>3.2&&!D.c1){D.c1=1;tip('التقى الفرسان ⚔️');}
+    if(T>7&&!D.c2){D.c2=1;tip('غلب عليّ وحمزة وعُبيدة من خرج لهم من قريش 🌟')}
+    if(T>10.5)endDuel();
+  }
+  function endDuel(){if(!duelS)return;const D=duelS;for(const d of D.p){world.remove(d.g);d.l.remove()}duelS=null;$('bGo').textContent='⚔️ ابدأ المعركة';home(true);D.done()}
+  /* الغنائم في أحد */
+  function goldPile(){
+    gold=new T3.Group();const gm=()=>new T3.MeshLambertMaterial({color:0xd4a72c,emissive:0x8a6a10,emissiveIntensity:.4});
+    for(let i=0;i<14;i++){const x=400+Math.random()*140,y=820+Math.random()*90;const m=new T3.Mesh(i%3?new T3.CylinderGeometry(.5,.7,.6,7):new T3.BoxGeometry(1,.7,.7),i%4===0?new T3.MeshLambertMaterial({color:0x9a7a52}):gm());m.position.set(wx(x),hS(x,y)+.3,wz(y));m.rotation.y=Math.random()*3;m.castShadow=true;gold.add(m)}
+    world.add(gold);
+  }
+  /* الحلقة الرئيسية */
+  let lastT=0;
+  function frame(dt){
+    if(!world)return;const t=performance.now()/1000;
+    for(const o of units3)syncUnit(o,G.paused?0:dt,t);
+    for(const u of G.units)if(!u._3)addUnit(u);
+    for(let i=fallen.length-1;i>=0;i--){const f=fallen[i];if(!G.paused){f.t+=dt;f.z+=(f.side==='m'?1:-1)*2.4*dt}if(f.t>4.2)fallen.splice(i,1)} // المنسحبون يمشون نحو معسكرهم ثم يختفون
+    if(duelS&&!G.paused)duelTick(dt,t);
+    if(shibM){shibM.visible=!!G.regroup;if(shibM.visible)shibM.material.opacity=.32+.14*Math.sin(t*3)}
+    if(pits.length){const T=G.b.trench;pits.forEach((p,i)=>{const d=G.dig[i];
+        p.pit.scale.set(T.sw*SC*.97,.12,.35+3.3*d);p.pit.material.color.setRGB(.54-.32*d,.42-.26*d,.27-.17*d);
+        const mh=.04+1.1*d;p.mound.scale.set(T.sw*SC*.92,mh,.6+1.1*d);p.mound.position.y=p.h-.02;
+        p.ring.visible=G.phase!=='dig'&&!G.wind&&weakSeg(i);if(p.ring.visible)p.ring.material.opacity=.55+.35*Math.sin(t*4+i)});
+      if(pits.guide){pits.guide.visible=G.phase==='dig';pits.guide.material.opacity=.16+.1*Math.sin(t*4)}}
+    if(G.wind&&!G.paused){const k=Math.min(1,(G.t-G.windT)/3);
+      for(const tn of tents){tn.s+=dt;tn.m.rotation.z+=dt*tn.v*k*1.4;tn.m.position.x+=dt*14*k*tn.v;tn.m.position.y+=dt*3*k*tn.v;const sc=Math.max(0,1-(G.t-G.windT)/(5+tn.v*3));tn.m.scale.setScalar(sc);tn.m.visible=sc>0}
+      for(let i=0;i<6;i++){const p=dustP.find(p=>p.l<=0);if(!p)break;Object.assign(p,{x:tgt.x-60+Math.random()*30,y:1+Math.random()*10,z:tgt.z+(Math.random()-.5)*110,vx:26+Math.random()*14,vy:(Math.random()-.3)*2,vz:(Math.random()-.5)*4,l:2.6})}
+      S.fog.color.setRGB(.89-.3*k,.81-.3*k,.65-.25*k)}
+    drawFigs(t);effects(dt,t);camUpd(dt);
+    R.render(S,cam);labels();
+  }
+  function resize(){if(!S)return;const r=$('stage').getBoundingClientRect();R.setSize(r.width,r.height,false);cam.aspect=r.width/Math.max(1,r.height);cam.updateProjectionMatrix()}
+  function hide(){if(S){R.domElement.style.display='none';lab.style.display='none';camBtn.style.display='none'}}
+  /* رشقة تحذير: سهام من الرماة تقع على الأرض أمام الخيل */
+  function volleyFx(a,pt){const o=a._3;if(!o||!o.f.length)return;for(let i=0;i<14;i++){const ar=arrows.find(x=>x.l<=0);if(!ar)break;const f=o.f[(Math.random()*o.f.length)|0];const X=wx(pt.x+(Math.random()-.5)*90),Z=wz(pt.y+(Math.random()-.5)*60);
+    Object.assign(ar,{l:1,d:1+Math.random()*.3,x0:f.x,y0:hW(f.x,f.z)+1.6,z0:f.z,x1:X,y1:hW(X,Z)+.1,z1:Z,hh:6+Math.random()*3})}}
+  function dirt(q){for(let i=0;i<2;i++){const p=dustP.find(p=>p.l<=0);if(!p)return;const X=wx(q.x)+(Math.random()-.5)*2,Z=wz(q.y)+(Math.random()-.5)*2;Object.assign(p,{x:X,y:hW(X,Z)+.3,z:Z,vx:(Math.random()-.5)*2,vy:1.5+Math.random()*1.5,vz:1+Math.random()*1.5,l:.9+Math.random()*.5})}}
+  return{ok:true,home:()=>home(true),dirt,look:(x,y,r,phi,th)=>{flyTo(wx(x),wz(y),r,phi);if(th!=null)fly.th=th},volley:volleyFx,build,frame,resize,duel,skipDuel:endDuel,gold:goldPile,hide,_cam:()=>({tgt,sph}),_ground:ground,_unitAt:unitAt,_proj:v=>proj(v)};
+})();
+
+/* ===================== اللمس ===================== */
+let down=null;
+const world=e=>{const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left-ox)/sc,y:H-(e.clientY-r.top-oy)/sc}};
+const isSel=u=>G.sel===u||(G.sel==='all'&&u.side==='m');
+const selList=()=>!G.sel?[]:G.sel==='all'?mUnits().filter(u=>u.st==='ok'&&!u.locked):[G.sel];
+const hitU=(p,side)=>{let best=null,bd=1e9;for(const u of G.units){if(u.st==='gone'||(side&&u.side!==side))continue;const d=Math.hypot(u.x-p.x,u.y-p.y);if(d<u.r+45&&d<bd){bd=d;best=u}}return best};
+cv.addEventListener('pointerdown',e=>{if(!G||G.over)return;const p=world(e);if(G.phase==='dig'){down={p,dig:1,lp:p};return}const u=hitU(p,'m');down={p,u};
+  if(u&&u.st==='ok'&&!u.locked){G.sel=u;updSel()}});
+cv.addEventListener('pointermove',e=>{if(!G||!down||!down.dig)return;const p=world(e);digAt(down.lp,p);down.lp=p});
+cv.addEventListener('pointerup',e=>{if(!G||!down||G.over)return;if(down.dig){down=null;return}const p=world(e);const moved=Math.hypot(p.x-down.p.x,p.y-down.p.y)>18;
+  const s=G.sel;
+  if(s&&(moved||!down.u)){ if(s==='all'){const L=selList(),c=L.reduce((a,u)=>({x:a.x+u.x/L.length,y:a.y+u.y/L.length}),{x:0,y:0});L.forEach(u=>order(u,{x:p.x+u.x-c.x,y:p.y+u.y-c.y},1));tip('الجيش كله يتحرّك')} else order(s,p)}
+  down=null;});
+function order(u,p,q){
+  if(u.st!=='ok'||u.locked)return;
+  if(G.phase==='deploy')p.y=Math.min(p.y,G.b.deployMaxY-20);
+  const e=G.phase==='battle'&&hitU(p,'q');
+  if(e){u.tx=e.x;u.ty=e.y;if(!q)tip(`«${u.name}» يهاجم «${e.name}» ⚔️`)}else{u.tx=Math.max(20,Math.min(W-20,p.x));u.ty=Math.max(20,Math.min(H-20,p.y))}
+  updSel();
+}
+function updSel(){const u=G.sel;
+  $('sel').textContent=!u?'١- اختر مجموعة من الأزرار، أو المسها على الخريطة':u==='all'?'٢- الجيش كله مختار: اضغط أمرًا، أو المس مكانًا على الخريطة':`٢- «${u.name}» مختار: اضغط أمرًا، أو المس مكانًا على الخريطة`;
+  grpBtns();}
+function grpBtns(){
+  const L=mUnits();
+  const h=L.map(u=>`<button class="gb ${G.sel===u?'on':''}" data-u="${u.id}" ${u.st!=='ok'||u.locked?'disabled':''}><b>${u.st==='tired'?'💤':KIND[u.kind].ico}</b>${u.name}</button>`).join('')+`<button class="gb ${G.sel==='all'?'on':''}" data-u="all"><b>👥</b>الكل</button>`;
+  if($('grp')._h!==h){$('grp').innerHTML=h;$('grp')._h=h}
+  document.querySelectorAll('.ob').forEach(b=>b.disabled=!G.sel||(b.dataset.o==='atk'&&G.phase!=='battle'));
+}
+$('grp').onclick=e=>{const b=e.target.closest('.gb');if(!b||b.disabled||!G)return;const id=b.dataset.u;G.sel=id==='all'?'all':G.units[+id];updSel()};
+$('ord').onclick=e=>{const b=e.target.closest('.ob');if(!b||b.disabled||!G||G.over)return;const o=b.dataset.o;const L=selList();if(!L.length)return;
+  const D={up:[0,-140],down:[0,140],right:[140,0],left:[-140,0]};
+  for(const u of L){
+    if(D[o]){order(u,{x:u.tx+D[o][0],y:u.ty+D[o][1]},1)}
+    else if(o==='stop'){u.tx=u.x;u.ty=u.y}
+    else if(o==='atk'){let best=null,bd=1e9;for(const e of G.units){if(e.side!=='q'||e.st!=='ok')continue;const d=dist(u,e);if(d<bd){bd=d;best=e}}if(best){u.tx=best.x;u.ty=best.y}}
+  }
+  tip({up:'⬇️ تراجعوا للخلف',down:'⬆️ تقدّموا نحو العدو',right:'➡️ اتجهوا يمينًا',left:'⬅️ اتجهوا يسارًا',atk:'⚔️ هجوم على أقرب عدو',stop:'✋ اثبتوا في مكانكم'}[o]);
+  updSel()};
+
+/* ===================== الأزرار والتشغيل ===================== */
+let tipT=0;function tip(t){$('tip').textContent=t;$('tip').hidden=false;tipT=5}
+$('bGo').onclick=()=>{if(G.phase==='dig')endDig();else if(G.phase==='deploy')setupBattle();else if(G.phase==='duel')R3.skipDuel()};
+$('bVolley').onclick=volley;
+$('bPic').onclick=()=>{if(!G)return;const w=G.paused;modal('📍 مكان غزوة '+G.b.name,[G.b.where,'هكذا يبدو المكان اليوم. اسحب الصورة لترى الثانية.'],[['⚔️ رجوع للميدان','gold',()=>{G.paused=w}]],picsHTML(G.b),true);picsDots($('modalIn'))};
+$('bPause').onclick=()=>{if(G.over)return;G.paused=!G.paused;G.paused?SND.stop():SND.start();$('bPause').textContent=G.paused?'▶️':'⏸'};
+$('bFast').onclick=()=>{G.speed=G.speed===1?2:1;$('bFast').style.setProperty('--c',G.speed===2?'#f1c96a':'')};
+$('bBack').onclick=()=>{SND.stop();G=null;menu()};
+const SNI=['🔇','🔉','🔊'];$('bSnd').textContent=SNI[SND.lvl];
+$('bSnd').onclick=()=>{const l=SND.toggle();$('bSnd').textContent=SNI[l];tip(['🔇 الصوت مكتوم','🔉 صوت واطي','🔊 صوت عالي'][l])};
+for(const ev of ['pointerup','touchend','click','keydown'])document.addEventListener(ev,()=>{if(SND.on)SND.init()},{passive:true});
+function modal(title,ps,btns,extra='',plain){
+  $('modalIn').innerHTML=`<h3>${title}</h3>${extra}${ps.map(p=>`<p>${p}</p>`).join('')}${plain?'':'<div class="fn">الأحداث مأخوذة من كتب السيرة، والأعداد تقريبية.</div>'}<div class="nav">${btns.map((b,i)=>`<button class="bt ${b[1]}" data-i="${i}">${b[0]}</button>`).join('')}</div>`;
+  $('modal').classList.add('on');if(G)G.paused=true;
+  $('modalIn').querySelectorAll('.nav .bt').forEach(x=>x.onclick=()=>{$('modal').classList.remove('on');if(G&&!G.over)G.paused=false;btns[+x.dataset.i][2]()});
+}
+function hud(){
+  const b=G.b,bar=(m,mt,q,qt)=>{$('mBar').style.width=(100*Math.max(0,Math.min(1,m)))+'%';$('qBar').style.width=(100*Math.max(0,Math.min(1,q)))+'%';$('mTxt').textContent=mt;$('qTxt').textContent=qt};
+  if(b.peace){const P=G.units.filter(u=>u.side==='p'),s=P.filter(u=>u.safe).length,left=G.phase==='battle'?Math.max(0,G.limit-(G.t-G.t0)):(G.limit||250);
+    return bar(s/P.length,`🕊️ في أمان: ${AR(s)} من ${AR(P.length)}`,left/(G.limit||250),`⏱️ الوقت ${AR(Math.ceil(left))} ث`)}
+  if(G.phase==='dig'||(b.trench&&G.phase==='deploy'&&!G.digMax)){const d=G.dig.reduce((a,x)=>a+x,0)/G.dig.reduce((a,x,i)=>a+digCap(i),0);
+    return bar(d,`⛏️ الخندق ${AR(d*100)}٪`,G.digMax?G.digT/G.digMax:1,G.digMax?`⏱️ قبل وصول الأحزاب: ${AR(Math.ceil(G.digT))} ث`:'⏱️ الأحزاب في الطريق')}
+  const mn=mUnits().reduce((s,u)=>s+u.n,0),mm=mUnits().reduce((s,u)=>s+u.max,0);
+  const qn=qUnits().filter(u=>u.st==='ok').reduce((s,u)=>s+u.n,0),qm=G.units.filter(u=>u.side==='q').reduce((s,u)=>s+u.max,0);
+  bar(mn/mm,'💪 ثبات المسلمين '+AR(100*mn/mm)+'٪',qn/qm,'ثبات '+(b.qShort||'قريش')+' '+AR(100*qn/qm)+'٪');
+}
+let last=performance.now();
+function loop(now){
+  const dt=Math.min(.05,(now-last)/1000);last=now;
+  if(G){ if(!G.paused&&G.phase!=='done'){for(let i=0;i<G.speed;i++)step(dt)}
+    SND.tick(dt,G);
+    if(R3.ok)R3.frame(dt);else draw();
+    hud();
+    if(tipT>0){tipT-=dt;if(tipT<=0)$('tip').hidden=true}
+    if(Math.random()<.1)updSel();
+  }
+  requestAnimationFrame(loop);
+}
+window.__G=()=>G;window.__R3=R3;window.__step=step;window.__start=id=>start(BATTLES.find(b=>b.id===id));window.__go=()=>setupBattle();
+menu();requestAnimationFrame(loop);
+})();
+</script>
+
+</html>
