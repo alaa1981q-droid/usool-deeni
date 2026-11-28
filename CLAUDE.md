@@ -10,6 +10,9 @@ App name (chosen by the owner, v2.8): «جنّتي الصغيرة». Children's 
 ## Other app of the owner: «تطبيق إدارة المدرسة الأهلية»
 When the owner says «تطبيق إدارة المدرسة الأهلية» he means the school accounts app for his friend's school (مدرسة الأوائل), NOT this kids app. It lives in repo `alaa1981q-droid/alaa1981q-droid.github.io`, folder `madrasa/` (live: https://alaa1981q-droid.github.io/madrasa/); read that repo's CLAUDE.md first (attach it with add_repo if it is not in the session).
 
+## Other app: «ميادين النصر» (لعبة الغزوات)
+When the owner says «ميادين النصر» (or «لعبة الغزوات / لعبة الحروب»), he means his battles strategy game, NOT this kids app. It lives in repo `alaa1981q-droid/alaa1981q-droid.github.io`, folder `maydan/` (hidden link https://alaa1981q-droid.github.io/maydan/); read that repo's CLAUDE.md section «لعبة ميادين النصر» first (attach the repo with add_repo if it is not in the session).
+
 ## Where it lives
 - Live app (PWA, the link families use): https://alaa1981q-droid.github.io/usool-deeni/ — GitHub Pages from `main`, root.
 - Android APK: built by `.github/workflows/android.yml` on every push, published to Release `latest` → `releases/download/latest/usool-deeni.apk`. Families prefer the link (APK triggers Play Protect warnings).
