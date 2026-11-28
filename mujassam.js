@@ -2245,7 +2245,10 @@ function run(ov,ui){const T=THREE,night=document.body.classList.contains('night'
 const kidBags=[-1,1].map(k=>{const b=new T.Mesh(new T.BoxGeometry(.2,.24,.12),new T.MeshStandardMaterial({color:k<0?0xe9e2cf:0xd6e8f5,roughness:.8}));b.position.set(k*.34,.42,.06);b.visible=false;kid.add(b);return b});
   const sign=v=>v<0?-1:1;
   const door=p=>{if(p==='sc')return {x:-2.4,z:-17.6,via:null};if(p==='m')return {x:6,z:3.95,via:4.6};const [x,z]=SPOT[p];return {x:x-sign(x)*(2.2+(BS[p]||1)),z:z+1,via:null}};
-  const treeSpot=i=>{const [x,z]=TREES[i];return Math.abs(x)<4?{x:x+sign(x)*.9,z,via:null}:{x:x-sign(x)*1.2,z,via:sign(z)*4.6}};
+  const treeSpot=i=>{const [x,z]=TREES[i];if(Math.abs(x)<4)return {x:x+sign(x)*.9,z,via:null};
+    // (v26.0) مع القصر: أشجار يسار الشارع قرب أرض القصر يُوصل إليها من خارج السور (الشارع الجنوبي −٤٫٦، أو شمال السور)
+    if(PALZ&&x<-3&&z>-HZ-1.5){if(z>HZNc+.5)return {x:x+1.2,z,via:HZNc+1.1};return {x:Math.min(x+1.2,XLc-.8),z,via:-4.6}}
+    return {x:x-sign(x)*1.2,z,via:sign(z)*4.6}};
   const litSpot=i=>{const [x,z]=LITTER[i];return {x,z,via:Math.abs(x)<4?null:z}};
   // (v11.4) الطفل يتجوّل وحده بفرح، ويلتفت إليك عندما يقف، ويقفز فرحًا عند الجوائز
   let wander=false,still=0,joyT=0,waveT=0,sparks=[];
@@ -2288,7 +2291,7 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8;
     if(at.via!=null)p.push([at.x,at.via]);p.push([sx(at),za]);
     if(sd(at)!==sd(to)){const zc=[4.6,-4.6].sort((u,v)=>Math.abs(za-u)+Math.abs(zt-u)-Math.abs(za-v)-Math.abs(zt-v))[0];p.push([sx(at),zc,1],[sx(to),zc])}
     p.push([sx(to),zt]);if(to.via!=null)p.push([to.x,to.via]);p.push([to.x,to.z]);
-    path=p;at=to;onArrive=done;card('')}
+    path=p;at=to;onArrive=done;card('');palAround()}
   function card(html,btns){const c=ui.card;if(!html){c.classList.remove('on');return}c.innerHTML=html+(btns?`<div class="row">${btns.map((b,i)=>`<button data-i="${i}" class="${b[2]||''}">${b[0]}</button>`).join('')}</div>`:'');
     c.classList.add('on');c.querySelectorAll('button').forEach(b=>b.onclick=()=>{const f=btns[+b.dataset.i][1];card('');f&&f()})}
   // نجوم وقلوب تتطاير حول الطفل عند الفرح
@@ -2956,12 +2959,17 @@ if(path.length&&wander){at=here();path=[]}wander=!!w;const p=[],R=2.8;
       if(x1>0&&x0<3.05)x0=3.05;if(x0<0&&x1>-3.05)x1=-3.05;if(x1-x0<.4||z1-z0<.4||(x1-x0)*(z1-z0)<1.2)return;const b=[x0,x1,z0,z1,u];OB.push(b);OBm.set(u,b)};
     S.children.forEach(take);life.g.children.forEach(o=>{if(o.userData&&o.userData.act==='park')take(o)});HOUSES.forEach(h=>OB.push([h[0]-2.3,h[0]+2.3,h[1]-2.5,h[1]+2.5,{act:'house'}]))}
   const obIn=(x,z,m)=>{m=m||0;if(!OB)obst();return OB.find(b=>x>b[0]-m&&x<b[1]+m&&z>b[2]-m&&z<b[3]+m)};
+  // (v26.0) الشيخ: «الطفل يخترق جدار القصر عند تأدية المهام» — مسارات المهام كانت تقطع أرض القصر بخطّ مستقيم (الالتفاف كان للمس الأرض فقط).
+  // الآن: إن قطع مشوار أرضَ القصر (صندوق home يغطّي الأرض كلها مع السور) يلتفّ حولها.
+  function palAround(){if(!PALZ||!path.length)return;let px=kid.position.x,pz=kid.position.z;
+    for(const q of path){const b=segHit(px,pz,q[0],q[1]);if(b&&b[4].p==='home'){detour();return}px=q[0];pz=q[1]}}
   function segHit(x0,z0,x1,z1){const n=Math.max(4,Math.ceil(Math.hypot(x1-x0,z1-z0)/.4));for(let i=1;i<n;i++){const k=i/n,b=obIn(x0+(x1-x0)*k,z0+(z1-z0)*k,.15);if(b&&!(x0>b[0]&&x0<b[1]&&z0>b[2]&&z0<b[3])&&!(x1>b[0]&&x1<b[1]&&z1>b[2]&&z1<b[3]))return b}return null}
   function detour(){for(let pass=0;pass<4;pass++){let ch=0;let px=kid.position.x,pz=kid.position.z;
       for(let i=0;i<path.length;i++){const [x1,z1]=path[i],b=segHit(px,pz,x1,z1);
         if(b){const m=.75,hz=Math.abs(x1-px)>=Math.abs(z1-pz),opts=hz?[[[px,b[2]-m],[x1,b[2]-m]],[[px,b[3]+m],[x1,b[3]+m]]]:[[[b[0]-m,pz],[b[0]-m,z1]],[[b[1]+m,pz],[b[1]+m,z1]]];
           const ln=o=>Math.hypot(o[0][0]-px,o[0][1]-pz)+Math.hypot(o[1][0]-o[0][0],o[1][1]-o[0][1])+Math.hypot(x1-o[1][0],z1-o[1][1]);
-          const good=opts.filter(o=>o.every(q=>Math.abs(q[0])>2.3||Math.abs(q[0])<2.3&&false)).sort((a,c)=>ln(a)-ln(c));const o=good[0];
+          const legH=o=>(segHit(px,pz,o[0][0],o[0][1])||segHit(o[0][0],o[0][1],o[1][0],o[1][1])||segHit(o[1][0],o[1][1],x1,z1)?500:0); // (v26.0) نفضّل الجهة التي لا تصطدم ببناية أخرى
+          const good=opts.filter(o=>o.every(q=>Math.abs(q[0])>2.3)).sort((a,c)=>ln(a)+legH(a)-ln(c)-legH(c));const o=good[0];
           if(o){path.splice(i,0,[o[0][0],o[0][1]],[o[1][0],o[1][1]]);ch=1;break}}
         px=x1;pz=z1}
       if(!ch)break}}
